@@ -1,3 +1,4 @@
+import type * as React from "react";
 import { render, screen } from "@testing-library/react";
 import {
   ChartContainer,
@@ -19,8 +20,8 @@ const config: ChartConfig = {
 };
 
 type AnyProps = Record<string, unknown>;
-const Tip = ChartTooltipContent as unknown as (p: AnyProps) => JSX.Element;
-const Legend = ChartLegendContent as unknown as (p: AnyProps) => JSX.Element;
+const Tip = ChartTooltipContent as unknown as (p: AnyProps) => React.ReactElement;
+const Legend = ChartLegendContent as unknown as (p: AnyProps) => React.ReactElement;
 
 function inChart(node: React.ReactNode, cfg: ChartConfig = config) {
   return render(
