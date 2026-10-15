@@ -77,12 +77,13 @@ describe("SidebarProvider state", () => {
       </SidebarProvider>,
     );
     expect(screen.getByTestId("state")).toHaveTextContent("expanded");
-    await user.click(screen.getByRole("button", { name: "Toggle Sidebar", hidden: false, exact: true, }).closest("[data-sidebar=trigger]") ? screen.getAllByRole("button", { name: "Toggle Sidebar" }).find((b) => b.dataset["sidebar"] === "trigger")! : document.body);
+    const byKind = (k: string) =>
+      screen.getAllByRole("button", { name: "Toggle Sidebar" }).find((b) => b.dataset["sidebar"] === k)!;
+    await user.click(byKind("trigger"));
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("state")).toHaveTextContent("collapsed");
     expect(document.cookie).toContain("sidebar_state=false");
-    const rail = screen.getAllByRole("button", { name: "Toggle Sidebar" }).find((b) => b.dataset["sidebar"] === "rail")!;
-    await user.click(rail);
+    await user.click(byKind("rail"));
     expect(screen.getByTestId("state")).toHaveTextContent("expanded");
     expect(document.cookie).toContain("sidebar_state=true");
   });
