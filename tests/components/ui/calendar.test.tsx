@@ -9,8 +9,12 @@ describe("Calendar", () => {
     const root = container.querySelector('[data-slot="calendar"]')!;
     expect(root).toHaveClass("cal-x");
     expect(screen.getByText("January 2026")).toHaveClass("text-sm");
-    expect(screen.getByRole("button", { name: /previous/i }).querySelector("svg")).toHaveClass("lucide-chevron-left");
-    expect(screen.getByRole("button", { name: /next/i }).querySelector("svg")).toHaveClass("lucide-chevron-right");
+    expect(screen.getByRole("button", { name: /previous/i }).querySelector("svg")).toHaveClass(
+      "lucide-chevron-left",
+    );
+    expect(screen.getByRole("button", { name: /next/i }).querySelector("svg")).toHaveClass(
+      "lucide-chevron-right",
+    );
   });
 
   it("uses short month names and a down chevron in dropdown layout", () => {
@@ -61,12 +65,20 @@ describe("CalendarDayButton", () => {
   const day = { date: new Date(2026, 0, 5) } as never;
 
   it("focuses itself when the focused modifier is set", () => {
-    render(<CalendarDayButton day={day} modifiers={{ focused: true }}>5</CalendarDayButton>);
+    render(
+      <CalendarDayButton day={day} modifiers={{ focused: true }}>
+        5
+      </CalendarDayButton>,
+    );
     expect(screen.getByRole("button", { name: "5" })).toHaveFocus();
   });
 
   it("does not focus without the modifier", () => {
-    render(<CalendarDayButton day={day} modifiers={{ selected: true }} className="d-x">6</CalendarDayButton>);
+    render(
+      <CalendarDayButton day={day} modifiers={{ selected: true }} className="d-x">
+        6
+      </CalendarDayButton>,
+    );
     const b = screen.getByRole("button", { name: "6" });
     expect(b).not.toHaveFocus();
     expect(b).toHaveClass("d-x");

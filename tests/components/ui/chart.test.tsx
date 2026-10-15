@@ -89,7 +89,9 @@ describe("ChartTooltipContent", () => {
   });
 
   it("shows label from config, names and formatted values with dot indicator", () => {
-    const { container } = inChart(<Tip active payload={payload} label="plates" labelClassName="lab-x" className="tip-x" />);
+    const { container } = inChart(
+      <Tip active payload={payload} label="plates" labelClassName="lab-x" className="tip-x" />,
+    );
     expect(container.querySelector(".tip-x")).not.toBeNull();
     expect(container.querySelector(".lab-x")).toHaveTextContent("Plates");
     expect(screen.getByText("Stories")).toBeInTheDocument();
@@ -99,7 +101,9 @@ describe("ChartTooltipContent", () => {
   });
 
   it("uses a raw string label not in config, and color prop over item color", () => {
-    const { container } = inChart(<Tip active payload={[payload[1]]} label="Mystery" color="#999" />);
+    const { container } = inChart(
+      <Tip active payload={[payload[1]]} label="Mystery" color="#999" />,
+    );
     expect(screen.getByText("Mystery")).toBeInTheDocument();
     const swatch = container.querySelector(".h-2\\.5") as HTMLElement;
     expect(swatch.style.getPropertyValue("--color-bg")).toBe("#999");
@@ -144,18 +148,25 @@ describe("ChartTooltipContent", () => {
 
   it("applies label and value formatters", () => {
     const labelFormatter = vi.fn((v: unknown) => `L:${String(v)}`);
-    const formatter = vi.fn((v: unknown, n: unknown) => <b key="f">{`${String(n)}=${String(v)}`}</b>);
-    inChart(<Tip active payload={payload} labelFormatter={labelFormatter} formatter={formatter} labelKey="plates" />);
+    const formatter = vi.fn((v: unknown, n: unknown) => (
+      <b key="f">{`${String(n)}=${String(v)}`}</b>
+    ));
+    inChart(
+      <Tip
+        active
+        payload={payload}
+        labelFormatter={labelFormatter}
+        formatter={formatter}
+        labelKey="plates"
+      />,
+    );
     expect(screen.getByText("L:Plates")).toBeInTheDocument();
     expect(screen.getByText("plates=1200")).toBeInTheDocument();
     expect(formatter).toHaveBeenCalledTimes(2);
   });
 
   it("renders nothing for label when no config label exists", () => {
-    const { container } = inChart(
-      <Tip active payload={[{ value: 5, payload: {} }]} />,
-      {},
-    );
+    const { container } = inChart(<Tip active payload={[{ value: 5, payload: {} }]} />, {});
     expect(container.querySelector(".font-medium:not(.font-mono)")).toBeNull();
     expect(screen.getByText("5")).toBeInTheDocument();
   });
@@ -214,7 +225,12 @@ describe("ChartLegendContent", () => {
 
   it("aligns top, hides icons and uses nameKey", () => {
     const { container } = inChart(
-      <Legend payload={[{ value: "a", dataKey: "x", color: "#0f0", kind: "iconic" }]} verticalAlign="top" hideIcon nameKey="kind" />,
+      <Legend
+        payload={[{ value: "a", dataKey: "x", color: "#0f0", kind: "iconic" }]}
+        verticalAlign="top"
+        hideIcon
+        nameKey="kind"
+      />,
     );
     expect(container.querySelector(".pb-3")).not.toBeNull();
     expect(screen.queryByTestId("cfg-icon")).toBeNull();

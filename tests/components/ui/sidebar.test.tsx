@@ -16,7 +16,12 @@ vi.mock("@/components/ui/tooltip", () => ({
     children?: React.ReactNode;
     hidden?: boolean;
     className?: string;
-  }) => (hidden ? null : <div data-testid="tip" className={className}>{children}</div>),
+  }) =>
+    hidden ? null : (
+      <div data-testid="tip" className={className}>
+        {children}
+      </div>
+    ),
 }));
 
 import {
@@ -78,7 +83,9 @@ describe("SidebarProvider state", () => {
     );
     expect(screen.getByTestId("state")).toHaveTextContent("expanded");
     const byKind = (k: string) =>
-      screen.getAllByRole("button", { name: "Toggle Sidebar" }).find((b) => b.dataset["sidebar"] === k)!;
+      screen
+        .getAllByRole("button", { name: "Toggle Sidebar" })
+        .find((b) => b.dataset["sidebar"] === k)!;
     await user.click(byKind("trigger"));
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("state")).toHaveTextContent("collapsed");
@@ -342,21 +349,44 @@ describe("Sidebar parts", () => {
     );
     const q = (k: string) => container.querySelectorAll(`[data-sidebar="${k}"]`);
     expect(container.querySelector("main")).toHaveClass("bg-background");
-    for (const k of ["header", "footer", "content", "group", "group-content", "menu", "menu-item", "menu-badge", "menu-sub", "separator", "input"]) {
+    for (const k of [
+      "header",
+      "footer",
+      "content",
+      "group",
+      "group-content",
+      "menu",
+      "menu-item",
+      "menu-badge",
+      "menu-sub",
+      "separator",
+      "input",
+    ]) {
       expect(q(k).length).toBe(1);
     }
-    expect(screen.getByRole("heading", { name: "AsLabel" })).toHaveAttribute("data-sidebar", "group-label");
-    expect(screen.getByRole("link", { name: "gact" })).toHaveAttribute("data-sidebar", "group-action");
+    expect(screen.getByRole("heading", { name: "AsLabel" })).toHaveAttribute(
+      "data-sidebar",
+      "group-label",
+    );
+    expect(screen.getByRole("link", { name: "gact" })).toHaveAttribute(
+      "data-sidebar",
+      "group-action",
+    );
     expect(screen.getByRole("button", { name: "ma" }).className).toContain("md:opacity-0");
     expect(screen.getByRole("link", { name: "mact" }).className).not.toContain("md:opacity-0");
     expect(q("menu-skeleton").length).toBe(2);
     expect(q("menu-skeleton-icon").length).toBe(1);
-    expect(screen.getByTestId("sk-icon").querySelector('[data-sidebar="menu-skeleton-icon"]')).not.toBeNull();
+    expect(
+      screen.getByTestId("sk-icon").querySelector('[data-sidebar="menu-skeleton-icon"]'),
+    ).not.toBeNull();
     expect(q("menu-skeleton-text").length).toBe(2);
     expect(screen.getByRole("link", { name: "md" })).toHaveAttribute("data-size", "md");
     expect(screen.getByRole("link", { name: "md" })).toHaveClass("text-sm");
     expect(screen.getByRole("link", { name: "sm" })).toHaveClass("text-xs");
     expect(screen.getByRole("link", { name: "sm" })).toHaveAttribute("data-active", "true");
-    expect(screen.getByRole("button", { name: "sb" })).toHaveAttribute("data-sidebar", "menu-sub-button");
+    expect(screen.getByRole("button", { name: "sb" })).toHaveAttribute(
+      "data-sidebar",
+      "menu-sub-button",
+    );
   });
 });

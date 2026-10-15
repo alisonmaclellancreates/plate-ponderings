@@ -107,7 +107,9 @@ describe("Carousel", () => {
   it("throws when a part renders outside a carousel", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
-      expect(() => render(<CarouselItem />)).toThrow("useCarousel must be used within a <Carousel />");
+      expect(() => render(<CarouselItem />)).toThrow(
+        "useCarousel must be used within a <Carousel />",
+      );
     } finally {
       spy.mockRestore();
     }

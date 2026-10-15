@@ -35,9 +35,9 @@ Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `
 - Leave `src/routeTree.gen.ts` and other generated files alone.
 - Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
 
-## Coverage map (after step 13)
+## Coverage map (after step 14)
 
-Totals: statements 43.65, branches 11.11, functions 49.66, lines 45.37. Thresholds set to 43/11/49/45.
+Totals: statements 72.48, branches 52.91, functions 77.51, lines 74.79. Thresholds set to 72/52/77/74.
 Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 
 | File                                              | Stmts % | Branch % | Funcs % | Lines % | Step |
@@ -50,10 +50,10 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/components/ui/badge.tsx`                     | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/breadcrumb.tsx`                | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/button.tsx`                    | 100     | 100      | 100     | 100     | 12   |
-| `src/components/ui/calendar.tsx`                  | 0       | 0        | 0       | 0       | 14   |
+| `src/components/ui/calendar.tsx`                  | 100     | 100      | 100     | 100     | 14   |
 | `src/components/ui/card.tsx`                      | 100     | 100      | 100     | 100     | 12   |
-| `src/components/ui/carousel.tsx`                  | 0       | 0        | 0       | 0       | 14   |
-| `src/components/ui/chart.tsx`                     | 0       | 0        | 0       | 0       | 14   |
+| `src/components/ui/carousel.tsx`                  | 98.18   | 87.87    | 100     | 98.18   | 14   |
+| `src/components/ui/chart.tsx`                     | 98.46   | 99.01    | 100     | 98.43   | 14   |
 | `src/components/ui/checkbox.tsx`                  | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/collapsible.tsx`               | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/command.tsx`                   | 100     | 100      | 100     | 100     | 13   |
@@ -61,9 +61,9 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/components/ui/dialog.tsx`                    | 100     | 100      | 100     | 100     | 13   |
 | `src/components/ui/drawer.tsx`                    | 100     | 100      | 100     | 100     | 13   |
 | `src/components/ui/dropdown-menu.tsx`             | 100     | 100      | 100     | 100     | 13   |
-| `src/components/ui/form.tsx`                      | 0       | 0        | 0       | 0       | 14   |
+| `src/components/ui/form.tsx`                      | 100     | 100      | 100     | 100     | 14   |
 | `src/components/ui/hover-card.tsx`                | 100     | 100      | 100     | 100     | 13   |
-| `src/components/ui/input-otp.tsx`                 | 0       | 0        | 0       | 0       | 14   |
+| `src/components/ui/input-otp.tsx`                 | 100     | 100      | 100     | 100     | 14   |
 | `src/components/ui/input.tsx`                     | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/label.tsx`                     | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/menubar.tsx`                   | 100     | 100      | 100     | 100     | 13   |
@@ -77,7 +77,7 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/components/ui/select.tsx`                    | 100     | 100      | 100     | 100     | 13   |
 | `src/components/ui/separator.tsx`                 | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/sheet.tsx`                     | 100     | 100      | 100     | 100     | 13   |
-| `src/components/ui/sidebar.tsx`                   | 0       | 0        | 0       | 0       | 14   |
+| `src/components/ui/sidebar.tsx`                   | 100     | 100      | 100     | 100     | 14   |
 | `src/components/ui/skeleton.tsx`                  | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/slider.tsx`                    | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/sonner.tsx`                    | 100     | 100      | 100     | 100     | 12   |
@@ -88,7 +88,7 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/components/ui/toggle-group.tsx`              | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/toggle.tsx`                    | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/tooltip.tsx`                   | 100     | 100      | 100     | 100     | 13   |
-| `src/hooks/use-mobile.tsx`                        | 0       | 100      | 0       | 0       | 14   |
+| `src/hooks/use-mobile.tsx`                        | 100     | 100      | 100     | 100     | 14   |
 | `src/integrations/supabase/auth-attacher.ts`      | 0       | 0        | 0       | 0       | 18   |
 | `src/integrations/supabase/auth-middleware.ts`    | 0       | 0        | 0       | 0       | 18   |
 | `src/integrations/supabase/client.server.ts`      | 0       | 0        | 0       | 0       | 18   |
@@ -116,3 +116,4 @@ Branch 100% on a 0% file means the file has no branches, not that it is tested.
   - `src/lib/error-capture.ts`, `error-page.ts`, `lovable-error-reporting.ts`: Lovable runtime error plumbing, placed in 15.
 - Step 19 has nothing to cover yet: there is no `src/lib/email-templates/` or `src/routes/lovable/email/` in this project.
 - `src/integrations/supabase/types.ts` is excluded as generated.
+- Step 14 uncovered, unreachable through the public surface: `carousel.tsx` line 57 (`onSelect` guard for an undefined API; only ever called with an API), the `orientation ||` fallback (orientation always has a default), and `api?.off` optional chaining in the cleanup. `chart.tsx` line 301 (non-object payload guard; Recharts payload items are always objects).

@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { OTPInputContext } from "input-otp";
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 describe("InputOTP", () => {
   it("renders slots for each state", () => {
