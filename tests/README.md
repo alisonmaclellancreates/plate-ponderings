@@ -1,0 +1,111 @@
+# Tests
+
+## Where tests live
+- New tests go in `tests/`, mirroring `src/`: `tests/components/`, `tests/hooks/`, `tests/lib/`, `tests/integrations/supabase/`, `tests/routes/`.
+- Wiring tests for `src/router.tsx`, `src/start.ts`, `src/server.ts` sit at the top of `tests/`.
+- One test file per source file: `<source-name>.test.ts(x)`, e.g. `src/lib/utils.ts` -> `tests/lib/utils.test.ts`.
+- Tests Lovable already wrote stay where they are (`src/test/app-routing.test.tsx`). The single setup file is `src/test/setup.ts`.
+
+## Running
+- `bun run test` runs everything once. `bun run test:watch` watches.
+- `bun run test:coverage` runs with v8 coverage and enforces `coverage.thresholds` in `vitest.config.ts`.
+- One file, coverage for one source file:
+  `bunx vitest run tests/lib/utils.test.ts --coverage --coverage.include=src/lib/utils.ts --coverage.thresholds.statements=0 --coverage.thresholds.branches=0 --coverage.thresholds.functions=0 --coverage.thresholds.lines=0`
+
+Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `src/**/*.{ts,tsx}` file, so untested files show as 0%.
+
+## Strict TypeScript settings that bite test code
+- `exactOptionalPropertyTypes`: pass an optional prop only when it has a value. Never pass `prop={undefined}`; spread conditionally.
+- `noPropertyAccessFromIndexSignature`: use bracket access on index signatures (`process.env["X"]`, `record["key"]`).
+- `noUncheckedIndexedAccess`: array and record lookups are `T | undefined`; narrow before use.
+- `verbatimModuleSyntax` is off, `noUnusedLocals` is off.
+
+## Ground rules
+- Read the source first and test what it does today. Names in a step brief are expectations, not a contract.
+- All tests are written new for this project. Nothing copied from other repos or templates.
+- Never edit scaffold source to make it testable: no new exports, no ignore comments, no refactors. Unreachable branches stay uncovered and get reported.
+- Assert behaviour. Each test must fail if the behaviour in its name breaks.
+- Leave the environment as found: restore globals, env vars, timers, cookies, module mocks and spies in `afterEach` or `finally`. Silence only the exact console message expected. Simulate the server with `vi.stubGlobal("window", undefined)` and `vi.unstubAllGlobals()` in `finally`.
+- Do not mock `@tanstack/react-router` globally; each file mocks it for itself when needed.
+- Start every test file with an `import` or `export {}`.
+- Leave `src/routeTree.gen.ts` and other generated files alone.
+- Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
+
+## Coverage map (baseline, step 10)
+Totals: statements 0.26, branches 0, functions 0, lines 0.27. Thresholds set to 0/0/0/0.
+
+| File | Stmts % | Branch % | Funcs % | Lines % | Step |
+|---|---|---|---|---|---|
+| `src/components/ui/accordion.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/alert-dialog.tsx` | 0 | 100 | 0 | 0 | 13 |
+| `src/components/ui/alert.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/aspect-ratio.tsx` | 0 | 100 | 100 | 0 | 12 |
+| `src/components/ui/avatar.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/badge.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/breadcrumb.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/button.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/calendar.tsx` | 0 | 0 | 0 | 0 | 14 |
+| `src/components/ui/card.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/carousel.tsx` | 0 | 0 | 0 | 0 | 14 |
+| `src/components/ui/chart.tsx` | 0 | 0 | 0 | 0 | 14 |
+| `src/components/ui/checkbox.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/collapsible.tsx` | 0 | 100 | 100 | 0 | 12 |
+| `src/components/ui/command.tsx` | 0 | 100 | 0 | 0 | 13 |
+| `src/components/ui/context-menu.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/dialog.tsx` | 0 | 100 | 0 | 0 | 13 |
+| `src/components/ui/drawer.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/dropdown-menu.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/form.tsx` | 0 | 0 | 0 | 0 | 14 |
+| `src/components/ui/hover-card.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/input-otp.tsx` | 0 | 0 | 0 | 0 | 14 |
+| `src/components/ui/input.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/label.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/menubar.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/navigation-menu.tsx` | 0 | 100 | 0 | 0 | 13 |
+| `src/components/ui/pagination.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/popover.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/progress.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/radio-group.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/resizable.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/scroll-area.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/select.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/separator.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/sheet.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/components/ui/sidebar.tsx` | 0 | 0 | 0 | 0 | 14 |
+| `src/components/ui/skeleton.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/slider.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/sonner.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/switch.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/table.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/tabs.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/textarea.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/toggle-group.tsx` | 0 | 0 | 0 | 0 | 12 |
+| `src/components/ui/toggle.tsx` | 0 | 100 | 0 | 0 | 12 |
+| `src/components/ui/tooltip.tsx` | 0 | 0 | 0 | 0 | 13 |
+| `src/hooks/use-mobile.tsx` | 0 | 100 | 0 | 0 | 14 |
+| `src/integrations/supabase/auth-attacher.ts` | 0 | 0 | 0 | 0 | 18 |
+| `src/integrations/supabase/auth-middleware.ts` | 0 | 0 | 0 | 0 | 18 |
+| `src/integrations/supabase/client.server.ts` | 0 | 0 | 0 | 0 | 18 |
+| `src/integrations/supabase/client.ts` | 0 | 0 | 0 | 0 | 18 |
+| `src/integrations/supabase/cron-auth.ts` | 0 | 0 | 0 | 0 | 18 |
+| `src/integrations/supabase/previewAuthStorage.ts` | 0 | 0 | 0 | 0 | 18 |
+| `src/lib/error-capture.ts` | 0 | 0 | 0 | 0 | 15 |
+| `src/lib/error-page.ts` | 0 | 100 | 0 | 0 | 15 |
+| `src/lib/lovable-error-reporting.ts` | 5.55 | 0 | 0 | 7.14 | 15 |
+| `src/lib/utils.ts` | 0 | 100 | 0 | 0 | 15 |
+| `src/router.tsx` | 0 | 100 | 0 | 0 | 16 |
+| `src/routes/__root.tsx` | 7.69 | 100 | 0 | 7.69 | 17 |
+| `src/routes/index.tsx` | 33.33 | 100 | 0 | 33.33 | 17 |
+| `src/server.ts` | 0 | 0 | 0 | 0 | 16 |
+| `src/start.ts` | 0 | 0 | 0 | 0 | 16 |
+
+Branch 100% on a 0% file means the file has no branches, not that it is tested.
+
+### Where the plan and the scaffold disagree
+- No file is unmapped, but these are judgement calls:
+  - `src/components/ui/command.tsx` (cmdk, wraps Dialog): placed in 13 as an overlay.
+  - `src/components/ui/resizable.tsx`, `toggle-group.tsx`, `scroll-area.tsx`, `pagination.tsx`, `breadcrumb.tsx`: placed in 12; multi-part, not strictly single-control.
+  - `src/integrations/supabase/client.server.ts` and `cron-auth.ts`: server-only, placed in 18 rather than 16.
+  - `src/lib/error-capture.ts`, `error-page.ts`, `lovable-error-reporting.ts`: Lovable runtime error plumbing, placed in 15.
+- Step 19 has nothing to cover yet: there is no `src/lib/email-templates/` or `src/routes/lovable/email/` in this project.
+- `src/integrations/supabase/types.ts` is excluded as generated.
