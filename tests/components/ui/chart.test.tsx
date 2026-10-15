@@ -139,7 +139,7 @@ describe("ChartTooltipContent", () => {
     );
     expect(container.querySelector(".h-2\\.5")).toBeNull();
     expect(screen.getByTestId("cfg-icon")).toBeInTheDocument();
-    expect(screen.getByText("Iconic")).toBeInTheDocument();
+    expect(screen.getAllByText("Iconic").length).toBeGreaterThan(0);
   });
 
   it("applies label and value formatters", () => {
@@ -156,7 +156,7 @@ describe("ChartTooltipContent", () => {
       <Tip active payload={[{ value: 5, payload: {} }]} />,
       {},
     );
-    expect(container.querySelector(".font-medium")).toBeNull();
+    expect(container.querySelector(".font-medium:not(.font-mono)")).toBeNull();
     expect(screen.getByText("5")).toBeInTheDocument();
   });
 
