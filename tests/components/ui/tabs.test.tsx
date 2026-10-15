@@ -8,10 +8,14 @@ describe("Tabs", () => {
     render(
       <Tabs defaultValue="a">
         <TabsList className="list-x">
-          <TabsTrigger value="a" className="trig-x">Stories</TabsTrigger>
+          <TabsTrigger value="a" className="trig-x">
+            Stories
+          </TabsTrigger>
           <TabsTrigger value="b">Summary</TabsTrigger>
         </TabsList>
-        <TabsContent value="a" className="content-x">Story panel</TabsContent>
+        <TabsContent value="a" className="content-x">
+          Story panel
+        </TabsContent>
         <TabsContent value="b">Summary panel</TabsContent>
       </Tabs>,
     );

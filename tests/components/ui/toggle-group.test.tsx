@@ -7,7 +7,9 @@ describe("ToggleGroup", () => {
     const user = userEvent.setup();
     render(
       <ToggleGroup type="single" variant="outline" size="sm" className="grp-x" aria-label="Region">
-        <ToggleGroupItem value="us" className="item-x">US</ToggleGroupItem>
+        <ToggleGroupItem value="us" className="item-x">
+          US
+        </ToggleGroupItem>
         <ToggleGroupItem value="ca">CA</ToggleGroupItem>
       </ToggleGroup>,
     );
@@ -21,7 +23,9 @@ describe("ToggleGroup", () => {
   it("falls back to the item's own variant and size when the group sets none", () => {
     render(
       <ToggleGroup type="multiple">
-        <ToggleGroupItem value="a" variant="outline" size="lg">A</ToggleGroupItem>
+        <ToggleGroupItem value="a" variant="outline" size="lg">
+          A
+        </ToggleGroupItem>
       </ToggleGroup>,
     );
     expect(screen.getByRole("button", { name: "A" })).toHaveClass("border-input", "h-10");

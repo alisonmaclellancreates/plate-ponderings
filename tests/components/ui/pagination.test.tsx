@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import {
-  Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink,
-  PaginationNext, PaginationPrevious,
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
 } from "@/components/ui/pagination";
 
 describe("Pagination", () => {
@@ -16,7 +21,9 @@ describe("Pagination", () => {
             <PaginationLink href="#1">1</PaginationLink>
           </PaginationItem>
           <PaginationItem>
-            <PaginationLink href="#2" isActive className="active-x">2</PaginationLink>
+            <PaginationLink href="#2" isActive className="active-x">
+              2
+            </PaginationLink>
           </PaginationItem>
           <PaginationItem>
             <PaginationEllipsis className="ell-x" data-testid="ell" />

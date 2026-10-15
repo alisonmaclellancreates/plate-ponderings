@@ -5,7 +5,9 @@ describe("Label", () => {
   it("labels its control and merges className", () => {
     render(
       <>
-        <Label htmlFor="plate" className="label-x">Plate text</Label>
+        <Label htmlFor="plate" className="label-x">
+          Plate text
+        </Label>
         <input id="plate" />
       </>,
     );

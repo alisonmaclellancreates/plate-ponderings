@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import {
-  Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList,
-  BreadcrumbPage, BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
 describe("Breadcrumb", () => {
@@ -10,7 +15,9 @@ describe("Breadcrumb", () => {
       <Breadcrumb>
         <BreadcrumbList className="list-x">
           <BreadcrumbItem className="item-x">
-            <BreadcrumbLink href="/" className="link-x">Home</BreadcrumbLink>
+            <BreadcrumbLink href="/" className="link-x">
+              Home
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="sep-x" data-testid="default-sep" />
           <BreadcrumbItem>

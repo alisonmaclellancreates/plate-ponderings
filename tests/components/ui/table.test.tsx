@@ -1,6 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import {
-  Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 
 describe("Table", () => {

@@ -1,5 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 describe("Card", () => {
   it("renders every part with its base and caller classes", () => {
