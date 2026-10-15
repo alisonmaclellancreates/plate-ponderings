@@ -1,5 +1,7 @@
 # Plate Ponderings
 
+[![codecov](https://codecov.io/gh/alisonmaclellancreates/plate-ponderings/graph/badge.svg)](https://codecov.io/gh/alisonmaclellancreates/plate-ponderings)
+
 We're building What the Plate?, a site where people look up personalized license plates from the US and Canada and share what they think the plates mean. It's for anyone who has ever sat in traffic wondering what the plate in front of them means. An AI summary shows where those stories agree and where they don't.
 
 We'll build this one step at a time, and I'll send each step as its own message. Please do only the step I ask for, then stop and tell me what you did, what you couldn't do, and anything that surprised you.
