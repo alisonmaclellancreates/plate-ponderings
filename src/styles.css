@@ -139,7 +139,13 @@
 
   body {
     margin: 0;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     letter-spacing: 0;
     background-color: var(--color-background);
     color: var(--color-foreground);
