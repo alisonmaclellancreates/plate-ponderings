@@ -11,7 +11,7 @@ describe("ToggleGroup", () => {
         <ToggleGroupItem value="ca">CA</ToggleGroupItem>
       </ToggleGroup>,
     );
-    expect(screen.getByRole("group", { name: "Region" })).toHaveClass("gap-1", "grp-x");
+    expect(screen.getByRole("radiogroup", { name: "Region" })).toHaveClass("gap-1", "grp-x");
     const us = screen.getByRole("radio", { name: "US" });
     expect(us).toHaveClass("border-input", "h-8", "item-x");
     await user.click(us);
