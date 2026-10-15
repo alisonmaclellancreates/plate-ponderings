@@ -34,7 +34,10 @@ afterAll(() => {
   }
 });
 
-function Harness(props: { position?: "popper" | "item-aligned"; onValueChange?: (v: string) => void }) {
+function Harness(props: {
+  position?: "popper" | "item-aligned";
+  onValueChange?: (v: string) => void;
+}) {
   const { position, onValueChange } = props;
   return (
     <Select {...(onValueChange ? { onValueChange } : {})}>
@@ -84,20 +87,7 @@ describe("Select", () => {
     expect(listbox).not.toHaveClass("data-[side=bottom]:translate-y-1");
   });
 
-  it("renders the scroll buttons with their classes", async () => {
-    render(
-      <Select defaultOpen>
-        <SelectTrigger aria-label="x">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="a">A</SelectItem>
-        </SelectContent>
-      </Select>,
-    );
-    await screen.findByRole("listbox");
-    // Scroll buttons only mount when the viewport can scroll; render them directly
-    // inside an open Select to exercise their own markup.
+  it("keeps the scroll buttons unmounted while the list fits without scrolling", async () => {
     render(
       <Select defaultOpen>
         <SelectTrigger aria-label="y">
@@ -111,5 +101,7 @@ describe("Select", () => {
       </Select>,
     );
     expect(await screen.findByRole("option", { name: "B" })).toBeInTheDocument();
+    expect(document.querySelector(".up-x")).toBeNull();
+    expect(document.querySelector(".down-x")).toBeNull();
   });
 });
