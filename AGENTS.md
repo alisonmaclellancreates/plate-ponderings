@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep the home screen in `src/routes/index.tsx` and its visual rules in `src/styles.css`, preserving the TanStack routing foundation so future steps remain additive.
+- Persistent data and sign-in live in Lovable Cloud (generated clients under `src/integrations/supabase`, schema only through migrations with RLS and GRANTs on every public table), so each step adds tables and policies instead of replacing the backend.
