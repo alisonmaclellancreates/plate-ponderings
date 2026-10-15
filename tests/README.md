@@ -35,26 +35,27 @@ Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `
 - Leave `src/routeTree.gen.ts` and other generated files alone.
 - Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
 
-## Coverage map (baseline, step 10)
+## Coverage map (after step 12)
 
-Totals: statements 0.26, branches 0, functions 0, lines 0.27. Thresholds set to 0/0/0/0.
+Totals: statements 17.72, branches 5.11, functions 20.8, lines 18.42. Thresholds set to 17/5/20/18.
+Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 
 | File                                              | Stmts % | Branch % | Funcs % | Lines % | Step |
 | ------------------------------------------------- | ------- | -------- | ------- | ------- | ---- |
-| `src/components/ui/accordion.tsx`                 | 0       | 100      | 0       | 0       | 12   |
+| `src/components/ui/accordion.tsx`                 | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/alert-dialog.tsx`              | 0       | 100      | 0       | 0       | 13   |
-| `src/components/ui/alert.tsx`                     | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/aspect-ratio.tsx`              | 0       | 100      | 100     | 0       | 12   |
-| `src/components/ui/avatar.tsx`                    | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/badge.tsx`                     | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/breadcrumb.tsx`                | 0       | 0        | 0       | 0       | 12   |
-| `src/components/ui/button.tsx`                    | 0       | 0        | 0       | 0       | 12   |
+| `src/components/ui/alert.tsx`                     | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/aspect-ratio.tsx`              | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/avatar.tsx`                    | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/badge.tsx`                     | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/breadcrumb.tsx`                | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/button.tsx`                    | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/calendar.tsx`                  | 0       | 0        | 0       | 0       | 14   |
-| `src/components/ui/card.tsx`                      | 0       | 100      | 0       | 0       | 12   |
+| `src/components/ui/card.tsx`                      | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/carousel.tsx`                  | 0       | 0        | 0       | 0       | 14   |
 | `src/components/ui/chart.tsx`                     | 0       | 0        | 0       | 0       | 14   |
-| `src/components/ui/checkbox.tsx`                  | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/collapsible.tsx`               | 0       | 100      | 100     | 0       | 12   |
+| `src/components/ui/checkbox.tsx`                  | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/collapsible.tsx`               | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/command.tsx`                   | 0       | 100      | 0       | 0       | 13   |
 | `src/components/ui/context-menu.tsx`              | 0       | 0        | 0       | 0       | 13   |
 | `src/components/ui/dialog.tsx`                    | 0       | 100      | 0       | 0       | 13   |
@@ -63,29 +64,29 @@ Totals: statements 0.26, branches 0, functions 0, lines 0.27. Thresholds set to 
 | `src/components/ui/form.tsx`                      | 0       | 0        | 0       | 0       | 14   |
 | `src/components/ui/hover-card.tsx`                | 0       | 0        | 0       | 0       | 13   |
 | `src/components/ui/input-otp.tsx`                 | 0       | 0        | 0       | 0       | 14   |
-| `src/components/ui/input.tsx`                     | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/label.tsx`                     | 0       | 100      | 0       | 0       | 12   |
+| `src/components/ui/input.tsx`                     | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/label.tsx`                     | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/menubar.tsx`                   | 0       | 0        | 0       | 0       | 13   |
 | `src/components/ui/navigation-menu.tsx`           | 0       | 100      | 0       | 0       | 13   |
-| `src/components/ui/pagination.tsx`                | 0       | 0        | 0       | 0       | 12   |
+| `src/components/ui/pagination.tsx`                | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/popover.tsx`                   | 0       | 0        | 0       | 0       | 13   |
-| `src/components/ui/progress.tsx`                  | 0       | 0        | 0       | 0       | 12   |
-| `src/components/ui/radio-group.tsx`               | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/resizable.tsx`                 | 0       | 0        | 0       | 0       | 12   |
-| `src/components/ui/scroll-area.tsx`               | 0       | 0        | 0       | 0       | 12   |
+| `src/components/ui/progress.tsx`                  | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/radio-group.tsx`               | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/resizable.tsx`                 | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/scroll-area.tsx`               | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/select.tsx`                    | 0       | 0        | 0       | 0       | 13   |
-| `src/components/ui/separator.tsx`                 | 0       | 0        | 0       | 0       | 12   |
+| `src/components/ui/separator.tsx`                 | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/sheet.tsx`                     | 0       | 0        | 0       | 0       | 13   |
 | `src/components/ui/sidebar.tsx`                   | 0       | 0        | 0       | 0       | 14   |
-| `src/components/ui/skeleton.tsx`                  | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/slider.tsx`                    | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/sonner.tsx`                    | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/switch.tsx`                    | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/table.tsx`                     | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/tabs.tsx`                      | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/textarea.tsx`                  | 0       | 100      | 0       | 0       | 12   |
-| `src/components/ui/toggle-group.tsx`              | 0       | 0        | 0       | 0       | 12   |
-| `src/components/ui/toggle.tsx`                    | 0       | 100      | 0       | 0       | 12   |
+| `src/components/ui/skeleton.tsx`                  | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/slider.tsx`                    | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/sonner.tsx`                    | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/switch.tsx`                    | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/table.tsx`                     | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/tabs.tsx`                      | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/textarea.tsx`                  | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/toggle-group.tsx`              | 100     | 100      | 100     | 100     | 12   |
+| `src/components/ui/toggle.tsx`                    | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/tooltip.tsx`                   | 0       | 0        | 0       | 0       | 13   |
 | `src/hooks/use-mobile.tsx`                        | 0       | 100      | 0       | 0       | 14   |
 | `src/integrations/supabase/auth-attacher.ts`      | 0       | 0        | 0       | 0       | 18   |
