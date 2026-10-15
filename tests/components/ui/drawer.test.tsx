@@ -43,7 +43,7 @@ describe("Drawer", () => {
       "mt-auto",
       "foot-x",
     );
-    expect(document.querySelector("[vaul-overlay]")).toHaveClass("bg-black/80");
+    expect(document.querySelector("[data-vaul-overlay]")).toHaveClass("bg-black/80");
   });
 
   it("opens with background scaling turned off", async () => {

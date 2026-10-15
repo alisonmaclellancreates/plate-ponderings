@@ -91,6 +91,6 @@ describe("ContextMenu", () => {
     fireEvent.contextMenu(screen.getByText("Right-click the plate"));
     await user.click(await screen.findByRole("menuitem", { name: "More" }));
     const report = await screen.findByRole("menuitem", { name: "Report" });
-    expect(report.closest(".sub-x")).toHaveClass("shadow-md");
+    expect(report.closest(".sub-x")).toHaveClass("shadow-lg");
   });
 });
