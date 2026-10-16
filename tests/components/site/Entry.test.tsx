@@ -27,7 +27,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 import { DemoPage, SignInPage, SignInPromptPage, SignUpPage } from "@/components/site/Entry";
 import { StoryStepOne } from "@/components/site/AddStory";
-import { SiteHeader, headerModeFor } from "@/components/site/SiteHeader";
+import { SiteHeader } from "@/components/site/SiteHeader";
 
 describe("entry screens", () => {
   it("sign-in prompt offers three choices with captions and a way back", () => {
@@ -106,12 +106,6 @@ describe("entry screens", () => {
 });
 
 describe("header modes", () => {
-  it("maps preview paths to header modes", () => {
-    expect(headerModeFor("/sign-in")).toBe("signed-out");
-    expect(headerModeFor("/demo-form")).toBe("demo");
-    expect(headerModeFor("/")).toBe("member");
-  });
-
   it("signed out shows Sign in, Try the Demo, and moves the demo into the mobile menu", () => {
     render(<SiteHeader mode="signed-out" />);
     expect(screen.getAllByRole("link", { name: "Sign in" })).toHaveLength(2);

@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { PlateHeader } from "@/components/site/AddStory";
+import { DEMO_SEES } from "@/lib/demo";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
 
@@ -126,8 +127,6 @@ export function SignUpPage() {
     </EntryShell>
   );
 }
-
-export const DEMO_SEES = ["Your submissions", "A story waiting for its check", "Your profile"];
 
 export function DemoPage() {
   return (

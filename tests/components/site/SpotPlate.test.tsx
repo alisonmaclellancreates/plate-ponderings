@@ -27,38 +27,17 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
+import { SpotOutcomePage, SpotPage } from "@/components/site/SpotPlate";
 import {
   JURISDICTION_ERROR,
   SPOT_OUTCOMES,
-  SpotOutcomePage,
-  SpotPage,
   TEXT_EMPTY_ERROR,
   TEXT_ERROR,
-  TEXT_LENGTH_ERROR,
-  validateSpot,
   type SpotOutcome,
-} from "@/components/site/SpotPlate";
+} from "@/lib/spot";
 
 const buttons = () =>
   [...document.querySelectorAll("main a, main button")].map((b) => b.textContent);
-
-describe("validateSpot", () => {
-  it("requires a jurisdiction and plate text of up to 8 allowed characters", () => {
-    expect(validateSpot({ jurisdiction: "Utah", text: "TR-AI LS" })).toEqual({});
-    expect(validateSpot({ jurisdiction: "Utah", text: "ABCD-EFGH" })).toEqual({});
-    expect(validateSpot({})).toEqual({
-      jurisdiction: JURISDICTION_ERROR,
-      text: TEXT_EMPTY_ERROR,
-    });
-    expect(validateSpot({ jurisdiction: "Utah", text: "   " }).text).toBe(TEXT_EMPTY_ERROR);
-    expect(validateSpot({ jurisdiction: "Utah", text: " - - " }).text).toBe(TEXT_EMPTY_ERROR);
-    expect(validateSpot({ jurisdiction: "Utah", text: "HI@@!" }).text).toBe(TEXT_ERROR);
-    expect(validateSpot({ jurisdiction: "Utah", text: "ABCDEFGHI" }).text).toBe(TEXT_LENGTH_ERROR);
-    expect(validateSpot({ jurisdiction: "Utah", text: "ABCD-EFGH-I" }).text).toBe(
-      TEXT_LENGTH_ERROR,
-    );
-  });
-});
 
 describe("Spot a Plate form", () => {
   it("shows the sign, labelled fields, coral button and next steps", () => {

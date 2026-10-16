@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PlateDetail, Stories, StoryCard, orderStories } from "@/components/site/PlateDetail";
+import { PlateDetail, Stories, StoryCard } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
 
 const strip = () => screen.getByRole("list", { name: "Plate status" });
@@ -158,26 +158,6 @@ describe("Stories", () => {
     await userEvent.click(screen.getByRole("button", { name: "Show 5 more stories" }));
     expect(screen.getAllByRole("article")).toHaveLength(10);
     expect(screen.getByRole("button", { name: "Show 1 more story" })).toBeTruthy();
-  });
-});
-
-describe("orderStories", () => {
-  it("never sorts by hearts; ties broken by id", () => {
-    const mk = (id: string, date: string, hearts: number): Story => ({
-      id,
-      handle: id,
-      date,
-      meaning: id,
-      howIKnow: "guess",
-      hearts,
-    });
-    expect(
-      orderStories([
-        mk("b", "2026-01-01", 1),
-        mk("a", "2026-01-01", 99),
-        mk("c", "2025-01-01", 0),
-      ]).map((s) => s.id),
-    ).toEqual(["c", "a", "b"]);
   });
 });
 
