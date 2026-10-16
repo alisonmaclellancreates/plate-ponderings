@@ -147,9 +147,9 @@ describe("Spot outcome previews", () => {
     expect(document.body.textContent).not.toMatch(/notify/i);
   });
 
-  it("error shows the Sasquatch placeholder with two buttons", () => {
+  it("error shows the Sasquatch with two buttons", () => {
     render(<SpotOutcomePage outcome="error" />);
-    expect(screen.getByRole("img", { name: "A friendly Sasquatch" })).toBeInTheDocument();
+    expect(screen.getByTestId("sasquatch")).toBeInTheDocument();
     expect(buttons()).toEqual(["Try Again", "Go Back"]);
   });
 
