@@ -35,9 +35,9 @@ Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `
 - Leave `src/routeTree.gen.ts` and other generated files alone.
 - Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
 
-## Coverage map (after step 15)
+## Coverage map (after step 16)
 
-Totals: statements 77.95, branches 61.55, functions 81.87, lines 79.74. Thresholds set to 77/61/81/79.
+Totals: statements 81.39, branches 65.25, functions 84.89, lines 82.95. Thresholds set to 81/65/84/82.
 Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 
 | File                                              | Stmts % | Branch % | Funcs % | Lines % | Step |
@@ -99,11 +99,11 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/lib/error-page.ts`                           | 100     | 100      | 100     | 100     | 15   |
 | `src/lib/lovable-error-reporting.ts`              | 100     | 100      | 100     | 100     | 15   |
 | `src/lib/utils.ts`                                | 100     | 100      | 100     | 100     | 15   |
-| `src/router.tsx`                                  | 0       | 100      | 0       | 0       | 16   |
+| `src/router.tsx`                                  | 100     | 100      | 100     | 100     | 16   |
 | `src/routes/__root.tsx`                           | 7.69    | 100      | 0       | 7.69    | 17   |
 | `src/routes/index.tsx`                            | 33.33   | 100      | 0       | 33.33   | 17   |
-| `src/server.ts`                                   | 0       | 0        | 0       | 0       | 16   |
-| `src/start.ts`                                    | 0       | 0        | 0       | 0       | 16   |
+| `src/server.ts`                                   | 100     | 100      | 100     | 100     | 16   |
+| `src/start.ts`                                    | 100     | 100      | 100     | 100     | 16   |
 
 Branch 100% on a 0% file means the file has no branches, not that it is tested.
 
@@ -117,3 +117,4 @@ Branch 100% on a 0% file means the file has no branches, not that it is tested.
 - Step 19 has nothing to cover yet: there is no `src/lib/email-templates/` or `src/routes/lovable/email/` in this project.
 - `src/integrations/supabase/types.ts` is excluded as generated.
 - Step 14 uncovered, unreachable through the public surface: `carousel.tsx` line 57 (`onSelect` guard for an undefined API; only ever called with an API), the `orientation ||` fallback (orientation always has a default), and `api?.off` optional chaining in the cleanup. `chart.tsx` line 301 (non-object payload guard; Recharts payload items are always objects).
+- Step 16 notes: `start.ts` rethrows only objects carrying `statusCode`; a thrown `Response` or redirect without one is logged and becomes the 500 page (tests pin this). `server.ts` reaches every branch through `fetch`, including the no-default-export fallback.
