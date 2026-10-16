@@ -54,7 +54,7 @@ export function AdminPage({ rows = REPORTED_STORIES }: { rows?: ReportedStory[] 
               <th scope="col" className="p-3">
                 Status
               </th>
-              <th scope="col" className="p-3">
+              <th scope="col" className="relative p-3">
                 <span className="sr-only">Action</span>
               </th>
             </tr>
