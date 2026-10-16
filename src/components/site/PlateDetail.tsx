@@ -13,6 +13,7 @@ import { formatDay } from "@/components/site/Homepage";
 import {
   CATCHING_UP_STORY,
   PLATES,
+  PNW_LV_SUMMARY,
   plateStatus,
   type PlateRecord,
   type Story,
@@ -21,7 +22,13 @@ import {
 import { storyCount } from "@/lib/story-count";
 
 export type PlateDetailState =
-  "mystery" | "interpreted" | "owner" | "interpreted-history" | "pending-story" | "catching-up";
+  | "mystery"
+  | "interpreted"
+  | "owner"
+  | "interpreted-history"
+  | "pending-story"
+  | "catching-up"
+  | "pnw-lv";
 
 export const PLATE_DETAIL_STATES: Record<PlateDetailState, { slug: string; label: string }> = {
   mystery: { slug: "wa-b7k2l9", label: "Mystery plate" },
@@ -30,6 +37,7 @@ export const PLATE_DETAIL_STATES: Record<PlateDetailState, { slug: string; label
   "interpreted-history": { slug: "bc-lv2code", label: "Earlier summaries open" },
   "pending-story": { slug: "bc-lv2code", label: "Your story is pending" },
   "catching-up": { slug: "bc-lv2code", label: "Summary catching up" },
+  "pnw-lv": { slug: "or-pnwlv", label: "Oregon PNW LV" },
 };
 
 export const PAGE_SIZE = 5;
@@ -266,7 +274,9 @@ export function PlateDetail({ state }: { state: PlateDetailState }) {
   const plate =
     state === "catching-up"
       ? { ...basePlate, stories: [...basePlate.stories, CATCHING_UP_STORY] }
-      : basePlate;
+      : state === "pnw-lv"
+        ? { ...basePlate, summaries: [PNW_LV_SUMMARY] }
+        : basePlate;
   const hasStories = plate.stories.length > 0;
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">

@@ -36,6 +36,7 @@ const PREVIEWS = [
 
 /** Plate detail preview states, served by the /plate/$state route. */
 const PLATE_PREVIEWS = [
+  { state: "pnw-lv", label: "Plate detail, PNW LV", note: "Oregon PNW LV, 2 stories" },
   { state: "mystery", label: "Plate detail, mystery", note: "Washington B7K2L9, no stories" },
   {
     state: "interpreted",
@@ -80,6 +81,19 @@ const SPOT_PREVIEWS = [
   { outcome: "error", label: "Spot a Plate, error", note: "Something went wrong" },
 ] as const;
 
+/** Add a story flow for Oregon PNW LV. */
+const STORY_PREVIEWS = [
+  { step: "1", label: "Add a story, step 1", note: "How do you know, meaning, more" },
+  { step: "1-owner-exists", label: "Add a story, owner already here", note: "Calm note" },
+  { step: "2", label: "Add a story, photo", note: "Drop area and privacy note" },
+  { step: "2-adjust", label: "Add a story, adjust photo", note: "Plate box editor" },
+  { step: "2-review", label: "Add a story, review photo", note: "Processed image" },
+  { step: "3", label: "Add a story, review and submit", note: "Summary of answers" },
+  { step: "done", label: "Add a story, submitted", note: "Outcome" },
+  { step: "checking", label: "Add a story, being checked", note: "Outcome" },
+  { step: "rejected", label: "Add a story, not added", note: "Step 1 with words kept" },
+] as const;
+
 function Previews() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -117,6 +131,18 @@ function Previews() {
             <Link
               to="/spot/$outcome"
               params={{ outcome: p.outcome }}
+              className="brand-card block p-4 hover:shadow-md"
+            >
+              <span className="font-semibold text-navy">{p.label}</span>
+              <span className="block text-sm text-muted-foreground">{p.note}</span>
+            </Link>
+          </li>
+        ))}
+        {STORY_PREVIEWS.map((p) => (
+          <li key={p.step}>
+            <Link
+              to="/story/$step"
+              params={{ step: p.step }}
               className="brand-card block p-4 hover:shadow-md"
             >
               <span className="font-semibold text-navy">{p.label}</span>

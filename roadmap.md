@@ -21,3 +21,6 @@
 
 # Spot a Plate previews
 - [x] /spot form and eight outcome previews, homepage search prefill, tests, lint.
+
+# Add a story previews
+- [x] /story/* nine Oregon PNW LV preview steps, tests, lint.
