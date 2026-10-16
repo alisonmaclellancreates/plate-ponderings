@@ -130,31 +130,27 @@ function NoMatchPanel() {
 const INTRO = "Curious about a plate you saw? Look it up, or add a new mystery to the collection.";
 
 function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
-  const content = (
-    <>
-      <Headline />
-      <p className="mt-3 max-w-md text-lg">{INTRO}</p>
-      <div className="mt-6">
-        <SearchCard values={search} />
-        {noMatch && <NoMatchPanel />}
-      </div>
-    </>
-  );
   return (
-    <section aria-label="Welcome" className="relative">
+    <section aria-label="Welcome" className="grid">
       <img
         src="/brand/homepage-hero-v2.webp"
         alt="An illustrated vintage car on a scenic road"
         width={1600}
         height={800}
-        className="block h-auto w-full"
+        className="col-start-1 row-start-1 block h-auto w-full"
       />
-      {/* Desktop: content on the quiet left half, washed only behind itself. */}
-      <div className="hero-text-wash absolute inset-y-0 left-0 hidden w-[52%] items-center lg:flex">
-        <div className="w-full py-8 pr-16 pl-10 xl:pl-16">{content}</div>
+      {/* Rendered once. Desktop: overlays the quiet left half, washed only behind itself.
+          Mobile and tablet: stacks under the illustration. */}
+      <div className="row-start-2 px-4 py-8 sm:px-8 lg:hero-text-wash lg:col-start-1 lg:row-start-1 lg:flex lg:w-[52%] lg:items-center lg:py-8 lg:pr-16 lg:pl-10 xl:pl-16">
+        <div className="w-full">
+          <Headline />
+          <p className="mt-3 max-w-md text-lg">{INTRO}</p>
+          <div className="mt-6">
+            <SearchCard values={search} />
+            {noMatch && <NoMatchPanel />}
+          </div>
+        </div>
       </div>
-      {/* Mobile and tablet: content stacks under the illustration. */}
-      <div className="px-4 py-8 sm:px-8 lg:hidden">{content}</div>
     </section>
   );
 }
