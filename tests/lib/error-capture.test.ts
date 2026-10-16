@@ -135,7 +135,7 @@ describe("describeError", () => {
   it("falls back to name and message without a stack", async () => {
     const { describeError } = await load();
     const err = new TypeError("no stack");
-    err.stack = undefined;
+    delete err.stack;
     expect(describeError(err)).toBe("TypeError: no stack");
   });
 
@@ -162,7 +162,7 @@ describe("describeError", () => {
     let current: Error | undefined;
     for (let i = 6; i >= 0; i--) {
       const e: Error = new Error(`e${i}`, current ? { cause: current } : undefined);
-      e.stack = undefined;
+      delete e.stack;
       current = e;
     }
     expect(describeError(current)).toBe(
@@ -179,7 +179,7 @@ describe("describeError", () => {
   it("stringifies a non-Error cause without a label and stops", async () => {
     const { describeError } = await load();
     const err = new Error("top", { cause: { code: "X" } });
-    err.stack = undefined;
+    delete err.stack;
     expect(describeError(err)).toBe('Error: top\n{"code":"X"}');
   });
 
