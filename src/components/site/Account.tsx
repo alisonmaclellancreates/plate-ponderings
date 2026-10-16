@@ -3,6 +3,7 @@ import { CheckCircle2, ChevronRight, UserCircle2 } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ModerationBadge } from "@/components/site/Badges";
 import { ScenicHeader } from "@/components/site/SpotPlate";
+import { StoryCard } from "@/components/site/PlateDetail";
 import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
 
 const formatDay = (iso: string) =>
@@ -168,17 +169,8 @@ export function ProfilePage() {
           <h2 id="how-appear" className="font-display text-2xl text-navy">
             How you'll appear
           </h2>
-          <article data-testid="sample-story" className="brand-card mt-3 flex gap-4 p-4">
-            <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
-            <div className="min-w-0">
-              <p className="text-sm">
-                <span className="font-semibold">{handle}</span>{" "}
-                <span className="text-muted-foreground">
-                  · {formatDay(PROFILE_SAMPLE_STORY.date)}
-                </span>
-              </p>
-              <p className="mt-1">{PROFILE_SAMPLE_STORY.text}</p>
-            </div>
+          <article data-testid="sample-story" className="mt-3">
+            <StoryCard story={{ ...PROFILE_SAMPLE_STORY, handle }} />
           </article>
         </section>
       </div>
