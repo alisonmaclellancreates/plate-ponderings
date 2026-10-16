@@ -156,6 +156,17 @@ function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
 }
 
 function ActionCards() {
+  function focusSearch() {
+    const searchCard = document.getElementById("plate-search");
+    const jurisdiction = searchCard?.querySelector<HTMLSelectElement>('select[name="jurisdiction"]');
+    if (!searchCard || !jurisdiction) return;
+    searchCard.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      block: "center",
+    });
+    jurisdiction.focus({ preventScroll: true });
+  }
+
   return (
     <section
       aria-label="Get started"
@@ -173,7 +184,7 @@ function ActionCards() {
         <p className="mt-2 flex-1">
           See what people think it means, or add your own interpretation.
         </p>
-        <button type="button" className="brand-btn brand-btn-navy mt-4 self-start">
+        <button type="button" onClick={focusSearch} className="brand-btn brand-btn-navy mt-4 self-start">
           Look Up a Plate
         </button>
       </article>
