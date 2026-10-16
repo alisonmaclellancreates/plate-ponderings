@@ -24,3 +24,6 @@
 
 # Add a story previews
 - [x] /story/* nine Oregon PNW LV preview steps, tests, lint.
+
+# Account previews
+- [x] /submissions and /profile previews, tests, lint.
