@@ -36,6 +36,7 @@ const PREVIEWS = [
 
 /** Plate detail preview states, served by the /plate/$state route. */
 const PLATE_PREVIEWS = [
+  { state: "pnw-lv", label: "Plate detail, PNW LV", note: "Oregon PNW LV, 2 stories" },
   { state: "mystery", label: "Plate detail, mystery", note: "Washington B7K2L9, no stories" },
   {
     state: "interpreted",

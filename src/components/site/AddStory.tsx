@@ -135,7 +135,7 @@ export function StoryStepOne({
       step={1}
       actions={
         <>
-          <Link to="/plate/$state" params={{ state: "interpreted" }} className={outline}>
+          <Link to="/plate/$state" params={{ state: "pnw-lv" }} className={outline}>
             Cancel
           </Link>
           <Link to="/story/$step" params={{ step: "2" }} className={coral}>
@@ -213,10 +213,12 @@ export function StoryStepOne({
           maxLength={MORE_MAX}
           value={more}
           onChange={(e) => setMore(e.target.value)}
-          placeholder="Keep places general, like near Seattle"
-          aria-describedby="story-more-count"
+          aria-describedby="story-more-hint story-more-count"
           className="w-full rounded-lg border border-input bg-card px-3 py-2"
         />
+        <p id="story-more-hint" className="text-sm text-muted-foreground">
+          Keep places general, like near Seattle
+        </p>
         <Counter id="story-more-count" value={more} max={MORE_MAX} />
       </div>
     </Shell>
@@ -426,7 +428,7 @@ export function StoryStepPage({ step }: { step: StoryStep }) {
             <>
               <Link
                 to="/plate/$state"
-                params={{ state: "interpreted" }}
+                params={{ state: "pnw-lv" }}
                 className="brand-btn brand-btn-navy"
               >
                 View This Plate
