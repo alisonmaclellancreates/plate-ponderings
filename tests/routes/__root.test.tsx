@@ -21,7 +21,6 @@ vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate }),
 }));
 vi.mock("@/lib/lovable-error-reporting", () => ({ reportLovableError }));
-vi.mock("../src/styles.css?url", () => ({ default: "/styles.css" }));
 
 function OutletProbe() {
   const client = useQueryClient();
@@ -54,7 +53,7 @@ describe("root route", () => {
     );
     expect(head.meta.find((m) => m["name"] === "viewport")).toBeDefined();
     const sheet = head.links.find((l) => l["rel"] === "stylesheet");
-    expect(sheet?.["href"]).toBeTruthy();
+    expect(sheet).toHaveProperty("href");
   });
 
   it("not-found renders a heading and a link home", () => {
