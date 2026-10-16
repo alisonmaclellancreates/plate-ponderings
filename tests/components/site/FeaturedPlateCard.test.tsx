@@ -9,9 +9,9 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
-import { PLATES, featuredProgress, publishedStories } from "@/lib/mock-data";
+import { featuredPlates, featuredProgress, publishedStories } from "@/lib/mock-data";
 
-it.each(PLATES.filter((p) => p.plateOfTheDay))(
+it.each(featuredPlates())(
   "renders published counts, status and progress for $text",
   (plate) => {
     render(<FeaturedPlateCard plate={plate} />);
@@ -25,7 +25,7 @@ it.each(PLATES.filter((p) => p.plateOfTheDay))(
 );
 
 it("names the card link with the plate, date, count, badge and progress", () => {
-  const plate = PLATES.find((p) => p.slug === "ut-canyons");
+  const plate = featuredPlates().find((p) => p.slug === "ut-canyons");
   if (!plate) throw new Error("Missing CANYONS");
   render(<FeaturedPlateCard plate={plate} />);
   const name = screen.getByRole("link").textContent ?? "";
