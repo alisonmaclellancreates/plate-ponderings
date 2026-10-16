@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Homepage, HEADLINES, ROTATE_MS, formatDay } from "@/components/site/Homepage";
 
 function media({ mobile = false, reduced = false }) {
@@ -16,6 +17,25 @@ afterEach(() => {
 });
 
 describe("Homepage", () => {
+  it.each([
+    { reduced: false, behavior: "smooth" },
+    { reduced: true, behavior: "instant" },
+  ])("focuses the jurisdiction field with $behavior scrolling", async ({ reduced, behavior }) => {
+    media({ reduced });
+    const user = userEvent.setup();
+    render(<Homepage />);
+    const searchCard = screen.getByRole("search", { name: "Look up a plate" });
+    const scrollIntoView = vi.fn();
+    searchCard.scrollIntoView = scrollIntoView;
+    const button = screen.getByRole("button", { name: "Look Up a Plate" });
+    button.focus();
+
+    await user.keyboard("{Enter}");
+
+    expect(document.activeElement).toBe(screen.getByRole("combobox", { name: "State or Province" }));
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior, block: "center" });
+  });
+
   it("rotates headlines on desktop every interval", () => {
     vi.useFakeTimers();
     media({});
