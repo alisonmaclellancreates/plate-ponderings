@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as HomeFallbackRouteImport } from './routes/home-fallback'
 import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as PreviewsRouteImport } from './routes/previews'
+import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const PreviewsRoute = PreviewsRouteImport.update({
   path: '/previews',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlateStateRoute = PlateStateRouteImport.update({
+  id: '/plate/$state',
+  path: '/plate/$state',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
   id: '/preview/components',
   path: '/preview/components',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
+  '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
+  '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRoutesById {
@@ -61,6 +69,7 @@ export interface FileRoutesById {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
+  '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRouteTypes {
@@ -70,6 +79,7 @@ export interface FileRouteTypes {
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
+    | '/plate/$state'
     | '/preview/components'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -77,6 +87,7 @@ export interface FileRouteTypes {
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
+    | '/plate/$state'
     | '/preview/components'
   id:
     | '__root__'
@@ -84,6 +95,7 @@ export interface FileRouteTypes {
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
+    | '/plate/$state'
     | '/preview/components'
   fileRoutesById: FileRoutesById
 }
@@ -92,6 +104,7 @@ export interface RootRouteChildren {
   HomeFallbackRoute: typeof HomeFallbackRoute
   HomeNoMatchRoute: typeof HomeNoMatchRoute
   PreviewsRoute: typeof PreviewsRoute
+  PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
 }
 
@@ -125,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plate/$state': {
+      id: '/plate/$state'
+      path: '/plate/$state'
+      fullPath: '/plate/$state'
+      preLoaderRoute: typeof PlateStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/preview/components': {
       id: '/preview/components'
       path: '/preview/components'
@@ -140,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeFallbackRoute: HomeFallbackRoute,
   HomeNoMatchRoute: HomeNoMatchRoute,
   PreviewsRoute: PreviewsRoute,
+  PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
 }
 export const routeTree = rootRouteImport

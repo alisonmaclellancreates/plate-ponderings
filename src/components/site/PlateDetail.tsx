@@ -4,7 +4,6 @@ import { Plate } from "@/components/site/Plate";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/components/site/Homepage";
 import {
-  CURRENT_USER,
   PLATES,
   plateStatus,
   type PlateRecord,
@@ -300,6 +299,3 @@ export function PlateDetail({ state }: { state: PlateDetailState }) {
     </main>
   );
 }
-
-/** Exposed so the pending panel copy can mention the signed-in viewer later. */
-export const VIEWER = CURRENT_USER;

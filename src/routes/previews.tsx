@@ -27,6 +27,12 @@ const PREVIEWS = [
     label: "Homepage, fallback day",
     note: "No mystery available; WANDER is featured",
   },
+  { to: "/plate/mystery", label: "Plate detail, mystery", note: "Washington B7K2L9, no stories" },
+  { to: "/plate/interpreted", label: "Plate detail, interpreted", note: "British Columbia LV2CODE, 5 stories, no owner" },
+  { to: "/plate/owner", label: "Plate detail, owner", note: "California TEATIME, 6 stories with an owner story" },
+  { to: "/plate/interpreted-history", label: "Plate detail, earlier summaries", note: "LV2CODE with earlier summaries open" },
+  { to: "/plate/pending-story", label: "Plate detail, pending story", note: "LV2CODE with your story waiting for its check" },
+  { to: "/plate/catching-up", label: "Plate detail, catching up", note: "LV2CODE with the summary catching up" },
   {
     to: "/preview/components",
     label: "Plate and badges",
