@@ -1,23 +1,19 @@
 import { useState } from "react";
-import { ArrowLeft, Heart, Hourglass, MessageCircle, MoreHorizontal, UserCircle2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Heart,
+  Hourglass,
+  MessageCircle,
+  MoreHorizontal,
+  UserCircle2,
+} from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/components/site/Homepage";
-import {
-  PLATES,
-  plateStatus,
-  type PlateRecord,
-  type Story,
-  type Summary,
-} from "@/lib/mock-data";
+import { PLATES, plateStatus, type PlateRecord, type Story, type Summary } from "@/lib/mock-data";
 
 export type PlateDetailState =
-  | "mystery"
-  | "interpreted"
-  | "owner"
-  | "interpreted-history"
-  | "pending-story"
-  | "catching-up";
+  "mystery" | "interpreted" | "owner" | "interpreted-history" | "pending-story" | "catching-up";
 
 export const PLATE_DETAIL_STATES: Record<PlateDetailState, { slug: string; label: string }> = {
   mystery: { slug: "wa-b7k2l9", label: "Mystery plate" },
@@ -216,8 +212,8 @@ function PendingPanel() {
     <div role="status" className="flex gap-3 rounded-xl bg-slate p-4">
       <Hourglass aria-hidden className="size-5 shrink-0 text-navy" />
       <p>
-        <span className="font-semibold">Your story is waiting for its check.</span> Only you can
-        see this for now. Your story will appear publicly once its check is complete.
+        <span className="font-semibold">Your story is waiting for its check.</span> Only you can see
+        this for now. Your story will appear publicly once its check is complete.
       </p>
     </div>
   );

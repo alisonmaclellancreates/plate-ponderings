@@ -72,7 +72,7 @@ export const PLATES: PlateRecord[] = [
         6,
         "Saw it parked outside a data centre in Burnaby. Felt like an inside joke.",
       ),
-      
+
       s("bc3", "rivercat", "2026-10-05", "Live to code.", "knows", 11),
       s(
         "bc4",
@@ -128,7 +128,14 @@ export const PLATES: PlateRecord[] = [
       ),
       s("ca2", "maplegirl", "2026-09-21", "A tea lover, obviously.", "guess", 5),
       s("ca3", "rivercat", "2026-09-22", "Someone who really loves tea.", "knows", 8),
-      withPhoto("ca4", "northshore", "2026-09-24", "Asked at a light: they just love tea.", "asked", 7),
+      withPhoto(
+        "ca4",
+        "northshore",
+        "2026-09-24",
+        "Asked at a light: they just love tea.",
+        "asked",
+        7,
+      ),
       s("ca5", "Traveler4821", "2026-09-26", "Afternoon tea enthusiast.", "guess", 3),
       s("ca6", "maplegirl", "2026-09-28", "Spotted near a tea shop. Makes sense.", "guess", 4),
     ],

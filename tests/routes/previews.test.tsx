@@ -4,7 +4,15 @@ import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (options: Record<string, unknown>) => options,
-  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
+  Link: ({
+    to,
+    params,
+    children,
+  }: {
+    to: string;
+    params?: { state: string };
+    children: ReactNode;
+  }) => <a href={params ? to.replace("$state", params.state) : to}>{children}</a>,
 }));
 
 import { Route } from "@/routes/previews";
@@ -28,5 +36,23 @@ describe("previews route", () => {
     const title = meta.find((m) => "title" in m)?.["title"];
     expect(title).toBeTruthy();
     expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
+  });
+});
+
+describe("previews plate links", () => {
+  it("links every plate detail state", () => {
+    const C = R.component;
+    render(<C />);
+    const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
+    for (const s of [
+      "mystery",
+      "interpreted",
+      "owner",
+      "interpreted-history",
+      "pending-story",
+      "catching-up",
+    ]) {
+      expect(hrefs).toContain(`/plate/${s}`);
+    }
   });
 });

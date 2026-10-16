@@ -15,7 +15,12 @@ export const Route = createFileRoute("/plate/$state")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "Plate unavailable | What the Plate?" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [
+          { title: "Plate unavailable | What the Plate?" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     }
     const info = PLATE_DETAIL_STATES[loaderData.state];
     const plate = PLATES.find((p) => p.slug === info.slug)!;
