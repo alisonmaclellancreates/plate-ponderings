@@ -12,4 +12,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Pre-bundle shared UI deps up front: late discovery re-optimizes mid-session and can
+    // load two React copies ("Cannot read properties of null (reading 'useContext')").
+    optimizeDeps: { include: ["lucide-react", "clsx", "tailwind-merge"] },
+    // Coverage reports are written into the project; don't reload the preview for them.
+    server: { watch: { ignored: ["**/coverage/**"] } },
+  },
 });
