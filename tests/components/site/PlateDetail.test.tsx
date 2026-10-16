@@ -110,6 +110,26 @@ describe("PlateDetail", () => {
   });
 });
 
+describe("Stories", () => {
+  const mk = (id: string): Story => ({
+    id,
+    handle: id,
+    date: "2026-10-01",
+    meaning: id,
+    howIKnow: "guess",
+    hearts: 0,
+  });
+
+  it("offers 5 more when more than five remain past the first page", async () => {
+    const stories = Array.from({ length: 11 }, (_, i) => mk(`s${i}`));
+    render(<Stories stories={stories} pending={false} />);
+    expect(screen.getAllByRole("article")).toHaveLength(5);
+    await userEvent.click(screen.getByRole("button", { name: "Show 5 more stories" }));
+    expect(screen.getAllByRole("article")).toHaveLength(10);
+    expect(screen.getByRole("button", { name: "Show 1 more story" })).toBeTruthy();
+  });
+});
+
 describe("orderStories", () => {
   it("never sorts by hearts; ties broken by id", () => {
     const mk = (id: string, date: string, hearts: number): Story => ({
