@@ -3,6 +3,7 @@ import { MessageCircle, Star } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
+import { storyCount } from "@/lib/story-count";
 import { PLATES, plateStatus, type PlateRecord } from "@/lib/mock-data";
 
 export const HEADLINES = [
@@ -266,10 +267,6 @@ function HowItWorks() {
       </div>
     </section>
   );
-}
-
-function storyCount(n: number) {
-  return `${n} ${n === 1 ? "story" : "stories"}`;
 }
 
 export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
