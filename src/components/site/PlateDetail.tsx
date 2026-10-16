@@ -22,7 +22,13 @@ import {
 import { storyCount } from "@/lib/story-count";
 
 export type PlateDetailState =
-  "mystery" | "interpreted" | "owner" | "interpreted-history" | "pending-story" | "catching-up" | "pnw-lv";
+  | "mystery"
+  | "interpreted"
+  | "owner"
+  | "interpreted-history"
+  | "pending-story"
+  | "catching-up"
+  | "pnw-lv";
 
 export const PLATE_DETAIL_STATES: Record<PlateDetailState, { slug: string; label: string }> = {
   mystery: { slug: "wa-b7k2l9", label: "Mystery plate" },

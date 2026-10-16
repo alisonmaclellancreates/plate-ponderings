@@ -82,12 +82,31 @@ describe("Add a story previews", () => {
     );
     unmount();
     const d = render(<StoryStepPage step="done" />);
-    expect(screen.getByRole("link", { name: "View This Plate" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View This Plate" })).toHaveAttribute(
+      "href",
+      "/plate/pnw-lv",
+    );
     d.unmount();
     render(<StoryStepPage step="checking" />);
     expect(screen.getByRole("link", { name: "Go to Your Submissions" })).toHaveAttribute(
       "href",
       "/submissions",
     );
+  });
+
+  it("location hint is visible and describes the text area", () => {
+    render(<StoryStepPage step="1" />);
+    const hint = screen.getByText("Keep places general, like near Seattle");
+    expect(hint).toBeVisible();
+    const more = screen.getByRole("textbox", { name: /Tell us more/ });
+    expect(more.getAttribute("aria-describedby")?.split(" ")).toEqual(
+      expect.arrayContaining([hint.id, "story-more-count"]),
+    );
+    expect(more).not.toHaveAttribute("placeholder");
+  });
+
+  it("Cancel on step 1 opens the PNW LV preview", () => {
+    render(<StoryStepPage step="1" />);
+    expect(screen.getByRole("link", { name: "Cancel" })).toHaveAttribute("href", "/plate/pnw-lv");
   });
 });
