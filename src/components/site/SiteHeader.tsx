@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
+import type { HeaderMode } from "@/lib/header-mode";
 
 // Explore, Spot a Plate and About are built in later steps; plain anchors until then.
 const NAV = [
@@ -9,16 +10,6 @@ const NAV = [
   { href: "/spot", label: "Spot a Plate" },
   { href: "/about", label: "About" },
 ];
-
-/** member: signed in. signed-out: Sign in + Try the Demo. demo: sample traveler with Exit Demo. */
-export type HeaderMode = "member" | "signed-out" | "demo";
-
-/** Which header each preview path shows; every other path is the signed-in member header. */
-export function headerModeFor(pathname: string): HeaderMode {
-  if (["/sign-in-prompt", "/sign-in", "/sign-up", "/demo"].includes(pathname)) return "signed-out";
-  if (pathname === "/demo-form") return "demo";
-  return "member";
-}
 
 function Avatar({ showHandle }: { showHandle: boolean }) {
   return (
