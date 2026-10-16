@@ -30,6 +30,7 @@ it("shows 12 newest plates with CANYONS today, then loads the remaining two", as
   expect(within(first).getByText("Still a mystery")).toBeTruthy();
   await user.click(screen.getByRole("button", { name: "Load More" }));
   expect(within(grid).getAllByRole("listitem")).toHaveLength(14);
+  expect(document.activeElement).toBe(within(grid).getAllByRole("link")[12]);
   expect(screen.queryByRole("button", { name: "Load More" })).toBeNull();
   expect(
     within(grid)

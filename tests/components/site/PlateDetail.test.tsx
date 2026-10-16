@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PlateDetail, Stories, orderStories } from "@/components/site/PlateDetail";
+import { PlateDetail, Stories, StoryCard, orderStories } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
 
 const strip = () => screen.getByRole("list", { name: "Plate status" });
@@ -157,4 +157,21 @@ describe("orderStories", () => {
       ]).map((s) => s.id),
     ).toEqual(["c", "a", "b"]);
   });
+});
+
+it("reads a story with 1 heart as 1 heart", () => {
+  render(
+    <StoryCard
+      story={{
+        id: "h1",
+        handle: "rivercat",
+        date: "2026-10-14",
+        meaning: "One.",
+        howIKnow: "guess",
+        hearts: 1,
+      }}
+    />,
+  );
+  expect(screen.getByText("heart").previousSibling?.textContent).toBe("1");
+  expect(screen.queryByText("hearts")).toBeNull();
 });

@@ -18,7 +18,6 @@ export function FeaturedPlateCard({
     <Link
       to="/plate/$state"
       params={{ state: plate.slug }}
-      aria-label={`${plate.jurisdiction} plate ${plate.text}`}
       className="brand-card flex h-full flex-col items-center gap-3 p-4 text-center transition-shadow hover:shadow-md"
     >
       <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="md" className="max-w-full" />

@@ -1,4 +1,6 @@
 /** Static preview data shared by every preview page. Replaced by Cloud data in a later step. */
+import { storyCount } from "@/lib/story-count";
+
 export type PlateStatus = "mystery" | "interpreted" | "owner";
 export type Consensus = "agree" | "mixed" | "differ";
 export type HowIKnow = "owner" | "knows" | "asked" | "guess";
@@ -249,8 +251,8 @@ export function publishedStories(plate: PlateRecord): Story[] {
 /** Progress since a plate was featured, from published story counts only. */
 export function featuredProgress(featured: number, now: number): string {
   if (now === 0) return "Still a mystery";
-  if (featured === 0) return `Was a mystery, now ${now} ${now === 1 ? "story" : "stories"}`;
-  return `Had ${featured} stories when featured, now ${now}`;
+  if (featured === 0) return `Was a mystery, now ${storyCount(now)}`;
+  return `Had ${storyCount(featured)} when featured, now ${now}`;
 }
 
 export const TODAY = "2026-10-16";
