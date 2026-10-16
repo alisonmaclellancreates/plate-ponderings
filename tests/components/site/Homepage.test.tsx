@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Homepage, HEADLINES, ROTATE_MS, PlateOfTheDay } from "@/components/site/Homepage";
+import { Homepage, PlateOfTheDay } from "@/components/site/Homepage";
+import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
 import type { PlateRecord } from "@/lib/mock-data";
 import type { ReactNode } from "react";
 

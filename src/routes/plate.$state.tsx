@@ -1,9 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import {
-  PlateDetail,
-  PLATE_DETAIL_STATES,
-  type PlateDetailState,
-} from "@/components/site/PlateDetail";
+import { PlateDetail } from "@/components/site/PlateDetail";
+import { PLATE_DETAIL_STATES, type PlateDetailState } from "@/lib/plate-detail";
 import { PLATES } from "@/lib/mock-data";
 
 const isState = (s: string): s is PlateDetailState => Object.hasOwn(PLATE_DETAIL_STATES, s);
