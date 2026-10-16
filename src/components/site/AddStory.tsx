@@ -159,16 +159,21 @@ export function StoryStepOne({
           {HOW_OPTIONS.map((o) => {
             const selected = how === o.value;
             return (
-              <button
+              <label
                 key={o.value}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => setHow(o.value)}
-                className={`brand-card flex flex-col items-center gap-2 p-3 text-center font-semibold transition ${selected ? "border-2 border-teal bg-cream-warm" : "bg-card"}`}
+                className={`brand-card flex cursor-pointer flex-col items-center gap-2 p-3 text-center font-semibold transition focus-within:ring-2 focus-within:ring-teal focus-within:ring-offset-2 ${selected ? "border-2 border-teal bg-cream-warm" : "bg-card"}`}
               >
+                <input
+                  type="radio"
+                  name="how-do-you-know"
+                  value={o.value}
+                  checked={selected}
+                  onChange={() => setHow(o.value)}
+                  className="sr-only"
+                />
                 <img src={o.image} alt="" className="h-20 w-auto sm:h-24" />
                 {o.label}
-              </button>
+              </label>
             );
           })}
         </div>
