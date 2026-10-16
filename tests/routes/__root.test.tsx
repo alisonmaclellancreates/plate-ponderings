@@ -57,10 +57,16 @@ describe("root route", () => {
     expect(sheet).toHaveProperty("href");
   });
 
-  it("not-found renders a heading and a link home", () => {
+  it("not-found renders the Sasquatch page with a link back to Explore", () => {
     render(<>{R.notFoundComponent()}</>);
-    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "This road doesn't go anywhere." }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("sasquatch")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to Explore" })).toHaveAttribute(
+      "href",
+      "/explore",
+    );
   });
 
   it("error component reports, logs, and retries", () => {
