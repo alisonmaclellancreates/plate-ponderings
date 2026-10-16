@@ -199,3 +199,85 @@ export function plateStatus(plate: PlateRecord): PlateStatus {
   if (plate.stories.some((story) => story.howIKnow === "owner")) return "owner";
   return plate.stories.length > 0 ? "interpreted" : "mystery";
 }
+
+/** Your Submissions preview rows, newest first. Plate rows carry story counts; story rows carry hearts. */
+export interface Submission {
+  id: string;
+  jurisdiction: string;
+  text: string;
+  kind: "plate" | "story";
+  date: string;
+  moderation: Moderation;
+  explanation: string;
+  /** Plate detail preview state to open, when the plate is public and has a preview. */
+  plateState?: string | undefined;
+  action: "view" | "dismiss" | null;
+  updated?: boolean | undefined;
+}
+
+export const SUBMISSIONS: Submission[] = [
+  {
+    id: "sub-pnwlv",
+    jurisdiction: "Oregon",
+    text: "PNW LV",
+    kind: "plate",
+    date: "2026-10-09",
+    moderation: "published",
+    explanation: "This plate is live with 2 stories.",
+    plateState: "pnw-lv",
+    action: "view",
+    updated: true,
+  },
+  {
+    id: "sub-teatime",
+    jurisdiction: "California",
+    text: "TEATIME",
+    kind: "story",
+    date: "2026-09-26",
+    moderation: "published",
+    explanation: "Your story is live and has 3 hearts.",
+    plateState: "owner",
+    action: "view",
+  },
+  {
+    id: "sub-debuggr",
+    jurisdiction: "Washington",
+    text: "DEBUGGR",
+    kind: "plate",
+    date: "2026-10-06",
+    moderation: "pending",
+    explanation: "Waiting for its check. We'll let you know when it's ready.",
+    action: null,
+  },
+  {
+    id: "sub-canyons",
+    jurisdiction: "Utah",
+    text: "CANYONS",
+    kind: "story",
+    date: "2026-10-04",
+    moderation: "rejected",
+    explanation: "We couldn't add your story.",
+    action: "dismiss",
+    updated: true,
+  },
+  {
+    id: "sub-trails",
+    jurisdiction: "Colorado",
+    text: "TRAILS",
+    kind: "plate",
+    date: "2026-10-02",
+    moderation: "published",
+    explanation: "This plate is live with 2 stories.",
+    action: "view",
+  },
+];
+
+export const PROFILE_SAMPLE_STORY: Story = {
+  id: "profile-sample",
+  handle: CURRENT_USER.handle,
+  date: "2026-10-12",
+  meaning: "Pacific Northwest love.",
+  howIKnow: "guess",
+  longer: "Saw this plate at a trailhead outside Bend.",
+  hearts: 0,
+};
