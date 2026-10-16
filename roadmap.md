@@ -71,3 +71,11 @@
 - [x] Require an explicit analytics host with no default when connector region is absent; all analytics statements, branches, functions and lines are 100% locally. Full suite: 442 tests / 107 files pass; coverage gate holds; lint 0 errors / 6 existing warnings; build OK.
 - [ ] Verify Codecov patch coverage after CI. Blocked: unauthenticated Codecov and GitHub check APIs return 404 for this repository; an accessible CI/Codecov result is needed.
 - [x] Consolidate event definitions into one runtime registry; test-only second event passes capture and before_send with only listed properties and identifiers. All 439 tests / 107 files pass; coverage gate holds (99.35% statements, 98.31% branches, 99.44% functions, 99.74% lines); lint 0 errors / 6 existing warnings; build OK; real query-free page views accepted with HTTP 200.
+
+# Step 42: accounts, handles and session-aware header
+
+- [ ] Approve database changes for generated handles, validation and durable save rate limiting.
+- [ ] Enable email/password-only accounts without email confirmation; wire signup, signin, signout and safe return paths.
+- [ ] Wire own profile and handle availability/moderated saves, with demo refusal and role-driven header.
+- [ ] Add privacy-limited account and handle analytics events with tests.
+- [ ] Run coverage, lint, database tests and live account/redirect/handle flows; report actual outcomes.
