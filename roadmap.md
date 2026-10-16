@@ -44,3 +44,10 @@
 - [x] /admin table never scrolls the page sideways at 360px (overflow-x-auto container).
 - [x] Privacy: update What we store, Photos, What the AI sees, and the Deleting title and first sentence.
 - [x] Tests: privacy wording present, "That's it" gone, admin table in scrollable container; lint clean.
+
+# Step 41: backend foundation
+- [x] Migration: 12 tables, app_role enum, has_role, derived views, is_summary_public, story_heart_counts, GRANTs, RLS.
+- [x] Private story-photos bucket with owner-folder storage policies.
+- [x] tests/db/summary-visibility.sql: 7 assertions run and passing; fixtures cleaned up.
+- [x] App unchanged: 431 tests, lint 0 errors, typecheck clean.
+- [x] Alison's revision applied (migration 0002): no public reads, exact grants, is_story_published, self-block check, stable owner tie-break, no storage policies; summaries and jurisdictions server-only. Final DB state verified from the catalog: anon has zero grants on all 12 tables; authenticated has select on profiles/user_roles/subjects/stories/notifications, insert+select on reports, insert+select+delete on hearts/blocks, and update only on notifications.read_at (column-level); jurisdictions/summaries/featured_days/app_settings have no grants at all. Policies: 14 in public (listed in the step 41 report), zero on storage.objects. All four helper functions are SECURITY DEFINER. All 8 visibility assertions pass; app suite 431 tests green, lint 0 errors, typecheck clean.
