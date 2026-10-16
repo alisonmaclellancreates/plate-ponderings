@@ -9,12 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as PreviewsRouteImport } from './routes/previews'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PreviewsRoute = PreviewsRouteImport.update({
+  id: '/previews',
+  path: '/previews',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
@@ -24,38 +24,38 @@ const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/previews': typeof PreviewsRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/previews': typeof PreviewsRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/previews': typeof PreviewsRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/preview/components'
+  fullPaths: '/previews' | '/preview/components'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/preview/components'
-  id: '__root__' | '/' | '/preview/components'
+  to: '/previews' | '/preview/components'
+  id: '__root__' | '/previews' | '/preview/components'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  PreviewsRoute: typeof PreviewsRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/previews': {
+      id: '/previews'
+      path: '/previews'
+      fullPath: '/previews'
+      preLoaderRoute: typeof PreviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/preview/components': {
@@ -69,7 +69,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  PreviewsRoute: PreviewsRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
 }
 export const routeTree = rootRouteImport
