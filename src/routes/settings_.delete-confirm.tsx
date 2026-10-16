@@ -4,7 +4,7 @@ import { DeleteConfirmPage } from "@/components/site/Settings";
 const TITLE = "Delete your account? | What the Plate?";
 const DESCRIPTION = "Confirm deleting your account.";
 
-export const Route = createFileRoute("/settings/delete-confirm")({
+export const Route = createFileRoute("/settings_/delete-confirm")({
   head: () => ({
     meta: [
       { title: TITLE },
