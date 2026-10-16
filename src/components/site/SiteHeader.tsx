@@ -33,7 +33,13 @@ export function SiteHeader() {
     <header className="bg-navy text-cream">
       <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-2">
         <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
-          <img src="/brand/what-the-plate-logo-v1.webp" alt="" width={480} height={240} className="h-14 w-auto" />
+          <img
+            src="/brand/what-the-plate-logo-v1.webp"
+            alt=""
+            width={480}
+            height={240}
+            className="h-14 w-auto"
+          />
         </Link>
         <nav aria-label="Main" className="hidden flex-1 items-center gap-6 md:flex">
           {NAV.map((item) => (
@@ -60,7 +66,11 @@ export function SiteHeader() {
         </div>
       </div>
       {open && (
-        <nav id="mobile-menu" aria-label="Mobile" className="border-t border-cream/20 px-4 pb-4 md:hidden">
+        <nav
+          id="mobile-menu"
+          aria-label="Mobile"
+          className="border-t border-cream/20 px-4 pb-4 md:hidden"
+        >
           {NAV.map((item) => (
             <a key={item.href} href={item.href} className="site-nav-link block py-3">
               {item.label}

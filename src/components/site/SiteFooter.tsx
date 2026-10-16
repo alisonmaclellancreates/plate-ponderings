@@ -19,7 +19,14 @@ export function SiteFooter() {
         />
         <div className="absolute inset-x-0 top-[8%] flex justify-center px-4">
           <div className="relative w-64 sm:w-96">
-            <img src="/brand/tagline-sign-v1.webp" alt="" loading="lazy" width={1200} height={400} className="w-full" />
+            <img
+              src="/brand/tagline-sign-v1.webp"
+              alt=""
+              loading="lazy"
+              width={1200}
+              height={400}
+              className="w-full"
+            />
             <p className="font-display absolute inset-0 flex items-center justify-center pb-[6%] text-lg text-navy sm:text-2xl">
               Little plates. Big stories.
             </p>
@@ -28,7 +35,14 @@ export function SiteFooter() {
       </div>
       <div className="bg-navy text-cream">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-8 sm:flex-row sm:justify-between">
-          <img src="/brand/footer-pines-emblem-v2.webp" alt="" loading="lazy" width={256} height={237} className="h-14 w-auto" />
+          <img
+            src="/brand/footer-pines-emblem-v2.webp"
+            alt=""
+            loading="lazy"
+            width={256}
+            height={237}
+            className="h-14 w-auto"
+          />
           <nav aria-label="Footer">
             <ul className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
               {LINKS.map((l) => (

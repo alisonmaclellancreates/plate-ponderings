@@ -16,7 +16,11 @@ export const Route = createFileRoute("/")({
 
 /** Every static preview route. Add one entry per new preview page. */
 const PREVIEWS = [
-  { to: "/preview/components", label: "Plate and badges", note: "Plate in three sizes, every badge" },
+  {
+    to: "/preview/components",
+    label: "Plate and badges",
+    note: "Plate in three sizes, every badge",
+  },
 ] as const;
 
 function Index() {

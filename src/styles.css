@@ -261,17 +261,51 @@
     line-height: 1.25rem;
     color: var(--navy);
   }
-  .brand-badge[data-tone="mystery"] { background: #e7ddd0; color: #4f4234; border-color: #cbbba6; }
-  .brand-badge[data-tone="amber"] { background: #f6dfae; border-color: #d9a94a; }
-  .brand-badge[data-tone="teal"] { background: var(--teal); color: #ffffff; }
-  .brand-badge[data-tone="yellow"] { background: var(--gold); }
-  .brand-badge[data-tone="coral"] { background: var(--coral-pale); border-color: var(--coral); }
-  .brand-badge[data-tone="green"] { background: #d5ead6; border-color: #6fa774; }
-  .brand-badge[data-tone="blue"] { background: #d8e6f3; border-color: #7da2c6; }
-  .brand-badge[data-tone="how-owner"] { background: var(--navy); color: #ffffff; }
-  .brand-badge[data-tone="how-knows"] { background: var(--slate); border-color: var(--navy); }
-  .brand-badge[data-tone="how-asked"] { background: var(--slate); border-color: #9fb0b4; }
-  .brand-badge[data-tone="how-guess"] { background: #fffaf0; border: 1px dashed var(--navy); font-weight: 400; }
+  .brand-badge[data-tone="mystery"] {
+    background: #e7ddd0;
+    color: #4f4234;
+    border-color: #cbbba6;
+  }
+  .brand-badge[data-tone="amber"] {
+    background: #f6dfae;
+    border-color: #d9a94a;
+  }
+  .brand-badge[data-tone="teal"] {
+    background: var(--teal);
+    color: #ffffff;
+  }
+  .brand-badge[data-tone="yellow"] {
+    background: var(--gold);
+  }
+  .brand-badge[data-tone="coral"] {
+    background: var(--coral-pale);
+    border-color: var(--coral);
+  }
+  .brand-badge[data-tone="green"] {
+    background: #d5ead6;
+    border-color: #6fa774;
+  }
+  .brand-badge[data-tone="blue"] {
+    background: #d8e6f3;
+    border-color: #7da2c6;
+  }
+  .brand-badge[data-tone="how-owner"] {
+    background: var(--navy);
+    color: #ffffff;
+  }
+  .brand-badge[data-tone="how-knows"] {
+    background: var(--slate);
+    border-color: var(--navy);
+  }
+  .brand-badge[data-tone="how-asked"] {
+    background: var(--slate);
+    border-color: #9fb0b4;
+  }
+  .brand-badge[data-tone="how-guess"] {
+    background: #fffaf0;
+    border: 1px dashed var(--navy);
+    font-weight: 400;
+  }
 
   .plate {
     container-type: inline-size;
@@ -290,13 +324,29 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .plate-jurisdiction[data-tone="wa"] { background: var(--plate-wa); }
-  .plate-jurisdiction[data-tone="ca"] { background: var(--plate-ca); }
-  .plate-jurisdiction[data-tone="or"] { background: var(--plate-or); }
-  .plate-jurisdiction[data-tone="ut"] { background: var(--plate-ut); }
-  .plate-jurisdiction[data-tone="bc"] { background: var(--plate-bc); }
-  .plate-jurisdiction[data-tone="on"] { background: var(--plate-on); box-shadow: inset 0 0 0 0.4cqw var(--navy); }
-  .plate-jurisdiction[data-tone="fallback"] { background: var(--plate-fallback); box-shadow: inset 0 0 0 0.3cqw var(--border); }
+  .plate-jurisdiction[data-tone="wa"] {
+    background: var(--plate-wa);
+  }
+  .plate-jurisdiction[data-tone="ca"] {
+    background: var(--plate-ca);
+  }
+  .plate-jurisdiction[data-tone="or"] {
+    background: var(--plate-or);
+  }
+  .plate-jurisdiction[data-tone="ut"] {
+    background: var(--plate-ut);
+  }
+  .plate-jurisdiction[data-tone="bc"] {
+    background: var(--plate-bc);
+  }
+  .plate-jurisdiction[data-tone="on"] {
+    background: var(--plate-on);
+    box-shadow: inset 0 0 0 0.4cqw var(--navy);
+  }
+  .plate-jurisdiction[data-tone="fallback"] {
+    background: var(--plate-fallback);
+    box-shadow: inset 0 0 0 0.3cqw var(--border);
+  }
   .plate-text {
     font-family: var(--font-sans);
     font-weight: 700;

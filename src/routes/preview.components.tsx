@@ -1,15 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plate } from "@/components/site/Plate";
-import { ConsensusBadge, HowIKnowBadge, ModerationBadge, StatusBadge } from "@/components/site/Badges";
+import {
+  ConsensusBadge,
+  HowIKnowBadge,
+  ModerationBadge,
+  StatusBadge,
+} from "@/components/site/Badges";
 import { PLATES, plateStatus } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/preview/components")({
   head: () => ({
     meta: [
       { title: "Plate and badges preview | What the Plate?" },
-      { name: "description", content: "The shared plate component in three sizes and every badge." },
+      {
+        name: "description",
+        content: "The shared plate component in three sizes and every badge.",
+      },
       { property: "og:title", content: "Plate and badges preview | What the Plate?" },
-      { property: "og:description", content: "The shared plate component in three sizes and every badge." },
+      {
+        property: "og:description",
+        content: "The shared plate component in three sizes and every badge.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -59,16 +70,24 @@ function ComponentsPreview() {
       <Section title="Badges">
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
-            {(["mystery", "interpreted", "owner"] as const).map((s) => <StatusBadge key={s} status={s} />)}
+            {(["mystery", "interpreted", "owner"] as const).map((s) => (
+              <StatusBadge key={s} status={s} />
+            ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            {(["agree", "mixed", "differ"] as const).map((c) => <ConsensusBadge key={c} consensus={c} />)}
+            {(["agree", "mixed", "differ"] as const).map((c) => (
+              <ConsensusBadge key={c} consensus={c} />
+            ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            {(["owner", "knows", "asked", "guess"] as const).map((h) => <HowIKnowBadge key={h} how={h} />)}
+            {(["owner", "knows", "asked", "guess"] as const).map((h) => (
+              <HowIKnowBadge key={h} how={h} />
+            ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            {(["published", "pending", "rejected"] as const).map((m) => <ModerationBadge key={m} state={m} />)}
+            {(["published", "pending", "rejected"] as const).map((m) => (
+              <ModerationBadge key={m} state={m} />
+            ))}
           </div>
           <p className="text-sm text-muted-foreground">
             Mock statuses: {PLATES.map((p) => `${p.text} ${plateStatus(p)}`).join(", ")}
@@ -77,9 +96,15 @@ function ComponentsPreview() {
       </Section>
       <Section title="Buttons">
         <div className="flex flex-wrap gap-3">
-          <button type="button" className="brand-btn brand-btn-navy">Explore plates</button>
-          <button type="button" className="brand-btn brand-btn-coral">Add Your Story</button>
-          <button type="button" className="brand-btn brand-btn-coral" disabled>Spot a Plate</button>
+          <button type="button" className="brand-btn brand-btn-navy">
+            Explore plates
+          </button>
+          <button type="button" className="brand-btn brand-btn-coral">
+            Add Your Story
+          </button>
+          <button type="button" className="brand-btn brand-btn-coral" disabled>
+            Spot a Plate
+          </button>
         </div>
       </Section>
     </main>
