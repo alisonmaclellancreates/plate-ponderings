@@ -57,15 +57,16 @@ begin
   end if;
 end $$;
 
--- Case: a never-published story (pending, no published_at) never hides anything.
-insert into public.stories (id, subject_id, meaning, source, status)
+-- Case: a story deleted before ever being published must not hide V2.
+-- Removed Oct 7 at noon, inside V2's Oct 7 to Oct 8 generation window.
+insert into public.stories (id, subject_id, meaning, source, status, published_at, removed_at)
 values ('d0000000-0000-0000-0000-000000000102', 'd0000000-0000-0000-0000-000000000041',
-        'Never published.', 'guess', 'pending');
+        'Never published.', 'guess', 'deleted', null, '2026-10-07 12:00:00+00');
 
 do $$
 begin
   if not public.is_summary_public('d0000000-0000-0000-0000-000000000202') then
-    raise exception 'FAIL: a never-published story must not affect visibility';
+    raise exception 'FAIL: a never-published story deleted inside the version window must not affect visibility';
   end if;
 end $$;
 
