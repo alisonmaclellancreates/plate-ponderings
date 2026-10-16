@@ -7,6 +7,23 @@ import type { Story } from "@/lib/mock-data";
 const strip = () => screen.getByRole("list", { name: "Plate status" });
 
 describe("PlateDetail", () => {
+  it("ut-canyons by slug renders the CANYONS plate as a mystery", () => {
+    render(<PlateDetail state="ut-canyons" />);
+    expect(screen.getByRole("heading", { level: 1, name: "Utah plate CANYONS" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "What do you think this plate means?" }),
+    ).toBeTruthy();
+    expect(within(strip()).getByText("0 stories")).toBeTruthy();
+  });
+
+  it("or-pnwlv by slug still uses the PNW LV summary", () => {
+    render(<PlateDetail state="or-pnwlv" />);
+    expect(screen.getByRole("heading", { level: 1, name: "Oregon plate PNW LV" })).toBeTruthy();
+    expect(
+      screen.getByText("Both stories read this plate as Pacific Northwest love."),
+    ).toBeTruthy();
+  });
+
   it("pnw-lv: Oregon PNW LV with its two stories and summary", () => {
     render(<PlateDetail state="pnw-lv" />);
     expect(screen.getByRole("heading", { level: 1, name: "Oregon plate PNW LV" })).toBeTruthy();

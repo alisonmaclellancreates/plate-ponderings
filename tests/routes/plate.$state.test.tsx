@@ -28,6 +28,18 @@ describe("plate detail route", () => {
     expect(() => R.loader({ params: { state: "constructor" } })).toThrow("not found");
   });
 
+  it("accepts any mock plate slug, as the Explore cards link", () => {
+    expect(R.loader({ params: { state: "ut-canyons" } })).toEqual({ state: "ut-canyons" });
+    expect(() => R.loader({ params: { state: "not-a-plate" } })).toThrow("not found");
+  });
+
+  it("head for a slug-only plate labels it as plate stories", () => {
+    const meta = R.head({ loaderData: { state: "ut-canyons" } }).meta;
+    expect(meta.find((m) => "title" in m)?.["title"]).toBe(
+      "CANYONS (Utah) · Plate stories | What the Plate?",
+    );
+  });
+
   it("head has unique titles per state and noindex fallback", () => {
     const meta = R.head({ loaderData: { state: "owner" } }).meta;
     const title = meta.find((m) => "title" in m)?.["title"];
