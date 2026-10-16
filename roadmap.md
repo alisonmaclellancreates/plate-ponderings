@@ -10,6 +10,6 @@
 - [x] Shared foundation: brand tokens, fonts, icons, header, footer, plate, badges, mock data, preview index.
 
 # Homepage corrections
-- [ ] Fix Plate of the Day shrinking layout and verify both variants plus Recently Featured at 375px.
-- [ ] Restore two-family typography and correct action-card colours.
-- [ ] Show both homepage variants in mobile view.
+- [x] Fix Plate of the Day shrinking layout and verify both variants plus Recently Featured at 375px.
+- [x] Restore two-family typography and correct action-card colours.
+- [x] Show both homepage variants in mobile view.
