@@ -35,22 +35,18 @@ describe("Add a story previews", () => {
     }
   });
 
-  it("step 1 selects It's my plate, counts characters and lets you switch", async () => {
+  it("step 1 has a four-radio group, checked by default and switchable", async () => {
     const user = userEvent.setup();
     render(<StoryStepPage step="1" />);
-    expect(screen.getByRole("button", { name: "It's my plate" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    expect(screen.getAllByRole("radio")).toHaveLength(4);
+    expect(screen.getByRole("radio", { name: "It's my plate" })).toBeChecked();
     expect(screen.getByText("0/80")).toBeInTheDocument();
     expect(screen.getByText("0/500")).toBeInTheDocument();
     await user.type(screen.getByLabelText(/What do you think it means/), "Hello");
     expect(screen.getByText("5/80")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "My best guess" }));
-    expect(screen.getByRole("button", { name: "My best guess" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    await user.click(screen.getByRole("radio", { name: "My best guess" }));
+    expect(screen.getByRole("radio", { name: "My best guess" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "It's my plate" })).not.toBeChecked();
     expect(screen.queryByText(/already said this is their plate/)).toBeNull();
   });
 
