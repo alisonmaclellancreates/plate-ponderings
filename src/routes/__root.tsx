@@ -16,6 +16,7 @@ import { SiteHeader } from "../components/site/SiteHeader";
 import { headerModeFor } from "@/lib/header-mode";
 import { SiteFooter } from "../components/site/SiteFooter";
 import { NotFoundPage } from "../components/site/InfoPages";
+import { track } from "@/lib/analytics";
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
@@ -108,6 +109,10 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    void track("$pageview", { path: pathname });
+  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
