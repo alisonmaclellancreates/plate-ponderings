@@ -2,9 +2,38 @@
 // subject text, photo data, or AI output. Properties are only planned keys, ids,
 // booleans, counts, outcome names, and query-free page paths.
 
-export type AnalyticsEvents = {
-  $pageview: { path: string };
+export const EVENTS = { $pageview: ["path"] } as const;
+
+type EventRegistry = Readonly<Record<string, readonly string[]>>;
+type EventProperties<R extends EventRegistry> = {
+  [E in keyof R]: {
+    [P in R[E][number]]: P extends "path" ? string : string | number | boolean;
+  };
 };
+export type AnalyticsEvents = EventProperties<typeof EVENTS>;
+
+const IDENTIFIERS = [
+  "token",
+  "distinct_id",
+  "$device_id",
+  "$anon_distinct_id",
+  "$session_id",
+  "$window_id",
+  "$is_identified",
+  "$process_person_profile",
+  "is_demo",
+];
+
+function filterProperties(properties: Record<string, unknown>, allowed: readonly string[]) {
+  return Object.fromEntries(
+    Object.entries(properties)
+      .filter(([name]) => allowed.includes(name))
+      .map(([name, value]) => [
+        name,
+        name === "path" && typeof value === "string" ? value.split(/[?#]/)[0] : value,
+      ]),
+  );
+}
 
 declare global {
   interface ImportMetaEnv {
@@ -14,7 +43,12 @@ declare global {
 }
 
 type Client = typeof import("posthog-js").default;
-let clientPromise: Promise<Client | undefined> | undefined;
+
+// A registry-scoped instance lets tests exercise additional events without
+// registering test events in the application's production registry.
+export function createAnalytics<const R extends EventRegistry>(registry: R) {
+  type Events = EventProperties<R>;
+  let clientPromise: Promise<Client | undefined> | undefined;
 
 function getClient(): Promise<Client | undefined> {
   const key = import.meta.env.VITE_POSTHOG_KEY;
@@ -33,24 +67,14 @@ function getClient(): Promise<Client | undefined> {
         disable_surveys: true,
         advanced_disable_flags: true,
         before_send: (event) => {
-          if (!event || !["$pageview", "$identify"].includes(event.event)) return null;
+          if (!event) return null;
+          const listed = Object.prototype.hasOwnProperty.call(registry, event.event)
+            ? registry[event.event]
+            : undefined;
+          if (!listed && event.event !== "$identify") return null;
           // The SDK adds URLs, referrers and other strings automatically. Retain
           // only analytics identifiers and explicitly planned properties.
-          const allowed = new Set([
-            "token",
-            "distinct_id",
-            "$device_id",
-            "$anon_distinct_id",
-            "$session_id",
-            "$window_id",
-            "$is_identified",
-            "$process_person_profile",
-            "is_demo",
-            "path",
-          ]);
-          event.properties = Object.fromEntries(
-            Object.entries(event.properties).filter(([name]) => allowed.has(name)),
-          );
+          event.properties = filterProperties(event.properties, [...IDENTIFIERS, ...(listed ?? [])]);
           return event;
         },
       });
@@ -60,26 +84,32 @@ function getClient(): Promise<Client | undefined> {
   return clientPromise;
 }
 
-export async function track<E extends keyof AnalyticsEvents, P extends AnalyticsEvents[E]>(
+async function track<E extends keyof Events & string, P extends Events[E]>(
   event: E,
-  properties: P & Record<Exclude<keyof P, keyof AnalyticsEvents[E]>, never>,
+  properties: P & Record<Exclude<keyof P, keyof Events[E]>, never>,
 ): Promise<void> {
+  const listed = Object.prototype.hasOwnProperty.call(registry, event) ? registry[event] : undefined;
+  if (!listed) return;
   const client = await getClient();
   if (!client) return;
-  client.capture(event, { path: properties.path.split(/[?#]/)[0] });
+  client.capture(event, filterProperties(properties, listed));
 }
 
-export async function identify(userId: string): Promise<void> {
+async function identify(userId: string): Promise<void> {
   const client = await getClient();
   client?.identify(userId);
 }
 
-export async function setDemo(isDemo: boolean): Promise<void> {
+async function setDemo(isDemo: boolean): Promise<void> {
   const client = await getClient();
   client?.register({ is_demo: isDemo });
 }
 
-export async function reset(): Promise<void> {
+async function reset(): Promise<void> {
   const client = await getClient();
   client?.reset();
 }
+  return { track, identify, setDemo, reset };
+}
+
+export const { track, identify, setDemo, reset } = createAnalytics(EVENTS);
