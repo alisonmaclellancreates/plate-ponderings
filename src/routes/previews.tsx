@@ -17,8 +17,16 @@ export const Route = createFileRoute("/previews")({
 /** Every static preview route. Add one entry per new preview page. */
 const PREVIEWS = [
   { to: "/", label: "Homepage", note: "Hero, search, Plate of the Day, recently featured" },
-  { to: "/home-no-match", label: "Homepage, no match", note: "Search for Utah DRAGON finds nothing" },
-  { to: "/home-fallback", label: "Homepage, fallback day", note: "No mystery available; WANDER is featured" },
+  {
+    to: "/home-no-match",
+    label: "Homepage, no match",
+    note: "Search for Utah DRAGON finds nothing",
+  },
+  {
+    to: "/home-fallback",
+    label: "Homepage, fallback day",
+    note: "No mystery available; WANDER is featured",
+  },
   {
     to: "/preview/components",
     label: "Plate and badges",

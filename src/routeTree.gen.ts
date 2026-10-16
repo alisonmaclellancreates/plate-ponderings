@@ -9,9 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as HomeFallbackRouteImport } from './routes/home-fallback'
+import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as PreviewsRouteImport } from './routes/previews'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeFallbackRoute = HomeFallbackRouteImport.update({
+  id: '/home-fallback',
+  path: '/home-fallback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeNoMatchRoute = HomeNoMatchRouteImport.update({
+  id: '/home-no-match',
+  path: '/home-no-match',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreviewsRoute = PreviewsRouteImport.update({
   id: '/previews',
   path: '/previews',
@@ -24,33 +42,82 @@ const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/home-fallback': typeof HomeFallbackRoute
+  '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/home-fallback': typeof HomeFallbackRoute
+  '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/home-fallback': typeof HomeFallbackRoute
+  '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
   '/preview/components': typeof PreviewComponentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/previews' | '/preview/components'
+  fullPaths:
+    | '/'
+    | '/home-fallback'
+    | '/home-no-match'
+    | '/previews'
+    | '/preview/components'
   fileRoutesByTo: FileRoutesByTo
-  to: '/previews' | '/preview/components'
-  id: '__root__' | '/previews' | '/preview/components'
+  to:
+    | '/'
+    | '/home-fallback'
+    | '/home-no-match'
+    | '/previews'
+    | '/preview/components'
+  id:
+    | '__root__'
+    | '/'
+    | '/home-fallback'
+    | '/home-no-match'
+    | '/previews'
+    | '/preview/components'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  HomeFallbackRoute: typeof HomeFallbackRoute
+  HomeNoMatchRoute: typeof HomeNoMatchRoute
   PreviewsRoute: typeof PreviewsRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home-fallback': {
+      id: '/home-fallback'
+      path: '/home-fallback'
+      fullPath: '/home-fallback'
+      preLoaderRoute: typeof HomeFallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home-no-match': {
+      id: '/home-no-match'
+      path: '/home-no-match'
+      fullPath: '/home-no-match'
+      preLoaderRoute: typeof HomeNoMatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/previews': {
       id: '/previews'
       path: '/previews'
@@ -69,6 +136,9 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  HomeFallbackRoute: HomeFallbackRoute,
+  HomeNoMatchRoute: HomeNoMatchRoute,
   PreviewsRoute: PreviewsRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
 }

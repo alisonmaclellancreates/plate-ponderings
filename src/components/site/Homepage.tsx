@@ -161,17 +161,34 @@ function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
 
 function ActionCards() {
   return (
-    <section aria-label="Get started" className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-2">
+    <section
+      aria-label="Get started"
+      className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-2"
+    >
       <article className="brand-card flex flex-col bg-lavender p-6">
-        <img src="/brand/look-up-a-plate-v1.webp" alt="" width={700} height={467} className="mx-auto w-56" />
+        <img
+          src="/brand/look-up-a-plate-v1.webp"
+          alt=""
+          width={700}
+          height={467}
+          className="mx-auto w-56"
+        />
         <h2 className="font-display mt-4 text-2xl text-navy">Look Up a Plate</h2>
-        <p className="mt-2 flex-1">See what people think it means, or add your own interpretation.</p>
+        <p className="mt-2 flex-1">
+          See what people think it means, or add your own interpretation.
+        </p>
         <button type="button" className="brand-btn brand-btn-navy mt-4 self-start">
           Look Up a Plate
         </button>
       </article>
       <article className="brand-card flex flex-col bg-cream-warm p-6">
-        <img src="/brand/spot-a-plate-v1.webp" alt="" width={700} height={467} className="mx-auto w-56" />
+        <img
+          src="/brand/spot-a-plate-v1.webp"
+          alt=""
+          width={700}
+          height={467}
+          className="mx-auto w-56"
+        />
         <h2 className="font-display mt-4 text-2xl text-navy">Spot a Plate</h2>
         <p className="mt-2 flex-1">
           Spotted a clever plate? Have one of your own? Add it to the collection and let the
@@ -203,7 +220,10 @@ function HowItWorks() {
       style={{ backgroundImage: "url(/brand/how-it-works-landscape-v2.webp)" }}
     >
       <div className="mx-auto max-w-6xl px-4">
-        <h2 id="how-heading" className="font-script mx-auto w-fit rounded-xl bg-cream px-6 py-2 text-5xl text-navy">
+        <h2
+          id="how-heading"
+          className="font-script mx-auto w-fit rounded-xl bg-cream px-6 py-2 text-5xl text-navy"
+        >
           How it works
         </h2>
         <ol className="mt-8 grid gap-6 md:grid-cols-3">

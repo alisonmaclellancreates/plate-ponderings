@@ -7,7 +7,10 @@ export const Route = createFileRoute("/home-no-match")({
       { title: "No plate found preview | What the Plate?" },
       { name: "description", content: "Homepage preview when a plate search finds no match." },
       { property: "og:title", content: "No plate found preview | What the Plate?" },
-      { property: "og:description", content: "Homepage preview when a plate search finds no match." },
+      {
+        property: "og:description",
+        content: "Homepage preview when a plate search finds no match.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
