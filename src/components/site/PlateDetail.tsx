@@ -10,7 +10,7 @@ import {
 import { Plate } from "@/components/site/Plate";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/components/site/Homepage";
-import { PLATES, plateStatus, type PlateRecord, type Story, type Summary } from "@/lib/mock-data";
+import { CATCHING_UP_STORY, PLATES, plateStatus, type PlateRecord, type Story, type Summary } from "@/lib/mock-data";
 
 export type PlateDetailState =
   "mystery" | "interpreted" | "owner" | "interpreted-history" | "pending-story" | "catching-up";
@@ -160,7 +160,7 @@ function StoryCard({ story }: { story: Story }) {
   return (
     <article
       data-owner={owner || undefined}
-      className={`brand-card flex gap-4 p-4 ${owner ? "border-coral" : ""}`}
+      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
     >
       <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1">
@@ -200,7 +200,7 @@ function StoryCard({ story }: { story: Story }) {
           width={944}
           height={704}
           loading="lazy"
-          className="h-20 w-28 shrink-0 rounded-md object-cover"
+          className="col-start-2 h-20 w-28 shrink-0 rounded-md object-cover sm:col-start-auto"
         />
       )}
     </article>
@@ -213,7 +213,7 @@ function PendingPanel() {
       <Hourglass aria-hidden className="size-5 shrink-0 text-navy" />
       <p>
         <span className="font-semibold">Your story is waiting for its check.</span> Only you can see
-        this for now. Your story will appear publicly once its check is complete.
+        this for now.
       </p>
     </div>
   );
@@ -255,7 +255,11 @@ function Stories({ stories, pending }: { stories: Story[]; pending: boolean }) {
 }
 
 export function PlateDetail({ state }: { state: PlateDetailState }) {
-  const plate = PLATES.find((p) => p.slug === PLATE_DETAIL_STATES[state].slug)!;
+  const basePlate = PLATES.find((p) => p.slug === PLATE_DETAIL_STATES[state].slug);
+  if (!basePlate) return null;
+  const plate = state === "catching-up"
+    ? { ...basePlate, stories: [...basePlate.stories, CATCHING_UP_STORY] }
+    : basePlate;
   const hasStories = plate.stories.length > 0;
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">

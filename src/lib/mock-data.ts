@@ -47,7 +47,7 @@ const s = (
 ): Story => ({ id, handle, date, meaning, howIKnow, hearts, ...(longer ? { longer } : {}) });
 
 /** Blurred placeholder photo with a clear plate area, used until real uploads exist. */
-export const STORY_PHOTO_PLACEHOLDER = "/brand/story-photo-placeholder-v1.jpg";
+export const STORY_PHOTO_PLACEHOLDER = "/mock/story-photo-placeholder.jpg";
 
 const withPhoto = (...args: Parameters<typeof s>): Story => ({
   ...s(...args),
@@ -66,7 +66,7 @@ export const PLATES: PlateRecord[] = [
       withPhoto(
         "bc2",
         "northshore",
-        "2026-10-04",
+        "2026-10-03",
         "Level 2 code, a security clearance joke.",
         "guess",
         6,
@@ -89,13 +89,13 @@ export const PLATES: PlateRecord[] = [
         date: "2026-10-12",
         consensus: "mixed",
         storyCount: 5,
-        text: "Most people read this plate as love or live to code, a developer's plate, and one contributor says the driver told them it's about a coding bootcamp. A couple of stories see a joke instead: a security clearance pun or a Las Vegas poker reference.",
+        text: "Most stories tie this plate to coding: love or live to code, and one contributor says the driver told them it's about a coding bootcamp. Two see a joke instead: a security clearance pun or a Las Vegas poker reference.",
       },
       {
         date: "2026-10-08",
         consensus: "mixed",
         storyCount: 4,
-        text: "Most read it as love or live to code; a few see a joke.",
+        text: "Readers are split: half see love or live to code, half see a joke.",
       },
       {
         date: "2026-10-05",
@@ -176,6 +176,16 @@ export const PLATES: PlateRecord[] = [
     ],
   })),
 ];
+
+/** Published only in the catching-up preview; shared LV2CODE data remains unchanged. */
+export const CATCHING_UP_STORY: Story = s(
+  "bc6",
+  "maplegirl",
+  "2026-10-14",
+  "Saw a laptop sticker in the back window: definitely a coder.",
+  "guess",
+  0,
+);
 
 export function plateStatus(plate: PlateRecord): PlateStatus {
   if (plate.stories.some((story) => story.howIKnow === "owner")) return "owner";

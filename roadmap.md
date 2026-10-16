@@ -13,3 +13,8 @@
 - [x] Fix Plate of the Day shrinking layout and verify both variants plus Recently Featured at 375px.
 - [x] Restore two-family typography and correct action-card colours.
 - [x] Show both homepage variants in mobile view.
+
+# Plate detail corrections
+- [ ] Correct pending copy and mobile photo placement.
+- [ ] Add a catching-up-only story, align summary history, and relocate mock photo.
+- [ ] Verify plate detail tests, mobile/desktop previews, and lint.
