@@ -240,9 +240,9 @@ export const SUBMISSIONS: Submission[] = [
     action: "view",
   },
   {
-    id: "sub-lv2code",
+    id: "sub-debuggr",
     jurisdiction: "Washington",
-    text: "LV2CODE",
+    text: "DEBUGGR",
     kind: "plate",
     date: "2026-10-06",
     moderation: "pending",

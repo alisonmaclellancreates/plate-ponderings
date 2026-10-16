@@ -35,7 +35,7 @@ describe("SubmissionsPage", () => {
       rows.map((r) => within(r).getByRole("img", { name: /plate/ }).getAttribute("aria-label")),
     ).toEqual([
       "Oregon plate PNW LV",
-      "Washington plate LV2CODE",
+      "Washington plate DEBUGGR",
       "Utah plate CANYONS",
       "Colorado plate TRAILS",
       "California plate TEATIME",
