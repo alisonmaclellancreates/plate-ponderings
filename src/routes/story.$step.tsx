@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { STORY_STEPS, StoryStepPage, type StoryStep } from "@/components/site/AddStory";
+import { StoryStepPage } from "@/components/site/AddStory";
+import { STORY_STEPS, type StoryStep } from "@/lib/story-form";
 
 const isStep = (s: string): s is StoryStep => Object.hasOwn(STORY_STEPS, s);
 

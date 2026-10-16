@@ -21,7 +21,12 @@ import {
   type Summary,
 } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
-import { PAGE_SIZE, PLATE_DETAIL_STATES, orderStories } from "@/lib/plate-detail";
+import {
+  PAGE_SIZE,
+  PLATE_DETAIL_STATES,
+  orderStories,
+  type PlateDetailState,
+} from "@/lib/plate-detail";
 
 function StatusStrip({ plate }: { plate: PlateRecord }) {
   const owner = plate.stories.find((s) => s.howIKnow === "owner");
