@@ -38,7 +38,9 @@ export interface SpotErrors {
 }
 
 export const JURISDICTION_ERROR = "Please select a state or province";
+export const TEXT_EMPTY_ERROR = "Please enter the plate text";
 export const TEXT_ERROR = "Plates can use letters, numbers, spaces, and dashes";
+export const TEXT_LENGTH_ERROR = "Plates can be up to 8 characters, not counting spaces and dashes";
 
 /** Letters, numbers, spaces and dashes; up to 8 characters once spaces and dashes are removed. */
 export function validateSpot(values: SpotValues): SpotErrors {
@@ -46,9 +48,10 @@ export function validateSpot(values: SpotValues): SpotErrors {
   if (!values.jurisdiction) errors.jurisdiction = JURISDICTION_ERROR;
   const raw = (values.text ?? "").trim();
   const compact = raw.replace(/[\s-]/g, "");
-  if (!/^[A-Za-z0-9\s-]*$/.test(raw) || compact.length < 1 || compact.length > 8) {
-    errors.text = TEXT_ERROR;
-  }
+  if (!raw) errors.text = TEXT_EMPTY_ERROR;
+  else if (!/^[A-Za-z0-9\s-]*$/.test(raw)) errors.text = TEXT_ERROR;
+  else if (compact.length > 8) errors.text = TEXT_LENGTH_ERROR;
+  else if (!compact) errors.text = TEXT_EMPTY_ERROR;
   return errors;
 }
 
@@ -56,15 +59,45 @@ function plateBySlug(slug: string) {
   return PLATES.find((p) => p.slug === slug)!;
 }
 
-/** Scenic band with a wooden sign placeholder; artwork comes later. */
-function ScenicHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+/** Rowan's signpost as decoration beside the sign's live text on a cream surface. */
+function ScenicHeader({
+  title,
+  subtitle,
+  asHeading = false,
+}: {
+  title: string;
+  subtitle?: string;
+  asHeading?: boolean;
+}) {
+  const Title = asHeading ? "h1" : "p";
   return (
-    <div className="spot-scenic flex justify-center px-4 pb-6 pt-10">
-      <div data-testid="wooden-sign" className="spot-sign max-w-md px-6 py-4 text-center">
-        <p className="font-display text-3xl">{title}</p>
+    <div className="flex items-center justify-center gap-4 bg-cream-warm px-4 pb-6 pt-8">
+      <img
+        src="/brand/signpost-v1.webp"
+        alt=""
+        width={700}
+        height={1050}
+        data-testid="signpost"
+        className="hidden h-36 w-auto shrink-0 sm:block"
+      />
+      <div data-testid="sign" className="brand-card max-w-md bg-cream px-6 py-4 text-center">
+        <Title className="font-display text-3xl text-navy">{title}</Title>
         {subtitle && <p className="mt-1">{subtitle}</p>}
       </div>
     </div>
+  );
+}
+
+function Sasquatch() {
+  return (
+    <img
+      src="/brand/sasquatch-v1.webp"
+      alt=""
+      width={700}
+      height={727}
+      data-testid="sasquatch"
+      className="h-40 w-auto"
+    />
   );
 }
 
@@ -257,6 +290,7 @@ export function SpotPage({
   return (
     <main>
       <ScenicHeader
+        asHeading
         title="Spot a Plate"
         subtitle="Seen a curious plate? Add it to the collection and let the guessing begin."
       />
@@ -415,6 +449,7 @@ export function SpotOutcomePage({ outcome }: { outcome: SpotOutcome }) {
             </>
           }
         >
+          <Sasquatch />
           <p className="text-lg">
             Our automated check couldn't approve this plate for the collection. Sometimes these
             checks get things wrong.
@@ -437,11 +472,7 @@ export function SpotOutcomePage({ outcome }: { outcome: SpotOutcome }) {
             </>
           }
         >
-          <Placeholder label="A friendly Sasquatch">
-            <span aria-hidden className="font-display text-4xl">
-              ?
-            </span>
-          </Placeholder>
+          <Sasquatch />
           <p className="text-lg">
             We couldn't check this plate right now. Please try again in a few moments.
           </p>
