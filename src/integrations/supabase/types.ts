@@ -481,6 +481,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_story_published: { Args: { _story_id: string }; Returns: boolean }
       is_summary_public: { Args: { _summary_id: string }; Returns: boolean }
       story_heart_counts: {
         Args: { _subject_id: string }
