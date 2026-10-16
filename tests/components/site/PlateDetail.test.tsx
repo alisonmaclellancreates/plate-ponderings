@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PlateDetail, orderStories } from "@/components/site/PlateDetail";
+import { PlateDetail, Stories, orderStories } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
 
 const strip = () => screen.getByRole("list", { name: "Plate status" });

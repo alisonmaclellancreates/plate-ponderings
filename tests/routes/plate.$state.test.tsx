@@ -24,6 +24,8 @@ describe("plate detail route", () => {
   it("loads known states and rejects unknown ones", () => {
     expect(R.loader({ params: { state: "mystery" } })).toEqual({ state: "mystery" });
     expect(() => R.loader({ params: { state: "nope" } })).toThrow("not found");
+    expect(() => R.loader({ params: { state: "toString" } })).toThrow("not found");
+    expect(() => R.loader({ params: { state: "constructor" } })).toThrow("not found");
   });
 
   it("head has unique titles per state and noindex fallback", () => {
