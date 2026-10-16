@@ -6,15 +6,7 @@ import { Outcome } from "@/components/site/SpotPlate";
 import { PLATES, STORY_PHOTO_PLACEHOLDER, type HowIKnow } from "@/lib/mock-data";
 
 export type StoryStep =
-  | "1"
-  | "1-owner-exists"
-  | "2"
-  | "2-adjust"
-  | "2-review"
-  | "3"
-  | "done"
-  | "checking"
-  | "rejected";
+  "1" | "1-owner-exists" | "2" | "2-adjust" | "2-review" | "3" | "done" | "checking" | "rejected";
 
 export const STORY_STEPS: Record<StoryStep, string> = {
   "1": "Your story",
@@ -56,7 +48,12 @@ function PlateHeader() {
       data-testid="plate-header"
       className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2 sm:gap-4 sm:px-4 sm:py-3"
     >
-      <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="sm" className="w-20 sm:w-32" />
+      <Plate
+        jurisdiction={plate.jurisdiction}
+        text={plate.text}
+        size="sm"
+        className="w-20 sm:w-32"
+      />
       <p className="min-w-0 text-sm sm:text-lg">
         <span className="font-semibold">{plate.text}</span>
         <span className="text-muted-foreground"> · {plate.jurisdiction}</span>
@@ -288,7 +285,11 @@ function AdjustEditor() {
   return (
     <Editor title="Adjust the plate area">
       <div className="relative overflow-hidden rounded-lg">
-        <img src={STORY_PHOTO_PLACEHOLDER} alt="Your photo with everything blurred except the plate" className="w-full" />
+        <img
+          src={STORY_PHOTO_PLACEHOLDER}
+          alt="Your photo with everything blurred except the plate"
+          className="w-full"
+        />
         <div
           data-testid="plate-box"
           className="absolute left-[37%] top-[46%] h-[12%] w-[25%] border-2 border-cream shadow-[0_0_0_2px_var(--navy)]"
@@ -365,11 +366,7 @@ function ReviewStep() {
     >
       <h2 className="font-display text-2xl text-navy">Review &amp; Submit</h2>
       <div className="grid gap-5 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start">
-        <img
-          src={STORY_PHOTO_PLACEHOLDER}
-          alt="Your blurred photo"
-          className="w-full rounded-lg"
-        />
+        <img src={STORY_PHOTO_PLACEHOLDER} alt="Your blurred photo" className="w-full rounded-lg" />
         <dl className="brand-card space-y-4 bg-card p-5">
           <div>
             <dt className="text-sm font-semibold text-muted-foreground">How I know</dt>
@@ -422,7 +419,11 @@ export function StoryStepPage({ step }: { step: StoryStep }) {
           heading="Story submitted!"
           actions={
             <>
-              <Link to="/plate/$state" params={{ state: "interpreted" }} className="brand-btn brand-btn-navy">
+              <Link
+                to="/plate/$state"
+                params={{ state: "interpreted" }}
+                className="brand-btn brand-btn-navy"
+              >
                 View This Plate
               </Link>
               <a href="/explore" className={outline}>

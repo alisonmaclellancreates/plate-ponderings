@@ -137,6 +137,18 @@ function Previews() {
             </Link>
           </li>
         ))}
+        {STORY_PREVIEWS.map((p) => (
+          <li key={p.step}>
+            <Link
+              to="/story/$step"
+              params={{ step: p.step }}
+              className="brand-card block p-4 hover:shadow-md"
+            >
+              <span className="font-semibold text-navy">{p.label}</span>
+              <span className="block text-sm text-muted-foreground">{p.note}</span>
+            </Link>
+          </li>
+        ))}
       </ul>
     </main>
   );
