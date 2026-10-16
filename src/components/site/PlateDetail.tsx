@@ -10,7 +10,14 @@ import {
 import { Plate } from "@/components/site/Plate";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/components/site/Homepage";
-import { CATCHING_UP_STORY, PLATES, plateStatus, type PlateRecord, type Story, type Summary } from "@/lib/mock-data";
+import {
+  CATCHING_UP_STORY,
+  PLATES,
+  plateStatus,
+  type PlateRecord,
+  type Story,
+  type Summary,
+} from "@/lib/mock-data";
 
 export type PlateDetailState =
   "mystery" | "interpreted" | "owner" | "interpreted-history" | "pending-story" | "catching-up";
@@ -257,9 +264,10 @@ function Stories({ stories, pending }: { stories: Story[]; pending: boolean }) {
 export function PlateDetail({ state }: { state: PlateDetailState }) {
   const basePlate = PLATES.find((p) => p.slug === PLATE_DETAIL_STATES[state].slug);
   if (!basePlate) return null;
-  const plate = state === "catching-up"
-    ? { ...basePlate, stories: [...basePlate.stories, CATCHING_UP_STORY] }
-    : basePlate;
+  const plate =
+    state === "catching-up"
+      ? { ...basePlate, stories: [...basePlate.stories, CATCHING_UP_STORY] }
+      : basePlate;
   const hasStories = plate.stories.length > 0;
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">

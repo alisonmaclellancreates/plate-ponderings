@@ -27,7 +27,9 @@ describe("mock data", () => {
   it("keeps LV2CODE history counts consistent with published story dates", () => {
     const plate = find("LV2CODE");
     for (const summary of plate.summaries) {
-      expect(plate.stories.filter((story) => story.date <= summary.date)).toHaveLength(summary.storyCount);
+      expect(plate.stories.filter((story) => story.date <= summary.date)).toHaveLength(
+        summary.storyCount,
+      );
     }
     expect(plate.stories).toHaveLength(5);
     expect(plate.stories.some((story) => story.date === "2026-10-14")).toBe(false);

@@ -66,9 +66,17 @@ describe("PlateDetail", () => {
     ]);
     const read = within(rows[0]!).getByRole("button", { name: "Read summary" });
     await userEvent.click(read);
-    expect(within(rows[0]!).getByText("Readers are split: half see love or live to code, half see a joke.")).toBeTruthy();
+    expect(
+      within(rows[0]!).getByText(
+        "Readers are split: half see love or live to code, half see a joke.",
+      ),
+    ).toBeTruthy();
     await userEvent.click(read);
-    expect(within(rows[0]!).queryByText("Readers are split: half see love or live to code, half see a joke.")).toBeNull();
+    expect(
+      within(rows[0]!).queryByText(
+        "Readers are split: half see love or live to code, half see a joke.",
+      ),
+    ).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Earlier summaries (3)" }));
     expect(document.getElementById("earlier-summaries")).toBeNull();
   });
@@ -94,7 +102,9 @@ describe("PlateDetail", () => {
     await userEvent.click(screen.getByRole("button", { name: "Show 1 more story" }));
     const latest = screen.getAllByRole("article")[5];
     if (!latest) throw new Error("Missing newest story");
-    expect(within(latest).getByText("Saw a laptop sticker in the back window: definitely a coder.")).toBeTruthy();
+    expect(
+      within(latest).getByText("Saw a laptop sticker in the back window: definitely a coder."),
+    ).toBeTruthy();
     expect(within(latest).getByText(/Oct 14, 2026/)).toBeTruthy();
     expect(within(latest).getByText("maplegirl")).toBeTruthy();
   });
