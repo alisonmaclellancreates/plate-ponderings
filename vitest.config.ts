@@ -22,10 +22,10 @@ export default defineConfig({
       ],
       reporter: ["text", "html", "lcov", "json", "json-summary"],
       thresholds: {
-        statements: 81,
+        statements: 82,
         branches: 65,
-        functions: 84,
-        lines: 82,
+        functions: 87,
+        lines: 84,
       },
     },
   },
