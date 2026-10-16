@@ -1,9 +1,29 @@
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient } from "@tanstack/react-query";
 import { createMemoryHistory, createRouter } from "@tanstack/react-router";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { routeTree } from "@/routeTree.gen";
+
+vi.mock("@tanstack/react-router", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-router")>();
+  return {
+    ...actual,
+    Link: ({
+      to,
+      children,
+      className,
+    }: {
+      to: string;
+      children: ReactNode;
+      className?: string;
+    }) => (
+      <a href={to} className={className}>
+        {children}
+      </a>
+    ),
+  };
+});
 
 function routerAt(path: string) {
   return createRouter({
