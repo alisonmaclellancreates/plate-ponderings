@@ -34,7 +34,6 @@ export const PLATE_DETAIL_STATES: Record<PlateDetailState, { slug: string; label
 
 export const PAGE_SIZE = 5;
 
-
 /** Owner story first, then everything else oldest first. Never sorted by hearts. */
 export function orderStories(stories: Story[]): Story[] {
   const owner = stories.filter((s) => s.howIKnow === "owner");
