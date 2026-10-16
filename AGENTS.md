@@ -20,3 +20,5 @@
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
 - Featured archive and homepage share `FeaturedPlateCard`; feature dates and counts at selection live on mock plate records, while current counts filter published stories, so progress cannot drift between views.
 - `/plate/$state` accepts existing preview aliases and mock plate slugs through the same detail layout, preserving preview URLs while giving each archive card its own working destination.
+- Only `src/lib/analytics.ts` imports the PostHog SDK; typed events and a payload allowlist centralize privacy enforcement, and root route effects capture query-free page paths after hydration.
+- Map public PostHog connector values to `VITE_POSTHOG_KEY` and `VITE_POSTHOG_HOST` in Vite configuration, keeping application code independent of connector-specific names.
