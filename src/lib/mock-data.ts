@@ -258,10 +258,14 @@ export function featuredProgress(featured: number, now: number): string {
 export const TODAY = "2026-10-16";
 
 /** Every featured plate, newest first. */
-export function featuredPlates(): PlateRecord[] {
-  return PLATES.filter((p) => p.plateOfTheDay && p.plateOfTheDay <= TODAY).sort((a, b) =>
-    (b.plateOfTheDay ?? "").localeCompare(a.plateOfTheDay ?? ""),
-  );
+export type FeaturedPlate = PlateRecord & { plateOfTheDay: string };
+
+export function featuredPlates(): FeaturedPlate[] {
+  const hasFeaturedDay = (p: PlateRecord): p is FeaturedPlate =>
+    typeof p.plateOfTheDay === "string";
+  return PLATES.filter(hasFeaturedDay)
+    .filter((p) => p.plateOfTheDay <= TODAY)
+    .sort((a, b) => b.plateOfTheDay.localeCompare(a.plateOfTheDay));
 }
 
 /** Your Submissions preview rows, newest first. Plate rows carry story counts; story rows carry hearts. */

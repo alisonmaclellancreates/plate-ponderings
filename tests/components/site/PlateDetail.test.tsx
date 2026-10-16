@@ -33,6 +33,11 @@ describe("PlateDetail", () => {
     ).toBeTruthy();
   });
 
+  it("renders nothing for an unknown state", () => {
+    const { container } = render(<PlateDetail state="nope" />);
+    expect(container.firstElementChild).toBeNull();
+  });
+
   it("mystery: prompt and sign, no summary, no stories list", () => {
     render(<PlateDetail state="mystery" />);
     expect(

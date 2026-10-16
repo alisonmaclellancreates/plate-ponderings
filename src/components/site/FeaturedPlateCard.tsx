@@ -4,13 +4,18 @@ import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
 import { storyCount } from "@/lib/story-count";
-import { featuredProgress, plateStatus, publishedStories, type PlateRecord } from "@/lib/mock-data";
+import {
+  featuredProgress,
+  plateStatus,
+  publishedStories,
+  type FeaturedPlate,
+} from "@/lib/mock-data";
 
 export function FeaturedPlateCard({
   plate,
   today = false,
 }: {
-  plate: PlateRecord;
+  plate: FeaturedPlate;
   today?: boolean;
 }) {
   const count = publishedStories(plate).length;
@@ -22,7 +27,7 @@ export function FeaturedPlateCard({
     >
       <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="md" className="max-w-full" />
       <p className="text-sm text-muted-foreground">
-        Featured {formatDay(plate.plateOfTheDay ?? "")}
+        Featured {formatDay(plate.plateOfTheDay)}
         {today && (
           <span className="ml-2 rounded bg-gold px-2 py-0.5 text-xs font-semibold text-navy">
             Today
