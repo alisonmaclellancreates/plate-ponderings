@@ -1,26 +1,20 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Eye, EyeOff, Info } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { PlateHeader } from "@/components/site/AddStory";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
 
-/** The read-only banner shown across the top of the content in demo mode. */
-export function DemoBanner() {
-  return (
-    <div
-      role="status"
-      data-testid="demo-banner"
-      className="flex items-start gap-2 rounded-xl border-2 border-teal bg-cream-warm p-4"
-    >
-      <Info aria-hidden className="mt-0.5 size-5 shrink-0 text-teal" />
-      <p>You're exploring the demo. You can look around, but adding plates and stories is turned off.</p>
-    </div>
-  );
-}
-
 /** Simple centred form card, with the small signpost beside it on desktop only. */
-function EntryShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
+function EntryShell({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
   return (
     <main className="mx-auto flex max-w-3xl items-center justify-center gap-8 px-4 py-10 sm:py-16">
       <img
@@ -62,7 +56,11 @@ function PasswordField({ hint }: { hint?: string }) {
           onClick={() => setShown((v) => !v)}
           className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-navy"
         >
-          {shown ? <EyeOff aria-hidden className="size-5" /> : <Eye aria-hidden className="size-5" />}
+          {shown ? (
+            <EyeOff aria-hidden className="size-5" />
+          ) : (
+            <Eye aria-hidden className="size-5" />
+          )}
         </button>
       </div>
       {hint && (
@@ -153,7 +151,12 @@ export function DemoPage() {
 const CHOICES = [
   { to: "/sign-in", label: "Sign In", caption: "I already have an account", cls: "brand-btn-navy" },
   { to: "/sign-up", label: "Create an Account", caption: "I'm new here", cls: "brand-btn-coral" },
-  { to: "/demo", label: "Try the Demo", caption: "Look around as a sample traveler", cls: "brand-btn-outline" },
+  {
+    to: "/demo",
+    label: "Try the Demo",
+    caption: "Look around as a sample traveler",
+    cls: "brand-btn-outline",
+  },
 ] as const;
 
 export function SignInPromptPage() {
@@ -165,14 +168,23 @@ export function SignInPromptPage() {
         <h2 id="prompt-title" className="font-display text-2xl text-navy">
           Sign in to add your story
         </h2>
-        <p className="mt-2">Choose how you'd like to continue. Your story will be added to this plate.</p>
+        <p className="mt-2">
+          Choose how you'd like to continue. Your story will be added to this plate.
+        </p>
         <ul className="mt-6 space-y-4">
           {CHOICES.map((c) => (
             <li key={c.to}>
-              <Link to={c.to} aria-describedby={`cap-${c.to.slice(1)}`} className={`brand-btn ${c.cls} w-full`}>
+              <Link
+                to={c.to}
+                aria-describedby={`cap-${c.to.slice(1)}`}
+                className={`brand-btn ${c.cls} w-full`}
+              >
                 {c.label}
               </Link>
-              <p id={`cap-${c.to.slice(1)}`} className="mt-1 text-center text-sm text-muted-foreground">
+              <p
+                id={`cap-${c.to.slice(1)}`}
+                className="mt-1 text-center text-sm text-muted-foreground"
+              >
                 {c.caption}
               </p>
             </li>

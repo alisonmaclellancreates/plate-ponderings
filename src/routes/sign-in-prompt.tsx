@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SignInPromptPage } from "@/components/site/Entry";
 
 const TITLE = "Sign in to add your story | What the Plate?";
-const DESCRIPTION = "Choose how you would like to continue. Your story will be added to this plate.";
+const DESCRIPTION =
+  "Choose how you would like to continue. Your story will be added to this plate.";
 
 export const Route = createFileRoute("/sign-in-prompt")({
   head: () => ({

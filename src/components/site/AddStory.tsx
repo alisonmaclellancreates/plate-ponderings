@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Camera, Info } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
-import { DemoBanner } from "@/components/site/Entry";
+import { DemoBanner } from "@/components/site/DemoBanner";
 import { PLATES, STORY_PHOTO_PLACEHOLDER, type HowIKnow } from "@/lib/mock-data";
 
 export type StoryStep =
@@ -212,7 +212,9 @@ export function StoryStepOne({
           onChange={(e) => setMeaning(e.target.value)}
           disabled={demo}
           placeholder={
-            demo ? "Adding stories is turned off in the demo." : "A short, clear meaning for this plate"
+            demo
+              ? "Adding stories is turned off in the demo."
+              : "A short, clear meaning for this plate"
           }
           aria-describedby="story-meaning-count"
           className="h-11 w-full rounded-lg border border-input bg-card px-3 disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60"
