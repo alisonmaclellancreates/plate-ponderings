@@ -24,7 +24,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Account";
-import { SUBMISSIONS } from "@/lib/mock-data";
+import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
 
 describe("SubmissionsPage", () => {
   it("lists rows newest first with one h1", () => {
@@ -35,25 +35,55 @@ describe("SubmissionsPage", () => {
       rows.map((r) => within(r).getByRole("img", { name: /plate/ }).getAttribute("aria-label")),
     ).toEqual([
       "Oregon plate PNW LV",
-      "California plate TEATIME",
       "Washington plate LV2CODE",
       "Utah plate CANYONS",
       "Colorado plate TRAILS",
+      "California plate TEATIME",
     ]);
     expect(rows[0]).toHaveTextContent("Oregon · Plate submission · Oct 9, 2026");
-    expect(rows[1]).toHaveTextContent("California · Your story · Oct 8, 2026");
+    expect(rows[1]).toHaveTextContent("Washington · Plate submission · Oct 6, 2026");
+  });
+
+  it("matches each row's count to its plate or story in the mock data", () => {
+    render(<SubmissionsPage />);
+    const rows = screen.getAllByTestId("submission");
+    const findPlate = (text: string) => PLATES.find((p) => p.text === text)!;
+    const pnw = findPlate("PNW LV");
+    expect(pnw.stories).toHaveLength(2);
+    expect(within(rows[0]!).getByText("This plate is live with 2 stories.")).toBeInTheDocument();
+    const trails = findPlate("TRAILS");
+    expect(trails.stories).toHaveLength(2);
+    expect(within(rows[3]!).getByText("This plate is live with 2 stories.")).toBeInTheDocument();
+    const teatimeStory = findPlate("TEATIME").stories.find((s) => s.handle === "Traveler4821")!;
+    expect(teatimeStory.hearts).toBe(3);
+    expect(within(rows[4]!).getByText("Your story is live and has 3 hearts.")).toBeInTheDocument();
+  });
+
+  it("sorts rows newest first with TEATIME last", () => {
+    render(<SubmissionsPage rows={[...SUBMISSIONS].reverse()} />);
+    const rows = screen.getAllByTestId("submission");
+    const last = rows[rows.length - 1]!;
+    expect(within(last).getByText("TEATIME")).toBeInTheDocument();
+    expect(last).toHaveTextContent("Sep 26, 2026");
+    const parsed = rows.map((r) => {
+      const d = (r.textContent ?? "").match(/(\w{3} \d{1,2}, \d{4})/)?.[1] ?? "";
+      return new Date(`${d} 12:00:00`).getTime();
+    });
+    for (let i = 1; i < parsed.length; i += 1) {
+      expect(parsed[i]!).toBeLessThanOrEqual(parsed[i - 1]!);
+    }
   });
 
   it("gives pending rows no action or chevron and marks updated rows", () => {
     render(<SubmissionsPage />);
     const rows = screen.getAllByTestId("submission");
-    const pending = rows[2]!;
+    const pending = rows[1]!;
     expect(within(pending).queryByRole("link")).toBeNull();
     expect(within(pending).queryByRole("button")).toBeNull();
     expect(within(pending).queryByTestId("chevron")).toBeNull();
     expect(within(rows[0]!).getByText("Updated")).toBeInTheDocument();
-    expect(within(rows[3]!).getByText("Updated")).toBeInTheDocument();
-    expect(within(rows[3]!).getAllByRole("button", { name: "Dismiss" }).length).toBeGreaterThan(0);
+    expect(within(rows[2]!).getByText("Updated")).toBeInTheDocument();
+    expect(within(rows[2]!).getAllByRole("button", { name: "Dismiss" }).length).toBeGreaterThan(0);
     expect(within(rows[0]!).getAllByRole("link", { name: "View Plate" })[0]).toHaveAttribute(
       "href",
       "/plate/pnw-lv",
@@ -73,5 +103,14 @@ describe("ProfilePage", () => {
     expect(field).toHaveAccessibleDescription(`Available ${HANDLE_HELP}`);
     expect(screen.getByRole("button", { name: "Save Changes" })).toBeInTheDocument();
     expect(screen.getByTestId("sample-story")).toHaveTextContent("Traveler4821");
+  });
+
+  it("renders the shared story card for the sample story", () => {
+    render(<ProfilePage />);
+    const card = screen.getByTestId("sample-story");
+    expect(within(card).getByText("Traveler4821")).toBeInTheDocument();
+    expect(within(card).getByText("Pacific Northwest love.")).toBeInTheDocument();
+    expect(within(card).getByText("Saw this plate at a trailhead outside Bend.")).toBeInTheDocument();
+    expect(within(card).getByText("My best guess")).toBeInTheDocument();
   });
 });
