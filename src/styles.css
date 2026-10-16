@@ -259,6 +259,14 @@
   .brand-btn-outline:hover:not(:disabled) {
     background: var(--cream);
   }
+  .brand-btn-outline-coral {
+    background: var(--card);
+    color: var(--coral-cta);
+    border: 2px solid var(--coral-cta);
+  }
+  .brand-btn-outline-coral:hover:not(:disabled) {
+    background: var(--coral-pale);
+  }
 
   @media (prefers-reduced-motion: no-preference) {
     .spot-drive {
