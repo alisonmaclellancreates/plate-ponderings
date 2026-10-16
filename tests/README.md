@@ -35,9 +35,9 @@ Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `
 - Leave `src/routeTree.gen.ts` and other generated files alone.
 - Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
 
-## Coverage map (after step 16)
+## Coverage map (after step 17)
 
-Totals: statements 81.39, branches 65.25, functions 84.89, lines 82.95. Thresholds set to 81/65/84/82.
+Totals: statements 82.62, branches 65.25, functions 87.91, lines 84.23. Thresholds set to 82/65/87/84.
 Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 
 | File                                              | Stmts % | Branch % | Funcs % | Lines % | Step |
@@ -100,8 +100,8 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/lib/lovable-error-reporting.ts`              | 100     | 100      | 100     | 100     | 15   |
 | `src/lib/utils.ts`                                | 100     | 100      | 100     | 100     | 15   |
 | `src/router.tsx`                                  | 100     | 100      | 100     | 100     | 16   |
-| `src/routes/__root.tsx`                           | 7.69    | 100      | 0       | 7.69    | 17   |
-| `src/routes/index.tsx`                            | 33.33   | 100      | 0       | 33.33   | 17   |
+| `src/routes/__root.tsx`                           | 100     | 100      | 100     | 100     | 17   |
+| `src/routes/index.tsx`                            | 100     | 100      | 100     | 100     | 17   |
 | `src/server.ts`                                   | 100     | 100      | 100     | 100     | 16   |
 | `src/start.ts`                                    | 100     | 100      | 100     | 100     | 16   |
 
@@ -118,3 +118,4 @@ Branch 100% on a 0% file means the file has no branches, not that it is tested.
 - `src/integrations/supabase/types.ts` is excluded as generated.
 - Step 14 uncovered, unreachable through the public surface: `carousel.tsx` line 57 (`onSelect` guard for an undefined API; only ever called with an API), the `orientation ||` fallback (orientation always has a default), and `api?.off` optional chaining in the cleanup. `chart.tsx` line 301 (non-object payload guard; Recharts payload items are always objects).
 - Step 16 notes: `start.ts` rethrows only objects carrying `statusCode`; a thrown `Response` or redirect without one is logged and becomes the 500 page (tests pin this). `server.ts` reaches every branch through `fetch`, including the no-default-export fallback.
+- Step 17: both route files use Option B (mocked route factory), since it reaches the root error component and shell without full-document rendering and avoids the real router stalling on stylesheets. Follow this for new routes. The `?url` stylesheet import resolves to an empty string under Vitest, so the head test checks the link exists rather than its value.
