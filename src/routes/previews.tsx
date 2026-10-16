@@ -64,6 +64,22 @@ const PLATE_PREVIEWS = [
   },
 ] as const;
 
+/** Spot a Plate form and outcome previews. */
+const SPOT_PREVIEWS = [
+  { outcome: "validation", label: "Spot a Plate, missing details", note: "Inline errors" },
+  { outcome: "checking", label: "Spot a Plate, checking", note: "Checking the collection" },
+  { outcome: "exists", label: "Spot a Plate, already here", note: "British Columbia LV2CODE" },
+  { outcome: "new", label: "Spot a Plate, new mystery", note: "Washington B7K2L9" },
+  { outcome: "pending", label: "Spot a Plate, pending", note: "Waiting for its safety check" },
+  { outcome: "rejected", label: "Spot a Plate, not added", note: "The automated check said no" },
+  {
+    outcome: "already-spotted",
+    label: "Spot a Plate, spotted already",
+    note: "Utah TRAILS is waiting for its check",
+  },
+  { outcome: "error", label: "Spot a Plate, error", note: "Something went wrong" },
+] as const;
+
 function Previews() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -83,6 +99,24 @@ function Previews() {
             <Link
               to="/plate/$state"
               params={{ state: p.state }}
+              className="brand-card block p-4 hover:shadow-md"
+            >
+              <span className="font-semibold text-navy">{p.label}</span>
+              <span className="block text-sm text-muted-foreground">{p.note}</span>
+            </Link>
+          </li>
+        ))}
+        <li>
+          <Link to="/spot" className="brand-card block p-4 hover:shadow-md">
+            <span className="font-semibold text-navy">Spot a Plate</span>
+            <span className="block text-sm text-muted-foreground">The empty form</span>
+          </Link>
+        </li>
+        {SPOT_PREVIEWS.map((p) => (
+          <li key={p.outcome}>
+            <Link
+              to="/spot/$outcome"
+              params={{ outcome: p.outcome }}
               className="brand-card block p-4 hover:shadow-md"
             >
               <span className="font-semibold text-navy">{p.label}</span>

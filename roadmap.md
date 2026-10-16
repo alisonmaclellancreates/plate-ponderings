@@ -18,3 +18,6 @@
 - [x] Correct pending copy and mobile photo placement.
 - [x] Add a catching-up-only story, align summary history, and relocate mock photo.
 - [x] Verify plate detail tests, mobile/desktop previews, and lint.
+
+# Spot a Plate previews
+- [x] /spot form and eight outcome previews, homepage search prefill, tests, lint.

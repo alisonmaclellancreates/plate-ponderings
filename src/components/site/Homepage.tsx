@@ -51,9 +51,9 @@ function Headline() {
   );
 }
 
-interface SearchValues {
-  jurisdiction?: string;
-  text?: string;
+export interface SearchValues {
+  jurisdiction?: string | undefined;
+  text?: string | undefined;
 }
 
 function SearchCard({ values }: { values: SearchValues }) {
@@ -359,11 +359,18 @@ function RecentlyFeatured() {
 
 export type HomepageVariant = "default" | "no-match" | "fallback";
 
-export function Homepage({ variant = "default" }: { variant?: HomepageVariant }) {
+export function Homepage({
+  variant = "default",
+  prefill,
+}: {
+  variant?: HomepageVariant;
+  prefill?: SearchValues;
+}) {
   const featured = PLATES.find((p) =>
     variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
   )!;
-  const search = variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : {};
+  const search =
+    variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (
     <main>
       <Hero search={search} noMatch={variant === "no-match"} />
