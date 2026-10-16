@@ -22,7 +22,7 @@ function getClient(): Promise<Client | undefined> {
   clientPromise ??= import("posthog-js")
     .then(({ default: client }) => {
       client.init(key, {
-        api_host: import.meta.env.VITE_POSTHOG_HOST,
+        api_host: import.meta.env.VITE_POSTHOG_HOST || "https://eu.i.posthog.com",
         autocapture: false,
         disable_session_recording: true,
         person_profiles: "identified_only",
