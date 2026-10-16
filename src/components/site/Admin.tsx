@@ -31,7 +31,7 @@ export function AdminPage({ rows = REPORTED_STORIES }: { rows?: ReportedStory[] 
         </button>
         <p className="text-sm text-muted-foreground">2 items waiting for a safety check.</p>
       </div>
-      <div className="brand-card mt-6 overflow-x-auto">
+      <div data-testid="admin-table-scroll" className="brand-card mt-6 overflow-x-auto">
         <table className="w-full min-w-[48rem] text-left text-sm">
           <caption className="sr-only">Reported stories</caption>
           <thead>
@@ -54,7 +54,7 @@ export function AdminPage({ rows = REPORTED_STORIES }: { rows?: ReportedStory[] 
               <th scope="col" className="p-3">
                 Status
               </th>
-              <th scope="col" className="p-3">
+              <th scope="col" className="relative p-3">
                 <span className="sr-only">Action</span>
               </th>
             </tr>

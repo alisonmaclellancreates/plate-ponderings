@@ -30,7 +30,7 @@ import { Route as StoryMenuRouteImport } from './routes/story-menu'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
-import { Route as SettingsDeleteConfirmRouteImport } from './routes/settings.delete-confirm'
+import { Route as SettingsDeleteConfirmRouteImport } from './routes/settings_.delete-confirm'
 import { Route as SpotIndexRouteImport } from './routes/spot.index'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
 import { Route as StoryStepRouteImport } from './routes/story.$step'
@@ -141,9 +141,9 @@ const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsDeleteConfirmRoute = SettingsDeleteConfirmRouteImport.update({
-  id: '/delete-confirm',
-  path: '/delete-confirm',
-  getParentRoute: () => SettingsRoute,
+  id: '/settings_/delete-confirm',
+  path: '/settings/delete-confirm',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SpotIndexRoute = SpotIndexRouteImport.update({
   id: '/spot/',
@@ -175,7 +175,7 @@ export interface FileRoutesByFullPath {
   '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
@@ -202,7 +202,7 @@ export interface FileRoutesByTo {
   '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
@@ -230,7 +230,7 @@ export interface FileRoutesById {
   '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
@@ -238,7 +238,7 @@ export interface FileRoutesById {
   '/submissions': typeof SubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
-  '/settings/delete-confirm': typeof SettingsDeleteConfirmRoute
+  '/settings_/delete-confirm': typeof SettingsDeleteConfirmRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/story/$step': typeof StoryStepRoute
   '/spot/': typeof SpotIndexRoute
@@ -321,7 +321,7 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
-    | '/settings/delete-confirm'
+    | '/settings_/delete-confirm'
     | '/spot/$outcome'
     | '/story/$step'
     | '/spot/'
@@ -341,7 +341,7 @@ export interface RootRouteChildren {
   PreviewsRoute: typeof PreviewsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
-  SettingsRoute: typeof SettingsRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
   SignInRoute: typeof SignInRoute
   SignInPromptRoute: typeof SignInPromptRoute
   SignUpRoute: typeof SignUpRoute
@@ -349,6 +349,7 @@ export interface RootRouteChildren {
   SubmissionsRoute: typeof SubmissionsRoute
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
+  SettingsDeleteConfirmRoute: typeof SettingsDeleteConfirmRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
   StoryStepRoute: typeof StoryStepRoute
   SpotIndexRoute: typeof SpotIndexRoute
@@ -503,12 +504,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings/delete-confirm': {
-      id: '/settings/delete-confirm'
-      path: '/delete-confirm'
+    '/settings_/delete-confirm': {
+      id: '/settings_/delete-confirm'
+      path: '/settings/delete-confirm'
       fullPath: '/settings/delete-confirm'
       preLoaderRoute: typeof SettingsDeleteConfirmRouteImport
-      parentRoute: typeof SettingsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/spot/': {
       id: '/spot/'
@@ -534,18 +535,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface SettingsRouteChildren {
-  SettingsDeleteConfirmRoute: typeof SettingsDeleteConfirmRoute
-}
-
-const SettingsRouteChildren: SettingsRouteChildren = {
-  SettingsDeleteConfirmRoute: SettingsDeleteConfirmRoute,
-}
-
-const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
-  SettingsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -560,7 +549,7 @@ const rootRouteChildren: RootRouteChildren = {
   PreviewsRoute: PreviewsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
-  SettingsRoute: SettingsRouteWithChildren,
+  SettingsRoute: SettingsRoute,
   SignInRoute: SignInRoute,
   SignInPromptRoute: SignInPromptRoute,
   SignUpRoute: SignUpRoute,
@@ -568,6 +557,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubmissionsRoute: SubmissionsRoute,
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
+  SettingsDeleteConfirmRoute: SettingsDeleteConfirmRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,
   StoryStepRoute: StoryStepRoute,
   SpotIndexRoute: SpotIndexRoute,

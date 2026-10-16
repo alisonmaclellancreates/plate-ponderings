@@ -12,6 +12,13 @@ describe("AdminPage", () => {
     expect(screen.getByText("2 items waiting for a safety check.")).toBeTruthy();
   });
 
+  it("keeps the table inside a horizontally scrollable container", () => {
+    render(<AdminPage />);
+    const scroll = screen.getByTestId("admin-table-scroll");
+    expect(scroll.className).toContain("overflow-x-auto");
+    expect(within(scroll).getByRole("table", { name: "Reported stories" })).toBeTruthy();
+  });
+
   it("lists every reported story with its status action", () => {
     render(<AdminPage />);
     const table = within(screen.getByRole("table", { name: "Reported stories" }));

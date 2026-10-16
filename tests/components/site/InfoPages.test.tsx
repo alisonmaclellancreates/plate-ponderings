@@ -23,19 +23,31 @@ describe("AboutPage", () => {
 });
 
 describe("PrivacyPage", () => {
-  it("covers every section from the brief", () => {
+  it("covers every section with the wording the app actually follows", () => {
     render(<PrivacyPage />);
     for (const heading of [
       "What we store",
       "Photos",
       "What the AI sees",
       "Blocking",
-      "Deleting your stories and account",
+      "Deleting your published stories and your account",
     ])
       expect(screen.getByRole("heading", { name: heading })).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Your email address and handle, the plates you spot, your stories and their blurred photos, the hearts you give, the reports you send, the people you block, and your notifications\./,
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(/summaries written from published stories, and their history/),
+    ).toBeTruthy();
+    expect(screen.getByText(/never stored by our application/)).toBeTruthy();
+    expect(screen.getByText(/Our safety checks use AI to review each new plate/)).toBeTruthy();
+    expect(screen.getByText(/so they see submissions before anyone else does/)).toBeTruthy();
+    expect(screen.getByText(/You can delete any of your published stories\./)).toBeTruthy();
     expect(screen.getByText(BLOCKING_EXPLANATION)).toBeTruthy();
     expect(screen.getByText(new RegExp(DELETE_ACCOUNT_WARNING.slice(0, 40)))).toBeTruthy();
-    expect(screen.getByText(/never stored/)).toBeTruthy();
+    expect(screen.queryByText(/That's it/)).toBeNull();
   });
 });
 
