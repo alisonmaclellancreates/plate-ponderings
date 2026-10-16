@@ -86,19 +86,21 @@ function SearchCard({ values }: { values: SearchValues }) {
             ))}
           </select>
         </label>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">Plate text</span>
-          <input
-            name="text"
-            defaultValue={values.text ?? ""}
-            placeholder="e.g. B7K2L9"
-            aria-describedby="plate-text-hint"
-            className="h-11 w-full rounded-lg border border-input bg-card px-3 uppercase placeholder:normal-case"
-          />
+        <div>
+          <label className="block">
+            <span className="mb-1 block text-sm font-semibold">Plate text</span>
+            <input
+              name="text"
+              defaultValue={values.text ?? ""}
+              placeholder="e.g. B7K2L9"
+              aria-describedby="plate-text-hint"
+              className="h-11 w-full rounded-lg border border-input bg-card px-3 uppercase placeholder:normal-case"
+            />
+          </label>
           <span id="plate-text-hint" className="mt-1 block text-sm text-muted-foreground">
             Spaces and dashes are ignored
           </span>
-        </label>
+        </div>
       </div>
       <button type="submit" className="brand-btn brand-btn-navy mt-4 w-full sm:w-auto">
         Search
