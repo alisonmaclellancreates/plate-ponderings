@@ -69,12 +69,14 @@
   --color-slate: var(--slate);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Fraunces", Georgia, serif;
+  --color-cream-warm: var(--cream-warm);
 }
 
 /* Brand palette (What the Plate?). Exact brand hex values are kept as given. */
 :root {
   --radius: 0.75rem;
   --cream: #faf6ed;
+  --cream-warm: #f7ead3;
   --navy: #24344d;
   --coral: #d66b50;
   --coral-cta: #c14b2d;
@@ -356,4 +358,25 @@
     white-space: nowrap;
     letter-spacing: 0.02em;
   }
+}
+
+@layer components {
+  .headline-slide {
+    transition: opacity 900ms ease-in-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .headline-slide {
+      transition: none;
+    }
+  }
+}
+
+/* Localized cream behind hero text only; the artwork itself is never faded. */
+@utility hero-text-wash {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--cream) 88%, transparent) 0%,
+    color-mix(in srgb, var(--cream) 70%, transparent) 60%,
+    transparent 100%
+  );
 }

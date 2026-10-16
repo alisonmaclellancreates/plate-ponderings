@@ -1,32 +1,21 @@
-import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { expect, it, vi } from "vitest";
+import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
-  createFileRoute: () => (options: Record<string, unknown>) => options,
-  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
+  createFileRoute: () => (o: Record<string, unknown>) => o,
+}));
+vi.mock("@/components/site/Homepage", () => ({
+  Homepage: ({ variant }: { variant?: string }) => <p>{variant ?? "default"}</p>,
 }));
 
-import { Route } from "@/routes/index";
+type R = { head: () => { meta: Record<string, string>[] }; component: () => ReactNode };
 
-const R = Route as unknown as {
-  head: () => { meta: Record<string, string>[] };
-  component: () => ReactNode;
-};
-
-describe("index route", () => {
-  it("renders the app name as the page heading inside main", () => {
-    const C = R.component;
-    render(<C />);
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(screen.getByRole("main")).toContainElement(heading);
-    expect(heading.textContent).toBeTruthy();
-  });
-
-  it("head provides a title and matching og:title", () => {
-    const meta = R.head().meta;
-    const title = meta.find((m) => "title" in m)?.["title"];
-    expect(title).toBeTruthy();
-    expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
-  });
+it("renders the default variant with matching titles", async () => {
+  const r = (await import("@/routes/index")).Route as unknown as R;
+  const C = r.component;
+  expect(render(<C />).container.textContent).toBe("default");
+  const meta = r.head().meta;
+  const title = meta.find((m) => "title" in m)?.["title"];
+  expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
 });

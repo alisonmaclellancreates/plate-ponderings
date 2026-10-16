@@ -30,6 +30,7 @@ export const Route = createFileRoute("/preview/components")({
 
 const EXTRA = [
   { jurisdiction: "Ontario", text: "ILUV2CODE" },
+  { jurisdiction: "Washington", text: "HI" },
   { jurisdiction: "Yukon", text: "NORTH" },
 ];
 
@@ -51,6 +52,7 @@ function ComponentsPreview() {
         <div className="flex flex-wrap gap-6">
           <Plate jurisdiction="British Columbia" text="LV2CODE" size="lg" />
           <Plate jurisdiction="Ontario" text="ILUV2CODE" size="lg" />
+          <Plate jurisdiction="Washington" text="HI" size="lg" />
         </div>
       </Section>
       <Section title="Medium">
