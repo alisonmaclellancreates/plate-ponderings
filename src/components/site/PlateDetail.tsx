@@ -169,7 +169,7 @@ function MysteryPrompt() {
   );
 }
 
-function StoryCard({ story }: { story: Story }) {
+export function StoryCard({ story }: { story: Story }) {
   const owner = story.howIKnow === "owner";
   return (
     <article

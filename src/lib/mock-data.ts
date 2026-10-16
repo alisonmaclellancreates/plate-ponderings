@@ -223,7 +223,7 @@ export const SUBMISSIONS: Submission[] = [
     kind: "plate",
     date: "2026-10-09",
     moderation: "published",
-    explanation: "This plate is live with 4 stories.",
+    explanation: "This plate is live with 2 stories.",
     plateState: "pnw-lv",
     action: "view",
     updated: true,
@@ -233,7 +233,7 @@ export const SUBMISSIONS: Submission[] = [
     jurisdiction: "California",
     text: "TEATIME",
     kind: "story",
-    date: "2026-10-08",
+    date: "2026-09-26",
     moderation: "published",
     explanation: "Your story is live and has 3 hearts.",
     plateState: "owner",
@@ -272,7 +272,12 @@ export const SUBMISSIONS: Submission[] = [
   },
 ];
 
-export const PROFILE_SAMPLE_STORY = {
+export const PROFILE_SAMPLE_STORY: Story = {
+  id: "profile-sample",
+  handle: CURRENT_USER.handle,
   date: "2026-10-12",
-  text: "Saw this plate at a trailhead outside Bend. Pretty sure it means Pacific Northwest love.",
+  meaning: "Pacific Northwest love.",
+  howIKnow: "guess",
+  longer: "Saw this plate at a trailhead outside Bend.",
+  hearts: 0,
 };
