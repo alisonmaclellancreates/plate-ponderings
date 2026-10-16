@@ -201,7 +201,14 @@ export const PLATES: PlateRecord[] = [
     ...(featured > 0 ? { featuredStoryCount: featured } : {}),
     stories: [
       ...Array.from({ length: published }, (_, i) =>
-        s(`${slug}-${i + 1}`, i % 2 ? "northshore" : "rivercat", day, `A ${text} reading.`, "guess", i),
+        s(
+          `${slug}-${i + 1}`,
+          i % 2 ? "northshore" : "rivercat",
+          day,
+          `A ${text} reading.`,
+          "guess",
+          i,
+        ),
       ),
       ...Array.from({ length: unpublished }, (_, i) => ({
         ...s(`${slug}-u${i + 1}`, "maplegirl", day, `A ${text} reading.`, "guess", 0),

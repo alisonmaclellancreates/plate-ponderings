@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { PLATES, plateStatus, STORY_PHOTO_PLACEHOLDER, featuredPlates, featuredProgress, publishedStories } from "@/lib/mock-data";
+import {
+  PLATES,
+  plateStatus,
+  STORY_PHOTO_PLACEHOLDER,
+  featuredPlates,
+  featuredProgress,
+  publishedStories,
+} from "@/lib/mock-data";
 import { plateFontSize, plateTone } from "@/lib/jurisdictions";
 
 const find = (text: string) => {
@@ -24,8 +31,15 @@ describe("mock data", () => {
     const featured = featuredPlates();
     expect(featured).toHaveLength(14);
     expect(featured[0]?.slug).toBe("ut-canyons");
-    expect(featured.map((p) => p.plateOfTheDay)).toEqual(featured.map((p) => p.plateOfTheDay).sort().reverse());
-    const progress = featured.map((p) => featuredProgress(p.featuredStoryCount ?? 0, publishedStories(p).length));
+    expect(featured.map((p) => p.plateOfTheDay)).toEqual(
+      featured
+        .map((p) => p.plateOfTheDay)
+        .sort()
+        .reverse(),
+    );
+    const progress = featured.map((p) =>
+      featuredProgress(p.featuredStoryCount ?? 0, publishedStories(p).length),
+    );
     expect(progress).toContain("Still a mystery");
     expect(progress).toContain("Was a mystery, now 1 story");
     expect(progress).toContain("Was a mystery, now 2 stories");

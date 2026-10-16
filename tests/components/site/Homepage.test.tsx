@@ -6,7 +6,11 @@ import type { PlateRecord } from "@/lib/mock-data";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ params, children, ...props }: { params: { state: string }; children: ReactNode }) => <a {...props} href={`/plate/${params.state}`}>{children}</a>,
+  Link: ({ params, children, ...props }: { params: { state: string }; children: ReactNode }) => (
+    <a {...props} href={`/plate/${params.state}`}>
+      {children}
+    </a>
+  ),
 }));
 
 function media({ mobile = false, reduced = false }) {

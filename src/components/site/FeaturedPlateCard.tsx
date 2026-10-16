@@ -6,7 +6,13 @@ import { formatDay } from "@/lib/format-day";
 import { storyCount } from "@/lib/story-count";
 import { featuredProgress, plateStatus, publishedStories, type PlateRecord } from "@/lib/mock-data";
 
-export function FeaturedPlateCard({ plate, today = false }: { plate: PlateRecord; today?: boolean }) {
+export function FeaturedPlateCard({
+  plate,
+  today = false,
+}: {
+  plate: PlateRecord;
+  today?: boolean;
+}) {
   const count = publishedStories(plate).length;
   return (
     <Link
@@ -18,7 +24,11 @@ export function FeaturedPlateCard({ plate, today = false }: { plate: PlateRecord
       <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="md" className="max-w-full" />
       <p className="text-sm text-muted-foreground">
         Featured {formatDay(plate.plateOfTheDay ?? "")}
-        {today && <span className="ml-2 rounded bg-gold px-2 py-0.5 text-xs font-semibold text-navy">Today</span>}
+        {today && (
+          <span className="ml-2 rounded bg-gold px-2 py-0.5 text-xs font-semibold text-navy">
+            Today
+          </span>
+        )}
       </p>
       <p className="flex items-center gap-1 font-semibold">
         <MessageCircle aria-hidden className="size-4" />

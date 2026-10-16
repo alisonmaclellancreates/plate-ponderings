@@ -6,7 +6,14 @@ import { StatusBadge } from "@/components/site/Badges";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
 
 import { storyCount } from "@/lib/story-count";
-import { PLATES, plateStatus, publishedStories, featuredPlates, TODAY, type PlateRecord } from "@/lib/mock-data";
+import {
+  PLATES,
+  plateStatus,
+  publishedStories,
+  featuredPlates,
+  TODAY,
+  type PlateRecord,
+} from "@/lib/mock-data";
 
 export const HEADLINES = [
   "Every plate has a story.",
@@ -315,7 +322,8 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
 }
 
 function RecentlyFeatured() {
-  const recent = featuredPlates().filter((p) => p.plateOfTheDay !== TODAY)
+  const recent = featuredPlates()
+    .filter((p) => p.plateOfTheDay !== TODAY)
     .slice(0, 4);
   return (
     <section aria-labelledby="recent-heading" className="mx-auto max-w-6xl px-4 py-12">
