@@ -10,10 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DemoRouteImport } from './routes/demo'
+import { Route as DemoFormRouteImport } from './routes/demo-form'
 import { Route as HomeFallbackRouteImport } from './routes/home-fallback'
 import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as PreviewsRouteImport } from './routes/previews'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as SignInPromptRouteImport } from './routes/sign-in-prompt'
+import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
@@ -24,6 +29,16 @@ import { Route as StoryStepRouteImport } from './routes/story.$step'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoFormRoute = DemoFormRouteImport.update({
+  id: '/demo-form',
+  path: '/demo-form',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeFallbackRoute = HomeFallbackRouteImport.update({
@@ -44,6 +59,21 @@ const PreviewsRoute = PreviewsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInPromptRoute = SignInPromptRouteImport.update({
+  id: '/sign-in-prompt',
+  path: '/sign-in-prompt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubmissionsRoute = SubmissionsRouteImport.update({
@@ -79,10 +109,15 @@ const StoryStepRoute = StoryStepRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/demo-form': typeof DemoFormRoute
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
   '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-in-prompt': typeof SignInPromptRoute
+  '/sign-up': typeof SignUpRoute
   '/submissions': typeof SubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
@@ -92,10 +127,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/demo-form': typeof DemoFormRoute
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
   '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-in-prompt': typeof SignInPromptRoute
+  '/sign-up': typeof SignUpRoute
   '/submissions': typeof SubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
@@ -106,10 +146,15 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/demo-form': typeof DemoFormRoute
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
   '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-in-prompt': typeof SignInPromptRoute
+  '/sign-up': typeof SignUpRoute
   '/submissions': typeof SubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
@@ -121,10 +166,15 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/demo'
+    | '/demo-form'
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
     | '/profile'
+    | '/sign-in'
+    | '/sign-in-prompt'
+    | '/sign-up'
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
@@ -134,10 +184,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/demo'
+    | '/demo-form'
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
     | '/profile'
+    | '/sign-in'
+    | '/sign-in-prompt'
+    | '/sign-up'
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
@@ -147,10 +202,15 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/demo'
+    | '/demo-form'
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
     | '/profile'
+    | '/sign-in'
+    | '/sign-in-prompt'
+    | '/sign-up'
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
@@ -161,10 +221,15 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  DemoFormRoute: typeof DemoFormRoute
   HomeFallbackRoute: typeof HomeFallbackRoute
   HomeNoMatchRoute: typeof HomeNoMatchRoute
   PreviewsRoute: typeof PreviewsRoute
   ProfileRoute: typeof ProfileRoute
+  SignInRoute: typeof SignInRoute
+  SignInPromptRoute: typeof SignInPromptRoute
+  SignUpRoute: typeof SignUpRoute
   SubmissionsRoute: typeof SubmissionsRoute
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
@@ -180,6 +245,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo-form': {
+      id: '/demo-form'
+      path: '/demo-form'
+      fullPath: '/demo-form'
+      preLoaderRoute: typeof DemoFormRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home-fallback': {
@@ -208,6 +287,27 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in-prompt': {
+      id: '/sign-in-prompt'
+      path: '/sign-in-prompt'
+      fullPath: '/sign-in-prompt'
+      preLoaderRoute: typeof SignInPromptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/submissions': {
@@ -257,10 +357,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  DemoFormRoute: DemoFormRoute,
   HomeFallbackRoute: HomeFallbackRoute,
   HomeNoMatchRoute: HomeNoMatchRoute,
   PreviewsRoute: PreviewsRoute,
   ProfileRoute: ProfileRoute,
+  SignInRoute: SignInRoute,
+  SignInPromptRoute: SignInPromptRoute,
+  SignUpRoute: SignUpRoute,
   SubmissionsRoute: SubmissionsRoute,
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
