@@ -69,8 +69,6 @@
   --color-slate: var(--slate);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Fraunces", Georgia, serif;
-  --font-script: "Caveat Brush", "Brush Script MT", cursive;
-  --color-lavender: var(--lavender);
   --color-cream-warm: var(--cream-warm);
 }
 
@@ -78,7 +76,6 @@
 :root {
   --radius: 0.75rem;
   --cream: #faf6ed;
-  --lavender: #ece7f6;
   --cream-warm: #f7ead3;
   --navy: #24344d;
   --coral: #d66b50;
@@ -364,11 +361,6 @@
 }
 
 @layer components {
-  .font-script {
-    font-family: var(--font-script);
-    font-weight: 400;
-    line-height: 1.05;
-  }
   .headline-slide {
     transition: opacity 900ms ease-in-out;
   }

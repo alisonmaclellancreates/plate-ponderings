@@ -41,7 +41,7 @@ function Headline() {
         <span
           key={text}
           aria-hidden={i !== active}
-          className={`headline-slide font-script col-start-1 row-start-1 ${i === active ? "opacity-100" : "opacity-0"}`}
+          className={`headline-slide font-display col-start-1 row-start-1 ${i === active ? "opacity-100" : "opacity-0"}`}
         >
           {text}
         </span>
@@ -161,7 +161,7 @@ function ActionCards() {
       aria-label="Get started"
       className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-2"
     >
-      <article className="brand-card flex flex-col bg-lavender p-6">
+      <article className="brand-card flex flex-col border-teal bg-cream p-6">
         <img
           src="/brand/look-up-a-plate-v1.webp"
           alt=""
@@ -218,7 +218,7 @@ function HowItWorks() {
       <div className="mx-auto max-w-6xl px-4">
         <h2
           id="how-heading"
-          className="font-script mx-auto w-fit rounded-xl bg-cream px-6 py-2 text-5xl text-navy"
+          className="font-display mx-auto w-fit rounded-xl bg-cream px-6 py-2 text-5xl text-navy"
         >
           How it works
         </h2>
@@ -268,14 +268,14 @@ function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
         <div className="rounded-2xl bg-cream p-6 shadow-sm md:p-8">
           <div className="flex items-center gap-2">
             <Star aria-hidden className="size-6 fill-gold text-gold" />
-            <h2 id="potd-heading" className="font-script text-4xl text-navy">
+            <h2 id="potd-heading" className="font-display text-4xl text-navy">
               Plate of the Day
             </h2>
           </div>
           <p className="mt-1 text-muted-foreground">Today's pick from the road.</p>
-          <div className="mt-6 grid items-center gap-6 md:grid-cols-[auto_1fr]">
-            <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="lg" />
-            <div>
+          <div className="mt-6 grid grid-cols-[minmax(0,1fr)] items-center gap-6 md:grid-cols-[auto_minmax(0,1fr)]">
+            <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="lg" className="min-w-0" />
+            <div className="min-w-0">
               <StatusBadge status={status} />
               <p className="mt-3 text-lg">{copy}</p>
               <a href="/plate/mystery" className="brand-btn brand-btn-navy mt-4">
@@ -348,7 +348,7 @@ export function Homepage({ variant = "default" }: { variant?: HomepageVariant })
       <HowItWorks />
       <PlateOfTheDay plate={featured} />
       <RecentlyFeatured />
-      <p className="font-script px-4 pt-4 text-center text-4xl text-navy">
+      <p className="font-display px-4 pt-4 text-center text-4xl text-navy">
         Different roads. Different stories. What's yours?
       </p>
     </main>
