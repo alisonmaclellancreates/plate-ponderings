@@ -10,33 +10,349 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DemoRouteImport } from './routes/demo'
+import { Route as DemoFormRouteImport } from './routes/demo-form'
+import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as HomeFallbackRouteImport } from './routes/home-fallback'
+import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
+import { Route as NotFoundRouteImport } from './routes/not-found'
+import { Route as PreviewsRouteImport } from './routes/previews'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as SignInPromptRouteImport } from './routes/sign-in-prompt'
+import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as StoryMenuRouteImport } from './routes/story-menu'
+import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as PlateStateRouteImport } from './routes/plate.$state'
+import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
+import { Route as SettingsDeleteConfirmRouteImport } from './routes/settings_.delete-confirm'
+import { Route as SpotIndexRouteImport } from './routes/spot.index'
+import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
+import { Route as StoryStepRouteImport } from './routes/story.$step'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoFormRoute = DemoFormRouteImport.update({
+  id: '/demo-form',
+  path: '/demo-form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeFallbackRoute = HomeFallbackRouteImport.update({
+  id: '/home-fallback',
+  path: '/home-fallback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeNoMatchRoute = HomeNoMatchRouteImport.update({
+  id: '/home-no-match',
+  path: '/home-no-match',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotFoundRoute = NotFoundRouteImport.update({
+  id: '/not-found',
+  path: '/not-found',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewsRoute = PreviewsRouteImport.update({
+  id: '/previews',
+  path: '/previews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInPromptRoute = SignInPromptRouteImport.update({
+  id: '/sign-in-prompt',
+  path: '/sign-in-prompt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoryMenuRoute = StoryMenuRouteImport.update({
+  id: '/story-menu',
+  path: '/story-menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubmissionsRoute = SubmissionsRouteImport.update({
+  id: '/submissions',
+  path: '/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlateStateRoute = PlateStateRouteImport.update({
+  id: '/plate/$state',
+  path: '/plate/$state',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
+  id: '/preview/components',
+  path: '/preview/components',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsDeleteConfirmRoute = SettingsDeleteConfirmRouteImport.update({
+  id: '/settings_/delete-confirm',
+  path: '/settings/delete-confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpotIndexRoute = SpotIndexRouteImport.update({
+  id: '/spot/',
+  path: '/spot/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
+  id: '/spot/$outcome',
+  path: '/spot/$outcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoryStepRoute = StoryStepRouteImport.update({
+  id: '/story/$step',
+  path: '/story/$step',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/demo': typeof DemoRoute
+  '/demo-form': typeof DemoFormRoute
+  '/explore': typeof ExploreRoute
+  '/home-fallback': typeof HomeFallbackRoute
+  '/home-no-match': typeof HomeNoMatchRoute
+  '/not-found': typeof NotFoundRoute
+  '/previews': typeof PreviewsRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-in-prompt': typeof SignInPromptRoute
+  '/sign-up': typeof SignUpRoute
+  '/story-menu': typeof StoryMenuRoute
+  '/submissions': typeof SubmissionsRoute
+  '/plate/$state': typeof PlateStateRoute
+  '/preview/components': typeof PreviewComponentsRoute
+  '/settings/delete-confirm': typeof SettingsDeleteConfirmRoute
+  '/spot/$outcome': typeof SpotOutcomeRoute
+  '/story/$step': typeof StoryStepRoute
+  '/spot/': typeof SpotIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/demo': typeof DemoRoute
+  '/demo-form': typeof DemoFormRoute
+  '/explore': typeof ExploreRoute
+  '/home-fallback': typeof HomeFallbackRoute
+  '/home-no-match': typeof HomeNoMatchRoute
+  '/not-found': typeof NotFoundRoute
+  '/previews': typeof PreviewsRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-in-prompt': typeof SignInPromptRoute
+  '/sign-up': typeof SignUpRoute
+  '/story-menu': typeof StoryMenuRoute
+  '/submissions': typeof SubmissionsRoute
+  '/plate/$state': typeof PlateStateRoute
+  '/preview/components': typeof PreviewComponentsRoute
+  '/settings/delete-confirm': typeof SettingsDeleteConfirmRoute
+  '/spot/$outcome': typeof SpotOutcomeRoute
+  '/story/$step': typeof StoryStepRoute
+  '/spot': typeof SpotIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/demo': typeof DemoRoute
+  '/demo-form': typeof DemoFormRoute
+  '/explore': typeof ExploreRoute
+  '/home-fallback': typeof HomeFallbackRoute
+  '/home-no-match': typeof HomeNoMatchRoute
+  '/not-found': typeof NotFoundRoute
+  '/previews': typeof PreviewsRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-in-prompt': typeof SignInPromptRoute
+  '/sign-up': typeof SignUpRoute
+  '/story-menu': typeof StoryMenuRoute
+  '/submissions': typeof SubmissionsRoute
+  '/plate/$state': typeof PlateStateRoute
+  '/preview/components': typeof PreviewComponentsRoute
+  '/settings_/delete-confirm': typeof SettingsDeleteConfirmRoute
+  '/spot/$outcome': typeof SpotOutcomeRoute
+  '/story/$step': typeof StoryStepRoute
+  '/spot/': typeof SpotIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/contact'
+    | '/demo'
+    | '/demo-form'
+    | '/explore'
+    | '/home-fallback'
+    | '/home-no-match'
+    | '/not-found'
+    | '/previews'
+    | '/privacy'
+    | '/profile'
+    | '/settings'
+    | '/sign-in'
+    | '/sign-in-prompt'
+    | '/sign-up'
+    | '/story-menu'
+    | '/submissions'
+    | '/plate/$state'
+    | '/preview/components'
+    | '/settings/delete-confirm'
+    | '/spot/$outcome'
+    | '/story/$step'
+    | '/spot/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/contact'
+    | '/demo'
+    | '/demo-form'
+    | '/explore'
+    | '/home-fallback'
+    | '/home-no-match'
+    | '/not-found'
+    | '/previews'
+    | '/privacy'
+    | '/profile'
+    | '/settings'
+    | '/sign-in'
+    | '/sign-in-prompt'
+    | '/sign-up'
+    | '/story-menu'
+    | '/submissions'
+    | '/plate/$state'
+    | '/preview/components'
+    | '/settings/delete-confirm'
+    | '/spot/$outcome'
+    | '/story/$step'
+    | '/spot'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/contact'
+    | '/demo'
+    | '/demo-form'
+    | '/explore'
+    | '/home-fallback'
+    | '/home-no-match'
+    | '/not-found'
+    | '/previews'
+    | '/privacy'
+    | '/profile'
+    | '/settings'
+    | '/sign-in'
+    | '/sign-in-prompt'
+    | '/sign-up'
+    | '/story-menu'
+    | '/submissions'
+    | '/plate/$state'
+    | '/preview/components'
+    | '/settings_/delete-confirm'
+    | '/spot/$outcome'
+    | '/story/$step'
+    | '/spot/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
+  ContactRoute: typeof ContactRoute
+  DemoRoute: typeof DemoRoute
+  DemoFormRoute: typeof DemoFormRoute
+  ExploreRoute: typeof ExploreRoute
+  HomeFallbackRoute: typeof HomeFallbackRoute
+  HomeNoMatchRoute: typeof HomeNoMatchRoute
+  NotFoundRoute: typeof NotFoundRoute
+  PreviewsRoute: typeof PreviewsRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRoute
+  SignInRoute: typeof SignInRoute
+  SignInPromptRoute: typeof SignInPromptRoute
+  SignUpRoute: typeof SignUpRoute
+  StoryMenuRoute: typeof StoryMenuRoute
+  SubmissionsRoute: typeof SubmissionsRoute
+  PlateStateRoute: typeof PlateStateRoute
+  PreviewComponentsRoute: typeof PreviewComponentsRoute
+  SettingsDeleteConfirmRoute: typeof SettingsDeleteConfirmRoute
+  SpotOutcomeRoute: typeof SpotOutcomeRoute
+  StoryStepRoute: typeof StoryStepRoute
+  SpotIndexRoute: typeof SpotIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +364,203 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo-form': {
+      id: '/demo-form'
+      path: '/demo-form'
+      fullPath: '/demo-form'
+      preLoaderRoute: typeof DemoFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home-fallback': {
+      id: '/home-fallback'
+      path: '/home-fallback'
+      fullPath: '/home-fallback'
+      preLoaderRoute: typeof HomeFallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home-no-match': {
+      id: '/home-no-match'
+      path: '/home-no-match'
+      fullPath: '/home-no-match'
+      preLoaderRoute: typeof HomeNoMatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/not-found': {
+      id: '/not-found'
+      path: '/not-found'
+      fullPath: '/not-found'
+      preLoaderRoute: typeof NotFoundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/previews': {
+      id: '/previews'
+      path: '/previews'
+      fullPath: '/previews'
+      preLoaderRoute: typeof PreviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in-prompt': {
+      id: '/sign-in-prompt'
+      path: '/sign-in-prompt'
+      fullPath: '/sign-in-prompt'
+      preLoaderRoute: typeof SignInPromptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/story-menu': {
+      id: '/story-menu'
+      path: '/story-menu'
+      fullPath: '/story-menu'
+      preLoaderRoute: typeof StoryMenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/submissions': {
+      id: '/submissions'
+      path: '/submissions'
+      fullPath: '/submissions'
+      preLoaderRoute: typeof SubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plate/$state': {
+      id: '/plate/$state'
+      path: '/plate/$state'
+      fullPath: '/plate/$state'
+      preLoaderRoute: typeof PlateStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview/components': {
+      id: '/preview/components'
+      path: '/preview/components'
+      fullPath: '/preview/components'
+      preLoaderRoute: typeof PreviewComponentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings_/delete-confirm': {
+      id: '/settings_/delete-confirm'
+      path: '/settings/delete-confirm'
+      fullPath: '/settings/delete-confirm'
+      preLoaderRoute: typeof SettingsDeleteConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spot/': {
+      id: '/spot/'
+      path: '/spot'
+      fullPath: '/spot/'
+      preLoaderRoute: typeof SpotIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spot/$outcome': {
+      id: '/spot/$outcome'
+      path: '/spot/$outcome'
+      fullPath: '/spot/$outcome'
+      preLoaderRoute: typeof SpotOutcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/story/$step': {
+      id: '/story/$step'
+      path: '/story/$step'
+      fullPath: '/story/$step'
+      preLoaderRoute: typeof StoryStepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
+  ContactRoute: ContactRoute,
+  DemoRoute: DemoRoute,
+  DemoFormRoute: DemoFormRoute,
+  ExploreRoute: ExploreRoute,
+  HomeFallbackRoute: HomeFallbackRoute,
+  HomeNoMatchRoute: HomeNoMatchRoute,
+  NotFoundRoute: NotFoundRoute,
+  PreviewsRoute: PreviewsRoute,
+  PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRoute,
+  SignInRoute: SignInRoute,
+  SignInPromptRoute: SignInPromptRoute,
+  SignUpRoute: SignUpRoute,
+  StoryMenuRoute: StoryMenuRoute,
+  SubmissionsRoute: SubmissionsRoute,
+  PlateStateRoute: PlateStateRoute,
+  PreviewComponentsRoute: PreviewComponentsRoute,
+  SettingsDeleteConfirmRoute: SettingsDeleteConfirmRoute,
+  SpotOutcomeRoute: SpotOutcomeRoute,
+  StoryStepRoute: StoryStepRoute,
+  SpotIndexRoute: SpotIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

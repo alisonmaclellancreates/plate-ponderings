@@ -1,31 +1,46 @@
-import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { expect, it, vi } from "vitest";
+import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 
+let search: { jurisdiction?: string; text?: string } = {};
 vi.mock("@tanstack/react-router", () => ({
-  createFileRoute: () => (options: Record<string, unknown>) => options,
+  createFileRoute: () => (o: Record<string, unknown>) => ({ ...o, useSearch: () => search }),
+}));
+vi.mock("@/components/site/Homepage", () => ({
+  Homepage: ({ variant, prefill }: { variant?: string; prefill?: { text?: string } }) => (
+    <p>
+      {variant ?? "default"}
+      {prefill?.text ?? ""}
+    </p>
+  ),
 }));
 
-import { Route } from "@/routes/index";
-
-const R = Route as unknown as {
+type R = {
+  validateSearch: (s: Record<string, unknown>) => Record<string, string | undefined>;
   head: () => { meta: Record<string, string>[] };
   component: () => ReactNode;
 };
 
-describe("index route", () => {
-  it("renders the app name as the page heading inside main", () => {
-    const C = R.component;
-    render(<C />);
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(screen.getByRole("main")).toContainElement(heading);
-    expect(heading.textContent).toBeTruthy();
-  });
+it("renders the default variant with matching titles", async () => {
+  const r = (await import("@/routes/index")).Route as unknown as R;
+  const C = r.component;
+  expect(render(<C />).container.textContent).toBe("default");
+  const meta = r.head().meta;
+  const title = meta.find((m) => "title" in m)?.["title"];
+  expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
+});
 
-  it("head provides a title and matching og:title", () => {
-    const meta = R.head().meta;
-    const title = meta.find((m) => "title" in m)?.["title"];
-    expect(title).toBeTruthy();
-    expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
+it("passes validated search values into the homepage search", async () => {
+  const r = (await import("@/routes/index")).Route as unknown as R;
+  expect(r.validateSearch({ jurisdiction: "Utah", text: "TRAILS", x: 1 })).toEqual({
+    jurisdiction: "Utah",
+    text: "TRAILS",
   });
+  expect(r.validateSearch({ jurisdiction: 5, text: "x".repeat(65) })).toEqual({
+    jurisdiction: undefined,
+    text: undefined,
+  });
+  search = { jurisdiction: "Utah", text: "TRAILS" };
+  const C = r.component;
+  expect(render(<C />).container.textContent).toBe("defaultTRAILS");
 });

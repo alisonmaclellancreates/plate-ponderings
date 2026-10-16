@@ -1,0 +1,19 @@
+{
+  "name": "What the Plate?",
+  "short_name": "What the Plate?",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#287C80",
+  "background_color": "#FAF6ED",
+  "display": "standalone"
+}

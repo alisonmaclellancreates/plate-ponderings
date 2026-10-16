@@ -1,0 +1,165 @@
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Menu, UserRound, X } from "lucide-react";
+import { CURRENT_USER } from "@/lib/mock-data";
+
+// Explore, Spot a Plate and About are built in later steps; plain anchors until then.
+const NAV = [
+  { href: "/explore", label: "Explore" },
+  { href: "/spot", label: "Spot a Plate" },
+  { href: "/about", label: "About" },
+];
+
+/** member: signed in. signed-out: Sign in + Try the Demo. demo: sample traveler with Exit Demo. */
+export type HeaderMode = "member" | "signed-out" | "demo";
+
+/** Which header each preview path shows; every other path is the signed-in member header. */
+export function headerModeFor(pathname: string): HeaderMode {
+  if (["/sign-in-prompt", "/sign-in", "/sign-up", "/demo"].includes(pathname)) return "signed-out";
+  if (pathname === "/demo-form") return "demo";
+  return "member";
+}
+
+function Avatar({ showHandle }: { showHandle: boolean }) {
+  return (
+    <span className="flex items-center gap-2">
+      <span className="relative inline-flex size-9 items-center justify-center rounded-full bg-cream text-navy">
+        <UserRound aria-hidden className="size-5" />
+        {CURRENT_USER.hasNotification && (
+          <span
+            data-testid="notification-dot"
+            className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-navy bg-coral"
+          />
+        )}
+      </span>
+      <span className={showHandle ? "font-semibold" : "sr-only"}>{CURRENT_USER.handle}</span>
+    </span>
+  );
+}
+
+/** Demo profile menu, shown open in the preview so Exit Demo is visible. */
+function DemoProfile({ showHandle }: { showHandle: boolean }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={showHandle ? "profile-menu" : "profile-menu-mobile"}
+        aria-label={showHandle ? undefined : `${CURRENT_USER.handle} menu`}
+        onClick={() => setOpen((v) => !v)}
+        className="rounded-full"
+      >
+        <Avatar showHandle={showHandle} />
+      </button>
+      {open && (
+        <ul
+          id={showHandle ? "profile-menu" : "profile-menu-mobile"}
+          aria-label="Profile"
+          className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
+        >
+          <li>
+            <Link to="/submissions" className="block px-4 py-2 hover:bg-cream">
+              Your Submissions
+            </Link>
+          </li>
+          <li>
+            <Link to="/profile" className="block px-4 py-2 hover:bg-cream">
+              Your Profile
+            </Link>
+          </li>
+          <li className="border-t border-border">
+            <Link to="/" className="block px-4 py-2 font-semibold hover:bg-cream">
+              Exit Demo
+            </Link>
+          </li>
+        </ul>
+      )}
+    </div>
+  );
+}
+
+const signIn = "site-nav-link rounded-md px-2 py-1";
+const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream";
+
+export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
+  const [open, setOpen] = useState(false);
+  const signedOut = mode === "signed-out";
+  return (
+    <header className="bg-navy text-cream" data-mode={mode}>
+      <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-2">
+        <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
+          <img
+            src="/brand/what-the-plate-logo-v1.webp"
+            alt=""
+            width={480}
+            height={240}
+            className="h-14 w-auto"
+          />
+        </Link>
+        <nav aria-label="Main" className="hidden flex-1 items-center gap-6 md:flex">
+          {NAV.map((item) => (
+            <a key={item.href} href={item.href} className="site-nav-link">
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <div className="ml-auto hidden items-center gap-4 md:flex">
+          {signedOut ? (
+            <>
+              <Link to="/sign-in" className={signIn}>
+                Sign in
+              </Link>
+              <Link to="/demo" className={tryDemo}>
+                Try the Demo
+              </Link>
+            </>
+          ) : mode === "demo" ? (
+            <DemoProfile showHandle />
+          ) : (
+            <Avatar showHandle />
+          )}
+        </div>
+        <div className="ml-auto flex items-center gap-3 md:hidden">
+          {signedOut ? (
+            <Link to="/sign-in" className={signIn}>
+              Sign in
+            </Link>
+          ) : mode === "demo" ? (
+            <DemoProfile showHandle={false} />
+          ) : (
+            <Avatar showHandle={false} />
+          )}
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex size-10 items-center justify-center rounded-lg"
+          >
+            {open ? <X aria-hidden /> : <Menu aria-hidden />}
+          </button>
+        </div>
+      </div>
+      {open && (
+        <nav
+          id="mobile-menu"
+          aria-label="Mobile"
+          className="border-t border-cream/20 px-4 pb-4 md:hidden"
+        >
+          {NAV.map((item) => (
+            <a key={item.href} href={item.href} className="site-nav-link block py-3">
+              {item.label}
+            </a>
+          ))}
+          {signedOut && (
+            <Link to="/demo" className={`${tryDemo} mt-2 inline-block`}>
+              Try the Demo
+            </Link>
+          )}
+        </nav>
+      )}
+    </header>
+  );
+}
