@@ -6,6 +6,13 @@ export type AnalyticsEvents = {
   $pageview: { path: string };
 };
 
+declare global {
+  interface ImportMetaEnv {
+    readonly VITE_POSTHOG_KEY?: string;
+    readonly VITE_POSTHOG_HOST?: string;
+  }
+}
+
 type Client = typeof import("posthog-js").default;
 let clientPromise: Promise<Client | undefined> | undefined;
 
@@ -53,9 +60,9 @@ function getClient(): Promise<Client | undefined> {
   return clientPromise;
 }
 
-export async function track<E extends keyof AnalyticsEvents>(
+export async function track<E extends keyof AnalyticsEvents, P extends AnalyticsEvents[E]>(
   event: E,
-  properties: AnalyticsEvents[E],
+  properties: P & Record<Exclude<keyof P, keyof AnalyticsEvents[E]>, never>,
 ): Promise<void> {
   const client = await getClient();
   if (!client) return;
