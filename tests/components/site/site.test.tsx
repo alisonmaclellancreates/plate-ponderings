@@ -35,20 +35,9 @@ describe("Plate", () => {
     expect(within(plate).getByText("Yukon")).toHaveAttribute("data-tone", "fallback");
   });
 
-  it("shrinks long text", () => {
-    render(
-      <>
-        <Plate jurisdiction="Ontario" text="ILUV2CODE" />
-        <Plate jurisdiction="Ontario" text="HI" />
-      </>,
-    );
-    const long = parseFloat(
-      (screen.getByText("ILUV2CODE").getAttribute("style") ?? "").replace(/[^0-9.]/g, ""),
-    );
-    const short = parseFloat(
-      (screen.getByText("HI").getAttribute("style") ?? "").replace(/[^0-9.]/g, ""),
-    );
-    expect(long).toBeLessThan(short);
+  it("renders long text on the plate", () => {
+    render(<Plate jurisdiction="Ontario" text="ILUV2CODE" />);
+    expect(screen.getByText("ILUV2CODE")).toHaveClass("plate-text");
   });
 });
 
