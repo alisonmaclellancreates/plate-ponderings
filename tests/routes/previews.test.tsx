@@ -7,14 +7,14 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
 }));
 
-import { Route } from "@/routes/index";
+import { Route } from "@/routes/previews";
 
 const R = Route as unknown as {
   head: () => { meta: Record<string, string>[] };
   component: () => ReactNode;
 };
 
-describe("index route", () => {
+describe("previews route", () => {
   it("renders the app name as the page heading inside main", () => {
     const C = R.component;
     render(<C />);
