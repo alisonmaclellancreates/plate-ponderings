@@ -125,28 +125,54 @@ describe("analytics", () => {
       const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
       sent = beforeSend({
         event,
-        properties: { ...captured, distinct_id: "anonymous-id", is_demo: true, unlisted: "sdk content" },
+        properties: {
+          ...captured,
+          distinct_id: "anonymous-id",
+          is_demo: true,
+          unlisted: "sdk content",
+        },
       });
     });
     // Exercise the runtime boundary with input that bypasses the typed API.
     // @ts-expect-error Unlisted properties are also rejected by the derived type.
     await analytics.track("test_event", properties);
     expect(sdk.capture).toHaveBeenCalledWith("test_event", {
-      outcome: "completed", count: 2, successful: true, path: "/test",
+      outcome: "completed",
+      count: 2,
+      successful: true,
+      path: "/test",
     });
     expect(sent).toEqual({
       event: "test_event",
       properties: {
-        outcome: "completed", count: 2, successful: true, path: "/test",
-        distinct_id: "anonymous-id", is_demo: true,
+        outcome: "completed",
+        count: 2,
+        successful: true,
+        path: "/test",
+        distinct_id: "anonymous-id",
+        is_demo: true,
       },
     });
     const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
-    expect(beforeSend({ event: "$identify", properties: { distinct_id: "user-id", is_demo: false, path: "/private", outcome: "private" } })).toEqual({
-      event: "$identify", properties: { distinct_id: "user-id", is_demo: false },
+    expect(
+      beforeSend({
+        event: "$identify",
+        properties: {
+          distinct_id: "user-id",
+          is_demo: false,
+          path: "/private",
+          outcome: "private",
+        },
+      }),
+    ).toEqual({
+      event: "$identify",
+      properties: { distinct_id: "user-id", is_demo: false },
     });
-    expect(beforeSend({ event: "$pageview", properties: { path: "/?secret=yes", outcome: "private" } })).toEqual({
-      event: "$pageview", properties: { path: "/" },
+    expect(
+      beforeSend({ event: "$pageview", properties: { path: "/?secret=yes", outcome: "private" } }),
+    ).toEqual({
+      event: "$pageview",
+      properties: { path: "/" },
     });
   });
 });

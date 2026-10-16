@@ -50,65 +50,70 @@ export function createAnalytics<const R extends EventRegistry>(registry: R) {
   type Events = EventProperties<R>;
   let clientPromise: Promise<Client | undefined> | undefined;
 
-function getClient(): Promise<Client | undefined> {
-  const key = import.meta.env.VITE_POSTHOG_KEY;
-  if (typeof window === "undefined" || !key) return Promise.resolve(undefined);
-  clientPromise ??= import("posthog-js")
-    .then(({ default: client }) => {
-      client.init(key, {
-        api_host: import.meta.env.VITE_POSTHOG_HOST || "https://eu.i.posthog.com",
-        autocapture: false,
-        disable_session_recording: true,
-        person_profiles: "identified_only",
-        capture_pageview: false,
-        capture_pageleave: false,
-        capture_exceptions: false,
-        capture_performance: false,
-        disable_surveys: true,
-        advanced_disable_flags: true,
-        before_send: (event) => {
-          if (!event) return null;
-          const listed = Object.prototype.hasOwnProperty.call(registry, event.event)
-            ? registry[event.event]
-            : undefined;
-          if (!listed && event.event !== "$identify") return null;
-          // The SDK adds URLs, referrers and other strings automatically. Retain
-          // only analytics identifiers and explicitly planned properties.
-          event.properties = filterProperties(event.properties, [...IDENTIFIERS, ...(listed ?? [])]);
-          return event;
-        },
-      });
-      return client;
-    })
-    .catch(() => undefined);
-  return clientPromise;
-}
+  function getClient(): Promise<Client | undefined> {
+    const key = import.meta.env.VITE_POSTHOG_KEY;
+    if (typeof window === "undefined" || !key) return Promise.resolve(undefined);
+    clientPromise ??= import("posthog-js")
+      .then(({ default: client }) => {
+        client.init(key, {
+          api_host: import.meta.env.VITE_POSTHOG_HOST || "https://eu.i.posthog.com",
+          autocapture: false,
+          disable_session_recording: true,
+          person_profiles: "identified_only",
+          capture_pageview: false,
+          capture_pageleave: false,
+          capture_exceptions: false,
+          capture_performance: false,
+          disable_surveys: true,
+          advanced_disable_flags: true,
+          before_send: (event) => {
+            if (!event) return null;
+            const listed = Object.prototype.hasOwnProperty.call(registry, event.event)
+              ? registry[event.event]
+              : undefined;
+            if (!listed && event.event !== "$identify") return null;
+            // The SDK adds URLs, referrers and other strings automatically. Retain
+            // only analytics identifiers and explicitly planned properties.
+            event.properties = filterProperties(event.properties, [
+              ...IDENTIFIERS,
+              ...(listed ?? []),
+            ]);
+            return event;
+          },
+        });
+        return client;
+      })
+      .catch(() => undefined);
+    return clientPromise;
+  }
 
-async function track<E extends keyof Events & string, P extends Events[E]>(
-  event: E,
-  properties: P & Record<Exclude<keyof P, keyof Events[E]>, never>,
-): Promise<void> {
-  const listed = Object.prototype.hasOwnProperty.call(registry, event) ? registry[event] : undefined;
-  if (!listed) return;
-  const client = await getClient();
-  if (!client) return;
-  client.capture(event, filterProperties(properties, listed));
-}
+  async function track<E extends keyof Events & string, P extends Events[E]>(
+    event: E,
+    properties: P & Record<Exclude<keyof P, keyof Events[E]>, never>,
+  ): Promise<void> {
+    const listed = Object.prototype.hasOwnProperty.call(registry, event)
+      ? registry[event]
+      : undefined;
+    if (!listed) return;
+    const client = await getClient();
+    if (!client) return;
+    client.capture(event, filterProperties(properties, listed));
+  }
 
-async function identify(userId: string): Promise<void> {
-  const client = await getClient();
-  client?.identify(userId);
-}
+  async function identify(userId: string): Promise<void> {
+    const client = await getClient();
+    client?.identify(userId);
+  }
 
-async function setDemo(isDemo: boolean): Promise<void> {
-  const client = await getClient();
-  client?.register({ is_demo: isDemo });
-}
+  async function setDemo(isDemo: boolean): Promise<void> {
+    const client = await getClient();
+    client?.register({ is_demo: isDemo });
+  }
 
-async function reset(): Promise<void> {
-  const client = await getClient();
-  client?.reset();
-}
+  async function reset(): Promise<void> {
+    const client = await getClient();
+    client?.reset();
+  }
   return { track, identify, setDemo, reset };
 }
 
