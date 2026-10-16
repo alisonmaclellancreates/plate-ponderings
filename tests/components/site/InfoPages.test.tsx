@@ -38,7 +38,9 @@ describe("PrivacyPage", () => {
         /Your email address and handle, the plates you spot, your stories and their blurred photos, the hearts you give, the reports you send, the people you block, and your notifications\./,
       ),
     ).toBeTruthy();
-    expect(screen.getByText(/summaries written from published stories, and their history/)).toBeTruthy();
+    expect(
+      screen.getByText(/summaries written from published stories, and their history/),
+    ).toBeTruthy();
     expect(screen.getByText(/never stored by our application/)).toBeTruthy();
     expect(screen.getByText(/Our safety checks use AI to review each new plate/)).toBeTruthy();
     expect(screen.getByText(/so they see submissions before anyone else does/)).toBeTruthy();
