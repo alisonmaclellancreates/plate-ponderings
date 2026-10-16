@@ -60,7 +60,7 @@ function plateBySlug(slug: string) {
 }
 
 /** Rowan's signpost as decoration beside the sign's live text on a cream surface. */
-function ScenicHeader({
+export function ScenicHeader({
   title,
   subtitle,
   asHeading = false,
