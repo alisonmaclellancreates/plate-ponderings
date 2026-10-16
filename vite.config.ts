@@ -29,7 +29,9 @@ export default defineConfig({
         env["VITE_POSTHOG_HOST"] ??
           (env["VITE_LOVABLE_CONNECTOR_POSTHOG_REGION"] === "us"
             ? "https://us.i.posthog.com"
-            : "https://eu.i.posthog.com"),
+            : env["VITE_LOVABLE_CONNECTOR_POSTHOG_REGION"] === "eu"
+              ? "https://eu.i.posthog.com"
+              : ""),
       ),
     },
     // Pre-bundle shared UI deps up front: late discovery re-optimizes mid-session and can
