@@ -177,6 +177,14 @@ export const PLATES: PlateRecord[] = [
   })),
 ];
 
+/** Used only by the PNW LV plate detail preview; the shared record stays unchanged. */
+export const PNW_LV_SUMMARY: Summary = {
+  date: "2026-10-12",
+  consensus: "agree",
+  storyCount: 2,
+  text: "Both stories read this plate as Pacific Northwest love.",
+};
+
 /** Published only in the catching-up preview; shared LV2CODE data remains unchanged. */
 export const CATCHING_UP_STORY: Story = s(
   "bc6",
