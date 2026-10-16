@@ -15,6 +15,8 @@ import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as PreviewsRouteImport } from './routes/previews'
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
+import { Route as SpotIndexRouteImport } from './routes/spot.index'
+import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +48,16 @@ const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
   path: '/preview/components',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpotIndexRoute = SpotIndexRouteImport.update({
+  id: '/spot/',
+  path: '/spot/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
+  id: '/spot/$outcome',
+  path: '/spot/$outcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +66,8 @@ export interface FileRoutesByFullPath {
   '/previews': typeof PreviewsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
+  '/spot/$outcome': typeof SpotOutcomeRoute
+  '/spot/': typeof SpotIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +76,8 @@ export interface FileRoutesByTo {
   '/previews': typeof PreviewsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
+  '/spot/$outcome': typeof SpotOutcomeRoute
+  '/spot': typeof SpotIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +87,8 @@ export interface FileRoutesById {
   '/previews': typeof PreviewsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
+  '/spot/$outcome': typeof SpotOutcomeRoute
+  '/spot/': typeof SpotIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +99,8 @@ export interface FileRouteTypes {
     | '/previews'
     | '/plate/$state'
     | '/preview/components'
+    | '/spot/$outcome'
+    | '/spot/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +109,8 @@ export interface FileRouteTypes {
     | '/previews'
     | '/plate/$state'
     | '/preview/components'
+    | '/spot/$outcome'
+    | '/spot'
   id:
     | '__root__'
     | '/'
@@ -97,6 +119,8 @@ export interface FileRouteTypes {
     | '/previews'
     | '/plate/$state'
     | '/preview/components'
+    | '/spot/$outcome'
+    | '/spot/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +130,8 @@ export interface RootRouteChildren {
   PreviewsRoute: typeof PreviewsRoute
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
+  SpotOutcomeRoute: typeof SpotOutcomeRoute
+  SpotIndexRoute: typeof SpotIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +178,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/spot/': {
+      id: '/spot/'
+      path: '/spot'
+      fullPath: '/spot/'
+      preLoaderRoute: typeof SpotIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spot/$outcome': {
+      id: '/spot/$outcome'
+      path: '/spot/$outcome'
+      fullPath: '/spot/$outcome'
+      preLoaderRoute: typeof SpotOutcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +202,8 @@ const rootRouteChildren: RootRouteChildren = {
   PreviewsRoute: PreviewsRoute,
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
+  SpotOutcomeRoute: SpotOutcomeRoute,
+  SpotIndexRoute: SpotIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

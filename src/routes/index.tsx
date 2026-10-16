@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Homepage } from "@/components/site/Homepage";
 
+const str = (v: unknown) => (typeof v === "string" && v.length <= 64 ? v : undefined);
+
 export const Route = createFileRoute("/")({
+  validateSearch: (s: Record<string, unknown>): { jurisdiction?: string; text?: string } => ({
+    jurisdiction: str(s.jurisdiction),
+    text: str(s.text),
+  }),
   head: () => ({
     meta: [
       { title: "What the Plate? Every plate has a story" },
@@ -20,5 +26,10 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: () => <Homepage />,
+  component: HomeRoute,
 });
+
+function HomeRoute() {
+  const prefill = Route.useSearch();
+  return <Homepage prefill={prefill} />;
+}

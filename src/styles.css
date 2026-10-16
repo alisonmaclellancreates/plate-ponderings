@@ -84,6 +84,9 @@
   --coral-cta-pressed: #923520;
   --coral-pale: #f2d7ca;
   --teal: #287c80;
+  --wood: #8a5a34;
+  --wood-dark: #5e3b1f;
+  --sky: #cfe6ee;
   --gold: #e9b85c;
   --slate: #dce5e7;
   --plate-wa: #b9d3ea;
@@ -249,6 +252,36 @@
   }
   .brand-btn-coral:active:not(:disabled) {
     background: var(--coral-cta-pressed);
+  }
+
+  .brand-btn-outline {
+    background: var(--card);
+    color: var(--navy);
+    border: 2px solid var(--navy);
+  }
+  .brand-btn-outline:hover:not(:disabled) {
+    background: var(--cream);
+  }
+
+  /* Spot a Plate: scenic band and wooden sign placeholder until Rowan's artwork lands. */
+  .spot-scenic {
+    background: linear-gradient(to bottom, var(--sky) 0%, var(--cream) 70%, var(--cream-warm) 100%);
+  }
+  .spot-sign {
+    background: var(--wood);
+    color: var(--cream);
+    border: 4px solid var(--wood-dark);
+    border-radius: 10px;
+    box-shadow: 0 6px 0 var(--wood-dark);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .spot-drive {
+      animation: spot-drive 1.6s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes spot-drive {
+    from { transform: translateX(-6px); }
+    to { transform: translateX(6px); }
   }
 
   .brand-badge {
