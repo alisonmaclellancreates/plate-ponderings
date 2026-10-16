@@ -1,0 +1,408 @@
+[
+  {
+    "file": "assets/what-the-plate-logo-v1.webp",
+    "role": "Header logo; retain selected Road Trip raster logo",
+    "source": "retained v1",
+    "master_size": [
+      1774,
+      887
+    ],
+    "web_size": [
+      480,
+      240
+    ],
+    "bytes": 44296,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "094a9771f762d15fc45cf6b0edec4f4289e3e65ed80156fc8a9ac3f3b2783430"
+  },
+  {
+    "file": "assets/homepage-hero-v2.webp",
+    "role": "Homepage hero; replaces homepage-hero-v1; car on right, headline on left",
+    "source": "new v2",
+    "master_size": [
+      1774,
+      887
+    ],
+    "web_size": [
+      1600,
+      800
+    ],
+    "bytes": 260736,
+    "alpha_range": null,
+    "sha256": "b32d817bcc66b4cde2ab841119a3b923fa9e70051193b7f38ba1dcfc58ab6b08"
+  },
+  {
+    "file": "assets/look-up-a-plate-v1.webp",
+    "role": "Look Up a Plate action illustration",
+    "source": "retained v1",
+    "master_size": [
+      1536,
+      1024
+    ],
+    "web_size": [
+      700,
+      467
+    ],
+    "bytes": 53264,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "84efc5726b3ebff769626751f514ff3705b3920355b7034f3b87eef4991eccac"
+  },
+  {
+    "file": "assets/spot-a-plate-v1.webp",
+    "role": "Spot a Plate action illustration",
+    "source": "retained v1",
+    "master_size": [
+      1536,
+      1024
+    ],
+    "web_size": [
+      700,
+      467
+    ],
+    "bytes": 73982,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "79bf0ffcce1d2735dd65d3af3dd228a40219f2a80731c84af7e0606f0b462483"
+  },
+  {
+    "file": "assets/how-i-know-owner-v1.webp",
+    "role": "Story choice: It's my plate",
+    "source": "retained v1",
+    "master_size": [
+      1536,
+      1024
+    ],
+    "web_size": [
+      700,
+      467
+    ],
+    "bytes": 50352,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "621ddcf739b1fd51d3904446c45dbf5368cc5c3ea0f1167c963a37b0eab2a163"
+  },
+  {
+    "file": "assets/how-i-know-knows-owner-v1.webp",
+    "role": "Story choice: I know the owner",
+    "source": "retained v1",
+    "master_size": [
+      1536,
+      1024
+    ],
+    "web_size": [
+      700,
+      467
+    ],
+    "bytes": 80702,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "e0df1bda8cbd593387f0d8dcae241a8e433d199af4708fd7e139b9cd04c916ae"
+  },
+  {
+    "file": "assets/how-i-know-asked-driver-v1.webp",
+    "role": "Story choice: I asked the driver",
+    "source": "retained v1",
+    "master_size": [
+      1536,
+      1024
+    ],
+    "web_size": [
+      700,
+      467
+    ],
+    "bytes": 69092,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "637ff21b7e4949ceb39fe752b901917e7a3ed3419702fb869657dac91958993f"
+  },
+  {
+    "file": "assets/how-i-know-guess-v1.webp",
+    "role": "Story choice: My best guess",
+    "source": "retained v1",
+    "master_size": [
+      1312,
+      1199
+    ],
+    "web_size": [
+      700,
+      640
+    ],
+    "bytes": 89270,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "5b11c98aa4d114974debbf930672f24c64d489175b34eb09ff04e8da96683e3e"
+  },
+  {
+    "file": "assets/sasquatch-v1.webp",
+    "role": "Shared rejection, error and not found character",
+    "source": "retained v1",
+    "master_size": [
+      1230,
+      1278
+    ],
+    "web_size": [
+      700,
+      727
+    ],
+    "bytes": 131702,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "feca32755321adb9833f33025450cedb353db0a324d57fae06fa8d3ba85b8c6d"
+  },
+  {
+    "file": "assets/search-no-match-v1.webp",
+    "role": "Homepage inline no-match illustration",
+    "source": "retained v1",
+    "master_size": [
+      1536,
+      1024
+    ],
+    "web_size": [
+      700,
+      467
+    ],
+    "bytes": 69704,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "c00d8bea403801cd8c4a446995da67072451e6c7137193946a26253dafec86a6"
+  },
+  {
+    "file": "assets/signpost-v1.webp",
+    "role": "Shared decorative roadside signpost",
+    "source": "retained v1",
+    "master_size": [
+      1024,
+      1536
+    ],
+    "web_size": [
+      700,
+      1050
+    ],
+    "bytes": 166528,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "68107acc66ee3d8de5a9752e09d3146da0361f7435ce95b2aac0591d3af99986"
+  },
+  {
+    "file": "assets/tagline-sign-v1.webp",
+    "role": "Blank sign; overlay Little plates. Big stories. as live text",
+    "source": "retained v1",
+    "master_size": [
+      2172,
+      724
+    ],
+    "web_size": [
+      1200,
+      400
+    ],
+    "bytes": 138102,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "bc0abf1bf7c8c03e660b6e9d428b26403d9ef60f78d7a801dbad45473d92c593"
+  },
+  {
+    "file": "assets/archive-landscape-v1.webp",
+    "role": "Explore introduction landscape",
+    "source": "retained v1",
+    "master_size": [
+      2172,
+      724
+    ],
+    "web_size": [
+      1600,
+      533
+    ],
+    "bytes": 300588,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "4302b8016de2ec60afde4d644bed7d00ffa45a7225aba0a8ec7a4f7424b6fdb8"
+  },
+  {
+    "file": "assets/how-it-works-road-v1.webp",
+    "role": "Optional alternative combined composition; do not stack with the three individual signposts",
+    "source": "retained v1",
+    "master_size": [
+      2073,
+      758
+    ],
+    "web_size": [
+      1400,
+      512
+    ],
+    "bytes": 124502,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "eeb0682bc80326ea4bcfad052ced6b2a33d3637752b39bbdc2fe3068ba3c1815"
+  },
+  {
+    "file": "assets/how-it-works-signpost-lookup-v1.webp",
+    "role": "Individual How it works magnifying-glass signpost; use Lovelace step copy/order",
+    "source": "retained v1",
+    "master_size": [
+      1218,
+      1292
+    ],
+    "web_size": [
+      700,
+      743
+    ],
+    "bytes": 98590,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "49f29b28642a7990768c48263a1903c9203750117aede4a733b20dd0258dae74"
+  },
+  {
+    "file": "assets/how-it-works-signpost-plate-v1.webp",
+    "role": "Individual How it works plate signpost; use Lovelace step copy/order",
+    "source": "retained v1",
+    "master_size": [
+      1155,
+      1362
+    ],
+    "web_size": [
+      700,
+      825
+    ],
+    "bytes": 97670,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "9845b8e87a76621e77ab1aed5cc683ece1a8be37feca2f3d20c76469a846ecdd"
+  },
+  {
+    "file": "assets/how-it-works-signpost-story-v1.webp",
+    "role": "Individual How it works story signpost; use Lovelace step copy/order",
+    "source": "retained v1",
+    "master_size": [
+      1224,
+      1285
+    ],
+    "web_size": [
+      700,
+      735
+    ],
+    "bytes": 118178,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "eec6823c4e98da7e79fa7b4d8f726c9f8f4b1d5b9aef76e3f779000caf5687df"
+  },
+  {
+    "file": "assets/generic-plate-background-v1.webp",
+    "role": "Base-build generic plate artwork; jurisdiction and plate text remain dynamic",
+    "source": "retained v1",
+    "master_size": [
+      1774,
+      887
+    ],
+    "web_size": [
+      900,
+      450
+    ],
+    "bytes": 31454,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "169831709c5351457c4fe7c261b9d287363e41d6dd98642dd9a0639bdbd11b4c"
+  },
+  {
+    "file": "assets/how-it-works-landscape-v2.webp",
+    "role": "New scenery behind How it works; no labels or signposts baked in",
+    "source": "new v2",
+    "master_size": [
+      2172,
+      724
+    ],
+    "web_size": [
+      1600,
+      533
+    ],
+    "bytes": 191692,
+    "alpha_range": null,
+    "sha256": "ad4f75e9c5b5d5bb322baa64fa6e2290dcb628fbbe8a0c6c3d2cc89a1a848b92"
+  },
+  {
+    "file": "assets/plate-of-the-day-landscape-v2.webp",
+    "role": "New scenery behind Plate of the Day; overlay real plate component",
+    "source": "new v2",
+    "master_size": [
+      2172,
+      724
+    ],
+    "web_size": [
+      1600,
+      533
+    ],
+    "bytes": 168758,
+    "alpha_range": null,
+    "sha256": "f5e71da2a77c02c5b5db11acaa31462d57e70861efbb0361993729f86f914844"
+  },
+  {
+    "file": "assets/footer-landscape-v2.webp",
+    "role": "New footer scenery; overlay existing blank tagline sign and live copy",
+    "source": "new v2",
+    "master_size": [
+      2172,
+      724
+    ],
+    "web_size": [
+      1600,
+      533
+    ],
+    "bytes": 206576,
+    "alpha_range": null,
+    "sha256": "ca6616b3574dd0025fb450dc168da66b30871dcc6a004d860eb2e86b6e8a6b6c"
+  },
+  {
+    "file": "assets/footer-pines-emblem-v2.webp",
+    "role": "New cream pine-and-road decorative emblem for navy footer",
+    "source": "new v2",
+    "master_size": [
+      1304,
+      1206
+    ],
+    "web_size": [
+      256,
+      237
+    ],
+    "bytes": 18542,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "sha256": "d080ebf51fc7486a9be7d5097a1ff81f7befab2d4f49459d5d46b8b8cda15fe5"
+  }
+]
