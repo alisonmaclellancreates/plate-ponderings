@@ -8,6 +8,13 @@
       "when": 1792190883516,
       "tag": "0000_step41_backend_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792190905253,
+      "tag": "0001_step41_story_photos_storage_policies",
+      "breakpoints": true
     }
   ]
 }
