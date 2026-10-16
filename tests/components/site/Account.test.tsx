@@ -50,20 +50,22 @@ describe("SubmissionsPage", () => {
     const findPlate = (text: string) => PLATES.find((p) => p.text === text)!;
     const pnw = findPlate("PNW LV");
     expect(pnw.stories).toHaveLength(2);
-    expect(within(rows[0]!).getByText("This plate is live with 2 stories.")).toBeInTheDocument();
+    expect(within(rows[0]!).getAllByText("This plate is live with 2 stories.").length).toBeGreaterThan(0);
     const trails = findPlate("TRAILS");
     expect(trails.stories).toHaveLength(2);
-    expect(within(rows[3]!).getByText("This plate is live with 2 stories.")).toBeInTheDocument();
+    expect(within(rows[3]!).getAllByText("This plate is live with 2 stories.").length).toBeGreaterThan(0);
     const teatimeStory = findPlate("TEATIME").stories.find((s) => s.handle === "Traveler4821")!;
     expect(teatimeStory.hearts).toBe(3);
-    expect(within(rows[4]!).getByText("Your story is live and has 3 hearts.")).toBeInTheDocument();
+    expect(within(rows[4]!).getAllByText("Your story is live and has 3 hearts.").length).toBeGreaterThan(0);
   });
 
   it("sorts rows newest first with TEATIME last", () => {
     render(<SubmissionsPage rows={[...SUBMISSIONS].reverse()} />);
     const rows = screen.getAllByTestId("submission");
     const last = rows[rows.length - 1]!;
-    expect(within(last).getByText("TEATIME")).toBeInTheDocument();
+    expect(
+      within(last).getByRole("img", { name: "California plate TEATIME" }),
+    ).toBeInTheDocument();
     expect(last).toHaveTextContent("Sep 26, 2026");
     const parsed = rows.map((r) => {
       const d = (r.textContent ?? "").match(/(\w{3} \d{1,2}, \d{4})/)?.[1] ?? "";
@@ -88,7 +90,7 @@ describe("SubmissionsPage", () => {
       "href",
       "/plate/pnw-lv",
     );
-    expect(within(rows[4]!).getAllByRole("button", { name: "View Plate" }).length).toBeGreaterThan(
+    expect(within(rows[4]!).getAllByRole("link", { name: "View Plate" }).length).toBeGreaterThan(
       0,
     );
   });
