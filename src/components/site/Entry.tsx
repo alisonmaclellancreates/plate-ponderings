@@ -169,8 +169,7 @@ export function SignInPromptPage() {
           Sign in to add your story
         </h2>
         <p className="mt-2">
-          Choose how you'd like to continue. After signing in, you'll return here to add your
-          story.
+          Choose how you'd like to continue. After signing in, you'll return here to add your story.
         </p>
         <ul className="mt-6 space-y-4">
           {CHOICES.map((c) => (
