@@ -15,8 +15,8 @@ export function AboutPage() {
         </p>
         <p>
           Anyone can look up a plate, share what they think it means, and see where people agree and
-          where they disagree. The Story So Far gathers those readings into one summary, so a plate's
-          meaning grows as more people weigh in.
+          where they disagree. The Story So Far gathers those readings into one summary, so a
+          plate's meaning grows as more people weigh in.
         </p>
         <p>It was built for #SheBuilds, with love for everyone who reads the road.</p>
       </div>

@@ -29,10 +29,7 @@ export function SettingsPage({ blocked = BLOCKED_HANDLES }: { blocked?: string[]
           </h2>
           <p className="mt-3">{DELETE_ACCOUNT_WARNING}</p>
           <div className="mt-4">
-            <Link
-              to="/settings/delete-confirm"
-              className="brand-btn brand-btn-outline-coral"
-            >
+            <Link to="/settings/delete-confirm" className="brand-btn brand-btn-outline-coral">
               Delete My Account
             </Link>
           </div>
