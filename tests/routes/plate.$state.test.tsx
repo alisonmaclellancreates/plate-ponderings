@@ -40,6 +40,12 @@ describe("plate detail route", () => {
     );
   });
 
+  it("head with an unknown state falls back to noindex", () => {
+    const meta = R.head({ loaderData: { state: "nope" } }).meta;
+    expect(meta.find((m) => "title" in m)?.["title"]).toBe("Plate unavailable | What the Plate?");
+    expect(meta.find((m) => m["name"] === "robots")?.["content"]).toBe("noindex");
+  });
+
   it("head has unique titles per state and noindex fallback", () => {
     const meta = R.head({ loaderData: { state: "owner" } }).meta;
     const title = meta.find((m) => "title" in m)?.["title"];
