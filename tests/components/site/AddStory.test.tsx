@@ -105,6 +105,17 @@ describe("Add a story previews", () => {
     expect(more).not.toHaveAttribute("placeholder");
   });
 
+  it("typing in Tell us more moves its counter from 0/500", async () => {
+    const user = userEvent.setup();
+    render(<StoryStepPage step="1" />);
+    const more = screen.getByRole("textbox", { name: /Tell us more/ });
+    expect(screen.getByText("0/500")).toBeInTheDocument();
+    await user.type(more, "Near Seattle");
+    expect(screen.getByText("12/500")).toBeInTheDocument();
+    expect(screen.queryByText("0/500")).toBeNull();
+  });
+
+
   it("Cancel on step 1 opens the PNW LV preview", () => {
     render(<StoryStepPage step="1" />);
     expect(screen.getByRole("link", { name: "Cancel" })).toHaveAttribute("href", "/plate/pnw-lv");
