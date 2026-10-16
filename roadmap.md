@@ -15,6 +15,6 @@
 - [x] Show both homepage variants in mobile view.
 
 # Plate detail corrections
-- [ ] Correct pending copy and mobile photo placement.
-- [ ] Add a catching-up-only story, align summary history, and relocate mock photo.
-- [ ] Verify plate detail tests, mobile/desktop previews, and lint.
+- [x] Correct pending copy and mobile photo placement.
+- [x] Add a catching-up-only story, align summary history, and relocate mock photo.
+- [x] Verify plate detail tests, mobile/desktop previews, and lint.
