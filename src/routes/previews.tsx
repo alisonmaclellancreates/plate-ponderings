@@ -34,6 +34,11 @@ const PREVIEWS = [
   },
   { to: "/submissions", label: "Your Submissions", note: "Plates and stories, newest first" },
   { to: "/profile", label: "Your Profile", note: "Handle, help text and preview card" },
+  { to: "/sign-in-prompt", label: "Sign in prompt", note: "Add Your Story for PNW LV, signed out" },
+  { to: "/sign-in", label: "Sign In", note: "Email and password" },
+  { to: "/sign-up", label: "Create an Account", note: "Email and password, no handle" },
+  { to: "/demo", label: "Try the Demo", note: "What the demo shows" },
+  { to: "/demo-form", label: "Demo, Add a story", note: "Step 1 read-only, profile menu open" },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */

@@ -19,6 +19,7 @@ vi.mock("@tanstack/react-router", () => ({
   HeadContent: () => <meta data-testid="head-content" />,
   Scripts: () => <span data-testid="scripts" />,
   useRouter: () => ({ invalidate }),
+  useRouterState: () => "/",
 }));
 vi.mock("@/lib/lovable-error-reporting", () => ({ reportLovableError }));
 

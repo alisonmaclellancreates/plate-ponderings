@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Camera, Info } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
+import { DemoBanner } from "@/components/site/DemoBanner";
 import { PLATES, STORY_PHOTO_PLACEHOLDER, type HowIKnow } from "@/lib/mock-data";
 
 export type StoryStep =
@@ -42,7 +43,7 @@ const coral = "brand-btn brand-btn-coral";
 const plate = PLATES.find((p) => p.slug === "or-pnwlv")!;
 
 /** Small plate with its name: beside it on desktop, a compact strip on phones. */
-function PlateHeader() {
+export function PlateHeader() {
   return (
     <div
       data-testid="plate-header"
@@ -92,13 +93,16 @@ function Shell({
   step,
   children,
   actions,
+  banner,
 }: {
   step: 1 | 2 | 3;
   children: ReactNode;
   actions: ReactNode;
+  banner?: ReactNode;
 }) {
   return (
     <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:py-10">
+      {banner}
       <PlateHeader />
       <h1 className="font-display text-3xl text-navy sm:text-4xl">Add Your Story</h1>
       <Stepper current={step} />
@@ -122,10 +126,12 @@ export function StoryStepOne({
   initial = { how: "owner", meaning: "", more: "" },
   ownerExists = false,
   rejected = false,
+  demo = false,
 }: {
   initial?: { how: HowIKnow; meaning: string; more: string };
   ownerExists?: boolean;
   rejected?: boolean;
+  demo?: boolean;
 }) {
   const [how, setHow] = useState<HowIKnow>(initial.how);
   const [meaning, setMeaning] = useState(initial.meaning);
@@ -133,14 +139,21 @@ export function StoryStepOne({
   return (
     <Shell
       step={1}
+      banner={demo ? <DemoBanner /> : undefined}
       actions={
         <>
           <Link to="/plate/$state" params={{ state: "pnw-lv" }} className={outline}>
             Cancel
           </Link>
-          <Link to="/story/$step" params={{ step: "2" }} className={coral}>
-            Next
-          </Link>
+          {demo ? (
+            <button type="button" disabled className={coral}>
+              Next
+            </button>
+          ) : (
+            <Link to="/story/$step" params={{ step: "2" }} className={coral}>
+              Next
+            </Link>
+          )}
         </>
       }
     >
@@ -153,7 +166,7 @@ export function StoryStepOne({
           </p>
         </div>
       )}
-      <fieldset>
+      <fieldset disabled={demo} className={demo ? "opacity-60" : undefined}>
         <legend className="mb-3 font-display text-2xl text-navy">How do you know?</legend>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {HOW_OPTIONS.map((o) => {
@@ -161,7 +174,7 @@ export function StoryStepOne({
             return (
               <label
                 key={o.value}
-                className={`brand-card flex cursor-pointer flex-col items-center gap-2 p-3 text-center font-semibold transition focus-within:ring-2 focus-within:ring-teal focus-within:ring-offset-2 ${selected ? "border-2 border-teal bg-cream-warm" : "bg-card"}`}
+                className={`brand-card flex ${demo ? "cursor-not-allowed" : "cursor-pointer"} flex-col items-center gap-2 p-3 text-center font-semibold transition focus-within:ring-2 focus-within:ring-teal focus-within:ring-offset-2 ${selected ? "border-2 border-teal bg-cream-warm" : "bg-card"}`}
               >
                 <input
                   type="radio"
@@ -197,9 +210,14 @@ export function StoryStepOne({
           maxLength={MEANING_MAX}
           value={meaning}
           onChange={(e) => setMeaning(e.target.value)}
-          placeholder="A short, clear meaning for this plate"
+          disabled={demo}
+          placeholder={
+            demo
+              ? "Adding stories is turned off in the demo."
+              : "A short, clear meaning for this plate"
+          }
           aria-describedby="story-meaning-count"
-          className="h-11 w-full rounded-lg border border-input bg-card px-3"
+          className="h-11 w-full rounded-lg border border-input bg-card px-3 disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60"
         />
         <Counter id="story-meaning-count" value={meaning} max={MEANING_MAX} />
       </div>
@@ -214,7 +232,8 @@ export function StoryStepOne({
           value={more}
           onChange={(e) => setMore(e.target.value)}
           aria-describedby="story-more-hint story-more-count"
-          className="w-full rounded-lg border border-input bg-card px-3 py-2"
+          disabled={demo}
+          className="w-full rounded-lg border border-input bg-card px-3 py-2 disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60"
         />
         <p id="story-more-hint" className="text-sm text-muted-foreground">
           Keep places general, like near Seattle

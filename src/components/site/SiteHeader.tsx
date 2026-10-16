@@ -10,7 +10,17 @@ const NAV = [
   { href: "/about", label: "About" },
 ];
 
-function Profile({ showHandle }: { showHandle: boolean }) {
+/** member: signed in. signed-out: Sign in + Try the Demo. demo: sample traveler with Exit Demo. */
+export type HeaderMode = "member" | "signed-out" | "demo";
+
+/** Which header each preview path shows; every other path is the signed-in member header. */
+export function headerModeFor(pathname: string): HeaderMode {
+  if (["/sign-in-prompt", "/sign-in", "/sign-up", "/demo"].includes(pathname)) return "signed-out";
+  if (pathname === "/demo-form") return "demo";
+  return "member";
+}
+
+function Avatar({ showHandle }: { showHandle: boolean }) {
   return (
     <span className="flex items-center gap-2">
       <span className="relative inline-flex size-9 items-center justify-center rounded-full bg-cream text-navy">
@@ -27,10 +37,56 @@ function Profile({ showHandle }: { showHandle: boolean }) {
   );
 }
 
-export function SiteHeader() {
-  const [open, setOpen] = useState(false);
+/** Demo profile menu, shown open in the preview so Exit Demo is visible. */
+function DemoProfile({ showHandle }: { showHandle: boolean }) {
+  const [open, setOpen] = useState(true);
   return (
-    <header className="bg-navy text-cream">
+    <div className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={showHandle ? "profile-menu" : "profile-menu-mobile"}
+        aria-label={showHandle ? undefined : `${CURRENT_USER.handle} menu`}
+        onClick={() => setOpen((v) => !v)}
+        className="rounded-full"
+      >
+        <Avatar showHandle={showHandle} />
+      </button>
+      {open && (
+        <ul
+          id={showHandle ? "profile-menu" : "profile-menu-mobile"}
+          aria-label="Profile"
+          className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
+        >
+          <li>
+            <Link to="/submissions" className="block px-4 py-2 hover:bg-cream">
+              Your Submissions
+            </Link>
+          </li>
+          <li>
+            <Link to="/profile" className="block px-4 py-2 hover:bg-cream">
+              Your Profile
+            </Link>
+          </li>
+          <li className="border-t border-border">
+            <Link to="/" className="block px-4 py-2 font-semibold hover:bg-cream">
+              Exit Demo
+            </Link>
+          </li>
+        </ul>
+      )}
+    </div>
+  );
+}
+
+const signIn = "site-nav-link rounded-md px-2 py-1";
+const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream";
+
+export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
+  const [open, setOpen] = useState(false);
+  const signedOut = mode === "signed-out";
+  return (
+    <header className="bg-navy text-cream" data-mode={mode}>
       <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-2">
         <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
           <img
@@ -48,11 +104,32 @@ export function SiteHeader() {
             </a>
           ))}
         </nav>
-        <div className="ml-auto hidden md:block">
-          <Profile showHandle />
+        <div className="ml-auto hidden items-center gap-4 md:flex">
+          {signedOut ? (
+            <>
+              <Link to="/sign-in" className={signIn}>
+                Sign in
+              </Link>
+              <Link to="/demo" className={tryDemo}>
+                Try the Demo
+              </Link>
+            </>
+          ) : mode === "demo" ? (
+            <DemoProfile showHandle />
+          ) : (
+            <Avatar showHandle />
+          )}
         </div>
         <div className="ml-auto flex items-center gap-3 md:hidden">
-          <Profile showHandle={false} />
+          {signedOut ? (
+            <Link to="/sign-in" className={signIn}>
+              Sign in
+            </Link>
+          ) : mode === "demo" ? (
+            <DemoProfile showHandle={false} />
+          ) : (
+            <Avatar showHandle={false} />
+          )}
           <button
             type="button"
             aria-expanded={open}
@@ -76,6 +153,11 @@ export function SiteHeader() {
               {item.label}
             </a>
           ))}
+          {signedOut && (
+            <Link to="/demo" className={`${tryDemo} mt-2 inline-block`}>
+              Try the Demo
+            </Link>
+          )}
         </nav>
       )}
     </header>

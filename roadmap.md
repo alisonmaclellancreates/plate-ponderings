@@ -27,3 +27,6 @@
 
 # Account previews
 - [x] /submissions and /profile previews, tests, lint.
+
+# Entry previews
+- [x] /sign-in-prompt, /sign-in, /sign-up, /demo, /demo-form with signed-out and demo headers, tests, lint.
