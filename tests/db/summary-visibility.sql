@@ -110,6 +110,26 @@ begin
   end if;
 end $$;
 
+-- Signed-out case: the anon role has no grant and no policy on summaries,
+-- so a signed-out reader cannot read summaries at all. All summary reads go
+-- through server functions, which enforce is_summary_public. Where the
+-- connection allows role switching, this block must raise a permission error:
+--
+--   set role anon;
+--   select * from public.summaries limit 1;  -- expected: permission denied
+--   reset role;
+--
+-- Verified by catalog check instead (works from any role):
+do $$
+begin
+  if has_table_privilege('anon', 'public.summaries', 'select') then
+    raise exception 'FAIL: anon must not have select on summaries';
+  end if;
+  if has_table_privilege('authenticated', 'public.summaries', 'select') then
+    raise exception 'FAIL: authenticated must not have select on summaries';
+  end if;
+end $$;
+
 -- Cleanup so the file is rerunnable
 delete from public.summaries where subject_id = 'd0000000-0000-0000-0000-000000000041';
 delete from public.stories  where subject_id = 'd0000000-0000-0000-0000-000000000041';
@@ -117,4 +137,4 @@ delete from public.subjects where id = 'd0000000-0000-0000-0000-000000000041';
 
 commit;
 
-select 'summary-visibility: all 7 assertions passed' as result;
+select 'summary-visibility: all 7 assertions plus the signed-out case passed' as result;
