@@ -50,28 +50,26 @@ describe("SubmissionsPage", () => {
     const findPlate = (text: string) => PLATES.find((p) => p.text === text)!;
     const pnw = findPlate("PNW LV");
     expect(pnw.stories).toHaveLength(2);
-    expect(within(rows[0]!).getAllByText("This plate is live with 2 stories.").length).toBeGreaterThan(
-      0,
-    );
+    expect(
+      within(rows[0]!).getAllByText("This plate is live with 2 stories.").length,
+    ).toBeGreaterThan(0);
     // TRAILS has no plate record in the mock data yet, so its row only
     // carries the SUBMISSIONS explanation.
-    expect(within(rows[3]!).getAllByText("This plate is live with 2 stories.").length).toBeGreaterThan(
-      0,
-    );
+    expect(
+      within(rows[3]!).getAllByText("This plate is live with 2 stories.").length,
+    ).toBeGreaterThan(0);
     const teatimeStory = findPlate("TEATIME").stories.find((s) => s.handle === "Traveler4821")!;
     expect(teatimeStory.hearts).toBe(3);
-    expect(within(rows[4]!).getAllByText("Your story is live and has 3 hearts.").length).toBeGreaterThan(
-      0,
-    );
+    expect(
+      within(rows[4]!).getAllByText("Your story is live and has 3 hearts.").length,
+    ).toBeGreaterThan(0);
   });
 
   it("sorts rows newest first with TEATIME last", () => {
     render(<SubmissionsPage rows={[...SUBMISSIONS].reverse()} />);
     const rows = screen.getAllByTestId("submission");
     const last = rows[rows.length - 1]!;
-    expect(
-      within(last).getByRole("img", { name: "California plate TEATIME" }),
-    ).toBeInTheDocument();
+    expect(within(last).getByRole("img", { name: "California plate TEATIME" })).toBeInTheDocument();
     expect(last).toHaveTextContent("Sep 26, 2026");
     const parsed = rows.map((r) => {
       const d = (r.textContent ?? "").match(/(\w{3} \d{1,2}, \d{4})/)?.[1] ?? "";
@@ -96,9 +94,7 @@ describe("SubmissionsPage", () => {
       "href",
       "/plate/pnw-lv",
     );
-    expect(within(rows[4]!).getAllByRole("link", { name: "View Plate" }).length).toBeGreaterThan(
-      0,
-    );
+    expect(within(rows[4]!).getAllByRole("link", { name: "View Plate" }).length).toBeGreaterThan(0);
   });
 });
 
@@ -118,7 +114,9 @@ describe("ProfilePage", () => {
     const card = screen.getByTestId("sample-story");
     expect(within(card).getByText("Traveler4821")).toBeInTheDocument();
     expect(within(card).getByText("Pacific Northwest love.")).toBeInTheDocument();
-    expect(within(card).getByText("Saw this plate at a trailhead outside Bend.")).toBeInTheDocument();
+    expect(
+      within(card).getByText("Saw this plate at a trailhead outside Bend."),
+    ).toBeInTheDocument();
     expect(within(card).getByText("My best guess")).toBeInTheDocument();
   });
 });
