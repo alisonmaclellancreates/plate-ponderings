@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { PLATES, plateStatus, STORY_PHOTO_PLACEHOLDER } from "@/lib/mock-data";
+import {
+  PLATES,
+  plateStatus,
+  STORY_PHOTO_PLACEHOLDER,
+  featuredPlates,
+  featuredProgress,
+  publishedStories,
+} from "@/lib/mock-data";
 import { plateFontSize, plateTone } from "@/lib/jurisdictions";
 
 const find = (text: string) => {
@@ -9,6 +16,38 @@ const find = (text: string) => {
 };
 
 describe("mock data", () => {
+  it.each([
+    [0, 0, "Still a mystery"],
+    [2, 0, "Still a mystery"],
+    [0, 1, "Was a mystery, now 1 story"],
+    [0, 3, "Was a mystery, now 3 stories"],
+    [2, 5, "Had 2 stories when featured, now 5"],
+    [2, 1, "Had 2 stories when featured, now 1"],
+  ] as const)("formats progress from %i to %i", (then, now, text) => {
+    expect(featuredProgress(then, now)).toBe(text);
+  });
+
+  it("has 14 featured records newest first with all progress cases", () => {
+    const featured = featuredPlates();
+    expect(featured).toHaveLength(14);
+    expect(featured[0]?.slug).toBe("ut-canyons");
+    expect(featured.map((p) => p.plateOfTheDay)).toEqual(
+      featured
+        .map((p) => p.plateOfTheDay)
+        .sort()
+        .reverse(),
+    );
+    const progress = featured.map((p) =>
+      featuredProgress(p.featuredStoryCount ?? 0, publishedStories(p).length),
+    );
+    expect(progress).toContain("Still a mystery");
+    expect(progress).toContain("Was a mystery, now 1 story");
+    expect(progress).toContain("Was a mystery, now 2 stories");
+    expect(progress).toContain("Had 3 stories when featured, now 5");
+    expect(publishedStories(find("CHILE"))).toHaveLength(0);
+    expect(plateStatus(find("CHILE"))).toBe("mystery");
+    expect(publishedStories(find("PRAIRIE"))).toHaveLength(1);
+  });
   it("matches the brief", () => {
     expect(find("B7K2L9").stories).toHaveLength(0);
     expect(find("LV2CODE").stories).toHaveLength(5);

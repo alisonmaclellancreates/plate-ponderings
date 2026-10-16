@@ -14,6 +14,8 @@ export interface Story {
   /** Optional photo URL shown small on the right of the story card. */
   photo?: string;
   hearts: number;
+  /** Omitted means published. Unpublished stories never count. */
+  moderation?: Moderation;
 }
 
 /** Newest first: summaries[0] is current, the rest are earlier versions. */
@@ -32,6 +34,8 @@ export interface PlateRecord {
   consensus?: Consensus;
   summaries: Summary[];
   plateOfTheDay?: string;
+  /** Published stories when featured. Above 0 means a fallback pick. Omitted means 0. */
+  featuredStoryCount?: number;
 }
 
 export const CURRENT_USER = { handle: "Traveler4821", hasNotification: true };
@@ -174,6 +178,43 @@ export const PLATES: PlateRecord[] = [
       s(`${slug}-1`, "rivercat", day, meaning, "guess", 4 + i),
       s(`${slug}-2`, "northshore", day, meaning, "knows", 2 + i),
     ],
+    ...(slug === "co-wander" ? { featuredStoryCount: 2 } : {}),
+  })),
+  ...(
+    [
+      ["az-sundog", "Arizona", "SUNDOG", "2026-10-11", 0, 1, 0],
+      ["vt-maple", "Vermont", "MAPLE", "2026-10-10", 0, 0, 0],
+      ["on-trillium", "Ontario", "TRILLIUM", "2026-10-09", 3, 5, 0],
+      ["mt-bigsky", "Montana", "BIGSKY", "2026-10-08", 0, 3, 0],
+      ["nm-chile", "New Mexico", "CHILE", "2026-10-07", 2, 0, 2],
+      ["ab-prairie", "Alberta", "PRAIRIE", "2026-10-06", 0, 1, 1],
+      ["fl-gator", "Florida", "GATOR", "2026-10-05", 0, 4, 0],
+      ["hi-aloha", "Hawaii", "ALOHA", "2026-10-04", 4, 6, 0],
+      ["qc-poutine", "Quebec", "POUTINE", "2026-10-03", 0, 2, 0],
+    ] as const
+  ).map(([slug, jurisdiction, text, day, featured, published, unpublished]) => ({
+    slug,
+    jurisdiction,
+    text,
+    plateOfTheDay: day,
+    summaries: [],
+    ...(featured > 0 ? { featuredStoryCount: featured } : {}),
+    stories: [
+      ...Array.from({ length: published }, (_, i) =>
+        s(
+          `${slug}-${i + 1}`,
+          i % 2 ? "northshore" : "rivercat",
+          day,
+          `A ${text} reading.`,
+          "guess",
+          i,
+        ),
+      ),
+      ...Array.from({ length: unpublished }, (_, i) => ({
+        ...s(`${slug}-u${i + 1}`, "maplegirl", day, `A ${text} reading.`, "guess", 0),
+        moderation: (slug === "nm-chile" ? "rejected" : "pending") as Moderation,
+      })),
+    ],
   })),
 ];
 
@@ -196,8 +237,29 @@ export const CATCHING_UP_STORY: Story = s(
 );
 
 export function plateStatus(plate: PlateRecord): PlateStatus {
-  if (plate.stories.some((story) => story.howIKnow === "owner")) return "owner";
-  return plate.stories.length > 0 ? "interpreted" : "mystery";
+  const stories = publishedStories(plate);
+  if (stories.some((story) => story.howIKnow === "owner")) return "owner";
+  return stories.length > 0 ? "interpreted" : "mystery";
+}
+
+export function publishedStories(plate: PlateRecord): Story[] {
+  return plate.stories.filter((story) => (story.moderation ?? "published") === "published");
+}
+
+/** Progress since a plate was featured, from published story counts only. */
+export function featuredProgress(featured: number, now: number): string {
+  if (now === 0) return "Still a mystery";
+  if (featured === 0) return `Was a mystery, now ${now} ${now === 1 ? "story" : "stories"}`;
+  return `Had ${featured} stories when featured, now ${now}`;
+}
+
+export const TODAY = "2026-10-16";
+
+/** Every featured plate, newest first. */
+export function featuredPlates(): PlateRecord[] {
+  return PLATES.filter((p) => p.plateOfTheDay && p.plateOfTheDay <= TODAY).sort((a, b) =>
+    (b.plateOfTheDay ?? "").localeCompare(a.plateOfTheDay ?? ""),
+  );
 }
 
 /** Your Submissions preview rows, newest first. Plate rows carry story counts; story rows carry hearts. */

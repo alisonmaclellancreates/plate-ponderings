@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as DemoFormRouteImport } from './routes/demo-form'
+import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HomeFallbackRouteImport } from './routes/home-fallback'
 import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as PreviewsRouteImport } from './routes/previews'
@@ -39,6 +40,11 @@ const DemoRoute = DemoRouteImport.update({
 const DemoFormRoute = DemoFormRouteImport.update({
   id: '/demo-form',
   path: '/demo-form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeFallbackRoute = HomeFallbackRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/demo-form': typeof DemoFormRoute
+  '/explore': typeof ExploreRoute
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/demo-form': typeof DemoFormRoute
+  '/explore': typeof ExploreRoute
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/demo-form': typeof DemoFormRoute
+  '/explore': typeof ExploreRoute
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/'
     | '/demo'
     | '/demo-form'
+    | '/explore'
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/'
     | '/demo'
     | '/demo-form'
+    | '/explore'
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/demo'
     | '/demo-form'
+    | '/explore'
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DemoRoute: typeof DemoRoute
   DemoFormRoute: typeof DemoFormRoute
+  ExploreRoute: typeof ExploreRoute
   HomeFallbackRoute: typeof HomeFallbackRoute
   HomeNoMatchRoute: typeof HomeNoMatchRoute
   PreviewsRoute: typeof PreviewsRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/demo-form'
       fullPath: '/demo-form'
       preLoaderRoute: typeof DemoFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home-fallback': {
@@ -359,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DemoRoute: DemoRoute,
   DemoFormRoute: DemoFormRoute,
+  ExploreRoute: ExploreRoute,
   HomeFallbackRoute: HomeFallbackRoute,
   HomeNoMatchRoute: HomeNoMatchRoute,
   PreviewsRoute: PreviewsRoute,

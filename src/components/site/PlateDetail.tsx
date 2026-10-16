@@ -15,6 +15,7 @@ import {
   PLATES,
   PNW_LV_SUMMARY,
   plateStatus,
+  publishedStories,
   type PlateRecord,
   type Story,
   type Summary,
@@ -268,13 +269,17 @@ export function Stories({ stories, pending }: { stories: Story[]; pending: boole
   );
 }
 
-export function PlateDetail({ state }: { state: PlateDetailState }) {
-  const basePlate = PLATES.find((p) => p.slug === PLATE_DETAIL_STATES[state].slug);
+export function PlateDetail({ state }: { state: string }) {
+  const slug = Object.hasOwn(PLATE_DETAIL_STATES, state)
+    ? PLATE_DETAIL_STATES[state as PlateDetailState].slug
+    : state;
+  const record = PLATES.find((p) => p.slug === slug);
+  const basePlate = record ? { ...record, stories: publishedStories(record) } : undefined;
   if (!basePlate) return null;
   const plate =
     state === "catching-up"
       ? { ...basePlate, stories: [...basePlate.stories, CATCHING_UP_STORY] }
-      : state === "pnw-lv"
+      : slug === "or-pnwlv"
         ? { ...basePlate, summaries: [PNW_LV_SUMMARY] }
         : basePlate;
   const hasStories = plate.stories.length > 0;
