@@ -68,4 +68,5 @@
 - [x] Add the typed, privacy-limited analytics module and route page views without changing page behavior.
 - [x] Verify tests, coverage gate, lint, and preview event requests: 438 tests pass, coverage gate holds, lint 0 errors, build OK; decoded page views for / and /explore contain no query strings, both ingest requests return 200, no browser errors.
 - [ ] Alison confirms page views arrive in PostHog.
+- [ ] Require an explicit analytics host, cover every analytics registry branch, and verify 100% patch coverage in Codecov after CI.
 - [x] Consolidate event definitions into one runtime registry; test-only second event passes capture and before_send with only listed properties and identifiers. All 439 tests / 107 files pass; coverage gate holds (99.35% statements, 98.31% branches, 99.44% functions, 99.74% lines); lint 0 errors / 6 existing warnings; build OK; real query-free page views accepted with HTTP 200.
