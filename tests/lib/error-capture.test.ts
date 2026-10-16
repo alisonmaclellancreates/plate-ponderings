@@ -97,8 +97,8 @@ describe("captured events", () => {
     handlers["error"]!({ error: new Error("stale") });
     vi.advanceTimersByTime(5_001);
     expect(mod.consumeLastCapturedError()).toBeUndefined();
-    vi.advanceTimersByTime(-0);
-    expect(mod.consumeLastCapturedError()).toBeUndefined();
+    handlers["error"]!({ error: new Error("next") });
+    expect(mod.consumeLastCapturedError()).toBeInstanceOf(Error);
   });
 });
 
@@ -166,15 +166,21 @@ describe("describeError", () => {
       current = e;
     }
     expect(describeError(current)).toBe(
-      ["Error: e0", "caused by: Error: e1", "caused by: Error: e2", "caused by: Error: e3", "caused by: Error: e4"].join("\n"),
+      [
+        "Error: e0",
+        "caused by: Error: e1",
+        "caused by: Error: e2",
+        "caused by: Error: e3",
+        "caused by: Error: e4",
+      ].join("\n"),
     );
   });
 
-  it("stringifies a non-Error cause and stops", async () => {
+  it("stringifies a non-Error cause without a label and stops", async () => {
     const { describeError } = await load();
     const err = new Error("top", { cause: { code: "X" } });
     err.stack = undefined;
-    expect(describeError(err)).toBe('Error: top\ncaused by: {"code":"X"}'.replace("caused by: ", ""));
+    expect(describeError(err)).toBe('Error: top\n{"code":"X"}');
   });
 
   it("stringifies a non-Error object", async () => {
