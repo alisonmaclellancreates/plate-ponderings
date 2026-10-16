@@ -23,6 +23,7 @@ describe("mock data", () => {
     [0, 3, "Was a mystery, now 3 stories"],
     [2, 5, "Had 2 stories when featured, now 5"],
     [2, 1, "Had 2 stories when featured, now 1"],
+    [1, 3, "Had 1 story when featured, now 3"],
   ] as const)("formats progress from %i to %i", (then, now, text) => {
     expect(featuredProgress(then, now)).toBe(text);
   });

@@ -35,3 +35,4 @@
 - [x] Share featured cards and add 14 featured mock plates with every progress case.
 - [x] Build /explore, working plate links, and Load More.
 - [x] Verify tests, lint, and desktop/tablet/mobile archive flow.
+- [x] Correct card accessible names, Load More focus, singular progress and hearts, and homepage plate destinations; verify tests, lint and browser flow.

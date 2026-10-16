@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
@@ -310,9 +311,13 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
             <div className="min-w-0">
               <StatusBadge status={status} />
               <p className="mt-3 text-lg">{copy}</p>
-              <a href="/plate/mystery" className="brand-btn brand-btn-navy mt-4">
+              <Link
+                to="/plate/$state"
+                params={{ state: plate.slug }}
+                className="brand-btn brand-btn-navy mt-4"
+              >
                 View This Plate
-              </a>
+              </Link>
             </div>
           </div>
         </div>

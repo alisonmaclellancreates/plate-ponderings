@@ -23,3 +23,15 @@ it.each(PLATES.filter((p) => p.plateOfTheDay))(
     if (n === 0) expect(screen.getByText("Mystery")).toBeTruthy();
   },
 );
+
+it("names the card link with the plate, date, count, badge and progress", () => {
+  const plate = PLATES.find((p) => p.slug === "ut-canyons");
+  if (!plate) throw new Error("Missing CANYONS");
+  render(<FeaturedPlateCard plate={plate} />);
+  const name = screen.getByRole("link").textContent ?? "";
+  const link = screen.getByRole("link", { name: /Utah plate CANYONS/ });
+  expect(link.getAttribute("aria-label")).toBeNull();
+  expect(screen.getByRole("link", { name: /Featured Oct 16, 2026/ })).toBe(link);
+  expect(screen.getByRole("link", { name: /Still a mystery/ })).toBe(link);
+  expect(name).toContain("0 stories");
+});

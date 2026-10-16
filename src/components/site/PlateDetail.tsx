@@ -205,7 +205,7 @@ export function StoryCard({ story }: { story: Story }) {
         <p className="mt-2 flex items-center gap-1 text-sm">
           <Heart aria-hidden className="size-4 text-coral" />
           <span>{story.hearts}</span>
-          <span className="sr-only">hearts</span>
+          <span className="sr-only">{story.hearts === 1 ? "heart" : "hearts"}</span>
         </p>
       </div>
       {story.photo && (

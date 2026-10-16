@@ -105,6 +105,18 @@ describe("Homepage", () => {
     const potd = screen.getByRole("region", { name: "Plate of the Day" });
     expect(within(potd).getByText("Interpreted")).toBeTruthy();
     expect(within(potd).getByText(/Only 2 stories so far/)).toBeTruthy();
+    expect(within(potd).getByRole("link", { name: "View This Plate" }).getAttribute("href")).toBe(
+      "/plate/co-wander",
+    );
+  });
+
+  it("default Plate of the Day links to today's plate", () => {
+    media({});
+    render(<Homepage />);
+    const potd = screen.getByRole("region", { name: "Plate of the Day" });
+    expect(within(potd).getByRole("link", { name: "View This Plate" }).getAttribute("href")).toBe(
+      "/plate/ut-canyons",
+    );
   });
 
   it("reads a plate with exactly one story as 1 story", () => {

@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
 import { featuredPlates, TODAY } from "@/lib/mock-data";
 
 export function Explore() {
   const [shown, setShown] = useState(12);
+  const [focusFrom, setFocusFrom] = useState<number | null>(null);
+  const list = useRef<HTMLUListElement>(null);
   const plates = featuredPlates();
+  useEffect(() => {
+    if (focusFrom === null) return;
+    list.current?.querySelectorAll("a")[focusFrom]?.focus();
+    setFocusFrom(null);
+  }, [focusFrom]);
   return (
     <main>
       <section className="relative overflow-hidden">
@@ -23,7 +30,11 @@ export function Explore() {
         </div>
       </section>
       <section aria-label="Featured plates" className="mx-auto max-w-6xl px-4 pb-12">
-        <ul id="featured-plates" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ul
+          ref={list}
+          id="featured-plates"
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
           {plates.slice(0, shown).map((plate) => (
             <li key={plate.slug} className="min-w-0">
               <FeaturedPlateCard plate={plate} today={plate.plateOfTheDay === TODAY} />
@@ -36,7 +47,10 @@ export function Explore() {
               size="lg"
               className="brand-btn brand-btn-navy"
               aria-controls="featured-plates"
-              onClick={() => setShown((n) => n + 12)}
+              onClick={() => {
+                setFocusFrom(shown);
+                setShown(shown + 12);
+              }}
             >
               Load More
             </Button>
