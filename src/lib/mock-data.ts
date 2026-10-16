@@ -263,9 +263,9 @@ export type FeaturedPlate = PlateRecord & { plateOfTheDay: string };
 export function featuredPlates(): FeaturedPlate[] {
   const hasFeaturedDay = (p: PlateRecord): p is FeaturedPlate =>
     typeof p.plateOfTheDay === "string";
-  return PLATES.filter((p) => hasFeaturedDay(p) && p.plateOfTheDay <= TODAY).sort((a, b) =>
-    b.plateOfTheDay.localeCompare(a.plateOfTheDay),
-  );
+  return PLATES.filter(hasFeaturedDay)
+    .filter((p) => p.plateOfTheDay <= TODAY)
+    .sort((a, b) => b.plateOfTheDay.localeCompare(a.plateOfTheDay));
 }
 
 /** Your Submissions preview rows, newest first. Plate rows carry story counts; story rows carry hearts. */
