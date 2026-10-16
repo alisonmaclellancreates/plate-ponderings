@@ -64,10 +64,12 @@ describe("analytics", () => {
     expect(sdk.capture).toHaveBeenCalledWith("empty_event", {});
     const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
     expect(beforeSend({ event: "empty_event", properties: { path: "/private" } })).toEqual({
-      event: "empty_event", properties: {},
+      event: "empty_event",
+      properties: {},
     });
     expect(beforeSend({ event: "path_event", properties: { path: 42 } })).toEqual({
-      event: "path_event", properties: { path: 42 },
+      event: "path_event",
+      properties: { path: 42 },
     });
     expect(beforeSend({ event: "toString", properties: {} })).toBeNull();
   });
