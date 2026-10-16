@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
-import { formatDay } from "@/components/site/Homepage";
+import { formatDay } from "@/lib/format-day";
 import {
   CATCHING_UP_STORY,
   PLATES,

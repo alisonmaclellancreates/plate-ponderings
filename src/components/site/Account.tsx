@@ -5,14 +5,9 @@ import { ModerationBadge } from "@/components/site/Badges";
 import { ScenicHeader } from "@/components/site/SpotPlate";
 import { StoryCard } from "@/components/site/PlateDetail";
 import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
+import { formatDay } from "@/lib/format-day";
 
-const formatDay = (iso: string) =>
-  new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+
 
 function RowAction({ row }: { row: Submission }) {
   if (row.action === "dismiss")
