@@ -226,7 +226,7 @@ function PendingPanel() {
   );
 }
 
-function Stories({ stories, pending }: { stories: Story[]; pending: boolean }) {
+export function Stories({ stories, pending }: { stories: Story[]; pending: boolean }) {
   const [shown, setShown] = useState(PAGE_SIZE);
   const ordered = orderStories(stories);
   const remaining = ordered.length - shown;
