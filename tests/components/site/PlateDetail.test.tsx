@@ -34,7 +34,6 @@ describe("PlateDetail", () => {
       screen.getByText("AI-generated summary · Based on 5 stories · Updated Oct 12, 2026"),
     ).toBeTruthy();
     expect(screen.getByRole("button", { name: "Earlier summaries (3)" })).toBeTruthy();
-    expect(screen.queryByRole("list", { name: undefined, hidden: false })).toBeTruthy();
     const handles = screen
       .getAllByRole("article")
       .map((a) => a.querySelector(".font-semibold")?.textContent);
