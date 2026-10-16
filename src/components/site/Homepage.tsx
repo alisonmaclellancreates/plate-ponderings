@@ -314,7 +314,6 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
   );
 }
 
-
 const TODAY = "2026-10-16";
 
 function RecentlyFeatured() {

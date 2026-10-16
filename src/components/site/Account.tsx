@@ -7,8 +7,6 @@ import { StoryCard } from "@/components/site/PlateDetail";
 import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
 import { formatDay } from "@/lib/format-day";
 
-
-
 function RowAction({ row }: { row: Submission }) {
   if (row.action === "dismiss")
     return (

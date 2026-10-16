@@ -1,12 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {
-  Homepage,
-  HEADLINES,
-  ROTATE_MS,
-  PlateOfTheDay,
-} from "@/components/site/Homepage";
+import { Homepage, HEADLINES, ROTATE_MS, PlateOfTheDay } from "@/components/site/Homepage";
 import type { PlateRecord } from "@/lib/mock-data";
 
 function media({ mobile = false, reduced = false }) {
@@ -102,7 +97,6 @@ describe("Homepage", () => {
     expect(within(potd).getByText("Interpreted")).toBeTruthy();
     expect(within(potd).getByText(/Only 2 stories so far/)).toBeTruthy();
   });
-
 
   it("reads a plate with exactly one story as 1 story", () => {
     media({});
