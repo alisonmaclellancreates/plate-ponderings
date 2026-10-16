@@ -17,6 +17,7 @@ export const Route = createFileRoute("/previews")({
 /** Every static preview route. Add one entry per new preview page. */
 const PREVIEWS = [
   { to: "/", label: "Homepage", note: "Hero, search, Plate of the Day, recently featured" },
+  { to: "/explore", label: "The Roadside Archive", note: "14 featured plates, newest first" },
   {
     to: "/home-no-match",
     label: "Homepage, no match",

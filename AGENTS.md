@@ -18,3 +18,5 @@
 - Static preview pages read only from `src/lib/mock-data.ts` and share the header, footer, plate and badge components in `src/components/site/`, so later steps swap the data source without touching page layouts.
 - Compose state-specific preview stories without mutating shared plate records, so catching-up examples cannot change other previews.
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
+- Featured archive and homepage share `FeaturedPlateCard`; feature dates and counts at selection live on mock plate records, while current counts filter published stories, so progress cannot drift between views.
+- `/plate/$state` accepts existing preview aliases and mock plate slugs through the same detail layout, preserving preview URLs while giving each archive card its own working destination.
