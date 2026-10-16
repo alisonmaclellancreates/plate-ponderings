@@ -32,7 +32,9 @@ describe("Homepage", () => {
 
     await user.keyboard("{Enter}");
 
-    expect(document.activeElement).toBe(screen.getByRole("combobox", { name: "State or Province" }));
+    expect(document.activeElement).toBe(
+      screen.getByRole("combobox", { name: "State or Province" }),
+    );
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior, block: "center" });
   });
 
