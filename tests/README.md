@@ -33,11 +33,30 @@ Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `
 - Do not mock `@tanstack/react-router` globally; each file mocks it for itself when needed.
 - Start every test file with an `import` or `export {}`.
 - Leave `src/routeTree.gen.ts` and other generated files alone.
-- Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
+- Gate: the four `coverage.thresholds` are fixed at 95 (set in step 20). Do not move them with the totals. A change that drops any total below 95 fails CI. Codecov also requires 95% on each patch.
 
-## Coverage map (after step 18)
+## Adding a test for a new file
 
-Totals: statements 99.64, branches 98.94, functions 100, lines 99.81. Thresholds set to 99/98/100/99.
+1. Create `tests/<same path as src>/<name>.test.ts(x)`, starting with an `import`.
+2. Read the source and assert behaviour, not just rendering. Cover every branch you can reach through the public surface.
+3. For a new route, use the mocked route factory approach (see Step 17 notes). For anything touching the backend, `vi.doMock("@supabase/supabase-js")` (see Step 18 notes).
+4. Restore any global, env var, timer or mock you change in `afterEach` or `finally`.
+5. Run the single-file coverage command above, then `bun run test:coverage`, and add the file to the map below.
+6. If a line truly cannot be reached, leave it uncovered and list it under "Lines deliberately left uncovered". Never add ignore comments or edit generated scaffold files.
+
+## Lines deliberately left uncovered
+
+- `src/components/ui/carousel.tsx` line 57 (`onSelect` guard for a missing API), the `orientation ||` fallback, and the `api?.off` cleanup chain: unreachable through the public surface.
+- `src/components/ui/chart.tsx` line 301: non-object payload guard; Recharts payload items are always objects.
+- `src/integrations/supabase/previewAuthStorage.ts` line 40 (`if (done) return;`): the listener and timer are removed on first finish, so it cannot run twice.
+
+## Coverage exclusions
+
+`**/*.d.ts`, `**/*.gen.ts` (route tree), test files, `src/test/**`, and `src/integrations/supabase/types.ts` (generated types). No exclusions were added in step 20.
+
+## Coverage map (final, step 20)
+
+Totals: statements 99.64, branches 98.94, functions 100, lines 99.81. Thresholds: 95/95/95/95 (were 99/98/100/99). 63 test files, 281 tests.
 Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 
 | File                                              | Stmts % | Branch % | Funcs % | Lines % | Step |

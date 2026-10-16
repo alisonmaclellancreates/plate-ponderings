@@ -8,6 +8,8 @@ We'll build this one step at a time, and I'll send each step as its own message.
 
 First step: a starting screen. A single home page with the name "What the Plate?" and one line underneath: "Every plate has a story." Nothing else. No navigation, no data, no backend, no sign-in, no images, and no placeholder features. We're keeping this first step small so I can connect the project to GitHub and set up branches, so that every step after this one arrives as a pull request.
 
+Tests and the 95% coverage gate are documented in [tests/README.md](tests/README.md).
+
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
