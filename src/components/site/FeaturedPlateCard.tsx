@@ -4,7 +4,12 @@ import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
 import { storyCount } from "@/lib/story-count";
-import { featuredProgress, plateStatus, publishedStories, type FeaturedPlate } from "@/lib/mock-data";
+import {
+  featuredProgress,
+  plateStatus,
+  publishedStories,
+  type FeaturedPlate,
+} from "@/lib/mock-data";
 
 export function FeaturedPlateCard({
   plate,
