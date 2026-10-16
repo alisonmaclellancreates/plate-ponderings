@@ -35,6 +35,12 @@ describe("entry screens", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Add Your Story");
     expect(screen.getByRole("img", { name: "Oregon plate PNW LV" })).toBeInTheDocument();
     expect(screen.getByText("Sign in to add your story")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Choose how you'd like to continue. After signing in, you'll return here to add your story.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Your story will be added/)).toBeNull();
     const signIn = screen.getByRole("link", { name: "Sign In" });
     expect(signIn).toHaveAttribute("href", "/sign-in");
     expect(signIn).toHaveAccessibleDescription("I already have an account");

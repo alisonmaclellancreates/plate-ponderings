@@ -3,7 +3,7 @@ import { SignInPromptPage } from "@/components/site/Entry";
 
 const TITLE = "Sign in to add your story | What the Plate?";
 const DESCRIPTION =
-  "Choose how you would like to continue. Your story will be added to this plate.";
+  "Choose how you would like to continue. After signing in, you will return here to add your story.";
 
 export const Route = createFileRoute("/sign-in-prompt")({
   head: () => ({
