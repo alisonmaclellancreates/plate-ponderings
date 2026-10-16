@@ -1,7 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Homepage, HEADLINES, ROTATE_MS, formatDay } from "@/components/site/Homepage";
+import {
+  Homepage,
+  HEADLINES,
+  ROTATE_MS,
+  formatDay,
+  PlateOfTheDay,
+} from "@/components/site/Homepage";
+import type { PlateRecord } from "@/lib/mock-data";
 
 function media({ mobile = false, reduced = false }) {
   window.matchMedia = vi.fn((q: string) => ({
@@ -99,5 +106,28 @@ describe("Homepage", () => {
 
   it("formats days without time zones", () => {
     expect(formatDay("2026-10-15")).toBe("Oct 15, 2026");
+  });
+
+  it("reads a plate with exactly one story as 1 story", () => {
+    media({});
+    const plate: PlateRecord = {
+      slug: "or-single",
+      jurisdiction: "Oregon",
+      text: "SINGLE",
+      stories: [
+        {
+          id: "single-1",
+          handle: "rivercat",
+          date: "2026-10-14",
+          meaning: "One story only.",
+          howIKnow: "guess",
+          hearts: 1,
+        },
+      ],
+      summaries: [],
+    };
+    render(<PlateOfTheDay plate={plate} />);
+    expect(screen.getByText(/Only 1 story so far/)).toBeTruthy();
+    expect(screen.queryByText(/1 stories/)).toBeNull();
   });
 });

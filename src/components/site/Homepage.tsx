@@ -270,7 +270,7 @@ function storyCount(n: number) {
   return `${n} ${n === 1 ? "story" : "stories"}`;
 }
 
-function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
+export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
   const status = plateStatus(plate);
   const n = plate.stories.length;
   const copy =
