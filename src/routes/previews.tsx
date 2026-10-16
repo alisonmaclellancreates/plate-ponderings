@@ -34,6 +34,36 @@ const PREVIEWS = [
   },
 ] as const;
 
+/** Plate detail preview states, served by the /plate/$state route. */
+const PLATE_PREVIEWS = [
+  { state: "mystery", label: "Plate detail, mystery", note: "Washington B7K2L9, no stories" },
+  {
+    state: "interpreted",
+    label: "Plate detail, interpreted",
+    note: "British Columbia LV2CODE, 5 stories, no owner",
+  },
+  {
+    state: "owner",
+    label: "Plate detail, owner",
+    note: "California TEATIME, 6 stories with an owner story",
+  },
+  {
+    state: "interpreted-history",
+    label: "Plate detail, earlier summaries",
+    note: "LV2CODE with earlier summaries open",
+  },
+  {
+    state: "pending-story",
+    label: "Plate detail, pending story",
+    note: "LV2CODE with your story waiting for its check",
+  },
+  {
+    state: "catching-up",
+    label: "Plate detail, catching up",
+    note: "LV2CODE with the summary catching up",
+  },
+] as const;
+
 function Previews() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -43,6 +73,18 @@ function Previews() {
         {PREVIEWS.map((p) => (
           <li key={p.to}>
             <Link to={p.to} className="brand-card block p-4 hover:shadow-md">
+              <span className="font-semibold text-navy">{p.label}</span>
+              <span className="block text-sm text-muted-foreground">{p.note}</span>
+            </Link>
+          </li>
+        ))}
+        {PLATE_PREVIEWS.map((p) => (
+          <li key={p.state}>
+            <Link
+              to="/plate/$state"
+              params={{ state: p.state }}
+              className="brand-card block p-4 hover:shadow-md"
+            >
               <span className="font-semibold text-navy">{p.label}</span>
               <span className="block text-sm text-muted-foreground">{p.note}</span>
             </Link>

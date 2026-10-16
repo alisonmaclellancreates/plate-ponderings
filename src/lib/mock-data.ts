@@ -11,13 +11,16 @@ export interface Story {
   meaning: string;
   howIKnow: HowIKnow;
   longer?: string;
+  /** Optional photo URL shown small on the right of the story card. */
   photo?: string;
   hearts: number;
 }
 
+/** Newest first: summaries[0] is current, the rest are earlier versions. */
 export interface Summary {
   date: string;
   consensus: Consensus;
+  storyCount: number;
   text: string;
 }
 
@@ -43,6 +46,14 @@ const s = (
   longer?: string,
 ): Story => ({ id, handle, date, meaning, howIKnow, hearts, ...(longer ? { longer } : {}) });
 
+/** Blurred placeholder photo with a clear plate area, used until real uploads exist. */
+export const STORY_PHOTO_PLACEHOLDER = "/mock/story-photo-placeholder.jpg";
+
+const withPhoto = (...args: Parameters<typeof s>): Story => ({
+  ...s(...args),
+  photo: STORY_PHOTO_PLACEHOLDER,
+});
+
 export const PLATES: PlateRecord[] = [
   { slug: "wa-b7k2l9", jurisdiction: "Washington", text: "B7K2L9", stories: [], summaries: [] },
   {
@@ -52,15 +63,16 @@ export const PLATES: PlateRecord[] = [
     consensus: "mixed",
     stories: [
       s("bc1", "maplegirl", "2026-10-02", "Love to code, a developer's plate.", "guess", 14),
-      s(
+      withPhoto(
         "bc2",
         "northshore",
-        "2026-10-04",
+        "2026-10-03",
         "Level 2 code, a security clearance joke.",
         "guess",
         6,
         "Saw it parked outside a data centre in Burnaby. Felt like an inside joke.",
       ),
+
       s("bc3", "rivercat", "2026-10-05", "Live to code.", "knows", 11),
       s(
         "bc4",
@@ -74,19 +86,28 @@ export const PLATES: PlateRecord[] = [
     ],
     summaries: [
       {
-        date: "2026-10-10",
+        date: "2026-10-12",
         consensus: "mixed",
-        text: "Most read it as love or live to code; a few see a joke.",
+        storyCount: 5,
+        text: "Most stories tie this plate to coding: love or live to code, and one contributor says the driver told them it's about a coding bootcamp. Two see a joke instead: a security clearance pun or a Las Vegas poker reference.",
       },
       {
-        date: "2026-10-06",
+        date: "2026-10-08",
+        consensus: "mixed",
+        storyCount: 4,
+        text: "Readers are split: half see love or live to code, half see a joke.",
+      },
+      {
+        date: "2026-10-05",
         consensus: "differ",
-        text: "Readings split between coding and a clearance joke.",
+        storyCount: 3,
+        text: "Readings split between coding and a security clearance joke.",
       },
       {
         date: "2026-10-03",
-        consensus: "agree",
-        text: "Early stories agree it's a programmer's plate.",
+        consensus: "mixed",
+        storyCount: 2,
+        text: "Early stories lean toward a programmer's plate, with one joke reading.",
       },
     ],
   },
@@ -100,14 +121,21 @@ export const PLATES: PlateRecord[] = [
         "ca1",
         "teadragon",
         "2026-09-20",
-        "I run a tea shop in Pasadena.",
+        "A nod to a lifelong love of tea.",
         "owner",
         31,
-        "Opened in 2019. Come say hi.",
+        "My grandmother poured me my first cup when I was five. I've been hooked ever since.",
       ),
       s("ca2", "maplegirl", "2026-09-21", "A tea lover, obviously.", "guess", 5),
-      s("ca3", "rivercat", "2026-09-22", "The owner sells tea.", "knows", 8),
-      s("ca4", "northshore", "2026-09-24", "Asked at a light: tea shop owner.", "asked", 7),
+      s("ca3", "rivercat", "2026-09-22", "Someone who really loves tea.", "knows", 8),
+      withPhoto(
+        "ca4",
+        "northshore",
+        "2026-09-24",
+        "Asked at a light: they just love tea.",
+        "asked",
+        7,
+      ),
       s("ca5", "Traveler4821", "2026-09-26", "Afternoon tea enthusiast.", "guess", 3),
       s("ca6", "maplegirl", "2026-09-28", "Spotted near a tea shop. Makes sense.", "guess", 4),
     ],
@@ -115,7 +143,8 @@ export const PLATES: PlateRecord[] = [
       {
         date: "2026-09-29",
         consensus: "agree",
-        text: "Everyone agrees: the owner runs a tea shop.",
+        storyCount: 6,
+        text: "Most people think this plate is about tea, and a contributor who says it's their plate explains it's a nod to a lifelong love of tea.",
       },
     ],
   },
@@ -147,6 +176,16 @@ export const PLATES: PlateRecord[] = [
     ],
   })),
 ];
+
+/** Published only in the catching-up preview; shared LV2CODE data remains unchanged. */
+export const CATCHING_UP_STORY: Story = s(
+  "bc6",
+  "maplegirl",
+  "2026-10-14",
+  "Saw a laptop sticker in the back window: definitely a coder.",
+  "guess",
+  0,
+);
 
 export function plateStatus(plate: PlateRecord): PlateStatus {
   if (plate.stories.some((story) => story.howIKnow === "owner")) return "owner";
