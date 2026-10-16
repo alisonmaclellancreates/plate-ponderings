@@ -7,7 +7,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("@/components/site/Settings", () => ({ DeleteConfirmPage: () => <p>page</p> }));
 
-import { Route } from "@/routes/settings.delete-confirm";
+import { Route } from "@/routes/settings_.delete-confirm";
 
 const R = Route as unknown as {
   head: () => { meta: Record<string, string>[] };

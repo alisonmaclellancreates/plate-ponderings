@@ -39,16 +39,17 @@ export function PrivacyPage() {
       <ScenicHeader asHeading title="Privacy" />
       <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
         <PrivacySection title="What we store">
-          We store your handle, your email address, the plates you spot, and the stories you share.
-          That's it.
+          Your email address and handle, the plates you spot, your stories and their blurred photos,
+          the hearts you give, the reports you send, and the people you block.
         </PrivacySection>
         <PrivacySection title="Photos">
           When you add a photo, the original is sent for plate detection and is never stored. Only
           the blurred version is uploaded, and location data is removed before anything is saved.
         </PrivacySection>
         <PrivacySection title="What the AI sees">
-          The AI reads the stories on a plate to write The Story So Far. It never sees your email
-          address, and it only works with stories that have passed their safety check.
+          The AI checks each new plate, each story before it's published, and each handle. It's
+          shown your photo once, to find the plate. It reads published stories to write The Story So
+          Far. It never sees your email address.
         </PrivacySection>
         <PrivacySection title="Blocking">{BLOCKING_EXPLANATION}</PrivacySection>
         <PrivacySection title="Deleting your stories and account">
