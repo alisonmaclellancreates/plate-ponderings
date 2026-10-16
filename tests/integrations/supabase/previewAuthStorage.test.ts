@@ -49,7 +49,12 @@ const answer =
   (value: unknown, ok = true): Responder =>
   (msg, origin) =>
     origin === EDITOR
-      ? [{ origin: EDITOR, data: { type: "lovable-preview-auth:result", requestId: msg.requestId, ok, value } }]
+      ? [
+          {
+            origin: EDITOR,
+            data: { type: "lovable-preview-auth:result", requestId: msg.requestId, ok, value },
+          },
+        ]
       : undefined;
 
 function adapter(): Adapter {
@@ -127,12 +132,18 @@ describe("editor origin resolution", () => {
   const dev = `id-preview--${UUID}.lovableproject-dev.com`;
 
   it("uses a trusted ancestor origin", async () => {
-    expect(await originsFor(prod, ["https://app.lovable.dev"])).toEqual(["https://app.lovable.dev"]);
+    expect(await originsFor(prod, ["https://app.lovable.dev"])).toEqual([
+      "https://app.lovable.dev",
+    ]);
   });
 
   it("falls back to the referrer origin when ancestorOrigins is missing or empty", async () => {
-    expect(await originsFor(prod, undefined, "https://x.lovable.dev/p")).toEqual(["https://x.lovable.dev"]);
-    expect(await originsFor(prod, [], "https://gptengineer.app/p")).toEqual(["https://gptengineer.app"]);
+    expect(await originsFor(prod, undefined, "https://x.lovable.dev/p")).toEqual([
+      "https://x.lovable.dev",
+    ]);
+    expect(await originsFor(prod, [], "https://gptengineer.app/p")).toEqual([
+      "https://gptengineer.app",
+    ]);
   });
 
   it("uses the default editor for an untrusted or absent ancestor", async () => {
@@ -197,11 +208,35 @@ describe("getItem", () => {
 
   it("ignores wrong origins, wrong ids and malformed replies", async () => {
     frame((msg) => [
-      { origin: "https://evil.example", data: { type: "lovable-preview-auth:result", requestId: msg.requestId, ok: true, value: "evil" } },
-      { origin: EDITOR, data: { type: "lovable-preview-auth:result", requestId: "other", ok: true, value: "wrong-id" } },
+      {
+        origin: "https://evil.example",
+        data: {
+          type: "lovable-preview-auth:result",
+          requestId: msg.requestId,
+          ok: true,
+          value: "evil",
+        },
+      },
+      {
+        origin: EDITOR,
+        data: {
+          type: "lovable-preview-auth:result",
+          requestId: "other",
+          ok: true,
+          value: "wrong-id",
+        },
+      },
       { origin: EDITOR, data: null },
       { origin: EDITOR, data: { type: "something-else", requestId: msg.requestId } },
-      { origin: EDITOR, data: { type: "lovable-preview-auth:result", requestId: msg.requestId, ok: true, value: "right" } },
+      {
+        origin: EDITOR,
+        data: {
+          type: "lovable-preview-auth:result",
+          requestId: msg.requestId,
+          ok: true,
+          value: "right",
+        },
+      },
     ]);
     expect(await adapter().getItem(KEY)).toBe("right");
   });
@@ -279,7 +314,10 @@ describe("setItem", () => {
     const p = s.setItem(KEY, "mine");
     expect(localStorage.getItem(KEY)).toBe("mine");
     await p;
-    expect(post.mock.calls[0]?.[0]).toMatchObject({ type: "lovable-preview-auth:set", value: "mine" });
+    expect(post.mock.calls[0]?.[0]).toMatchObject({
+      type: "lovable-preview-auth:set",
+      value: "mine",
+    });
     expect(localStorage.getItem(KEY)).toBe("canonical");
   });
 
@@ -320,7 +358,10 @@ describe("removeItem", () => {
     const post = frame(answer(null));
     await expect(adapter().removeItem(KEY)).resolves.toBeUndefined();
     expect(localStorage.getItem(KEY)).toBeNull();
-    expect(post.mock.calls[0]?.[0]).toMatchObject({ type: "lovable-preview-auth:remove", value: "old" });
+    expect(post.mock.calls[0]?.[0]).toMatchObject({
+      type: "lovable-preview-auth:remove",
+      value: "old",
+    });
   });
 
   it("resolves after a timeout and omits the value when storage is blocked", async () => {

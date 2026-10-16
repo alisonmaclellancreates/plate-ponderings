@@ -35,9 +35,9 @@ Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `
 - Leave `src/routeTree.gen.ts` and other generated files alone.
 - Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
 
-## Coverage map (after step 17)
+## Coverage map (after step 18)
 
-Totals: statements 82.62, branches 65.25, functions 87.91, lines 84.23. Thresholds set to 82/65/87/84.
+Totals: statements 99.64, branches 98.94, functions 100, lines 99.81. Thresholds set to 99/98/100/99.
 Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 
 | File                                              | Stmts % | Branch % | Funcs % | Lines % | Step |
@@ -89,12 +89,12 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/components/ui/toggle.tsx`                    | 100     | 100      | 100     | 100     | 12   |
 | `src/components/ui/tooltip.tsx`                   | 100     | 100      | 100     | 100     | 13   |
 | `src/hooks/use-mobile.tsx`                        | 100     | 100      | 100     | 100     | 14   |
-| `src/integrations/supabase/auth-attacher.ts`      | 0       | 0        | 0       | 0       | 18   |
-| `src/integrations/supabase/auth-middleware.ts`    | 0       | 0        | 0       | 0       | 18   |
-| `src/integrations/supabase/client.server.ts`      | 0       | 0        | 0       | 0       | 18   |
-| `src/integrations/supabase/client.ts`             | 0       | 0        | 0       | 0       | 18   |
-| `src/integrations/supabase/cron-auth.ts`          | 0       | 0        | 0       | 0       | 18   |
-| `src/integrations/supabase/previewAuthStorage.ts` | 0       | 0        | 0       | 0       | 18   |
+| `src/integrations/supabase/auth-attacher.ts`      | 100     | 100      | 100     | 100     | 18   |
+| `src/integrations/supabase/auth-middleware.ts`    | 100     | 100      | 100     | 100     | 18   |
+| `src/integrations/supabase/client.server.ts`      | 100     | 100      | 100     | 100     | 18   |
+| `src/integrations/supabase/client.ts`             | 100     | 100      | 100     | 100     | 18   |
+| `src/integrations/supabase/cron-auth.ts`          | 100     | 100      | 100     | 100     | 18   |
+| `src/integrations/supabase/previewAuthStorage.ts` | 97.43   | 98.63    | 100     | 100     | 18   |
 | `src/lib/error-capture.ts`                        | 100     | 100      | 100     | 100     | 15   |
 | `src/lib/error-page.ts`                           | 100     | 100      | 100     | 100     | 15   |
 | `src/lib/lovable-error-reporting.ts`              | 100     | 100      | 100     | 100     | 15   |
@@ -119,3 +119,9 @@ Branch 100% on a 0% file means the file has no branches, not that it is tested.
 - Step 14 uncovered, unreachable through the public surface: `carousel.tsx` line 57 (`onSelect` guard for an undefined API; only ever called with an API), the `orientation ||` fallback (orientation always has a default), and `api?.off` optional chaining in the cleanup. `chart.tsx` line 301 (non-object payload guard; Recharts payload items are always objects).
 - Step 16 notes: `start.ts` rethrows only objects carrying `statusCode`; a thrown `Response` or redirect without one is logged and becomes the 500 page (tests pin this). `server.ts` reaches every branch through `fetch`, including the no-default-export fallback.
 - Step 17: both route files use Option B (mocked route factory), since it reaches the root error component and shell without full-document rendering and avoids the real router stalling on stylesheets. Follow this for new routes. The `?url` stylesheet import resolves to an empty string under Vitest, so the head test checks the link exists rather than its value.
+
+### Step 18 notes
+
+- `previewAuthStorage.ts` line 40 (`if (done) return;` in `finish`) is unreachable: the listener is removed and the timer cleared on the first finish, so nothing can call it twice.
+- Never `await` a module's lazy client proxy (e.g. `return mod.supabase` from an async helper): awaiting reads `.then`, which builds the client. Return the module instead.
+- `@supabase/supabase-js` is mocked with `vi.doMock` in every file; no test reaches a real backend.

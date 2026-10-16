@@ -128,7 +128,11 @@ describe("requireSupabaseAuth exits", () => {
     expect(url).toBe("https://proj.example.co");
     expect(key).toBe("sb_publishable_abc");
     expect(opts.global.headers).toEqual({ Authorization: `Bearer ${JWT}` });
-    expect(opts.auth).toEqual({ storage: undefined, persistSession: false, autoRefreshToken: false });
+    expect(opts.auth).toEqual({
+      storage: undefined,
+      persistSession: false,
+      autoRefreshToken: false,
+    });
   });
 });
 
@@ -137,7 +141,9 @@ describe("auth-middleware fetch wrapper", () => {
     vi.stubEnv("SUPABASE_PUBLISHABLE_KEY", key);
     withAuth(`Bearer ${JWT}`);
     getClaims.mockResolvedValue({ data: { claims: { sub: "u" } }, error: null });
-    await (await load())({ next: vi.fn() });
+    await (
+      await load()
+    )({ next: vi.fn() });
     return createClient.mock.calls[0]?.[2].global.fetch as FetchFn;
   }
 

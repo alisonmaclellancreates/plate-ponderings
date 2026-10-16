@@ -49,7 +49,11 @@ describe("supabaseAdmin", () => {
     const [url, key, opts] = createClient.mock.calls[0] ?? [];
     expect(url).toBe("https://proj.example.co");
     expect(key).toBe("sb_secret_service");
-    expect(opts.auth).toEqual({ storage: undefined, persistSession: false, autoRefreshToken: false });
+    expect(opts.auth).toEqual({
+      storage: undefined,
+      persistSession: false,
+      autoRefreshToken: false,
+    });
     expect(typeof opts.global.fetch).toBe("function");
   });
 

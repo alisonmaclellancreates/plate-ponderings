@@ -87,7 +87,10 @@ describe("supabase browser client", () => {
   });
 
   it("falls back to server env names when VITE names are empty", async () => {
-    setEnv({ SUPABASE_URL: "https://server.example.co", SUPABASE_PUBLISHABLE_KEY: "sb_publishable_s" });
+    setEnv({
+      SUPABASE_URL: "https://server.example.co",
+      SUPABASE_PUBLISHABLE_KEY: "sb_publishable_s",
+    });
     void (await load()).supabase.from;
     const [url, key] = createClient.mock.calls[0] ?? [];
     expect(url).toBe("https://server.example.co");

@@ -37,7 +37,9 @@ describe("attachSupabaseAuth", () => {
   it("sends no headers when there is no session", async () => {
     getSession.mockResolvedValue({ data: { session: null } });
     const next = vi.fn();
-    await (await load())({ next });
+    await (
+      await load()
+    )({ next });
     expect(next).toHaveBeenCalledWith({ headers: {} });
   });
 });
