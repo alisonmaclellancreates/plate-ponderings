@@ -39,3 +39,8 @@
 
 # Remaining pages
 - [x] /settings, /settings/delete-confirm, /story-menu, /admin, /about, /privacy, /contact, /not-found previews, tests, lint.
+
+# Admin mobile and privacy wording
+- [ ] /admin table never scrolls the page sideways at 360px (overflow-x-auto container).
+- [ ] Privacy: update What we store, Photos, What the AI sees, and the Deleting title and first sentence.
+- [ ] Tests: privacy wording present, "That's it" gone, admin table in scrollable container; lint clean.
