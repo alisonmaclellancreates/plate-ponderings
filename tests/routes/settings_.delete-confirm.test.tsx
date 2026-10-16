@@ -1,24 +1,21 @@
-import { expect, it, vi } from "vitest";
-import { render } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { expect, it } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { QueryClient } from "@tanstack/react-query";
+import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/react-router";
+import { routeTree } from "@/routeTree.gen";
 
-vi.mock("@tanstack/react-router", () => ({
-  createFileRoute: () => (o: Record<string, unknown>) => o,
-}));
-vi.mock("@/components/site/Settings", () => ({ DeleteConfirmPage: () => <p>page</p> }));
-
-import { Route } from "@/routes/settings_.delete-confirm";
-
-const R = Route as unknown as {
-  head: () => { meta: Record<string, string>[] };
-  component: () => ReactNode;
-};
-
-it("renders the page with matching titles", () => {
-  const C = R.component;
-  expect(render(<C />).container.textContent).toBe("page");
-  const meta = R.head().meta;
-  const title = meta.find((m) => "title" in m)?.["title"];
-  expect(title).toContain("Delete your account");
-  expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
+it("renders /settings/delete-confirm through the router as its own page", async () => {
+  const router = createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries: ["/settings/delete-confirm"] }),
+    context: { queryClient: new QueryClient() },
+  });
+  render(<RouterProvider router={router} />);
+  expect(
+    await screen.findByRole("heading", { name: "Delete your account?" }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Keep My Account" })).toHaveAttribute(
+    "href",
+    "/settings",
+  );
 });
