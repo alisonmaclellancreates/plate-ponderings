@@ -6,7 +6,7 @@ import {
 } from "@/components/site/PlateDetail";
 import { PLATES } from "@/lib/mock-data";
 
-const isState = (s: string): s is PlateDetailState => s in PLATE_DETAIL_STATES;
+const isState = (s: string): s is PlateDetailState => Object.hasOwn(PLATE_DETAIL_STATES, s);
 
 export const Route = createFileRoute("/plate/$state")({
   loader: ({ params }) => {

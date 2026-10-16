@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PlateDetail, orderStories } from "@/components/site/PlateDetail";
+import { PlateDetail, Stories, orderStories } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
 
 const strip = () => screen.getByRole("list", { name: "Plate status" });
@@ -107,6 +107,26 @@ describe("PlateDetail", () => {
     ).toBeTruthy();
     expect(within(latest).getByText(/Oct 14, 2026/)).toBeTruthy();
     expect(within(latest).getByText("maplegirl")).toBeTruthy();
+  });
+});
+
+describe("Stories", () => {
+  const mk = (id: string): Story => ({
+    id,
+    handle: id,
+    date: "2026-10-01",
+    meaning: id,
+    howIKnow: "guess",
+    hearts: 0,
+  });
+
+  it("offers 5 more when more than five remain past the first page", async () => {
+    const stories = Array.from({ length: 11 }, (_, i) => mk(`s${i}`));
+    render(<Stories stories={stories} pending={false} />);
+    expect(screen.getAllByRole("article")).toHaveLength(5);
+    await userEvent.click(screen.getByRole("button", { name: "Show 5 more stories" }));
+    expect(screen.getAllByRole("article")).toHaveLength(10);
+    expect(screen.getByRole("button", { name: "Show 1 more story" })).toBeTruthy();
   });
 });
 

@@ -18,6 +18,7 @@ import {
   type Story,
   type Summary,
 } from "@/lib/mock-data";
+import { storyCount } from "@/lib/story-count";
 
 export type PlateDetailState =
   "mystery" | "interpreted" | "owner" | "interpreted-history" | "pending-story" | "catching-up";
@@ -32,8 +33,6 @@ export const PLATE_DETAIL_STATES: Record<PlateDetailState, { slug: string; label
 };
 
 export const PAGE_SIZE = 5;
-
-const storyCount = (n: number) => `${n} ${n === 1 ? "story" : "stories"}`;
 
 /** Owner story first, then everything else oldest first. Never sorted by hearts. */
 export function orderStories(stories: Story[]): Story[] {
@@ -226,7 +225,7 @@ function PendingPanel() {
   );
 }
 
-function Stories({ stories, pending }: { stories: Story[]; pending: boolean }) {
+export function Stories({ stories, pending }: { stories: Story[]; pending: boolean }) {
   const [shown, setShown] = useState(PAGE_SIZE);
   const ordered = orderStories(stories);
   const remaining = ordered.length - shown;
