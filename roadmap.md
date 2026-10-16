@@ -36,3 +36,11 @@
 - [x] Build /explore, working plate links, and Load More.
 - [x] Verify tests, lint, and desktop/tablet/mobile archive flow.
 - [x] Correct card accessible names, Load More focus, singular progress and hearts, and homepage plate destinations; verify tests, lint and browser flow.
+
+# Remaining pages
+- [x] /settings, /settings/delete-confirm, /story-menu, /admin, /about, /privacy, /contact, /not-found previews, tests, lint.
+
+# Admin mobile and privacy wording
+- [x] /admin table never scrolls the page sideways at 360px (overflow-x-auto container).
+- [x] Privacy: update What we store, Photos, What the AI sees, and the Deleting title and first sentence.
+- [x] Tests: privacy wording present, "That's it" gone, admin table in scrollable container; lint clean.

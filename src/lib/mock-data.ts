@@ -340,6 +340,60 @@ export const SUBMISSIONS: Submission[] = [
   },
 ];
 
+/** Settings preview: handles the signed-in person has blocked. */
+export const BLOCKED_HANDLES = ["maplegirl", "rivercat"];
+
+export const BLOCKING_EXPLANATION =
+  "Blocking someone hides their stories from your view. It doesn't remove their contributions from the shared plate summary.";
+
+export const DELETE_ACCOUNT_WARNING =
+  "Deleting your account removes your handle and your published stories from the site. Plates you've spotted stay in the collection. This can't be undone.";
+
+/** Admin preview: reported stories awaiting review. */
+export interface ReportedStory {
+  id: string;
+  jurisdiction: string;
+  text: string;
+  handle: string;
+  meaning: string;
+  reports: number;
+  reasons: string[];
+  status: "visible" | "hidden";
+}
+
+export const REPORTED_STORIES: ReportedStory[] = [
+  {
+    id: "rep-1",
+    jurisdiction: "British Columbia",
+    text: "LV2CODE",
+    handle: "maplegirl",
+    meaning: "Love to code, a developer's plate.",
+    reports: 3,
+    reasons: ["Spam", "Something else"],
+    status: "visible",
+  },
+  {
+    id: "rep-2",
+    jurisdiction: "California",
+    text: "TEATIME",
+    handle: "rivercat",
+    meaning: "Someone who really loves tea.",
+    reports: 1,
+    reasons: ["Personal information"],
+    status: "visible",
+  },
+  {
+    id: "rep-3",
+    jurisdiction: "Oregon",
+    text: "PNW LV",
+    handle: "northshore",
+    meaning: "Pacific Northwest love.",
+    reports: 2,
+    reasons: ["Hurtful or harassing"],
+    status: "hidden",
+  },
+];
+
 export const PROFILE_SAMPLE_STORY: Story = {
   id: "profile-sample",
   handle: CURRENT_USER.handle,

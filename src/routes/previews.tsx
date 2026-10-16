@@ -40,6 +40,14 @@ const PREVIEWS = [
   { to: "/sign-up", label: "Create an Account", note: "Email and password, no handle" },
   { to: "/demo", label: "Try the Demo", note: "What the demo shows" },
   { to: "/demo-form", label: "Demo, Add a story", note: "Step 1 read-only, profile menu open" },
+  { to: "/settings", label: "Settings", note: "Blocked people and delete account" },
+  { to: "/settings/delete-confirm", label: "Delete account, confirm", note: "Keep or delete" },
+  { to: "/story-menu", label: "Story menus", note: "Report, block, delete and both dialogs" },
+  { to: "/admin", label: "Admin", note: "Reported stories table" },
+  { to: "/about", label: "About", note: "Why What the Plate? exists" },
+  { to: "/privacy", label: "Privacy", note: "Storage, photos, AI, blocking, deleting" },
+  { to: "/contact", label: "Contact", note: "Email link placeholder" },
+  { to: "/not-found", label: "Not found", note: "Sasquatch and Back to Explore" },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */
