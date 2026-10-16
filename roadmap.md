@@ -44,3 +44,9 @@
 - [x] /admin table never scrolls the page sideways at 360px (overflow-x-auto container).
 - [x] Privacy: update What we store, Photos, What the AI sees, and the Deleting title and first sentence.
 - [x] Tests: privacy wording present, "That's it" gone, admin table in scrollable container; lint clean.
+
+# Step 41: backend foundation
+- [x] Migration: 12 tables, app_role enum, has_role, derived views, is_summary_public, story_heart_counts, GRANTs, RLS.
+- [x] Private story-photos bucket with owner-folder storage policies.
+- [x] tests/db/summary-visibility.sql: 7 assertions run and passing; fixtures cleaned up.
+- [x] App unchanged: 431 tests, lint 0 errors, typecheck clean.
