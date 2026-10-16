@@ -22,7 +22,9 @@ async function loadServer(
   vi.doMock("@/lib/error-page", () => ({ renderErrorPage: () => ERROR_PAGE }));
   vi.doMock("@tanstack/react-start/server-entry", () => {
     entryFactoryRuns += 1;
-    return options.noDefault ? { default: undefined, fetch: innerFetch } : { default: { fetch: innerFetch } };
+    return options.noDefault
+      ? { default: undefined, fetch: innerFetch }
+      : { default: { fetch: innerFetch } };
   });
   const mod = await import("@/server");
   return mod.default as ServerModule;
