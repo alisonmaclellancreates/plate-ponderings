@@ -29,12 +29,12 @@ export const SPOT_OUTCOMES: Record<SpotOutcome, string> = {
 };
 
 export interface SpotValues {
-  jurisdiction?: string;
-  text?: string;
+  jurisdiction?: string | undefined;
+  text?: string | undefined;
 }
 export interface SpotErrors {
-  jurisdiction?: string;
-  text?: string;
+  jurisdiction?: string | undefined;
+  text?: string | undefined;
 }
 
 export const JURISDICTION_ERROR = "Please select a state or province";
@@ -109,7 +109,7 @@ function Outcome({
   );
 }
 
-function FieldError({ id, message }: { id: string; message?: string }) {
+function FieldError({ id, message }: { id: string; message?: string | undefined }) {
   if (!message) return null;
   return (
     <p id={id} className="mt-1 flex items-center gap-1 text-sm text-coral-cta">
@@ -123,8 +123,8 @@ export function SpotForm({
   values = {},
   errors: initialErrors = {},
 }: {
-  values?: SpotValues;
-  errors?: SpotErrors;
+  values?: SpotValues | undefined;
+  errors?: SpotErrors | undefined;
 }) {
   const [errors, setErrors] = useState<SpotErrors>(initialErrors);
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -250,8 +250,8 @@ export function SpotPage({
   errors,
   alreadySpotted,
 }: {
-  values?: SpotValues;
-  errors?: SpotErrors;
+  values?: SpotValues | undefined;
+  errors?: SpotErrors | undefined;
   alreadySpotted?: boolean;
 }) {
   return (

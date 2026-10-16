@@ -52,8 +52,8 @@ function Headline() {
 }
 
 export interface SearchValues {
-  jurisdiction?: string;
-  text?: string;
+  jurisdiction?: string | undefined;
+  text?: string | undefined;
 }
 
 function SearchCard({ values }: { values: SearchValues }) {

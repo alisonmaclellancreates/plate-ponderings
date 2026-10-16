@@ -4,9 +4,14 @@ import { Homepage } from "@/components/site/Homepage";
 const str = (v: unknown) => (typeof v === "string" && v.length <= 64 ? v : undefined);
 
 export const Route = createFileRoute("/")({
-  validateSearch: (s: Record<string, unknown>): { jurisdiction?: string; text?: string } => ({
-    jurisdiction: str(s.jurisdiction),
-    text: str(s.text),
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): {
+    jurisdiction?: string | undefined;
+    text?: string | undefined;
+  } => ({
+    jurisdiction: str(s["jurisdiction"]),
+    text: str(s["text"]),
   }),
   head: () => ({
     meta: [
