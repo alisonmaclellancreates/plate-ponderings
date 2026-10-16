@@ -52,11 +52,12 @@ export function createAnalytics<const R extends EventRegistry>(registry: R) {
 
   function getClient(): Promise<Client | undefined> {
     const key = import.meta.env.VITE_POSTHOG_KEY;
-    if (typeof window === "undefined" || !key) return Promise.resolve(undefined);
+    const host = import.meta.env.VITE_POSTHOG_HOST;
+    if (typeof window === "undefined" || !key || !host) return Promise.resolve(undefined);
     clientPromise ??= import("posthog-js")
       .then(({ default: client }) => {
         client.init(key, {
-          api_host: import.meta.env.VITE_POSTHOG_HOST || "https://eu.i.posthog.com",
+          api_host: host,
           autocapture: false,
           disable_session_recording: true,
           person_profiles: "identified_only",

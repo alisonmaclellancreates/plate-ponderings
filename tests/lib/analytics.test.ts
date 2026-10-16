@@ -38,6 +38,40 @@ describe("analytics", () => {
     expect(sdk.init).not.toHaveBeenCalled();
   });
 
+  it("silently does nothing without an explicit host, even with a key", async () => {
+    vi.stubEnv("VITE_POSTHOG_HOST", "");
+    const analytics = await import("@/lib/analytics");
+    await analytics.track("$pageview", { path: "/" });
+    await analytics.identify("user-id");
+    await analytics.setDemo(true);
+    await analytics.reset();
+    for (const method of Object.values(sdk)) expect(method).not.toHaveBeenCalled();
+  });
+
+  it("rejects unregistered and inherited event names before initializing", async () => {
+    const analytics = await import("@/lib/analytics");
+    // @ts-expect-error Test runtime protection against callers bypassing types.
+    await analytics.track("unregistered", {});
+    // @ts-expect-error Object prototype properties are not registered events.
+    await analytics.track("toString", {});
+    for (const method of Object.values(sdk)) expect(method).not.toHaveBeenCalled();
+  });
+
+  it("supports empty property lists and handles malformed path values without throwing", async () => {
+    const { createAnalytics } = await import("@/lib/analytics");
+    const analytics = createAnalytics({ empty_event: [], path_event: ["path"] } as const);
+    await analytics.track("empty_event", {});
+    expect(sdk.capture).toHaveBeenCalledWith("empty_event", {});
+    const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+    expect(beforeSend({ event: "empty_event", properties: { path: "/private" } })).toEqual({
+      event: "empty_event", properties: {},
+    });
+    expect(beforeSend({ event: "path_event", properties: { path: 42 } })).toEqual({
+      event: "path_event", properties: { path: 42 },
+    });
+    expect(beforeSend({ event: "toString", properties: {} })).toBeNull();
+  });
+
   it("passes planned events to PostHog and initializes only once", async () => {
     const analytics = await import("@/lib/analytics");
     await analytics.track("$pageview", { path: "/explore" });
