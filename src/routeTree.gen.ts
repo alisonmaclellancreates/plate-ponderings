@@ -17,6 +17,7 @@ import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 import { Route as SpotIndexRouteImport } from './routes/spot.index'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
+import { Route as StoryStepRouteImport } from './routes/story.$step'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
   path: '/spot/$outcome',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoryStepRoute = StoryStepRouteImport.update({
+  id: '/story/$step',
+  path: '/story/$step',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
+  '/story/$step': typeof StoryStepRoute
   '/spot/': typeof SpotIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
+  '/story/$step': typeof StoryStepRoute
   '/spot': typeof SpotIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
+  '/story/$step': typeof StoryStepRoute
   '/spot/': typeof SpotIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/spot/$outcome'
+    | '/story/$step'
     | '/spot/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/spot/$outcome'
+    | '/story/$step'
     | '/spot'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/spot/$outcome'
+    | '/story/$step'
     | '/spot/'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
+  StoryStepRoute: typeof StoryStepRoute
   SpotIndexRoute: typeof SpotIndexRoute
 }
 
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpotOutcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/story/$step': {
+      id: '/story/$step'
+      path: '/story/$step'
+      fullPath: '/story/$step'
+      preLoaderRoute: typeof StoryStepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,
+  StoryStepRoute: StoryStepRoute,
   SpotIndexRoute: SpotIndexRoute,
 }
 export const routeTree = rootRouteImport

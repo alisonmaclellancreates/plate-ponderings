@@ -116,7 +116,7 @@ function Placeholder({ label, children }: { label: string; children: ReactNode }
 const outline = "brand-btn brand-btn-outline";
 
 /** Shared outcome layout: scenic header, heading, body, one or two buttons. */
-function Outcome({
+export function Outcome({
   sign,
   heading,
   children,
