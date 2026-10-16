@@ -251,6 +251,29 @@
     background: var(--coral-cta-pressed);
   }
 
+  .brand-btn-outline {
+    background: var(--card);
+    color: var(--navy);
+    border: 2px solid var(--navy);
+  }
+  .brand-btn-outline:hover:not(:disabled) {
+    background: var(--cream);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .spot-drive {
+      animation: spot-drive 1.6s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes spot-drive {
+    from {
+      transform: translateX(-6px);
+    }
+    to {
+      transform: translateX(6px);
+    }
+  }
+
   .brand-badge {
     display: inline-flex;
     align-items: center;
