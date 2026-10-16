@@ -1,12 +1,20 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MessageCircle, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
 import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
-import { formatDay } from "@/lib/format-day";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
 
 import { storyCount } from "@/lib/story-count";
-import { PLATES, plateStatus, type PlateRecord } from "@/lib/mock-data";
+import {
+  PLATES,
+  plateStatus,
+  publishedStories,
+  featuredPlates,
+  TODAY,
+  type PlateRecord,
+} from "@/lib/mock-data";
 
 export const HEADLINES = [
   "Every plate has a story.",
@@ -273,7 +281,7 @@ function HowItWorks() {
 
 export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
   const status = plateStatus(plate);
-  const n = plate.stories.length;
+  const n = publishedStories(plate).length;
   const copy =
     status === "mystery"
       ? `No stories yet. What do you think ${plate.text} means? Be the first to share your interpretation!`
@@ -303,9 +311,13 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
             <div className="min-w-0">
               <StatusBadge status={status} />
               <p className="mt-3 text-lg">{copy}</p>
-              <a href="/plate/mystery" className="brand-btn brand-btn-navy mt-4">
+              <Link
+                to="/plate/$state"
+                params={{ state: plate.slug }}
+                className="brand-btn brand-btn-navy mt-4"
+              >
                 View This Plate
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -314,11 +326,9 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
   );
 }
 
-const TODAY = "2026-10-16";
-
 function RecentlyFeatured() {
-  const recent = PLATES.filter((p) => p.plateOfTheDay && p.plateOfTheDay < TODAY)
-    .sort((a, b) => b.plateOfTheDay!.localeCompare(a.plateOfTheDay!))
+  const recent = featuredPlates()
+    .filter((p) => p.plateOfTheDay !== TODAY)
     .slice(0, 4);
   return (
     <section aria-labelledby="recent-heading" className="mx-auto max-w-6xl px-4 py-12">
@@ -335,15 +345,8 @@ function RecentlyFeatured() {
       </div>
       <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {recent.map((p) => (
-          <li key={p.slug} className="brand-card flex flex-col items-center gap-3 p-4 text-center">
-            <Plate jurisdiction={p.jurisdiction} text={p.text} size="md" />
-            <p className="text-sm text-muted-foreground">Featured {formatDay(p.plateOfTheDay!)}</p>
-            <p className="flex items-center gap-1 font-semibold">
-              <MessageCircle aria-hidden className="size-4" />
-              {storyCount(p.stories.length)}
-            </p>
-            <StatusBadge status={plateStatus(p)} />
-            <p className="text-sm">Was a mystery, now {storyCount(p.stories.length)}.</p>
+          <li key={p.slug} className="min-w-0">
+            <FeaturedPlateCard plate={p} />
           </li>
         ))}
       </ul>
@@ -362,7 +365,8 @@ export function Homepage({
 }) {
   const featured = PLATES.find((p) =>
     variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
-  )!;
+  );
+  if (!featured) return null;
   const search =
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (

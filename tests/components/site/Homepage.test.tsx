@@ -3,6 +3,15 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Homepage, HEADLINES, ROTATE_MS, PlateOfTheDay } from "@/components/site/Homepage";
 import type { PlateRecord } from "@/lib/mock-data";
+import type { ReactNode } from "react";
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ params, children, ...props }: { params: { state: string }; children: ReactNode }) => (
+    <a {...props} href={`/plate/${params.state}`}>
+      {children}
+    </a>
+  ),
+}));
 
 function media({ mobile = false, reduced = false }) {
   window.matchMedia = vi.fn((q: string) => ({
@@ -96,6 +105,18 @@ describe("Homepage", () => {
     const potd = screen.getByRole("region", { name: "Plate of the Day" });
     expect(within(potd).getByText("Interpreted")).toBeTruthy();
     expect(within(potd).getByText(/Only 2 stories so far/)).toBeTruthy();
+    expect(within(potd).getByRole("link", { name: "View This Plate" }).getAttribute("href")).toBe(
+      "/plate/co-wander",
+    );
+  });
+
+  it("default Plate of the Day links to today's plate", () => {
+    media({});
+    render(<Homepage />);
+    const potd = screen.getByRole("region", { name: "Plate of the Day" });
+    expect(within(potd).getByRole("link", { name: "View This Plate" }).getAttribute("href")).toBe(
+      "/plate/ut-canyons",
+    );
   });
 
   it("reads a plate with exactly one story as 1 story", () => {

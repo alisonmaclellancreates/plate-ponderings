@@ -10,7 +10,7 @@ const isState = (s: string): s is PlateDetailState => Object.hasOwn(PLATE_DETAIL
 
 export const Route = createFileRoute("/plate/$state")({
   loader: ({ params }) => {
-    if (!isState(params.state)) throw notFound();
+    if (!isState(params.state) && !PLATES.some((p) => p.slug === params.state)) throw notFound();
     return { state: params.state };
   },
   head: ({ loaderData }) => {
@@ -22,9 +22,16 @@ export const Route = createFileRoute("/plate/$state")({
         ],
       };
     }
-    const info = PLATE_DETAIL_STATES[loaderData.state];
-    const plate = PLATES.find((p) => p.slug === info.slug)!;
-    const title = `${plate.text} (${plate.jurisdiction}) · ${info.label} | What the Plate?`;
+    const info = isState(loaderData.state) ? PLATE_DETAIL_STATES[loaderData.state] : undefined;
+    const plate = PLATES.find((p) => p.slug === (info?.slug ?? loaderData.state));
+    if (!plate)
+      return {
+        meta: [
+          { title: "Plate unavailable | What the Plate?" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    const title = `${plate.text} (${plate.jurisdiction}) · ${info?.label ?? "Plate stories"} | What the Plate?`;
     const description = `Stories about the ${plate.jurisdiction} plate ${plate.text}, and what people think it means.`;
     return {
       meta: [

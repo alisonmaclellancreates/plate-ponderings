@@ -1,12 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PlateDetail, Stories, orderStories } from "@/components/site/PlateDetail";
+import { PlateDetail, Stories, StoryCard, orderStories } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
 
 const strip = () => screen.getByRole("list", { name: "Plate status" });
 
 describe("PlateDetail", () => {
+  it("ut-canyons by slug renders the CANYONS plate as a mystery", () => {
+    render(<PlateDetail state="ut-canyons" />);
+    expect(screen.getByRole("heading", { level: 1, name: "Utah plate CANYONS" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "What do you think this plate means?" }),
+    ).toBeTruthy();
+    expect(within(strip()).getByText("0 stories")).toBeTruthy();
+  });
+
+  it("or-pnwlv by slug still uses the PNW LV summary", () => {
+    render(<PlateDetail state="or-pnwlv" />);
+    expect(screen.getByRole("heading", { level: 1, name: "Oregon plate PNW LV" })).toBeTruthy();
+    expect(
+      screen.getByText("Both stories read this plate as Pacific Northwest love."),
+    ).toBeTruthy();
+  });
+
   it("pnw-lv: Oregon PNW LV with its two stories and summary", () => {
     render(<PlateDetail state="pnw-lv" />);
     expect(screen.getByRole("heading", { level: 1, name: "Oregon plate PNW LV" })).toBeTruthy();
@@ -14,6 +31,11 @@ describe("PlateDetail", () => {
     expect(
       screen.getByText("Both stories read this plate as Pacific Northwest love."),
     ).toBeTruthy();
+  });
+
+  it("renders nothing for an unknown state", () => {
+    const { container } = render(<PlateDetail state="nope" />);
+    expect(container.firstElementChild).toBeNull();
   });
 
   it("mystery: prompt and sign, no summary, no stories list", () => {
@@ -157,4 +179,21 @@ describe("orderStories", () => {
       ]).map((s) => s.id),
     ).toEqual(["c", "a", "b"]);
   });
+});
+
+it("reads a story with 1 heart as 1 heart", () => {
+  render(
+    <StoryCard
+      story={{
+        id: "h1",
+        handle: "rivercat",
+        date: "2026-10-14",
+        meaning: "One.",
+        howIKnow: "guess",
+        hearts: 1,
+      }}
+    />,
+  );
+  expect(screen.getByText("heart").previousSibling?.textContent).toBe("1");
+  expect(screen.queryByText("hearts")).toBeNull();
 });
