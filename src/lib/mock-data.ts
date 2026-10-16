@@ -251,7 +251,7 @@ export const TODAY = "2026-10-16";
 /** Every featured plate, newest first. */
 export function featuredPlates(): PlateRecord[] {
   return PLATES.filter((p) => p.plateOfTheDay && p.plateOfTheDay <= TODAY).sort((a, b) =>
-    b.plateOfTheDay!.localeCompare(a.plateOfTheDay!),
+    (b.plateOfTheDay ?? "").localeCompare(a.plateOfTheDay ?? ""),
   );
 }
 

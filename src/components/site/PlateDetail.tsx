@@ -269,8 +269,10 @@ export function Stories({ stories, pending }: { stories: Story[]; pending: boole
   );
 }
 
-export function PlateDetail({ state }: { state: PlateDetailState }) {
-  const slug = PLATE_DETAIL_STATES[state]?.slug ?? state;
+export function PlateDetail({ state }: { state: string }) {
+  const slug = Object.hasOwn(PLATE_DETAIL_STATES, state)
+    ? PLATE_DETAIL_STATES[state as PlateDetailState].slug
+    : state;
   const record = PLATES.find((p) => p.slug === slug);
   const basePlate = record ? { ...record, stories: publishedStories(record) } : undefined;
   if (!basePlate) return null;
