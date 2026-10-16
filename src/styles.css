@@ -280,8 +280,12 @@
     }
   }
   @keyframes spot-drive {
-    from { transform: translateX(-6px); }
-    to { transform: translateX(6px); }
+    from {
+      transform: translateX(-6px);
+    }
+    to {
+      transform: translateX(6px);
+    }
   }
 
   .brand-badge {

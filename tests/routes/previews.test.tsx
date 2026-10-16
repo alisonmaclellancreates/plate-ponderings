@@ -10,9 +10,11 @@ vi.mock("@tanstack/react-router", () => ({
     children,
   }: {
     to: string;
-    params?: { state: string };
+    params?: Record<string, string>;
     children: ReactNode;
-  }) => <a href={params ? to.replace("$state", params.state) : to}>{children}</a>,
+  }) => (
+    <a href={params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to}>{children}</a>
+  ),
 }));
 
 import { Route } from "@/routes/previews";

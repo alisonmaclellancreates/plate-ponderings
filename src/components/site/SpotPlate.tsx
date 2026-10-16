@@ -264,7 +264,9 @@ export function SpotPage({
         <div className="space-y-4">
           <SpotForm values={values} errors={errors} />
           {alreadySpotted && values?.jurisdiction && values.text && (
-            <AlreadySpottedPanel values={{ jurisdiction: values.jurisdiction, text: values.text }} />
+            <AlreadySpottedPanel
+              values={{ jurisdiction: values.jurisdiction, text: values.text }}
+            />
           )}
         </div>
         <WhatHappensNext />
