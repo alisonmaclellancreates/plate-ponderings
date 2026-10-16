@@ -1,9 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
 
-const routerMarker = { kind: "router-marker" };
-const routeTreeMarker = { kind: "route-tree-marker" };
-const createRouter = vi.fn((_options: Record<string, unknown>) => routerMarker);
+const { routerMarker, routeTreeMarker, createRouter } = vi.hoisted(() => {
+  const routerMarker = { kind: "router-marker" };
+  return {
+    routerMarker,
+    routeTreeMarker: { kind: "route-tree-marker" },
+    createRouter: vi.fn((_options: Record<string, unknown>) => routerMarker),
+  };
+});
 
 vi.mock("@tanstack/react-router", () => ({ createRouter }));
 vi.mock("@/routeTree.gen", () => ({ routeTree: routeTreeMarker }));
