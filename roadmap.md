@@ -50,3 +50,4 @@
 - [x] Private story-photos bucket with owner-folder storage policies.
 - [x] tests/db/summary-visibility.sql: 7 assertions run and passing; fixtures cleaned up.
 - [x] App unchanged: 431 tests, lint 0 errors, typecheck clean.
+- [ ] Alison's revision: no public reads, exact grants, is_story_published, self-block check, stable owner tie-break, no storage policies; summaries server-only, jurisdictions server-only; report final DB state.
