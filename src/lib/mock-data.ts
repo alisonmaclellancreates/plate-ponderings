@@ -46,6 +46,14 @@ const s = (
   longer?: string,
 ): Story => ({ id, handle, date, meaning, howIKnow, hearts, ...(longer ? { longer } : {}) });
 
+/** Blurred placeholder photo with a clear plate area, used until real uploads exist. */
+export const STORY_PHOTO_PLACEHOLDER = "/brand/story-photo-placeholder-v1.jpg";
+
+const withPhoto = (...args: Parameters<typeof s>): Story => ({
+  ...s(...args),
+  photo: STORY_PHOTO_PLACEHOLDER,
+});
+
 export const PLATES: PlateRecord[] = [
   { slug: "wa-b7k2l9", jurisdiction: "Washington", text: "B7K2L9", stories: [], summaries: [] },
   {
@@ -55,7 +63,7 @@ export const PLATES: PlateRecord[] = [
     consensus: "mixed",
     stories: [
       s("bc1", "maplegirl", "2026-10-02", "Love to code, a developer's plate.", "guess", 14),
-      s(
+      withPhoto(
         "bc2",
         "northshore",
         "2026-10-04",
@@ -120,7 +128,7 @@ export const PLATES: PlateRecord[] = [
       ),
       s("ca2", "maplegirl", "2026-09-21", "A tea lover, obviously.", "guess", 5),
       s("ca3", "rivercat", "2026-09-22", "Someone who really loves tea.", "knows", 8),
-      s("ca4", "northshore", "2026-09-24", "Asked at a light: they just love tea.", "asked", 7),
+      withPhoto("ca4", "northshore", "2026-09-24", "Asked at a light: they just love tea.", "asked", 7),
       s("ca5", "Traveler4821", "2026-09-26", "Afternoon tea enthusiast.", "guess", 3),
       s("ca6", "maplegirl", "2026-09-28", "Spotted near a tea shop. Makes sense.", "guess", 4),
     ],
