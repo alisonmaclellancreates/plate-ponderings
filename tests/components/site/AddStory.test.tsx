@@ -115,7 +115,6 @@ describe("Add a story previews", () => {
     expect(screen.queryByText("0/500")).toBeNull();
   });
 
-
   it("Cancel on step 1 opens the PNW LV preview", () => {
     render(<StoryStepPage step="1" />);
     expect(screen.getByRole("link", { name: "Cancel" })).toHaveAttribute("href", "/plate/pnw-lv");
