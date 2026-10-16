@@ -80,6 +80,19 @@ const SPOT_PREVIEWS = [
   { outcome: "error", label: "Spot a Plate, error", note: "Something went wrong" },
 ] as const;
 
+/** Add a story flow for Oregon PNW LV. */
+const STORY_PREVIEWS = [
+  { step: "1", label: "Add a story, step 1", note: "How do you know, meaning, more" },
+  { step: "1-owner-exists", label: "Add a story, owner already here", note: "Calm note" },
+  { step: "2", label: "Add a story, photo", note: "Drop area and privacy note" },
+  { step: "2-adjust", label: "Add a story, adjust photo", note: "Plate box editor" },
+  { step: "2-review", label: "Add a story, review photo", note: "Processed image" },
+  { step: "3", label: "Add a story, review and submit", note: "Summary of answers" },
+  { step: "done", label: "Add a story, submitted", note: "Outcome" },
+  { step: "checking", label: "Add a story, being checked", note: "Outcome" },
+  { step: "rejected", label: "Add a story, not added", note: "Step 1 with words kept" },
+] as const;
+
 function Previews() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">

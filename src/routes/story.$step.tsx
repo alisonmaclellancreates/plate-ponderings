@@ -1,0 +1,40 @@
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { STORY_STEPS, StoryStepPage, type StoryStep } from "@/components/site/AddStory";
+
+const isStep = (s: string): s is StoryStep => Object.hasOwn(STORY_STEPS, s);
+
+export const Route = createFileRoute("/story/$step")({
+  loader: ({ params }) => {
+    if (!isStep(params.step)) throw notFound();
+    return { step: params.step };
+  },
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return {
+        meta: [
+          { title: "Add Your Story unavailable | What the Plate?" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const label = STORY_STEPS[loaderData.step];
+    const title = `Add Your Story · ${label} | What the Plate?`;
+    const description = `Add a story for Oregon PNW LV: ${label.toLowerCase()}.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary" },
+      ],
+    };
+  },
+  component: StoryStepRoute,
+});
+
+function StoryStepRoute() {
+  const { step } = Route.useLoaderData();
+  return <StoryStepPage step={step} />;
+}
