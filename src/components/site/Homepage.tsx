@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { MessageCircle, Star } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
+import { formatDay } from "@/lib/format-day";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
+
 import { storyCount } from "@/lib/story-count";
 import { PLATES, plateStatus, type PlateRecord } from "@/lib/mock-data";
 
@@ -310,14 +312,6 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
       </div>
     </section>
   );
-}
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-/** Formats an ISO day without Date, so server and browser time zones always agree. */
-export function formatDay(iso: string) {
-  const [y, m = 1, d] = iso.split("-").map(Number);
-  return `${MONTHS[m - 1]} ${d}, ${y}`;
 }
 
 const TODAY = "2026-10-16";
