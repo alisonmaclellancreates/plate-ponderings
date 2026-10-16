@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as HomeFallbackRouteImport } from './routes/home-fallback'
 import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as PreviewsRouteImport } from './routes/previews'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 import { Route as SpotIndexRouteImport } from './routes/spot.index'
@@ -37,6 +39,16 @@ const HomeNoMatchRoute = HomeNoMatchRouteImport.update({
 const PreviewsRoute = PreviewsRouteImport.update({
   id: '/previews',
   path: '/previews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubmissionsRoute = SubmissionsRouteImport.update({
+  id: '/submissions',
+  path: '/submissions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlateStateRoute = PlateStateRouteImport.update({
@@ -70,6 +82,8 @@ export interface FileRoutesByFullPath {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
+  '/profile': typeof ProfileRoute
+  '/submissions': typeof SubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -81,6 +95,8 @@ export interface FileRoutesByTo {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
+  '/profile': typeof ProfileRoute
+  '/submissions': typeof SubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -93,6 +109,8 @@ export interface FileRoutesById {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/previews': typeof PreviewsRoute
+  '/profile': typeof ProfileRoute
+  '/submissions': typeof SubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -106,6 +124,8 @@ export interface FileRouteTypes {
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
+    | '/profile'
+    | '/submissions'
     | '/plate/$state'
     | '/preview/components'
     | '/spot/$outcome'
@@ -117,6 +137,8 @@ export interface FileRouteTypes {
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
+    | '/profile'
+    | '/submissions'
     | '/plate/$state'
     | '/preview/components'
     | '/spot/$outcome'
@@ -128,6 +150,8 @@ export interface FileRouteTypes {
     | '/home-fallback'
     | '/home-no-match'
     | '/previews'
+    | '/profile'
+    | '/submissions'
     | '/plate/$state'
     | '/preview/components'
     | '/spot/$outcome'
@@ -140,6 +164,8 @@ export interface RootRouteChildren {
   HomeFallbackRoute: typeof HomeFallbackRoute
   HomeNoMatchRoute: typeof HomeNoMatchRoute
   PreviewsRoute: typeof PreviewsRoute
+  ProfileRoute: typeof ProfileRoute
+  SubmissionsRoute: typeof SubmissionsRoute
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
@@ -175,6 +201,20 @@ declare module '@tanstack/react-router' {
       path: '/previews'
       fullPath: '/previews'
       preLoaderRoute: typeof PreviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/submissions': {
+      id: '/submissions'
+      path: '/submissions'
+      fullPath: '/submissions'
+      preLoaderRoute: typeof SubmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plate/$state': {
@@ -220,6 +260,8 @@ const rootRouteChildren: RootRouteChildren = {
   HomeFallbackRoute: HomeFallbackRoute,
   HomeNoMatchRoute: HomeNoMatchRoute,
   PreviewsRoute: PreviewsRoute,
+  ProfileRoute: ProfileRoute,
+  SubmissionsRoute: SubmissionsRoute,
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,

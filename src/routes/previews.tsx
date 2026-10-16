@@ -32,6 +32,8 @@ const PREVIEWS = [
     label: "Plate and badges",
     note: "Plate in three sizes, every badge",
   },
+  { to: "/submissions", label: "Your Submissions", note: "Plates and stories, newest first" },
+  { to: "/profile", label: "Your Profile", note: "Handle, help text and preview card" },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */
