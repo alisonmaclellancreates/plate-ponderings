@@ -20,8 +20,10 @@ afterEach(() => {
   vi.doUnmock("@supabase/supabase-js");
 });
 
+// Return the module, not the proxy: awaiting the proxy reads `.then` and builds the client.
 async function load() {
-  return (await import("@/integrations/supabase/client.server")).supabaseAdmin;
+  const mod = await import("@/integrations/supabase/client.server");
+  return mod;
 }
 
 function silenceMissing() {
@@ -34,7 +36,7 @@ function silenceMissing() {
 
 describe("supabaseAdmin", () => {
   it("builds lazily on first access and reuses the client", async () => {
-    const admin = await load();
+    const admin = (await load()).supabaseAdmin;
     expect(createClient).not.toHaveBeenCalled();
     expect((admin as unknown as { tag: string }).tag).toBe("admin");
     expect(createClient).toHaveBeenCalledTimes(1);
@@ -43,7 +45,7 @@ describe("supabaseAdmin", () => {
   });
 
   it("passes URL, service role key and non-persistent auth", async () => {
-    void (await load()).from;
+    void (await load()).supabaseAdmin.from;
     const [url, key, opts] = createClient.mock.calls[0] ?? [];
     expect(url).toBe("https://proj.example.co");
     expect(key).toBe("sb_secret_service");
@@ -58,7 +60,7 @@ describe("supabaseAdmin", () => {
   ])("throws naming missing %j", async (missing, text) => {
     for (const m of missing) vi.stubEnv(m, "");
     const spy = silenceMissing();
-    const admin = await load();
+    const admin = (await load()).supabaseAdmin;
     expect(() => admin.from).toThrow(`Missing Supabase environment variable(s): ${text}`);
     expect(spy).toHaveBeenCalledWith(expect.stringContaining(text));
   });
@@ -67,7 +69,7 @@ describe("supabaseAdmin", () => {
 describe("client.server fetch wrapper", () => {
   async function wrapperFor(key: string): Promise<FetchFn> {
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", key);
-    void (await load()).from;
+    void (await load()).supabaseAdmin.from;
     return createClient.mock.calls[0]?.[2].global.fetch as FetchFn;
   }
   function spyFetch() {

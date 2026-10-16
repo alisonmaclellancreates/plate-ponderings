@@ -38,12 +38,14 @@ function setEnv(vals: Partial<Record<string, string>>) {
   }
 }
 
+// Return the module, not the proxy: awaiting the proxy reads `.then` and builds the client.
 async function load() {
-  return (await import("@/integrations/supabase/client")).supabase;
+  const mod = await import("@/integrations/supabase/client");
+  return mod;
 }
 
 async function wrapper(): Promise<FetchFn> {
-  void (await load()).from;
+  void (await load()).supabase.from;
   return createClient.mock.calls[0]?.[2].global.fetch as FetchFn;
 }
 
@@ -65,7 +67,7 @@ function silenceMissing() {
 
 describe("supabase browser client", () => {
   it("builds lazily on first access and reuses the client", async () => {
-    const client = await load();
+    const client = (await load()).supabase;
     expect(createClient).not.toHaveBeenCalled();
     expect((client as unknown as { tag: string }).tag).toBe("browser");
     void client.from;
@@ -73,7 +75,7 @@ describe("supabase browser client", () => {
   });
 
   it("passes the VITE URL, publishable key and preview storage", async () => {
-    void (await load()).from;
+    void (await load()).supabase.from;
     const [url, key, opts] = createClient.mock.calls[0] ?? [];
     expect(url).toBe(PUBLIC);
     expect(key).toBe(KEY);
@@ -86,7 +88,7 @@ describe("supabase browser client", () => {
 
   it("falls back to server env names when VITE names are empty", async () => {
     setEnv({ SUPABASE_URL: "https://server.example.co", SUPABASE_PUBLISHABLE_KEY: "sb_publishable_s" });
-    void (await load()).from;
+    void (await load()).supabase.from;
     const [url, key] = createClient.mock.calls[0] ?? [];
     expect(url).toBe("https://server.example.co");
     expect(key).toBe("sb_publishable_s");
@@ -99,7 +101,7 @@ describe("supabase browser client", () => {
   ])("throws naming missing variables (%j)", async (vals, text) => {
     setEnv(vals);
     const spy = silenceMissing();
-    const client = await load();
+    const client = (await load()).supabase;
     expect(() => client.from).toThrow(`Missing Supabase environment variable(s): ${text}`);
     expect(spy).toHaveBeenCalledWith(expect.stringContaining(text));
   });
