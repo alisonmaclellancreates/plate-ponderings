@@ -158,10 +158,14 @@ function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
 function ActionCards() {
   function focusSearch() {
     const searchCard = document.getElementById("plate-search");
-    const jurisdiction = searchCard?.querySelector<HTMLSelectElement>('select[name="jurisdiction"]');
+    const jurisdiction = searchCard?.querySelector<HTMLSelectElement>(
+      'select[name="jurisdiction"]',
+    );
     if (!searchCard || !jurisdiction) return;
     searchCard.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
       block: "center",
     });
     jurisdiction.focus({ preventScroll: true });
@@ -184,7 +188,11 @@ function ActionCards() {
         <p className="mt-2 flex-1">
           See what people think it means, or add your own interpretation.
         </p>
-        <button type="button" onClick={focusSearch} className="brand-btn brand-btn-navy mt-4 self-start">
+        <button
+          type="button"
+          onClick={focusSearch}
+          className="brand-btn brand-btn-navy mt-4 self-start"
+        >
           Look Up a Plate
         </button>
       </article>
@@ -285,7 +293,12 @@ function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
           </div>
           <p className="mt-1 text-muted-foreground">Today's pick from the road.</p>
           <div className="mt-6 grid grid-cols-[minmax(0,1fr)] items-center gap-6 md:grid-cols-[auto_minmax(0,1fr)]">
-            <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="lg" className="min-w-0" />
+            <Plate
+              jurisdiction={plate.jurisdiction}
+              text={plate.text}
+              size="lg"
+              className="min-w-0"
+            />
             <div className="min-w-0">
               <StatusBadge status={status} />
               <p className="mt-3 text-lg">{copy}</p>
