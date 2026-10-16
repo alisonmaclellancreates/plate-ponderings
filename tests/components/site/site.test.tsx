@@ -42,8 +42,12 @@ describe("Plate", () => {
         <Plate jurisdiction="Ontario" text="HI" />
       </>,
     );
-    const long = parseFloat(screen.getByText("ILUV2CODE").style.fontSize);
-    const short = parseFloat(screen.getByText("HI").style.fontSize);
+    const long = parseFloat(
+      (screen.getByText("ILUV2CODE").getAttribute("style") ?? "").replace(/[^0-9.]/g, ""),
+    );
+    const short = parseFloat(
+      (screen.getByText("HI").getAttribute("style") ?? "").replace(/[^0-9.]/g, ""),
+    );
     expect(long).toBeLessThan(short);
   });
 });
@@ -74,7 +78,10 @@ describe("SiteHeader", () => {
     const button = screen.getByRole("button", { name: "Open menu" });
     fireEvent.click(button);
     const mobile = screen.getByRole("navigation", { name: "Mobile" });
-    expect(within(mobile).getByRole("link", { name: "Explore" })).toHaveAttribute("href", "/explore");
+    expect(within(mobile).getByRole("link", { name: "Explore" })).toHaveAttribute(
+      "href",
+      "/explore",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Close menu" }));
     expect(screen.queryByRole("navigation", { name: "Mobile" })).toBeNull();
   });
@@ -85,11 +92,11 @@ describe("SiteFooter", () => {
     render(<SiteFooter />);
     expect(screen.getByText("Little plates. Big stories.")).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "Footer" });
-    expect(within(nav).getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual([
-      "/about",
-      "/privacy",
-      "/contact",
-    ]);
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((a) => a.getAttribute("href")),
+    ).toEqual(["/about", "/privacy", "/contact"]);
     expect(screen.getByText(/Built for #SheBuilds/)).toBeInTheDocument();
   });
 });
