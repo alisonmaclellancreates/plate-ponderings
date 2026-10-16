@@ -18,7 +18,7 @@ No migration or auth-setting change will be applied before approval.
 
 ## Accounts and navigation
 
-- Enable email/password only and disable email confirmation as explicitly requested. Disable social and anonymous signup providers; retain the existing password minimum of eight characters. No password reset or Remember me. Read the hosted settings afterward rather than assuming configuration succeeded.
+- Enable email/password only and disable email confirmation as explicitly requested. Disable social and anonymous signup providers; configure a minimum of eight password characters to match the existing form. No password reset or Remember me. Read the hosted settings afterward rather than assuming configuration succeeded.
 - Signup and signin wire into their existing forms. Signin errors never distinguish missing accounts from wrong passwords. Duplicate-email signup shows a generic failure with the existing signin link. A password-policy rejection gets an actionable password message.
 - Preserve the intended destination in a validated `returnTo` query parameter across signin/signup links. Default to `/`. Reject external origins, protocol-relative URLs, backslashes, control characters and auth-loop destinations; allow only a same-site absolute path.
 - Use the managed client-only authenticated layout for `/profile` and account-required routes, preserving their public URLs and the existing TanStack foundation. The public `/auth` adapter leads to the existing `/sign-in` screen with the safe return path. Redirects occur in route `beforeLoad`, never by throwing from a server function. **Do not edit `src/start.ts`.** Public read pages remain public; account-required contribution entry checks do not implement contribution writes.
