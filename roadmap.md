@@ -53,6 +53,6 @@
 - [x] Alison's revision applied (migration 0002): no public reads, exact grants, is_story_published, self-block check, stable owner tie-break, no storage policies; summaries and jurisdictions server-only. Final DB state verified from the catalog: anon has zero grants on all 12 tables; authenticated has select on profiles/user_roles/subjects/stories/notifications, insert+select on reports, insert+select+delete on hearts/blocks, and update only on notifications.read_at (column-level); jurisdictions/summaries/featured_days/app_settings have no grants at all. Policies: 14 in public (listed in the step 41 report), zero on storage.objects. All four helper functions are SECURITY DEFINER. All 8 visibility assertions pass; app suite 431 tests green, lint 0 errors, typecheck clean.
 
 # Step 41b: PostHog analytics
-- [ ] Add the typed, privacy-limited analytics module and route page views without changing page behavior.
-- [ ] Verify tests, coverage gate, lint, and preview event requests.
+- [x] Add the typed, privacy-limited analytics module and route page views without changing page behavior.
+- [x] Verify tests, coverage gate, lint, and preview event requests: 438 tests pass, coverage gate holds, lint 0 errors, build OK; decoded page views for / and /explore contain no query strings, both ingest requests return 200, no browser errors.
 - [ ] Alison confirms page views arrive in PostHog.
