@@ -12,7 +12,7 @@ vi.mock("@/components/site/Homepage", () => ({
 type R = { head: () => { meta: Record<string, string>[] }; component: () => ReactNode };
 
 it("renders the default variant with matching titles", async () => {
-  const r = (await import("@/routes/index")).Route as R;
+  const r = (await import("@/routes/index")).Route as unknown as R;
   const C = r.component;
   expect(render(<C />).container.textContent).toBe("default");
   const meta = r.head().meta;

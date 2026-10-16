@@ -12,7 +12,7 @@ vi.mock("@/components/site/Homepage", () => ({
 type R = { head: () => { meta: Record<string, string>[] }; component: () => ReactNode };
 
 it("renders the fallback variant with matching titles", async () => {
-  const r = (await import("@/routes/home-fallback")).Route as R;
+  const r = (await import("@/routes/home-fallback")).Route as unknown as R;
   const C = r.component;
   expect(render(<C />).container.textContent).toBe("fallback");
   const meta = r.head().meta;
