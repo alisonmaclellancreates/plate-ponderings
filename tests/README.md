@@ -35,9 +35,9 @@ Environment is happy-dom, globals on, `testTimeout` 20s. Coverage counts every `
 - Leave `src/routeTree.gen.ts` and other generated files alone.
 - Ratchet: after each step, raise the four `coverage.thresholds` to the new totals rounded down. Never lower one.
 
-## Coverage map (after step 14)
+## Coverage map (after step 15)
 
-Totals: statements 72.48, branches 52.91, functions 77.51, lines 74.79. Thresholds set to 72/52/77/74.
+Totals: statements 77.95, branches 61.55, functions 81.87, lines 79.74. Thresholds set to 77/61/81/79.
 Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 
 | File                                              | Stmts % | Branch % | Funcs % | Lines % | Step |
@@ -95,10 +95,10 @@ Baseline (step 10): statements 0.26, branches 0, functions 0, lines 0.27.
 | `src/integrations/supabase/client.ts`             | 0       | 0        | 0       | 0       | 18   |
 | `src/integrations/supabase/cron-auth.ts`          | 0       | 0        | 0       | 0       | 18   |
 | `src/integrations/supabase/previewAuthStorage.ts` | 0       | 0        | 0       | 0       | 18   |
-| `src/lib/error-capture.ts`                        | 0       | 0        | 0       | 0       | 15   |
-| `src/lib/error-page.ts`                           | 0       | 100      | 0       | 0       | 15   |
-| `src/lib/lovable-error-reporting.ts`              | 5.55    | 0        | 0       | 7.14    | 15   |
-| `src/lib/utils.ts`                                | 0       | 100      | 0       | 0       | 15   |
+| `src/lib/error-capture.ts`                        | 100     | 100      | 100     | 100     | 15   |
+| `src/lib/error-page.ts`                           | 100     | 100      | 100     | 100     | 15   |
+| `src/lib/lovable-error-reporting.ts`              | 100     | 100      | 100     | 100     | 15   |
+| `src/lib/utils.ts`                                | 100     | 100      | 100     | 100     | 15   |
 | `src/router.tsx`                                  | 0       | 100      | 0       | 0       | 16   |
 | `src/routes/__root.tsx`                           | 7.69    | 100      | 0       | 7.69    | 17   |
 | `src/routes/index.tsx`                            | 33.33   | 100      | 0       | 33.33   | 17   |
