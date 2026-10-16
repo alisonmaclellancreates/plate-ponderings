@@ -32,7 +32,9 @@ import {
   SPOT_OUTCOMES,
   SpotOutcomePage,
   SpotPage,
+  TEXT_EMPTY_ERROR,
   TEXT_ERROR,
+  TEXT_LENGTH_ERROR,
   validateSpot,
   type SpotOutcome,
 } from "@/components/site/SpotPlate";
@@ -44,16 +46,24 @@ describe("validateSpot", () => {
   it("requires a jurisdiction and plate text of up to 8 allowed characters", () => {
     expect(validateSpot({ jurisdiction: "Utah", text: "TR-AI LS" })).toEqual({});
     expect(validateSpot({ jurisdiction: "Utah", text: "ABCD-EFGH" })).toEqual({});
-    expect(validateSpot({})).toEqual({ jurisdiction: JURISDICTION_ERROR, text: TEXT_ERROR });
-    expect(validateSpot({ jurisdiction: "Utah", text: "HI@!" }).text).toBe(TEXT_ERROR);
-    expect(validateSpot({ jurisdiction: "Utah", text: "ABCDEFGHI" }).text).toBe(TEXT_ERROR);
+    expect(validateSpot({})).toEqual({
+      jurisdiction: JURISDICTION_ERROR,
+      text: TEXT_EMPTY_ERROR,
+    });
+    expect(validateSpot({ jurisdiction: "Utah", text: "   " }).text).toBe(TEXT_EMPTY_ERROR);
+    expect(validateSpot({ jurisdiction: "Utah", text: " - - " }).text).toBe(TEXT_EMPTY_ERROR);
+    expect(validateSpot({ jurisdiction: "Utah", text: "HI@@!" }).text).toBe(TEXT_ERROR);
+    expect(validateSpot({ jurisdiction: "Utah", text: "ABCDEFGHI" }).text).toBe(TEXT_LENGTH_ERROR);
+    expect(validateSpot({ jurisdiction: "Utah", text: "ABCD-EFGH-I" }).text).toBe(
+      TEXT_LENGTH_ERROR,
+    );
   });
 });
 
 describe("Spot a Plate form", () => {
   it("shows the sign, labelled fields, coral button and next steps", () => {
     render(<SpotPage />);
-    expect(screen.getByTestId("wooden-sign").textContent).toContain("Spot a Plate");
+    expect(screen.getByTestId("sign").textContent).toContain("Spot a Plate");
     expect(screen.getByLabelText("State or Province")).toBeRequired();
     const text = screen.getByLabelText("Plate text");
     expect(text).toHaveAccessibleDescription("Up to 8 characters. Spaces and dashes are ignored");
@@ -68,7 +78,7 @@ describe("Spot a Plate form", () => {
       JURISDICTION_ERROR,
     );
     expect(screen.getByLabelText("Plate text")).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText(TEXT_ERROR)).toBeInTheDocument();
+    expect(screen.getByText(TEXT_EMPTY_ERROR)).toBeInTheDocument();
   });
 });
 
@@ -110,7 +120,7 @@ describe("Spot outcome previews", () => {
 
   it("pending offers submissions and explore, never a story button", () => {
     render(<SpotOutcomePage outcome="pending" />);
-    expect(screen.getByTestId("wooden-sign").textContent).toBe("Checking this one out...");
+    expect(screen.getByTestId("sign").textContent).toBe("Checking this one out...");
     expect(buttons()).toEqual(["Go to Your Submissions", "Back to Explore"]);
     expect(document.body.textContent).not.toMatch(/add a story/i);
   });
@@ -148,6 +158,53 @@ describe("Spot outcome previews", () => {
       const { unmount } = render(<SpotOutcomePage outcome={outcome} />);
       expect(document.querySelector("main")).not.toBeNull();
       unmount();
+    }
+  });
+});
+
+describe("Spot artwork and headings", () => {
+  const all = Object.keys(SPOT_OUTCOMES) as SpotOutcome[];
+
+  it("every Spot page has exactly one h1, the sign title on form pages", () => {
+    const { unmount } = render(<SpotPage />);
+    expect(screen.getAllByRole("heading", { level: 1 }).map((h) => h.textContent)).toEqual([
+      "Spot a Plate",
+    ]);
+    unmount();
+    for (const outcome of all) {
+      const r = render(<SpotOutcomePage outcome={outcome} />);
+      const h1s = screen.getAllByRole("heading", { level: 1 });
+      expect(h1s).toHaveLength(1);
+      if (outcome === "validation" || outcome === "already-spotted") {
+        expect(h1s[0]?.textContent).toBe("Spot a Plate");
+      } else {
+        expect(within(screen.getByTestId("sign")).queryByRole("heading")).toBeNull();
+      }
+      r.unmount();
+    }
+  });
+
+  it("shows the decorative signpost on every page", () => {
+    for (const outcome of all) {
+      const r = render(<SpotOutcomePage outcome={outcome} />);
+      const img = screen.getByTestId("signpost");
+      expect(img).toHaveAttribute("src", "/brand/signpost-v1.webp");
+      expect(img).toHaveAttribute("alt", "");
+      r.unmount();
+    }
+  });
+
+  it("shows the Sasquatch only on error and rejected", () => {
+    for (const outcome of all) {
+      const r = render(<SpotOutcomePage outcome={outcome} />);
+      const img = screen.queryByTestId("sasquatch");
+      if (outcome === "error" || outcome === "rejected") {
+        expect(img).toHaveAttribute("src", "/brand/sasquatch-v1.webp");
+        expect(img).toHaveAttribute("alt", "");
+      } else {
+        expect(img).toBeNull();
+      }
+      r.unmount();
     }
   });
 });
