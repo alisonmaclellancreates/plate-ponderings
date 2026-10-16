@@ -32,6 +32,6 @@
 - [x] /sign-in-prompt, /sign-in, /sign-up, /demo, /demo-form with signed-out and demo headers, tests, lint.
 
 # Plate of the Day archive
-- [ ] Share featured cards and add 14 featured mock plates with every progress case.
-- [ ] Build /explore, working plate links, and Load More.
-- [ ] Verify tests, lint, and desktop/tablet/mobile archive flow.
+- [x] Share featured cards and add 14 featured mock plates with every progress case.
+- [x] Build /explore, working plate links, and Load More.
+- [x] Verify tests, lint, and desktop/tablet/mobile archive flow.
