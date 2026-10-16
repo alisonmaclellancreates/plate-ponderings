@@ -12,7 +12,7 @@ describe("mock data", () => {
   it("matches the brief", () => {
     expect(find("B7K2L9").stories).toHaveLength(0);
     expect(find("LV2CODE").stories).toHaveLength(5);
-    expect(find("LV2CODE").summaries).toHaveLength(3);
+    expect(find("LV2CODE").summaries).toHaveLength(4);
     expect(find("TEATIME").stories).toHaveLength(6);
     expect(find("CANYONS").plateOfTheDay).toBeTruthy();
     expect(find("PNW LV").stories.length).toBeGreaterThan(0);
