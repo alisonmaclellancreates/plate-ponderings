@@ -23,7 +23,7 @@ export function AboutPage() {
   );
 }
 
-function PrivacySection({ title, children }: { title: string; children: string }) {
+function PrivacySection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="brand-card p-6">
       <h2 className="font-display text-2xl text-navy">{title}</h2>
