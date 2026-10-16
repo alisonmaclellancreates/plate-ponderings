@@ -21,7 +21,7 @@ describe.each([
     const C = r.component;
     expect(render(<C />).container.textContent).toBe(variant);
     const meta = r.head().meta;
-    const title = meta.find((m) => "title" in m)?.title;
-    expect(meta.find((m) => m.property === "og:title")?.content).toBe(title);
+    const title = meta.find((m) => "title" in m)?.["title"];
+    expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
   });
 });
