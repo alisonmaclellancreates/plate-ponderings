@@ -1,0 +1,48 @@
+# Step 42: real accounts, handles and header
+
+## Domain and state transitions
+
+- Keep the existing `profiles` and separate `user_roles`. Signup creates an auth account and its generated profile atomically, without AI. Signin hydrates the caller's handle and verified roles; signout clears the session and analytics identity.
+- Handle editing follows `format/reserved check → availability check → save attempt → repeat checks → AI safety check → atomic update`. Rejection, AI failure or a concurrent collision leaves the existing handle unchanged. No pending handles.
+- Preserve the existing page layouts, brand artwork and copy. Plate, story, submissions and settings data remain previews unless required for this account flow. No new contribution, notification, demo or admin-management features.
+
+## Database changes requiring approval
+
+1. **Generated handles on signup.** Add a fixed-search-path `SECURITY DEFINER` function in `public`, invoked by an app-owned `AFTER INSERT` trigger on `auth.users`. Ignore user-supplied handle/role metadata. Insert `Traveler` plus exactly four digits into `profiles`; on a case-insensitive unique collision, try another unused number. Exhaustion fails account creation cleanly rather than creating an account without a profile. The existing namespace has 10,000 handles, which is a deliberate V0 capacity boundary.
+2. **Handle validation.** Keep the existing unique index on `lower(handle)`. Add an immutable format/reserved-name constraint: 3–20 ASCII letters, digits or underscores, excluding the brief's complete reserved list, ignoring case. Validate existing rows before applying and verify the constraint afterward. Current database check found zero profiles, missing profiles, malformed handles, reserved handles or duplicate handles. Include a backfill for any account missing a profile if one appears before application, using the same generator without AI.
+3. **Durable rate limiting.** Add `public.handle_save_attempts` with `id uuid`, `user_id uuid`, `attempted_at timestamptz default now()` and an index on `(user_id, attempted_at)`. No foreign key to `auth.users`. Revoke all from `anon` and `authenticated`, grant only `service_role`, enable RLS with no browser policies. A service-only, fixed-search-path function serializes requests per user and records an attempt only below the limit. **Assumption for approval: at most five handle-save attempts per person in any rolling 15 minutes**, including rejected attempts; availability checks do not consume attempts. Demo callers are refused before recording attempts or invoking AI.
+4. **AI access pause state.** Add a small `public.ai_access_state` table for durable handle-moderation access blocks, with capability key, paused reason/category and update timestamp. Service-only grants, RLS, no browser policies. Persist credit/configuration/provider access blocks across requests and reloads; do not automatically replay them or substitute a model. A new user action may run moderation only after access is restored. Ordinary moderation refusals reject the current attempt without permanently disabling access.
+5. **Privileges.** Keep `profiles` and `user_roles` owner-only SELECT policies and authenticated SELECT grants, because authenticated server functions use the verified caller's RLS client to read their own account. Do not add browser INSERT/UPDATE/DELETE grants or profile-write policies. Elevated profile updates happen only inside a verified server function, to its caller's own id, after demo, validation, rate and AI checks. Revoke default PUBLIC/anon/authenticated execution on new privileged helpers and grant execution only to `service_role`. Existing Step 41 grants and policies otherwise remain unchanged.
+
+No migration or auth-setting change will be applied before approval.
+
+## Accounts and navigation
+
+- Enable email/password only and disable email confirmation as explicitly requested. Disable social and anonymous signup providers; retain the existing password minimum of eight characters. No password reset or Remember me. Read the hosted settings afterward rather than assuming configuration succeeded.
+- Signup and signin wire into their existing forms. Signin errors never distinguish missing accounts from wrong passwords. Duplicate-email signup shows a generic failure with the existing signin link. A password-policy rejection gets an actionable password message.
+- Preserve the intended destination in a validated `returnTo` query parameter across signin/signup links. Default to `/`. Reject external origins, protocol-relative URLs, backslashes, control characters and auth-loop destinations; allow only a same-site absolute path.
+- Use the managed client-only authenticated layout for `/profile` and account-required routes, preserving their public URLs and the existing TanStack foundation. The public `/auth` adapter leads to the existing `/sign-in` screen with the safe return path. Redirects occur in route `beforeLoad`, never by throwing from a server function. **Do not edit `src/start.ts`.** Public read pages remain public; account-required contribution entry checks do not implement contribution writes.
+- One root auth lifecycle owner hydrates identity and invalidates the router/cache only on relevant identity transitions. Ignore token-refresh churn; signout does not refetch protected queries.
+
+## Profile, header and analytics
+
+- Profile uses the caller's actual handle. Debounced availability requests return only availability, never another contributor's id or handle. Stale results cannot mark a newer input Available.
+- Save repeats format, reserved and availability checks server-side, then runs the brief's handle check. Preserve the current handle on all failures. Use the exact unavailable-AI and rate-limit copy from the brief; rejected saves expose no moderation reason. Successful changes invalidate account data and update the header and profile sample immediately.
+- Published story data is still deferred to its feature step. Do not claim mock story authors are linked to real accounts; future story readers join profiles rather than storing handle copies.
+- Header reads real session/roles: signed-out signin, demo link only when the server's safe settings projection permits it; signed-in generic icon, current handle and existing profile menu labels with Sign out; Admin only for verified admins. No notification dot until Step 47. Demo launch remains deferred to Step 51.
+- Add `signed_up`, `signed_in`, `signed_out`, `handle_changed`, `handle_rejected` to the existing single runtime event registry, with empty property lists. Identify only the auth user id, set `is_demo` from verified roles, capture signout before reset. Never send emails, handles, passwords or moderation output.
+
+## Technical boundaries
+
+- Client-safe `*.functions.ts` modules expose typed server functions; server-only helpers own elevated writes and AI calls. Use the existing bearer middleware without changing generated integration files.
+- Ordinary own-account reads use authenticated RLS. Public functions project only non-sensitive settings needed by the header. Handle availability and saves require signin and verified non-demo status.
+- Use the current Lovable AI Gateway default and documented streamed structured-output workflow for the new handle check. No AI on signup or while typing. Mock AI in automated tests and inspect a real moderation request before reporting the integration verified.
+- Record structural rules in `AGENTS.md`. Lovable manages Git state; no manual commit or branch commands.
+
+## Verification and completion report
+
+- Tests for exact handle format/reserved names, case-insensitive collisions, generated four-digit handles, concurrency, demo refusal, five-attempt/15-minute boundaries, safe return paths, account transitions and privacy-limited analytics.
+- Database tests prove signup profile creation, uniqueness, constraints, rate-limit atomicity and denied browser profile writes. Rerun `tests/db/summary-visibility.sql` after the migration and clean up test fixtures.
+- Run affected tests, the full coverage suite and lint; inspect the preview's automatic build result. Report actual counts and coverage, not estimates.
+- In the running preview, verify signup → generated handle → signout → signin → original destination; profile change and readback; reserved/taken rejection; signed-out/member/admin header states; each new redirect and hard refresh. Use isolated verification accounts and clean up only fixtures created for verification.
+- Report final grants/policies/functions for changed database objects, hosted auth settings, actual AI/analytics results and anything blocked. Codecov's previously inaccessible CI patch result remains a separate existing blocker.
