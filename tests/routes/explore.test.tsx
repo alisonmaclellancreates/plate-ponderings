@@ -1,10 +1,25 @@
 import { expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
+const m = vi.hoisted(() => ({ empty: false }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
 }));
 vi.mock("@/components/site/Explore", () => ({ Explore: () => <p>archive</p> }));
+vi.mock("@tanstack/react-query", () => ({
+  useSuspenseInfiniteQuery: () => ({
+    data: { pages: m.empty ? [] : [{ today: "2026-10-17", plates: [] }] },
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn(),
+  }),
+  queryOptions: (o: unknown) => o,
+  infiniteQueryOptions: (o: unknown) => o,
+}));
+vi.mock("@/lib/featured.functions", () => ({
+  getFeaturedHome: vi.fn(),
+  getFeaturedArchive: vi.fn(),
+}));
 import { Route } from "@/routes/explore";
 it("renders the archive with matching page and social metadata", () => {
   const r = Route as unknown as {
@@ -19,5 +34,24 @@ it("renders the archive with matching page and social metadata", () => {
   expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
   expect(meta.find((m) => m["property"] === "og:description")?.["content"]).toBe(
     meta.find((m) => m["name"] === "description")?.["content"],
+  );
+});
+
+it("refuses malformed empty query state rather than inventing a date", () => {
+  m.empty = true;
+  try {
+    const C = (Route as unknown as { component: () => ReactNode }).component;
+    expect(() => render(<C />)).toThrow("couldn't load");
+  } finally {
+    m.empty = false;
+  }
+});
+
+it("loads the matching infinite archive query", async () => {
+  const r = Route as unknown as { loader: (args: unknown) => unknown };
+  const ensureInfiniteQueryData = vi.fn().mockResolvedValue("archive");
+  expect(await r.loader({ context: { queryClient: { ensureInfiniteQueryData } } })).toBe("archive");
+  expect(ensureInfiniteQueryData).toHaveBeenCalledWith(
+    expect.objectContaining({ queryKey: ["featured-archive"] }),
   );
 });

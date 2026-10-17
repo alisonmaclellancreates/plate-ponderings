@@ -1,8 +1,10 @@
 # Step 46: real daily pick, featured shelf and archive
 
-- [ ] Resolve any brief/static-page conflict and analytics ambiguity, then present one plan including database changes for Alison's approval.
-- [ ] After approval, build atomic UTC selection, live featured pages, batch visible-summary reads and privacy-scoped analytics.
-- [ ] Add branch-complete tests; run changed test files and lint only, plus rollback-only database tests for schema changes. CI is authoritative for coverage/types/build; no live/browser/AI checks.
+- [x] Alison approved the plan and three service-only functions; singular daily copy retained and explore_filtered excluded entirely.
+- [x] Applied approved migration 0013; built atomic UTC selection, live featured pages, batch visible-summary reads and privacy-scoped analytics.
+- [x] Changed tests: 96 passed across 10 files. Lint: zero errors, six existing UI warnings. All seven database test files passed through the privileged tool; fixture readback zero. Automatic build OK; no manual full suite, coverage, typecheck, build, browser or AI checks.
+- [ ] Two-session concurrency is unexercised; requires an independent privileged multi-session harness. Daily reuse, immutable snapshot and single-row behavior passed in one transaction.
+- [ ] Report PR Codecov patch after Alison opens the Step 46 PR. CI is authoritative; no local coverage estimate.
 
 # Step 45b: fictional plate guesses
 

@@ -20,7 +20,7 @@
 - Static preview pages read only from `src/lib/mock-data.ts` and share the header, footer, plate and badge components in `src/components/site/`, so later steps swap the data source without touching page layouts.
 - Compose state-specific preview stories without mutating shared plate records, so catching-up examples cannot change other previews.
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
-- Featured archive and homepage share `FeaturedPlateCard`; feature dates and counts at selection live on mock plate records, while current counts filter published stories, so progress cannot drift between views.
+- Homepage and archive share `FeaturedPlateCard` DTOs from service-only RPCs with date cursors; previews adapt mocks, preventing count/progress drift.
 - `/plate/$state` accepts existing preview aliases and mock plate slugs through the same detail layout, preserving preview URLs while giving each archive card its own working destination.
 - Only `src/lib/analytics.ts` imports the PostHog SDK; one runtime event registry derives event types and drives both capture and before_send filtering, preventing event definitions from drifting; root route effects capture query-free page paths after hydration. Registry-scoped instances support test-only events without adding production events.
 - Map public PostHog connector values to `VITE_POSTHOG_KEY` and `VITE_POSTHOG_HOST` in Vite configuration, keeping application code independent of connector-specific names.
@@ -33,6 +33,6 @@
 - Live spot outcomes retain the submitted identity separately from route prefill, so pending feedback and return-to-search links describe the actual request even after the form remounts.
 - PlateFrame owns the detail-only frame for static and real plate pages, so jurisdiction display stays identical without changing Plate artwork or other render locations.
 - Register project-owned `attachSession`, never generated `attachSupabaseAuth`: bounded `getSession()` preserves normal renewal without blocking public RPCs. Server authorization remains unchanged; never read tokens directly from storage.
-- Background AI uses `runAfterResponse` and request-scoped waitUntil; admin summaries filter via `is_summary_public`. Guesses use Astra's streamed structured low-reasoning Responses shape for stable behavior.
+- Background AI uses `runAfterResponse` and request-scoped waitUntil; summary reads batch `get_visible_summary_versions` using `is_summary_public`, keeping read counts fixed. Guesses use Astra's streamed structured low-reasoning Responses.
 - Guesses use separate server-only insert-once storage and existence-only reads until published human stories unlock text, preventing story/summary contamination.
 - Hidden guesses retain the invitation despite old summaries; revealed guesses follow summaries before human stories at every width, preserving reading order.

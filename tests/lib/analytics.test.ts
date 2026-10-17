@@ -21,6 +21,29 @@ afterEach(() => {
 });
 
 describe("analytics", () => {
+  it("featured openings retain only mystery status and elapsed days", async () => {
+    const analytics = await import("@/lib/analytics");
+    expect(analytics.EVENTS).not.toHaveProperty("explore_filtered");
+    await analytics.track("featured_subject_opened", { is_mystery: false, days_ago: 3 });
+    expect(sdk.capture).toHaveBeenLastCalledWith("featured_subject_opened", {
+      is_mystery: false,
+      days_ago: 3,
+    });
+    const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+    expect(
+      beforeSend({
+        event: "featured_subject_opened",
+        properties: {
+          is_mystery: false,
+          days_ago: 3,
+          subject_id: "private",
+          text: "private",
+          handle: "private",
+          $current_url: "private",
+        },
+      }),
+    ).toEqual({ event: "featured_subject_opened", properties: { is_mystery: false, days_ago: 3 } });
+  });
   it("allows rate_limited and preserves each planned spot outcome through capture and before_send", async () => {
     const analytics = await import("@/lib/analytics");
     expect(analytics.SUBJECT_SPOTTED_OUTCOMES).toContain("rate_limited");

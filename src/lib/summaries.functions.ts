@@ -19,7 +19,7 @@ export type PlateSummaryResult = {
 /**
  * The Story So Far for a published plate, public and signed-out safe. It reads
  * with the admin client, which bypasses row level security, so every version
- * passes through is_summary_public here before it can be returned. When the
+ * passes through the service-only visible-version RPC before it can be returned. When the
  * plate is catching up, a summary run starts after the response, never awaited.
  */
 export const getPlateSummary = createServerFn({ method: "POST" })
@@ -36,22 +36,12 @@ export const getPlateSummary = createServerFn({ method: "POST" })
       .maybeSingle();
     if (plateError || !plate) return null;
 
-    const { data: versions, error } = await supabaseAdmin
-      .from("summaries")
-      .select("id,version,text,disagreement_score,story_count,started_at,generated_at")
-      .eq("subject_id", plate.id)
-      .order("version", { ascending: false });
+    const { data: versions, error } = await supabaseAdmin.rpc("get_visible_summary_versions", {
+      _subject_id: plate.id,
+    });
     if (error) return null;
 
-    const checks = await Promise.all(
-      (versions ?? []).map(async (v) => {
-        const { data: isPublic, error: checkError } = await supabaseAdmin.rpc("is_summary_public", {
-          _summary_id: v.id,
-        });
-        return !checkError && isPublic === true;
-      }),
-    );
-    const visible = (versions ?? []).filter((_, i) => checks[i]);
+    const visible = versions ?? [];
 
     const { data: published, error: storiesError } = await supabaseAdmin
       .from("stories")
