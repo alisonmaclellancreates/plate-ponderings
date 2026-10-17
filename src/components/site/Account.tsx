@@ -6,7 +6,7 @@ import { ScenicHeader } from "@/components/site/SpotPlate";
 import { StoryCard } from "@/components/site/PlateDetail";
 import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
 import { formatDay } from "@/lib/format-day";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAccountAuth } from "@/lib/account-auth";
 import { checkHandle, saveHandle } from "@/lib/accounts.functions";
