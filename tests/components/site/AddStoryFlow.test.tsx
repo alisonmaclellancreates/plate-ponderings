@@ -294,7 +294,14 @@ describe("AddStoryFlow", () => {
     await user.click(screen.getByRole("button", { name: "Submit Story" }));
     await waitFor(() =>
       expect(m.submit).toHaveBeenCalledWith({
-        data: { plateId: "p1", meaning: expected, source: "owner", more: "", photoPath: "", photoBox: null },
+        data: {
+          plateId: "p1",
+          meaning: expected,
+          source: "owner",
+          more: "",
+          photoPath: "",
+          photoBox: null,
+        },
       }),
     );
   });

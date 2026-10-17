@@ -95,7 +95,13 @@ describe("PhotoEditor", () => {
       await user.click(screen.getByRole("button", { name: "Next" }));
       await screen.findByRole("heading", { name: "Review your photo" });
       await user.click(screen.getByRole("button", { name: "Use This Photo" }));
-      await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), true, expect.objectContaining({ w: expect.any(Number) })));
+      await waitFor(() =>
+        expect(onUse).toHaveBeenCalledWith(
+          expect.any(Blob),
+          true,
+          expect.objectContaining({ w: expect.any(Number) }),
+        ),
+      );
       expect(m.renderBlurred).toHaveBeenCalledWith(
         BITMAP,
         expect.objectContaining({
@@ -124,7 +130,13 @@ describe("PhotoEditor", () => {
     await user.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByRole("heading", { name: "Review your photo" });
     await user.click(screen.getByRole("button", { name: "Use This Photo" }));
-    await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), true, expect.objectContaining({ w: expect.any(Number) })));
+    await waitFor(() =>
+      expect(onUse).toHaveBeenCalledWith(
+        expect.any(Blob),
+        true,
+        expect.objectContaining({ w: expect.any(Number) }),
+      ),
+    );
   });
 
   it("ignores other keys, supports shift nudges, and confirms a round-trip box as unchanged", async () => {

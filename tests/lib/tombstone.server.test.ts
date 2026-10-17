@@ -42,7 +42,13 @@ it("tombstones with published_at kept, erases text and photo, removes hearts and
   expect(read).toContainEqual(["in", ["status", ["published", "hidden"]]]);
   expect(read).toContainEqual(["in", ["id", ["s1", "s2"]]]);
   const patch = update?.[0]?.[1][0] as Record<string, unknown>;
-  expect(patch).toMatchObject({ status: "deleted", meaning: "", body: null, photo_path: null, photo_box: null });
+  expect(patch).toMatchObject({
+    status: "deleted",
+    meaning: "",
+    body: null,
+    photo_path: null,
+    photo_box: null,
+  });
   expect(patch).not.toHaveProperty("published_at");
   expect(typeof patch["removed_at"]).toBe("string");
   expect(update).toContainEqual(["eq", ["author_id", "me"]]);

@@ -33,7 +33,11 @@ describe("plateCropStyle", () => {
     expect(tall.h).toBeGreaterThan(400);
   });
   it("shifts the area inward at the photo's edges", () => {
-    const area = shown(plateCropStyle({ x: 0.85, y: 0.9, w: 0.15, h: 0.1 }, 1000, 1000), 1000, 1000);
+    const area = shown(
+      plateCropStyle({ x: 0.85, y: 0.9, w: 0.15, h: 0.1 }, 1000, 1000),
+      1000,
+      1000,
+    );
     expect(area.x + area.w).toBeCloseTo(1000, 0);
     expect(area.y + area.h).toBeCloseTo(1000, 0);
   });
