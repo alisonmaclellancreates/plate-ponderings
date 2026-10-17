@@ -101,6 +101,11 @@ const PREVIEWS = [
     label: "Add a story, paused (live form)",
     note: "Real form, inert: Let's pause a moment, words kept",
   },
+  {
+    to: "/previews/story-photo",
+    label: "Story photo, sample data",
+    note: "Real editor, sample photo: suggested box, no box found, review",
+  },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */

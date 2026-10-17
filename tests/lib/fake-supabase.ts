@@ -11,7 +11,7 @@ export function fakeSupabase() {
   const results: Record<string, Result[]> = {};
   const calls: Call[] = [];
   const rpc = vi.fn();
-  const storage = { list: vi.fn(), remove: vi.fn(), buckets: [] as string[] };
+  const storage = { list: vi.fn(), remove: vi.fn(), download: vi.fn(), buckets: [] as string[] };
   const deleteUser = vi.fn();
   function from(table: string) {
     const call: Call = { table, ops: [] };
@@ -50,7 +50,7 @@ export function fakeSupabase() {
     storage: {
       from: (bucket: string) => {
         storage.buckets.push(bucket);
-        return { list: storage.list, remove: storage.remove };
+        return { list: storage.list, remove: storage.remove, download: storage.download };
       },
     },
   };
@@ -63,6 +63,7 @@ export function fakeSupabase() {
     rpc.mockReset();
     storage.list.mockReset();
     storage.remove.mockReset();
+    storage.download.mockReset();
     storage.buckets.length = 0;
     deleteUser.mockReset();
   };

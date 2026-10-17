@@ -502,7 +502,12 @@ describe("recheckPendingSubjects", () => {
     it("publishes an approved story, notifies, and asks for a fresh summary", async () => {
       const { notifications } = withStories([storyRow]);
       expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
-      expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "", "PNW LV");
+      expect(mocks.checkStory).toHaveBeenCalledWith(
+        "Pacific Northwest love.",
+        "",
+        "PNW LV",
+        undefined,
+      );
       expect(notifications).toEqual([
         { user_id: "caller", kind: "subject_published", subject_id: "subj-9" },
         {
@@ -561,7 +566,12 @@ describe("recheckPendingSubjects", () => {
       tables["subjects"] = { data: [], error: null };
       expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
       expect(mocks.check).not.toHaveBeenCalled();
-      expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "", "PNW LV");
+      expect(mocks.checkStory).toHaveBeenCalledWith(
+        "Pacific Northwest love.",
+        "",
+        "PNW LV",
+        undefined,
+      );
       expect(mocks.refresh).toHaveBeenCalledWith("subj-9");
     });
 
@@ -598,6 +608,7 @@ describe("recheckPendingSubjects", () => {
         "Pacific Northwest love.",
         "Seen near Seattle.",
         "",
+        undefined,
       );
     });
   });

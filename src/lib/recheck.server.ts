@@ -10,6 +10,7 @@ export type PendingStory = {
   meaning: string;
   body: string | null;
   plateText: string;
+  photo_path: string | null;
 };
 
 /**
@@ -72,13 +73,29 @@ export async function recheckStory(
 ): Promise<RecheckOutcome> {
   const { checkStory } = await import("./story-moderation.server");
   const { persistAiBlock } = await import("./ai-block.server");
-  const result = await checkStory(story.meaning, story.body ?? "", story.plateText);
+  // A story with a photo is checked with the photo, exactly as in addStory. A
+  // failed download means the check cannot run: the story stays pending.
+  let photoDataUrl: string | undefined;
+  if (story.photo_path) {
+    const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");
+    const downloaded = await admin.storage.from(STORY_PHOTO_BUCKET).download(story.photo_path);
+    if (downloaded.error || !downloaded.data) return "unavailable";
+    const bytes = new Uint8Array(await downloaded.data.arrayBuffer());
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    photoDataUrl = `data:image/jpeg;base64,${btoa(binary)}`;
+  }
+  const result = await checkStory(story.meaning, story.body ?? "", story.plateText, photoDataUrl);
   if (result.block) {
     await persistAiBlock(admin, result.block, result.runId);
     return "blocked";
   }
   if (result.outcome === "unavailable") return "unavailable";
   const approved = result.outcome === "approved";
+  if (!approved && story.photo_path) {
+    const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");
+    await admin.storage.from(STORY_PHOTO_BUCKET).remove([story.photo_path]);
+  }
   const updated = await admin
     .from("stories")
     .update(

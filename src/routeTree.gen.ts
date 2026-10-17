@@ -39,6 +39,7 @@ import { Route as PreviewsHomepageFeaturedRouteImport } from './routes/previews_
 import { Route as PreviewsSettingsRouteImport } from './routes/previews_.settings'
 import { Route as PreviewsSettingsDeleteConfirmRouteImport } from './routes/previews_.settings-delete-confirm'
 import { Route as PreviewsStoryErrorRouteImport } from './routes/previews_.story-error'
+import { Route as PreviewsStoryPhotoRouteImport } from './routes/previews_.story-photo'
 import { Route as PreviewsStoryRateLimitedRouteImport } from './routes/previews_.story-rate-limited'
 import { Route as PreviewsSubmissionsRouteImport } from './routes/previews_.submissions'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
@@ -198,6 +199,11 @@ const PreviewsStoryErrorRoute = PreviewsStoryErrorRouteImport.update({
   path: '/previews/story-error',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreviewsStoryPhotoRoute = PreviewsStoryPhotoRouteImport.update({
+  id: '/previews_/story-photo',
+  path: '/previews/story-photo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreviewsStoryRateLimitedRoute =
   PreviewsStoryRateLimitedRouteImport.update({
     id: '/previews_/story-rate-limited',
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/previews/settings': typeof PreviewsSettingsRoute
   '/previews/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
+  '/previews/story-photo': typeof PreviewsStoryPhotoRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/previews/submissions': typeof PreviewsSubmissionsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/previews/settings': typeof PreviewsSettingsRoute
   '/previews/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
+  '/previews/story-photo': typeof PreviewsStoryPhotoRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/previews/submissions': typeof PreviewsSubmissionsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/previews_/settings': typeof PreviewsSettingsRoute
   '/previews_/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
   '/previews_/story-error': typeof PreviewsStoryErrorRoute
+  '/previews_/story-photo': typeof PreviewsStoryPhotoRoute
   '/previews_/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/previews_/submissions': typeof PreviewsSubmissionsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -376,6 +385,7 @@ export interface FileRouteTypes {
     | '/previews/settings'
     | '/previews/settings-delete-confirm'
     | '/previews/story-error'
+    | '/previews/story-photo'
     | '/previews/story-rate-limited'
     | '/previews/submissions'
     | '/spot/$outcome'
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/previews/settings'
     | '/previews/settings-delete-confirm'
     | '/previews/story-error'
+    | '/previews/story-photo'
     | '/previews/story-rate-limited'
     | '/previews/submissions'
     | '/spot/$outcome'
@@ -451,6 +462,7 @@ export interface FileRouteTypes {
     | '/previews_/settings'
     | '/previews_/settings-delete-confirm'
     | '/previews_/story-error'
+    | '/previews_/story-photo'
     | '/previews_/story-rate-limited'
     | '/previews_/submissions'
     | '/spot/$outcome'
@@ -486,6 +498,7 @@ export interface RootRouteChildren {
   PreviewsSettingsRoute: typeof PreviewsSettingsRoute
   PreviewsSettingsDeleteConfirmRoute: typeof PreviewsSettingsDeleteConfirmRoute
   PreviewsStoryErrorRoute: typeof PreviewsStoryErrorRoute
+  PreviewsStoryPhotoRoute: typeof PreviewsStoryPhotoRoute
   PreviewsStoryRateLimitedRoute: typeof PreviewsStoryRateLimitedRoute
   PreviewsSubmissionsRoute: typeof PreviewsSubmissionsRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
@@ -703,6 +716,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewsStoryErrorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/previews_/story-photo': {
+      id: '/previews_/story-photo'
+      path: '/previews/story-photo'
+      fullPath: '/previews/story-photo'
+      preLoaderRoute: typeof PreviewsStoryPhotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/previews_/story-rate-limited': {
       id: '/previews_/story-rate-limited'
       path: '/previews/story-rate-limited'
@@ -799,6 +819,7 @@ const rootRouteChildren: RootRouteChildren = {
   PreviewsSettingsRoute: PreviewsSettingsRoute,
   PreviewsSettingsDeleteConfirmRoute: PreviewsSettingsDeleteConfirmRoute,
   PreviewsStoryErrorRoute: PreviewsStoryErrorRoute,
+  PreviewsStoryPhotoRoute: PreviewsStoryPhotoRoute,
   PreviewsStoryRateLimitedRoute: PreviewsStoryRateLimitedRoute,
   PreviewsSubmissionsRoute: PreviewsSubmissionsRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,

@@ -41,10 +41,10 @@ describe("Add a story previews", () => {
     render(<StoryStepPage step="1" />);
     expect(screen.getAllByRole("radio")).toHaveLength(4);
     expect(screen.getByRole("radio", { name: "It's my plate" })).toBeChecked();
-    expect(screen.getByText("0/80")).toBeInTheDocument();
+    expect(screen.getByText("14/80")).toBeInTheDocument();
     expect(screen.getByText("0/500")).toBeInTheDocument();
     await user.type(screen.getByLabelText(/What do you think it means/), "Hello");
-    expect(screen.getByText("5/80")).toBeInTheDocument();
+    expect(screen.getByText("19/80")).toBeInTheDocument();
     await user.click(screen.getByRole("radio", { name: "My best guess" }));
     expect(screen.getByRole("radio", { name: "My best guess" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "It's my plate" })).not.toBeChecked();

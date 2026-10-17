@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StrictMode, type ReactNode } from "react";
 
@@ -9,6 +9,12 @@ const m = vi.hoisted(() => ({
   getPlateStories: vi.fn(),
   track: vi.fn(),
   navigate: vi.fn(),
+  detect: vi.fn(),
+  upload: vi.fn(),
+  decode: vi.fn(),
+  renderBlurred: vi.fn(),
+  toJpeg: vi.fn(),
+  close: vi.fn(),
   auth: { account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean } },
   plate: { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } } as unknown,
   stories: { hasOwnerStory: false } as unknown,
@@ -57,6 +63,17 @@ vi.mock("@/lib/stories.functions", () => ({
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => m.auth }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
+vi.mock("@/lib/photos.functions", () => ({
+  detectPlateBox: m.detect,
+  uploadStoryPhoto: m.upload,
+}));
+vi.mock("@/lib/photo-canvas", () => ({
+  decodePhoto: m.decode,
+  renderBlurredPhoto: m.renderBlurred,
+  canvasToJpegBlob: m.toJpeg,
+  toDetectDataUrl: vi.fn(() => "data:image/jpeg;base64,detect"),
+  blobToDataUrl: vi.fn(async () => "data:image/jpeg;base64,processed"),
+}));
 
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
 import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
@@ -73,9 +90,225 @@ beforeEach(() => {
   m.plate = { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } };
   m.stories = { hasOwnerStory: false };
   m.submit.mockResolvedValue({ outcome: "published" });
+  m.decode.mockResolvedValue({ width: 800, height: 600, close: m.close });
+  m.detect.mockResolvedValue({ outcome: "ok", box: { x: 0.3, y: 0.4, w: 0.25, h: 0.12 } });
+  m.renderBlurred.mockResolvedValue(undefined);
+  m.toJpeg.mockResolvedValue(new Blob(["jpeg"], { type: "image/jpeg" }));
+  m.upload.mockResolvedValue({ outcome: "ok", path: "user-1/photo.jpg" });
+  m.renderBlurred.mockReturnValue(document.createElement("canvas"));
+  URL.revokeObjectURL = vi.fn();
+  URL.createObjectURL = vi.fn(() => "blob:mock");
 });
 
+/** Choose a photo, confirm the suggested box, and land back on step 2. */
+async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Next" }));
+  const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+  await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: "Adjust the plate area" })).toBeInTheDocument(),
+  );
+  await user.click(screen.getByRole("button", { name: "Next" }));
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
+  );
+  await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+  await waitFor(() =>
+    expect(
+      screen.getByAltText("Your processed photo, blurred except the plate"),
+    ).toBeInTheDocument(),
+  );
+}
+
 describe("AddStoryFlow", () => {
+  it("cancelled file selection does nothing", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.change(document.getElementById("story-photo") as HTMLInputElement, {
+      target: { files: [] },
+    });
+    expect(m.decode).not.toHaveBeenCalled();
+  });
+
+  it("a thrown detection failure still opens manual adjustment", async () => {
+    m.detect.mockRejectedValue(new Error("offline"));
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.upload(
+      document.getElementById("story-photo") as HTMLInputElement,
+      new File(["x"], "x.jpg", { type: "image/jpeg" }),
+    );
+    await screen.findByRole("dialog");
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    expect(screen.getByText(/We couldn't find the plate in this photo/)).toBeInTheDocument();
+  });
+
+  it("disposes a stale detection result after unmount", async () => {
+    let resolve: ((result: unknown) => void) | undefined;
+    m.detect.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const user = userEvent.setup();
+    const { unmount } = render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.upload(
+      document.getElementById("story-photo") as HTMLInputElement,
+      new File(["x"], "x.jpg", { type: "image/jpeg" }),
+    );
+    await waitFor(() => expect(m.detect).toHaveBeenCalled());
+    unmount();
+    await act(async () => {
+      resolve?.({ outcome: "ok", box: null });
+    });
+    expect(m.close).toHaveBeenCalledTimes(1);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+    expect(m.upload).not.toHaveBeenCalled();
+  });
+
+  it.each(["returned", "thrown"])(
+    "a %s upload failure closes the editor and allows continuing without a photo",
+    async (kind) => {
+      if (kind === "returned") m.upload.mockResolvedValue({ outcome: "error" });
+      else m.upload.mockRejectedValue(new Error("offline"));
+      const user = userEvent.setup();
+      render(<AddStoryFlow plateId="p1" />);
+      await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await user.upload(
+        document.getElementById("story-photo") as HTMLInputElement,
+        new File(["x"], "x.jpg", { type: "image/jpeg" }),
+      );
+      await screen.findByRole("dialog");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await screen.findByRole("heading", { name: "Review your photo" });
+      await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(m.close).toHaveBeenCalledTimes(1);
+      expect(m.track).not.toHaveBeenCalledWith("photo_added", expect.anything());
+      await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() =>
+        expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }),
+      );
+    },
+  );
+
+  it("removing a confirmed photo clears its submitted path", async () => {
+    vi.mocked(URL.createObjectURL)
+      .mockReturnValueOnce("blob:original")
+      .mockReturnValueOnce("blob:editor-review")
+      .mockReturnValueOnce("blob:processed");
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await addPhoto(user);
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed");
+    await user.click(screen.getByRole("button", { name: "Remove Photo" }));
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:processed");
+    expect(
+      screen.queryByAltText("Your processed photo, blurred except the plate"),
+    ).not.toBeInTheDocument();
+    expect(m.track).toHaveBeenCalledWith("photo_skipped", {});
+    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }),
+    );
+  });
+
+  it("replacing a confirmed photo releases only the previous preview until unmount", async () => {
+    vi.mocked(URL.createObjectURL)
+      .mockReturnValueOnce("blob:original-1")
+      .mockReturnValueOnce("blob:editor-review-1")
+      .mockReturnValueOnce("blob:processed-1")
+      .mockReturnValueOnce("blob:original-2")
+      .mockReturnValueOnce("blob:editor-review-2")
+      .mockReturnValueOnce("blob:processed-2");
+    const user = userEvent.setup();
+    const { unmount } = render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await addPhoto(user);
+    await user.click(screen.getByRole("button", { name: "Remove Photo" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await addPhoto(user);
+    expect(screen.getByAltText("Your processed photo, blurred except the plate")).toHaveAttribute(
+      "src",
+      "blob:processed-2",
+    );
+    expect(
+      vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-1"),
+    ).toHaveLength(1);
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed-2");
+    unmount();
+    expect(
+      vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-2"),
+    ).toHaveLength(1);
+  });
+
+  it("unmount releases a confirmed preview but step changes keep it alive", async () => {
+    vi.mocked(URL.createObjectURL)
+      .mockReturnValueOnce("blob:original")
+      .mockReturnValueOnce("blob:editor-review")
+      .mockReturnValueOnce("blob:processed");
+    const user = userEvent.setup();
+    const { unmount } = render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await addPhoto(user);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed");
+    unmount();
+    expect(
+      vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed"),
+    ).toHaveLength(1);
+  });
+  it("requires more than the prefilled starter before continuing", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    const input = screen.getByLabelText(/What do you think it means/);
+    expect(input).toHaveValue("They might be ");
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    await user.type(input, "single.");
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+  });
+
+  it.each([
+    ["a funeral director", "They might be a funeral director"],
+    ["They might be a funeral director", "They might be a funeral director"],
+    ["they might be single.", "they might be single."],
+  ])("frames %s consistently for review and submission", async (entered, expected) => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.clear(screen.getByLabelText(/What do you think it means/));
+    await user.type(screen.getByLabelText(/What do you think it means/), entered);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+    expect(screen.getByText(expected)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(m.submit).toHaveBeenCalledWith({
+        data: { plateId: "p1", meaning: expected, source: "owner", more: "", photoPath: "" },
+      }),
+    );
+  });
+
+  it("does not allow adding a missing prefix to overflow the meaning limit", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    const input = screen.getByLabelText(/What do you think it means/);
+    await user.clear(input);
+    await user.type(input, "a".repeat(67));
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    expect(m.submit).not.toHaveBeenCalled();
+  });
+
   it("tracks story_started once on mount", () => {
     render(<AddStoryFlow plateId="p1" />);
     expect(m.track).toHaveBeenCalledWith("story_started", {});
@@ -90,7 +323,13 @@ describe("AddStoryFlow", () => {
     await user.click(screen.getByRole("button", { name: "Submit Story" }));
     await waitFor(() => expect(screen.getByText("Story submitted!")).toBeInTheDocument());
     expect(m.submit).toHaveBeenCalledWith({
-      data: { plateId: "p1", meaning: "Pacific Northwest love.", source: "owner", more: "" },
+      data: {
+        plateId: "p1",
+        meaning: "They might be Pacific Northwest love.",
+        source: "owner",
+        more: "",
+        photoPath: "",
+      },
     });
     expect(m.track).toHaveBeenCalledWith("story_submitted", {
       source: "owner",
@@ -119,7 +358,7 @@ describe("AddStoryFlow", () => {
       expect(screen.getByText("We couldn't add this story.")).toBeInTheDocument(),
     );
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
+      "They might be Pacific Northwest love.",
     );
     expect(m.track).toHaveBeenCalledWith(
       "story_submitted",
@@ -176,7 +415,7 @@ describe("AddStoryFlow", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
+      "They might be Pacific Northwest love.",
     );
     expect(m.track).toHaveBeenCalledWith(
       "story_submitted",
@@ -199,6 +438,158 @@ describe("AddStoryFlow", () => {
     m.plate = undefined;
     const { container } = render(<AddStoryFlow plateId="p1" />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("tracks photo_skipped when continuing without a photo", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    expect(m.track).toHaveBeenCalledWith("photo_skipped", {});
+  });
+
+  it("a confirmed photo is uploaded, shown at review, and submitted with the story", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+    await addPhoto(user);
+    expect(m.upload).toHaveBeenCalledWith({
+      data: { jpeg: "data:image/jpeg;base64,processed" },
+    });
+    expect(m.track).toHaveBeenCalledWith("photo_added", { box_found: true, box_adjusted: false });
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByAltText("Your blurred photo")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() => expect(screen.getByText("Story submitted!")).toBeInTheDocument());
+    expect(m.submit).toHaveBeenCalledWith({
+      data: {
+        plateId: "p1",
+        meaning: "They might be Pacific Northwest love.",
+        source: "owner",
+        more: "",
+        photoPath: "user-1/photo.jpg",
+      },
+    });
+  });
+
+  it.each(["rejected", "error", "validation"] as const)(
+    "a %s outcome forgets the deleted photo, so a retry never sends its path",
+    async (first) => {
+      vi.mocked(URL.createObjectURL)
+        .mockReturnValueOnce("blob:original")
+        .mockReturnValueOnce("blob:editor-review")
+        .mockReturnValueOnce("blob:processed");
+      m.submit.mockResolvedValueOnce({ outcome: first });
+      const user = userEvent.setup();
+      render(<AddStoryFlow plateId="p1" />);
+      await user.type(
+        screen.getByLabelText(/What do you think it means/),
+        "They might be Pacific Northwest love.",
+      );
+      await addPhoto(user);
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(1));
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:processed");
+      expect(m.submit.mock.calls[0]?.[0]?.data.photoPath).toBe("user-1/photo.jpg");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(2));
+      expect(m.submit.mock.calls[1]?.[0]?.data.photoPath).toBe("");
+    },
+  );
+
+  it("detection unavailable goes straight to draw-a-box with the no-box message", async () => {
+    m.detect.mockResolvedValue({ outcome: "unavailable" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "We couldn't find the plate in this photo. Draw a box around it to keep it clear.",
+        ),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it("opens a cleared picker, preserves the editor on cancel, and detects the same file when selected again", async () => {
+    m.detect.mockResolvedValue({ outcome: "ok", box: null });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const input = document.getElementById("story-photo") as HTMLInputElement;
+    const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(input, file);
+    await screen.findByRole("dialog");
+    const click = vi.spyOn(input, "click");
+    await user.click(screen.getByRole("button", { name: "Choose another photo" }));
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(input.value).toBe("");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(m.detect).toHaveBeenCalledTimes(1);
+    expect(m.close).not.toHaveBeenCalled();
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+    await user.upload(input, file);
+    await waitFor(() => expect(m.detect).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(m.close).toHaveBeenCalledTimes(1));
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+    expect(m.upload).not.toHaveBeenCalled();
+  });
+
+  it.each([null, { x: 0.3, y: 0.4, w: 0.25, h: 0.12 }])(
+    "skipping adjustment with box %o frees the photo and returns to the photo step without uploading",
+    async (box) => {
+      m.detect.mockResolvedValue({ outcome: "ok", box });
+      const user = userEvent.setup();
+      render(<AddStoryFlow plateId="p1" />);
+      await user.type(
+        screen.getByLabelText(/What do you think it means/),
+        "Pacific Northwest love.",
+      );
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      const input = document.getElementById("story-photo") as HTMLInputElement;
+      await user.upload(input, new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+      await screen.findByRole("dialog");
+      await user.click(screen.getByRole("button", { name: "Skip photo" }));
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(input.value).toBe("");
+      expect(m.close).toHaveBeenCalledTimes(1);
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+      expect(m.track.mock.calls.filter(([event]) => event === "photo_skipped")).toEqual([
+        ["photo_skipped", {}],
+      ]);
+      expect(m.upload).not.toHaveBeenCalled();
+      expect(m.toJpeg).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() =>
+        expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }),
+      );
+    },
+  );
+
+  it("an unreadable photo shows the message and lets the visitor continue", async () => {
+    m.decode.mockRejectedValue(new Error("bad file"));
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const file = new File(["nope"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "We couldn't read this photo. You can choose another, or continue without one.",
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(m.detect).not.toHaveBeenCalled();
+    expect(m.upload).not.toHaveBeenCalled();
   });
 });
 
@@ -322,7 +713,7 @@ describe("AddStoryFlow branches", () => {
         "We couldn't submit your story right now. Your words are still here. Please try again.",
       );
       expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-        "Pacific Northwest love.",
+        "They might be Pacific Northwest love.",
       );
       expect(m.track).toHaveBeenCalledWith(
         "story_submitted",
@@ -339,7 +730,7 @@ describe("AddStoryFlow branches", () => {
     expect(screen.getByRole("heading", { name: "Add a photo (optional)" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
+      "They might be Pacific Northwest love.",
     );
   });
 
@@ -356,9 +747,10 @@ describe("AddStoryFlow branches", () => {
       expect(m.submit).toHaveBeenCalledWith({
         data: {
           plateId: "p1",
-          meaning: "Pacific Northwest love.",
+          meaning: "They might be Pacific Northwest love.",
           source: "guess",
           more: "Seen near Seattle.",
+          photoPath: "",
         },
       }),
     );
@@ -376,7 +768,11 @@ describe("AddStoryFlow branches", () => {
         plateId="x"
         preview={{
           plate: { id: "x", jurisdiction: "Oregon", text: "PNW LV" },
-          draft: { how: "mystery" as never, meaning: "Pacific Northwest love.", more: "" },
+          draft: {
+            how: "mystery" as never,
+            meaning: "They might be Pacific Northwest love.",
+            more: "",
+          },
           notice: { heading: null, message: "note" },
         }}
       />,

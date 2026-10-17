@@ -186,6 +186,34 @@ describe("RealPlateDetail", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
   });
 
+  it("renders a story photo through its signed link with the shared alt text", () => {
+    m.stories = {
+      stories: [story("1", { photo: "https://signed.example/photo.jpg" })],
+      pending: [],
+      total: 1,
+      storyCount: 1,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    const img = screen.getByRole("img", { name: "Photo shared by Traveler1" });
+    expect(img.getAttribute("src")).toBe("https://signed.example/photo.jpg");
+    expect(img.getAttribute("loading")).toBe("lazy");
+  });
+
+  it("renders no image and no empty space when a story has no photo", () => {
+    m.stories = {
+      stories: [story("1")],
+      pending: [],
+      total: 1,
+      storyCount: 1,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    expect(screen.queryByRole("img", { name: /Photo shared by/ })).toBeNull();
+  });
+
   it("pages five stories at a time with Show more", async () => {
     const user = userEvent.setup();
     const stories = Array.from({ length: 7 }, (_, i) => story(String(i + 1)));

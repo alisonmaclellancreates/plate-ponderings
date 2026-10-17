@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  admin: { from: vi.fn(), rpc: vi.fn(), auth: { getUser: vi.fn() } },
+  admin: {
+    from: vi.fn(),
+    rpc: vi.fn(),
+    auth: { getUser: vi.fn() },
+    storage: { from: vi.fn() },
+  },
+  remove: vi.fn(),
+  download: vi.fn(),
   check: vi.fn(),
   readBlock: vi.fn(),
   persistBlock: vi.fn(),
@@ -58,7 +65,13 @@ async function call(fn: unknown, data: unknown) {
   return await (fn as (a: unknown) => Promise<Record<string, unknown>>)({ data, context });
 }
 
-const INPUT = { plateId: "plate-1", meaning: "Pacific Northwest love.", source: "guess", more: "" };
+const INPUT = {
+  plateId: "plate-1",
+  meaning: "Pacific Northwest love.",
+  source: "guess",
+  more: "",
+  photoPath: "",
+};
 
 let tables: Record<string, Result>;
 let storyInsert: Result;
@@ -85,6 +98,12 @@ beforeEach(() => {
   mocks.check.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
   mocks.refresh.mockResolvedValue(undefined);
   mocks.getRequest.mockReturnValue(undefined);
+  mocks.remove.mockResolvedValue({ data: null, error: null });
+  mocks.download.mockResolvedValue({
+    data: { arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer },
+    error: null,
+  });
+  mocks.admin.storage.from.mockReturnValue({ remove: mocks.remove, download: mocks.download });
 });
 
 describe("validateStory", () => {
@@ -146,6 +165,55 @@ describe("addStory", () => {
     expect(await call(addStory, INPUT)).toEqual({ outcome: "rejected" });
     expect(storyInsert.data).toEqual({ id: "story-1" });
   });
+  describe("photoPath", () => {
+    const UUID = "123e4567-e89b-42d3-a456-426614174000";
+    const OWN = `caller/${UUID}.jpg`;
+
+    it("accepts exactly the caller's folder plus one uuid.jpg", async () => {
+      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      expect(result).toEqual({ outcome: "published" });
+    });
+
+    it.each([
+      `caller/../caller/${UUID}.jpg`,
+      `someone-else/${UUID}.jpg`,
+      `caller/${UUID}.jpg/extra`,
+      `caller/${UUID}.png`,
+      `caller/not-a-uuid.jpg`,
+    ])("refuses %s", async (photoPath) => {
+      const result = await call(addStory, { ...INPUT, photoPath });
+      expect(result).toEqual({ outcome: "error" });
+      expect(mocks.admin.from).not.toHaveBeenCalled();
+    });
+
+    it("downloads the photo and adds it to the same single check", async () => {
+      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      expect(result).toEqual({ outcome: "published" });
+      expect(mocks.download).toHaveBeenCalledWith(OWN);
+      expect(mocks.check).toHaveBeenCalledWith(
+        "Pacific Northwest love.",
+        "",
+        "B7K2L9",
+        expect.stringMatching(/^data:image\/jpeg;base64,/),
+      );
+    });
+
+    it("rejects the story and deletes the photo when the check fails", async () => {
+      mocks.check.mockResolvedValue({ outcome: "rejected", block: null });
+      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      expect(result).toEqual({ outcome: "rejected" });
+      expect(mocks.remove).toHaveBeenCalledWith([OWN]);
+    });
+
+    it("saves nothing and deletes the photo when the download fails", async () => {
+      mocks.download.mockResolvedValue({ data: null, error: new Error("missing") });
+      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      expect(result).toEqual({ outcome: "error" });
+      expect(mocks.check).not.toHaveBeenCalled();
+      expect(mocks.remove).toHaveBeenCalledWith([OWN]);
+    });
+  });
+
   it("publishes and asks for a fresh summary when the check passes", async () => {
     expect(await call(addStory, INPUT)).toEqual({ outcome: "published" });
     expect(mocks.refresh).toHaveBeenCalledWith("plate-1");
@@ -467,11 +535,69 @@ describe("getPlateStories failed and empty lookups", () => {
         publishedAt: "",
         isOwn: false,
         hearted: false,
+        photo: null,
       },
     ]);
     expect(result.pending).toEqual([]);
     expect(result.ownerHandle).toBe("Traveler");
   });
+  it("signs a published story's photo with a short-lived link", async () => {
+    tables["stories"] = {
+      data: [
+        {
+          id: "s1",
+          meaning: "M",
+          source: "guess",
+          body: null,
+          author_id: "a1",
+          published_at: "x",
+          photo_path: "a1/uuid.jpg",
+        },
+      ],
+      error: null,
+    };
+    const createSignedUrls = vi.fn().mockResolvedValue({
+      data: [{ signedUrl: "https://signed.example/photo.jpg" }],
+      error: null,
+    });
+    mocks.admin.storage.from.mockReturnValue({
+      remove: mocks.remove,
+      download: mocks.download,
+      createSignedUrls,
+    });
+    const result = (await call(getPlateStories, { plateId: "plate-1" })) as unknown as {
+      stories: { id: string; photo: string | null }[];
+    };
+    expect(result.stories).toEqual([
+      expect.objectContaining({ id: "s1", photo: "https://signed.example/photo.jpg" }),
+    ]);
+    expect(mocks.admin.storage.from).toHaveBeenCalledWith("story-photos");
+    expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
+  });
+  it.each([null, [], [{ signedUrl: "" }]])(
+    "omits a photo when signing yields no URL: %o",
+    async (data) => {
+      tables["stories"] = {
+        data: [
+          {
+            id: "s1",
+            meaning: "M",
+            source: "guess",
+            body: null,
+            author_id: "a1",
+            published_at: "x",
+            photo_path: "a1/uuid.jpg",
+          },
+        ],
+        error: null,
+      };
+      const createSignedUrls = vi.fn().mockResolvedValue({ data, error: null });
+      mocks.admin.storage.from.mockReturnValue({ createSignedUrls });
+      const result = await call(getPlateStories, { plateId: "plate-1" });
+      expect(result["stories"]).toEqual([expect.objectContaining({ id: "s1", photo: null })]);
+      expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
+    },
+  );
   it("keeps stories whose author is gone, shown as Traveler, even with blocks", async () => {
     signedIn();
     tables["blocks"] = { data: [{ blocked_id: "a2" }], error: null };

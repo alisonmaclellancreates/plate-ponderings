@@ -1,3 +1,26 @@
+# PR #113 Copilot follow-ups
+
+- [x] Stage exact 0017 SQL in docs/proposed-migrations (managed migration directory cannot be written without applying); add index-existence assertion. 0016 untouched.
+- [x] Applied approved statement as drizzle/migrations/0017_step49_photo_detect_attempts_index.sql (managed file adds trailing newline only). Database test passed, btree (user_id, attempted_at) verified, zero test attempts left.
+- [x] Stop local coverage runs going forward; only the PR Codecov figure is authoritative, per Alison's 19:27 UTC instruction.
+- [x] Release confirmed-photo preview URLs on removal/replacement, no-save submission and unmount; test each lifecycle. Review/back keeps the active URL alive.
+- [x] Requested related tests: 66 passed across 7 files. Local AddStoryFlow coverage 100% in all metrics. Lint zero errors/six existing warnings. Build OK. Replied to both Copilot comments.
+- [ ] Confirm follow-up PR Codecov after managed sync/CI. Latest PR report at 19:07:17 UTC says all modified coverable lines covered (100%), predating this follow-up.
+
+# PR #113 photo patch coverage
+
+- [x] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths; remove unreachable UI guards and duplicate URL revocation. No server/storage behaviour changes or canvas extraction.
+- [x] Requested related tests: 343 passed across 28 files. All eight named files have 100% local statements, branches and functions. Lint: zero errors/six existing warnings. Automatic build OK.
+- [x] PR Codecov report updated 19:07:17 UTC: all modified and coverable lines covered (100%). Copilot follow-up needs its own fresh CI result above. No manual push permitted.
+
+# Photo editor exits
+
+- [x] Replacement picker and adjustment skip implemented; cleanup, same-file reselection, cancellation, no-upload skip and box validation pass 45 changed tests. Preview updated. Lint zero errors/six existing warnings; automatic build OK. Desktop and 360×640 sample editor verified: exits visible, buttons/handles at least 44px, drawing enables Next and changes instruction, skip closes editor. Real file selection and cleanup are mocked tests, not live AI.
+
+# Story meaning framing
+
+- [x] Prefill “They might be”, add it when missing before review/submission without duplication, preserve the complete 80-character limit. 45 focused tests passed; changed-file lint clean; automatic build OK. No moderation or database changes.
+
 # Step 48: public facts and report labels
 
 - [x] Public facts and invitation use all published stories; visible list alone is filtered. Admin shares all report labels. Related tests: 240 passed across 26 files. Repository lint: 0 errors, 6 existing warnings. No database changes.
@@ -195,3 +218,4 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Step 47 built: live Your Submissions, Updated labels, header dot (refreshes after recheck), conditional dismiss, submissions_viewed; notifications cascade (0014). PR Codecov pending.
 
 - Step 48: plan revisions (hide/unhide refresh, reporter_id SET NULL, capped recheckAllPending, no authorKey) then build after approval
+- [ ] Step 49: story photos (choose, AI box detect, adjust, canvas blur, JPEG export, server upload).

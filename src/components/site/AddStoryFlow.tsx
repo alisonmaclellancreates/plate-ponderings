@@ -2,14 +2,21 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Info } from "lucide-react";
+import { Camera, Info } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
+import { PhotoEditor } from "@/components/site/PhotoEditor";
 import { getPlate } from "@/lib/plates.functions";
 import { addStory, getPlateStories, type HowKey } from "@/lib/stories.functions";
+import { detectPlateBox, uploadStoryPhoto } from "@/lib/photos.functions";
+import { blobToDataUrl, decodePhoto, toDetectDataUrl } from "@/lib/photo-canvas";
+import type { Box } from "@/lib/photo-blur";
 import {
   HOW_OPTIONS,
   MEANING_MAX,
+  MEANING_START,
+  frameMeaning,
+  canContinueMeaning,
   MORE_MAX,
   STORY_RATE_LIMIT_HEADING,
   STORY_SUBMIT_ERROR_HEADING,
@@ -19,9 +26,24 @@ import { useAccountAuth } from "@/lib/account-auth";
 import { track } from "@/lib/analytics";
 
 const DEMO_FORM_MESSAGE = "Adding stories is turned off in the demo.";
+const UNREADABLE_PHOTO_MESSAGE =
+  "We couldn't read this photo. You can choose another, or continue without one.";
+const PHOTO_UPLOAD_NOTE =
+  "We'll suggest the license plate area and blur everything else. You'll review and adjust it before sharing. The original photo is sent for detection and is never stored by our application.";
 
 const outline = "brand-btn brand-btn-outline";
 const coral = "brand-btn brand-btn-coral";
+
+/** A chosen photo being worked on: the decoded image and its display URL. */
+type PhotoDraft = {
+  bitmap: ImageBitmap;
+  imageUrl: string;
+  suggestion: Box | null;
+  noBoxMessage: boolean;
+};
+
+/** The confirmed photo: uploaded path plus the processed preview for review. */
+type PhotoReady = { path: string; previewUrl: string };
 
 type FlowStep = "1" | "2" | "3" | "done" | "checking";
 
@@ -104,14 +126,43 @@ export type AddStoryPreview = {
 export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: AddStoryPreview }) {
   const [step, setStep] = useState<FlowStep>("1");
   const [how, setHow] = useState<HowKey>(preview?.draft.how ?? "owner");
-  const [meaning, setMeaning] = useState(preview?.draft.meaning ?? "");
+  const [meaning, setMeaning] = useState(preview?.draft.meaning ?? MEANING_START);
   const [more, setMore] = useState(preview?.draft.more ?? "");
   const [rejected, setRejected] = useState(false);
   const [pause, setPause] = useState<{ heading: string | null; message: string } | null>(
     preview?.notice ?? null,
   );
   const [submitting, setSubmitting] = useState(false);
+  const [photoDraft, setPhotoDraft] = useState<PhotoDraft | null>(null);
+  const [photoReady, setPhotoReady] = useState<PhotoReady | null>(null);
+  const [photoUnreadable, setPhotoUnreadable] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const started = useRef(false);
+  const photoInput = useRef<HTMLInputElement>(null);
+  const photoSelection = useRef(0);
+  const photoPreviewUrl = photoReady?.previewUrl;
+
+  useEffect(() => {
+    if (!photoPreviewUrl) return;
+    return () => URL.revokeObjectURL(photoPreviewUrl);
+  }, [photoPreviewUrl]);
+
+  useEffect(
+    () => () => {
+      photoSelection.current += 1;
+    },
+    [],
+  );
+
+  useEffect(
+    () => () => {
+      if (photoDraft) {
+        photoDraft.bitmap.close();
+        URL.revokeObjectURL(photoDraft.imageUrl);
+      }
+    },
+    [photoDraft],
+  );
 
   const { data: plateData } = useQuery({
     queryKey: ["plate", plateId],
@@ -126,6 +177,8 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   const auth = useAccountAuth();
   const demo = Boolean(auth?.account?.isDemo);
   const submitStory = useServerFn(addStory);
+  const detectBox = useServerFn(detectPlateBox);
+  const uploadPhoto = useServerFn(uploadStoryPhoto);
 
   useEffect(() => {
     if (!started.current) {
@@ -135,6 +188,84 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   }, [preview]);
 
   const plate = preview?.plate ?? plateData?.plate;
+
+  const choosePhoto = async (file: File | undefined) => {
+    if (!file || preview) return;
+    const selection = ++photoSelection.current;
+    setPhotoUnreadable(false);
+    let bitmap: ImageBitmap;
+    try {
+      bitmap = await decodePhoto(file);
+    } catch {
+      setPhotoUnreadable(true);
+      return;
+    }
+    const imageUrl = URL.createObjectURL(file);
+    let draft: PhotoDraft;
+    // Detection is a shortcut, never a gate: any failure means draw the box.
+    try {
+      const result = await detectBox({ data: { image: toDetectDataUrl(bitmap) } });
+      draft = {
+        bitmap,
+        imageUrl,
+        suggestion: result.outcome === "ok" ? result.box : null,
+        noBoxMessage: result.outcome !== "ok" || result.box === null,
+      };
+    } catch {
+      draft = { bitmap, imageUrl, suggestion: null, noBoxMessage: true };
+    }
+    if (selection !== photoSelection.current) {
+      bitmap.close();
+      URL.revokeObjectURL(imageUrl);
+      return;
+    }
+    setPhotoDraft(draft);
+  };
+
+  const chooseAnotherPhoto = () => {
+    // The editor's replacement callback exists only with this input mounted.
+    const input = photoInput.current as HTMLInputElement;
+    input.value = "";
+    input.click();
+  };
+
+  const skipEditorPhoto = () => {
+    photoSelection.current += 1;
+    setPhotoDraft(null);
+    setPhotoUnreadable(false);
+    (photoInput.current as HTMLInputElement).value = "";
+    void track("photo_skipped", {});
+    setStep("2");
+  };
+
+  const handleUsePhoto = async (blob: Blob, adjusted: boolean, draft: PhotoDraft) => {
+    setPhotoBusy(true);
+    try {
+      const uploaded = await uploadPhoto({ data: { jpeg: await blobToDataUrl(blob) } });
+      if (uploaded.outcome !== "ok") {
+        setPause({ heading: STORY_SUBMIT_ERROR_HEADING, message: STORY_SUBMIT_ERROR_MESSAGE });
+        setPhotoDraft(null);
+        return;
+      }
+      void track("photo_added", {
+        box_found: draft.suggestion !== null,
+        box_adjusted: adjusted,
+      });
+      setPhotoReady({ path: uploaded.path, previewUrl: URL.createObjectURL(blob) });
+      setPhotoDraft(null);
+    } catch {
+      setPause({ heading: STORY_SUBMIT_ERROR_HEADING, message: STORY_SUBMIT_ERROR_MESSAGE });
+      setPhotoDraft(null);
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+
+  const skipPhoto = () => {
+    if (!preview) void track("photo_skipped", {});
+    setStep("3");
+  };
+
   if (!plate) return null;
   const ownerExists = preview ? false : (storiesData?.hasOwnerStory ?? false);
 
@@ -145,7 +276,13 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     setPause(null);
     try {
       const result = await submitStory({
-        data: { plateId, meaning, source: how, more },
+        data: {
+          plateId,
+          meaning: frameMeaning(meaning),
+          source: how,
+          more,
+          photoPath: photoReady?.path ?? "",
+        },
       });
       const outcome =
         result.outcome === "rate-limited"
@@ -158,6 +295,9 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         has_more_text: more.trim().length > 0,
         outcome,
       });
+      // The server deletes the uploaded photo on every outcome that saves no
+      // story, so the form must forget it too; a retry re-adds the photo.
+      if (result.outcome !== "published" && result.outcome !== "pending") setPhotoReady(null);
       if (result.outcome === "published") setStep("done");
       else if (result.outcome === "pending") setStep("checking");
       else if (result.outcome === "rejected") {
@@ -236,17 +376,75 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
             <button type="button" onClick={() => setStep("1")} className={outline}>
               Back
             </button>
-            <button type="button" onClick={() => setStep("3")} className={coral}>
+            <button type="button" onClick={skipPhoto} className={coral}>
               Continue without a photo
             </button>
           </>
         }
       >
         <h2 className="font-display text-2xl text-navy">Add a photo (optional)</h2>
-        <p className="flex items-start gap-2 rounded-lg bg-cream-warm p-4">
-          <Info aria-hidden className="mt-0.5 size-5 shrink-0 text-teal" />
-          Photo sharing is on its way. For now, you can continue without a photo.
-        </p>
+        {photoReady ? (
+          <div className="space-y-3">
+            <img
+              src={photoReady.previewUrl}
+              alt="Your processed photo, blurred except the plate"
+              className="w-full rounded-lg"
+            />
+            <button
+              type="button"
+              className={outline}
+              onClick={() => {
+                setPhotoReady(null);
+                void track("photo_skipped", {});
+              }}
+            >
+              Remove Photo
+            </button>
+            <button type="button" className={coral} onClick={() => setStep("3")}>
+              Next
+            </button>
+          </div>
+        ) : (
+          <>
+            <label
+              htmlFor="story-photo"
+              className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-teal bg-card px-4 py-10 text-center"
+            >
+              <Camera aria-hidden className="size-10 text-teal" />
+              <span className="font-semibold">Choose a photo or drag and drop</span>
+              <span className="text-sm text-muted-foreground">JPEG, PNG, or WebP</span>
+              <input
+                ref={photoInput}
+                id="story-photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={demo || photoBusy}
+                onChange={(e) => void choosePhoto(e.target.files?.[0])}
+              />
+            </label>
+            {photoUnreadable && (
+              <p role="status" className="rounded-lg bg-cream-warm p-4">
+                {UNREADABLE_PHOTO_MESSAGE}
+              </p>
+            )}
+            <p className="flex items-start gap-2 rounded-lg bg-cream-warm p-4">
+              <Info aria-hidden className="mt-0.5 size-5 shrink-0 text-teal" />
+              {PHOTO_UPLOAD_NOTE}
+            </p>
+          </>
+        )}
+        {photoDraft && (
+          <PhotoEditor
+            imageUrl={photoDraft.imageUrl}
+            bitmap={photoDraft.bitmap}
+            initialBox={photoDraft.suggestion}
+            showNoBoxMessage={photoDraft.noBoxMessage}
+            onUse={(blob, adjusted) => void handleUsePhoto(blob, adjusted, photoDraft)}
+            onRemove={skipEditorPhoto}
+            onChooseAnother={chooseAnotherPhoto}
+          />
+        )}
       </Shell>
     );
   }
@@ -274,22 +472,37 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         }
       >
         <h2 className="font-display text-2xl text-navy">Review &amp; Submit</h2>
-        <dl className="brand-card space-y-4 bg-card p-5">
-          <div>
-            <dt className="text-sm font-semibold text-muted-foreground">How I know</dt>
-            <dd>{howLabel}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-semibold text-muted-foreground">What you think it means</dt>
-            <dd>{meaning}</dd>
-          </div>
-          {more.trim() && (
-            <div>
-              <dt className="text-sm font-semibold text-muted-foreground">Your story</dt>
-              <dd>{more}</dd>
-            </div>
+        <div
+          className={
+            photoReady ? "grid gap-5 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start" : ""
+          }
+        >
+          {photoReady && (
+            <img
+              src={photoReady.previewUrl}
+              alt="Your blurred photo"
+              className="w-full rounded-lg"
+            />
           )}
-        </dl>
+          <dl className="brand-card space-y-4 bg-card p-5">
+            <div>
+              <dt className="text-sm font-semibold text-muted-foreground">How I know</dt>
+              <dd>{howLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-muted-foreground">
+                What you think it means
+              </dt>
+              <dd>{meaning}</dd>
+            </div>
+            {more.trim() && (
+              <div>
+                <dt className="text-sm font-semibold text-muted-foreground">Your story</dt>
+                <dd>{more}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
       </Shell>
     );
   }
@@ -305,8 +518,11 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
           </Link>
           <button
             type="button"
-            onClick={() => setStep("2")}
-            disabled={demo || meaning.trim().length < 3}
+            onClick={() => {
+              setMeaning(frameMeaning(meaning));
+              setStep("2");
+            }}
+            disabled={demo || !canContinueMeaning(meaning)}
             className={coral}
           >
             Next
