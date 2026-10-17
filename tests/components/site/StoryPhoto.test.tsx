@@ -61,9 +61,8 @@ describe("StoryPhotoZoom", () => {
 
   it("closes with a tap outside", async () => {
     render(<StoryPhotoZoom {...props} />);
-    await open();
-    const overlay = document.querySelector("[data-state='open'].fixed.inset-0") as HTMLElement;
-    fireEvent.pointerDown(overlay);
+    const { user } = await open();
+    await user.click(document.body);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
