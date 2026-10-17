@@ -117,6 +117,15 @@ export type PlateStoriesResult = {
 
 export const STORY_PAGE_SIZE = 5;
 
+type StoryRow = {
+  id: string;
+  meaning: string;
+  source: string;
+  body: string | null;
+  author_id: string | null;
+  published_at: string | null;
+};
+
 /**
  * Published stories for a published plate. The visitor's identity comes only
  * from their verified session on the server, never from a parameter: signed
@@ -160,27 +169,56 @@ export const getPlateStories = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("stories")
-      .select("id,meaning,source,body,author_id,published_at,profiles!stories_author_id_fkey(handle)")
+      .select("id,meaning,source,body,author_id,published_at")
       .eq("subject_id", plate.id)
       .eq("status", "published")
       .order("published_at", { ascending: true });
     if (error) return null;
 
-    const visible = (rows ?? []).filter(
+    const visible = ((rows ?? []) as StoryRow[]).filter(
       (r) => r.author_id === null || !blockedIds.includes(r.author_id),
     );
+
+    let pendingRows: StoryRow[] = [];
+    if (viewerId) {
+      const { data: mine } = await supabaseAdmin
+        .from("stories")
+        .select("id,meaning,source,body,author_id,published_at")
+        .eq("subject_id", plate.id)
+        .eq("status", "pending")
+        .eq("author_id", viewerId)
+        .order("created_at", { ascending: true });
+      pendingRows = (mine ?? []) as StoryRow[];
+    }
+
+    // Handles come from profiles in a separate lookup; stories has no FK to it.
+    const authorIds = [
+      ...new Set(
+        [...visible, ...pendingRows]
+          .map((r) => r.author_id)
+          .filter((id): id is string => id !== null),
+      ),
+    ];
+    const handles = new Map<string, string>();
+    if (authorIds.length > 0) {
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id,handle")
+        .in("id", authorIds);
+      for (const p of profiles ?? []) handles.set(p.id, p.handle);
+    }
+
     const { data: heartRows } = await supabaseAdmin.rpc("story_heart_counts", {
       _subject_id: plate.id,
     });
     const hearts = new Map((heartRows ?? []).map((h) => [h.story_id, Number(h.hearts)]));
 
-    const toStory = (r: (typeof visible)[number]): PlateStory => ({
+    const toStory = (r: StoryRow): PlateStory => ({
       id: r.id,
       meaning: r.meaning,
       source: r.source as HowKey,
       body: r.body,
-      handle:
-        (r.profiles as unknown as { handle: string } | null)?.handle ?? "Traveler",
+      handle: (r.author_id && handles.get(r.author_id)) || "Traveler",
       hearts: hearts.get(r.id) ?? 0,
       publishedAt: r.published_at ?? "",
     });
@@ -189,41 +227,15 @@ export const getPlateStories = createServerFn({ method: "POST" })
     const rest = visible.filter((r) => r.source !== "owner");
     const ordered = [...ownerStories, ...rest].map(toStory);
 
-    let pending: PlateStory[] = [];
-    if (viewerId) {
-      const { data: pendingRows } = await supabaseAdmin
-        .from("stories")
-        .select(
-          "id,meaning,source,body,author_id,published_at,profiles!stories_author_id_fkey(handle)",
-        )
-        .eq("subject_id", plate.id)
-        .eq("status", "pending")
-        .eq("author_id", viewerId)
-        .order("created_at", { ascending: true });
-      pending = (pendingRows ?? []).map((r) => ({
-        id: r.id,
-        meaning: r.meaning,
-        source: r.source as HowKey,
-        body: r.body,
-        handle:
-          (r.profiles as unknown as { handle: string } | null)?.handle ?? "Traveler",
-        hearts: 0,
-        publishedAt: r.published_at ?? "",
-      }));
-    }
-
-    const ownerHandle =
-      ownerStories.length > 0
-        ? ((ownerStories[0].profiles as unknown as { handle: string } | null)?.handle ??
-          "Traveler")
-        : null;
-
     return {
       stories: ordered.slice(data.offset, data.offset + STORY_PAGE_SIZE),
       total: ordered.length,
-      pending,
+      pending: pendingRows.map(toStory),
       storyCount: ordered.length,
-      ownerHandle,
+      ownerHandle:
+        ownerStories.length > 0
+          ? (ownerStories[0].author_id && handles.get(ownerStories[0].author_id)) || "Traveler"
+          : null,
       hasOwnerStory: ownerStories.length > 0,
     };
   });
