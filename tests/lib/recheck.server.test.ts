@@ -110,6 +110,11 @@ describe("recheckStory", () => {
     expect(await recheckStory(admin, story, "author")).toBe("unchanged");
     expect(f.after).not.toHaveBeenCalled();
   });
+  it("stops on unavailable without a block", async () => {
+    f.checkStory.mockResolvedValue({ outcome: "unavailable" });
+    expect(await recheckStory(admin, story, "author")).toBe("unavailable");
+    expect(f.persist).not.toHaveBeenCalled();
+  });
   it("persists a block and stops", async () => {
     f.checkStory.mockResolvedValue({ outcome: "unavailable", block: "denied", runId: "r" });
     expect(await recheckStory(admin, story, "author")).toBe("blocked");
