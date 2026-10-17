@@ -257,7 +257,9 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
       ? { data: null, error: null }
       : await supabaseAdmin
           .from("stories")
-          .select("id,subject_id,meaning,body,subjects!stories_subject_id_fkey(identity_b)")
+          .select(
+            "id,subject_id,meaning,body,photo_path,subjects!stories_subject_id_fkey(identity_b)",
+          )
           .eq("author_id", context.userId)
           .eq("status", "pending");
     for (const story of pendingStories.error ? [] : (pendingStories.data ?? [])) {

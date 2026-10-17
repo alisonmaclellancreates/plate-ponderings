@@ -25,7 +25,16 @@ import type { Database } from "@/integrations/supabase/types";
 
 const admin = f.db.client as unknown as SupabaseClient<Database>;
 const subject = { id: "p1", identity_a: "US-WA", identity_b: "abc", name: "Washington" };
-const story = { id: "s1", subject_id: "p1", meaning: "M", body: null, plateText: "ABC" };
+const story = {
+  id: "s1",
+  subject_id: "p1",
+  meaning: "M",
+  body: null,
+  plateText: "ABC",
+  photo_path: null as string | null,
+};
+const photoStory = { ...story, photo_path: "author/11111111-1111-1111-1111-111111111111.jpg" };
+const photoBlob = { arrayBuffer: () => Promise.resolve(new Uint8Array([1, 2, 3]).buffer) };
 
 beforeEach(() => {
   f.db.reset();
@@ -82,7 +91,7 @@ describe("recheckStory", () => {
     f.checkStory.mockResolvedValue({ outcome: "approved" });
     f.db.queue("stories", { data: [{ id: "s1" }], error: null });
     expect(await recheckStory(admin, story, "author")).toBe("published");
-    expect(f.checkStory).toHaveBeenCalledWith("M", "", "ABC");
+    expect(f.checkStory).toHaveBeenCalledWith("M", "", "ABC", undefined);
     expect(f.after).toHaveBeenCalledWith("refresh:p1");
     expect(f.db.ops("notifications")[0]?.[0]?.[1]).toEqual([
       { user_id: "author", kind: "story_published", subject_id: "p1", story_id: "s1" },
@@ -92,7 +101,7 @@ describe("recheckStory", () => {
     f.checkStory.mockResolvedValue({ outcome: "rejected" });
     f.db.queue("stories", { data: [{ id: "s1" }], error: null });
     expect(await recheckStory(admin, { ...story, body: "more" }, "author")).toBe("rejected");
-    expect(f.checkStory).toHaveBeenCalledWith("M", "more", "ABC");
+    expect(f.checkStory).toHaveBeenCalledWith("M", "more", "ABC", undefined);
     expect(f.db.ops("notifications")[0]?.[0]?.[1]).toEqual([
       { user_id: "author", kind: "story_rejected", subject_id: "p1", story_id: "s1" },
     ]);
@@ -119,5 +128,32 @@ describe("recheckStory", () => {
     f.checkStory.mockResolvedValue({ outcome: "unavailable", block: "denied", runId: "r" });
     expect(await recheckStory(admin, story, "author")).toBe("blocked");
     expect(f.persist).toHaveBeenCalledWith(admin, "denied", "r");
+  });
+  it("checks a story with its photo, exactly as addStory does", async () => {
+    f.db.storage.download.mockResolvedValue({ data: photoBlob, error: null });
+    f.checkStory.mockResolvedValue({ outcome: "approved" });
+    f.db.queue("stories", { data: [{ id: "s1" }], error: null });
+    expect(await recheckStory(admin, photoStory, "author")).toBe("published");
+    expect(f.db.storage.download).toHaveBeenCalledWith(photoStory.photo_path);
+    expect(f.checkStory).toHaveBeenCalledWith(
+      "M",
+      "",
+      "ABC",
+      `data:image/jpeg;base64,${btoa("\u0001\u0002\u0003")}`,
+    );
+    expect(f.db.storage.remove).not.toHaveBeenCalled();
+  });
+  it("leaves the story pending when the photo download fails", async () => {
+    f.db.storage.download.mockResolvedValue({ data: null, error: { message: "missing" } });
+    expect(await recheckStory(admin, photoStory, "author")).toBe("unavailable");
+    expect(f.checkStory).not.toHaveBeenCalled();
+    expect(f.db.ops("stories")).toEqual([]);
+  });
+  it("deletes the photo when the recheck rejects the story", async () => {
+    f.db.storage.download.mockResolvedValue({ data: photoBlob, error: null });
+    f.checkStory.mockResolvedValue({ outcome: "rejected" });
+    f.db.queue("stories", { data: [{ id: "s1" }], error: null });
+    expect(await recheckStory(admin, photoStory, "author")).toBe("rejected");
+    expect(f.db.storage.remove).toHaveBeenCalledWith([photoStory.photo_path]);
   });
 });
