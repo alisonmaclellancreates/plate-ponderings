@@ -623,6 +623,29 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      get_featured_subject_days: {
+        Args: { _before?: string; _limit?: number }
+        Returns: {
+          day: string
+          has_owner_story: boolean
+          jurisdiction: string
+          plate_text: string
+          stories_at_pick: number
+          story_count: number
+          subject_id: string
+        }[]
+      }
+      get_visible_summary_versions: {
+        Args: { _subject_id: string }
+        Returns: {
+          disagreement_score: number
+          generated_at: string
+          started_at: string
+          story_count: number
+          text: string
+          version: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -632,6 +655,14 @@ export type Database = {
       }
       is_story_published: { Args: { _story_id: string }; Returns: boolean }
       is_summary_public: { Args: { _summary_id: string }; Returns: boolean }
+      pick_featured_subject_for_today: {
+        Args: never
+        Returns: {
+          day: string
+          stories_at_pick: number
+          subject_id: string
+        }[]
+      }
       story_heart_counts: {
         Args: { _subject_id: string }
         Returns: {
