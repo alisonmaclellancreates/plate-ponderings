@@ -46,14 +46,17 @@ export const checkHandle = createServerFn({ method: "POST" })
       _user_id: context.userId,
       _role: "demo",
     });
-    if (roleError || demo || !handleFormatValid(data.handle)) return { available: false };
+    if (roleError) return { status: "unknown" as const };
+    if (demo) return { status: null };
+    if (!handleFormatValid(data.handle)) return { status: "unknown" as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const result = await supabaseAdmin
       .from("profiles")
       .select("id")
       .ilike("handle", data.handle.replace(/_/g, "\\_"))
       .neq("id", context.userId);
-    return { available: !result.error && result.data?.length === 0 };
+    if (result.error || !result.data) return { status: "unknown" as const };
+    return { status: result.data.length === 0 ? ("available" as const) : ("taken" as const) };
   });
 
 export const saveHandle = createServerFn({ method: "POST" })
