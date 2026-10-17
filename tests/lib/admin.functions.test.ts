@@ -157,9 +157,9 @@ describe("setStoryHidden", () => {
     ["no matching row", { data: [], error: null }],
   ])("reports %s without a refresh", async (_l, result) => {
     f.db.queue("stories", result);
-    expect(
-      await setStoryHidden({ data: { storyId: 1, hidden: "y" } as unknown as never }),
-    ).toEqual({ outcome: "error" });
+    expect(await setStoryHidden({ data: { storyId: 1, hidden: "y" } as unknown as never })).toEqual(
+      { outcome: "error" },
+    );
     expect(f.after).not.toHaveBeenCalled();
   });
 });

@@ -82,8 +82,7 @@ export function serverFnMock(context: () => unknown) {
           return builder;
         },
         handler:
-          (fn: (a: { data: unknown; context: unknown }) => unknown) =>
-          (args?: { data: unknown }) =>
+          (fn: (a: { data: unknown; context: unknown }) => unknown) => (args?: { data: unknown }) =>
             fn({ data: validate(args?.data), context: context() }),
       };
       return builder;

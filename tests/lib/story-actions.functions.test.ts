@@ -74,9 +74,9 @@ describe("toggleHeart", () => {
   });
   it("reports a write error and coerces bad input", async () => {
     f.db.queue("hearts", { error: { message: "rls" } });
-    expect(
-      await toggleHeart({ data: { storyId: 5, hearted: "yes" } as unknown as never }),
-    ).toEqual({ outcome: "error" });
+    expect(await toggleHeart({ data: { storyId: 5, hearted: "yes" } as unknown as never })).toEqual(
+      { outcome: "error" },
+    );
     expect(f.db.ops("hearts")[0]?.[0]).toEqual(["delete", []]);
   });
 });
