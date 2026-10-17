@@ -333,7 +333,12 @@ export function RealPlateDetail({
           <h1 className="sr-only">
             {plate.jurisdiction} plate {plate.text}
           </h1>
-          <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="lg" className="mx-auto min-w-0" />
+          <Plate
+            jurisdiction={plate.jurisdiction}
+            text={plate.text}
+            size="lg"
+            className="mx-auto min-w-0"
+          />
         </div>
         <div className="min-w-0">
           <MysteryPrompt />

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Homepage, PlateOfTheDay } from "@/components/site/Homepage";
@@ -8,8 +8,8 @@ import type { ReactNode } from "react";
 
 const searchMock = vi.hoisted(() => ({ fn: vi.fn(), navigate: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ params, children, ...props }: { params: { state: string }; children: ReactNode }) => (
-    <a {...props} href={`/plate/${params.state}`}>
+  Link: ({ params, children, ...props }: { params?: { state: string }; children: ReactNode }) => (
+    <a {...props} href={params ? `/plate/${params.state}` : "/spot"}>
       {children}
     </a>
   ),
@@ -26,6 +26,11 @@ function media({ mobile = false, reduced = false }) {
 }
 const visibleHeadline = () =>
   screen.getByRole("heading", { level: 1 }).querySelector('[aria-hidden="false"]')?.textContent;
+
+beforeEach(() => {
+  searchMock.fn.mockReset();
+  searchMock.navigate.mockReset();
+});
 
 afterEach(() => {
   vi.useRealTimers();
@@ -150,8 +155,8 @@ describe("Homepage", () => {
 
   async function submitSearch(user: ReturnType<typeof userEvent.setup>) {
     await user.selectOptions(screen.getByRole("combobox", { name: "State or Province" }), "Utah");
-    await user.type(screen.getByRole("textbox", { name: /Plate Text/i }), "DRAGON");
-    await user.click(screen.getByRole("button", { name: "Look Up Plate" }));
+    await user.type(screen.getByRole("textbox", { name: "Plate text" }), "DRAGON");
+    await user.click(screen.getByRole("button", { name: "Search" }));
   }
 
   it("navigates to the plate page when the search finds a match", async () => {
@@ -180,9 +185,9 @@ describe("Homepage", () => {
     const user = userEvent.setup();
     render(<Homepage />);
     await submitSearch(user);
-    expect(
-      screen.getAllByRole("region", { name: "No plate found. Yet!" }).length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByRole("region", { name: "No plate found. Yet!" }).length).toBeGreaterThan(
+      0,
+    );
     expect(screen.getAllByDisplayValue("DRAGON").length).toBeGreaterThan(0);
   });
 
@@ -192,18 +197,20 @@ describe("Homepage", () => {
     const user = userEvent.setup();
     render(<Homepage />);
     await submitSearch(user);
-    expect(screen.getByRole("alert")).toHaveTextContent(/couldn't search right now/);
+    const alerts = screen.getAllByRole("alert").map((a) => a.textContent);
+    expect(alerts.some((t) => t?.includes("couldn't search right now"))).toBe(true);
     expect(screen.queryByRole("region", { name: "No plate found. Yet!" })).toBeNull();
     searchMock.fn.mockRejectedValue(new Error("down"));
     await submitSearch(user);
-    expect(screen.getByRole("alert")).toHaveTextContent(/couldn't search right now/);
+    const again = screen.getAllByRole("alert").map((a) => a.textContent);
+    expect(again.some((t) => t?.includes("couldn't search right now"))).toBe(true);
   });
 
   it("keeps client validation ahead of any server call", async () => {
     media({});
     const user = userEvent.setup();
     render(<Homepage />);
-    await user.click(screen.getByRole("button", { name: "Look Up Plate" }));
+    await user.click(screen.getByRole("button", { name: "Search" }));
     expect(screen.getByText("Please select a state or province")).toBeInTheDocument();
     expect(searchMock.fn).not.toHaveBeenCalled();
   });

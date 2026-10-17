@@ -56,5 +56,5 @@ it("renders the account previews gallery with its heading", async () => {
   const Page = route.options.component as ComponentType;
   render(<Page />);
   expect(await screen.findByRole("heading", { name: "Account previews" })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Handle check status, Blocked" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "AI check status, Blocked" })).toBeInTheDocument();
 });

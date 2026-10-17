@@ -7,30 +7,39 @@ vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => ({
     ...o,
     useLoaderData: () => loaderData,
+    useSearch: () => ({}),
   }),
   notFound: () => new Error("not found"),
 }));
+
+vi.mock("@/lib/plates.functions", () => ({ getPlate: vi.fn(async () => ({ plate: null })) }));
 
 import { Route } from "@/routes/plate.$state";
 
 type Meta = Record<string, string>[];
 const R = Route as unknown as {
-  loader: (a: { params: { state: string } }) => { state: string };
+  loader: (a: { params: { state: string } }) => Promise<{ state: string }>;
   head: (a: { loaderData?: { state: string } }) => { meta: Meta };
   component: () => ReactNode;
 };
 
 describe("plate detail route", () => {
-  it("loads known states and rejects unknown ones", () => {
-    expect(R.loader({ params: { state: "mystery" } })).toEqual({ state: "mystery" });
-    expect(() => R.loader({ params: { state: "nope" } })).toThrow("not found");
-    expect(() => R.loader({ params: { state: "toString" } })).toThrow("not found");
-    expect(() => R.loader({ params: { state: "constructor" } })).toThrow("not found");
+  it("loads known states and rejects unknown ones", async () => {
+    expect(await R.loader({ params: { state: "mystery" } })).toEqual({
+      state: "mystery",
+      plate: null,
+    });
+    await expect(R.loader({ params: { state: "nope" } })).rejects.toThrow("not found");
+    await expect(R.loader({ params: { state: "toString" } })).rejects.toThrow("not found");
+    await expect(R.loader({ params: { state: "constructor" } })).rejects.toThrow("not found");
   });
 
-  it("accepts any mock plate slug, as the Explore cards link", () => {
-    expect(R.loader({ params: { state: "ut-canyons" } })).toEqual({ state: "ut-canyons" });
-    expect(() => R.loader({ params: { state: "not-a-plate" } })).toThrow("not found");
+  it("accepts any mock plate slug, as the Explore cards link", async () => {
+    expect(await R.loader({ params: { state: "ut-canyons" } })).toEqual({
+      state: "ut-canyons",
+      plate: null,
+    });
+    await expect(R.loader({ params: { state: "not-a-plate" } })).rejects.toThrow("not found");
   });
 
   it("head for a slug-only plate labels it as plate stories", () => {

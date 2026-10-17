@@ -33,6 +33,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 vi.mock("@/lib/accounts.functions", () => ({ getAccount: m.get, getDemoSetting: m.demo }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
 vi.mock("@tanstack/react-query", () => {
   const client = {
     cancelQueries: m.cancel,
