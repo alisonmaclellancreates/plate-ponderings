@@ -58,7 +58,16 @@ it("redirects safely rather than waiting forever on a stuck session", async () =
   const result = expect(gate.beforeLoad({ location: { href: "/profile" } })).rejects.toEqual({
     options: { to: "/auth", search: { returnTo: "/profile" } },
   });
-  await vi.advanceTimersByTimeAsync(1000);
+  await vi.advanceTimersByTimeAsync(GUARD_TIMEOUT_MS);
   await result;
   expect(out).not.toHaveBeenCalled();
+});
+it("lets a slow visitor through once the check resolves", async () => {
+  vi.useFakeTimers();
+  user.mockImplementation(
+    () => new Promise((resolve) => setTimeout(() => resolve({ data: { user: {} }, error: null }), 2000)),
+  );
+  const result = gate.beforeLoad({ location: { href: "/profile" } });
+  await vi.advanceTimersByTimeAsync(2000);
+  await expect(result).resolves.toBeUndefined();
 });
