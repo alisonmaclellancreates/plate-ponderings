@@ -1,8 +1,8 @@
 # Rowan: summary prompt review
 
 - [x] Preserve the brief’s score table, match Rowan’s score/text instruction verbatim, and add the attributed-ownership rule with instruction tests. No schema or existing-summary edits.
-- [ ] Run summary-generation tests and changed-file lint.
-- [ ] Generate one fresh ROW43XYZ summary through the normal flow and report its saved text and score.
+- [x] Run summary-generation tests: 15 passed. Changed-file ESLint: clean.
+- [ ] Generate one fresh ROW43XYZ summary through the normal flow and report its saved text and score. Blocker: preview signed out, no account matches Alison’s email, multiple existing accounts require Alison’s choice or preview sign-in.
 
 # Step 44c: stale or stuck sessions
 
