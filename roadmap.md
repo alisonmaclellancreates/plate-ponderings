@@ -2,7 +2,7 @@
 
 - [x] Preserve the brief’s score table, match Rowan’s score/text instruction verbatim, and add the attributed-ownership rule with instruction tests. No schema or existing-summary edits.
 - [x] Run summary-generation tests: 15 passed. Changed-file ESLint: clean.
-- [ ] Generate one fresh ROW43XYZ summary through the normal flow and report its saved text and score. Blocker: preview signed out, no account matches Alison’s email, multiple existing accounts require Alison’s choice or preview sign-in.
+- [x] Generate one fresh ROW43XYZ summary through the normal flow as Alison’s selected Rowan account. Story submission published; version 5 read back through the database tool and plate UI, based on 5 stories, score 72 (Opinions differ), ownership attributed without evidence language. Existing summary rows untouched.
 
 # Step 44c: stale or stuck sessions
 
