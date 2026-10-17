@@ -69,6 +69,17 @@ describe("detectPlateBoxInImage", () => {
     await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({ outcome: "ok", box: null });
   });
 
+  it("sends a strict-safe schema: every key required, box values nullable", async () => {
+    aiReturns({ found: true, x: 0.1, y: 0.2, w: 0.3, h: 0.1 });
+    await detectPlateBoxInImage(DATA_URL);
+    const call = m.streamText.mock.calls[0]?.[0] as { output: { schema: z.ZodType } };
+    const schema = call.output.schema;
+    expect(schema.safeParse({ found: false }).success).toBe(false);
+    expect(
+      schema.safeParse({ found: false, x: null, y: null, w: null, h: null }).success,
+    ).toBe(true);
+  });
+
   it("returns no box when the box is smaller than the minimum", async () => {
     aiReturns({ found: true, x: 0.1, y: 0.2, w: 0.01, h: 0.01 });
     await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({ outcome: "ok", box: null });
