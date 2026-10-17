@@ -140,7 +140,11 @@ it("signs out with ordered cache teardown and replacement navigation", async () 
 });
 it("exits the demo to public home and never starts a pending recheck", async () => {
   m.get.mockResolvedValue({ handle: "Traveler4821", isDemo: true, isAdmin: false });
-  render(<AccountProvider><Consumer /></AccountProvider>);
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
   await screen.findByText("Traveler4821");
   expect(m.setDemo).toHaveBeenCalledWith(true);
   expect(m.recheck).not.toHaveBeenCalled();

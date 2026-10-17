@@ -142,7 +142,9 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 it("reads the next account page after a full thousand-user page", async () => {
   const batch = [...users.values(), ...Array.from({ length: 997 }, (_, n) => ({ id: `old-${n}` }))];
-  m.users.mockResolvedValueOnce({ data: { users: batch }, error: null }).mockResolvedValueOnce({ data: { users: [] }, error: null });
+  m.users
+    .mockResolvedValueOnce({ data: { users: batch }, error: null })
+    .mockResolvedValueOnce({ data: { users: [] }, error: null });
   expect((await resetDemoSeed(client)).outcome).toBe("done");
   expect(m.users.mock.calls).toEqual([[{ page: 1, perPage: 1000 }], [{ page: 2, perPage: 1000 }]]);
   expect(m.removeUser).toHaveBeenCalledTimes(998);
@@ -159,7 +161,10 @@ it("accepts null admin rows and a null empty storage listing", async () => {
 
 it("refuses an unknown photo author before clearing storage", async () => {
   m.photos.mockReturnValue({ UNKNOWN: new Uint8Array([1]) });
-  expect(await resetDemoSeed(client)).toEqual({ outcome: "error", message: "Reset incomplete at seed accounts. Retry Reset seed data to finish." });
+  expect(await resetDemoSeed(client)).toEqual({
+    outcome: "error",
+    message: "Reset incomplete at seed accounts. Retry Reset seed data to finish.",
+  });
   expect(m.list).not.toHaveBeenCalled();
   expect(m.replace).not.toHaveBeenCalled();
 });

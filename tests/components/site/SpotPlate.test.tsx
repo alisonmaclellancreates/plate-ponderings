@@ -87,10 +87,15 @@ async function fillAndSpot(user: ReturnType<typeof userEvent.setup>) {
 
 describe("Spot a Plate live flow", () => {
   it("shows a server demo refusal and records only the refused action", async () => {
-    live.spot.mockResolvedValueOnce({ outcome: "demo", message: "Adding plates and stories is turned off in the demo." });
+    live.spot.mockResolvedValueOnce({
+      outcome: "demo",
+      message: "Adding plates and stories is turned off in the demo.",
+    });
     render(<SpotLivePage />);
     await fillAndSpot(userEvent.setup());
-    expect(await screen.findByText("Adding plates and stories is turned off in the demo.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Adding plates and stories is turned off in the demo."),
+    ).toBeInTheDocument();
     expect(track).toHaveBeenCalledWith("demo_write_refused", { action: "spot_plate" });
     expect(track).toHaveBeenLastCalledWith("subject_spotted", { outcome: "error" });
   });

@@ -56,10 +56,27 @@ it("rejects an unknown source label in the literal seed document", async () => {
 });
 
 it.each([
-  ["sample history", (text: string) => text.replace("**Pending story on RAINY7Q**", "**Removed pending history**"), "Seed sample history missing."],
-  ["notification story", (text: string) => text.replace("1. **Traveler4821** · My best guess", "1. **FogLightFan** · My best guess"), "Seed notification story missing."],
-  ["report story", (text: string) => text.replace("**ParkingLotOracle**", "**MileMarker88**"), "Seed report story missing."],
-  ["story count", (text: string) => text.replace(/1\. \*\*RoadTripRaven\*\*[^\n]+/, "Removed story"), "Approved seed content counts do not match."],
+  [
+    "sample history",
+    (text: string) => text.replace("**Pending story on RAINY7Q**", "**Removed pending history**"),
+    "Seed sample history missing.",
+  ],
+  [
+    "notification story",
+    (text: string) =>
+      text.replace("1. **Traveler4821** · My best guess", "1. **FogLightFan** · My best guess"),
+    "Seed notification story missing.",
+  ],
+  [
+    "report story",
+    (text: string) => text.replace("**ParkingLotOracle**", "**MileMarker88**"),
+    "Seed report story missing.",
+  ],
+  [
+    "story count",
+    (text: string) => text.replace(/1\. \*\*RoadTripRaven\*\*[^\n]+/, "Removed story"),
+    "Approved seed content counts do not match.",
+  ],
 ])("rejects malformed seed %s", async (_label, mutate, error) => {
   vi.resetModules();
   vi.doMock("../../docs/seed.md?raw", () => ({ default: mutate(seedText) }));
@@ -72,7 +89,9 @@ it("uses a null box when a photo's box mapping is absent", () => {
   delete SEED_PHOTO_BOXES["RAINY7Q"];
   try {
     const seed = buildSeed("2026-10-17", accounts, paths);
-    expect(seed.stories.find((story) => story.photo_path === paths["RAINY7Q"])?.photo_box).toBeNull();
+    expect(
+      seed.stories.find((story) => story.photo_path === paths["RAINY7Q"])?.photo_box,
+    ).toBeNull();
   } finally {
     if (box) SEED_PHOTO_BOXES["RAINY7Q"] = box;
   }

@@ -127,7 +127,10 @@ describe("AddStoryFlow", () => {
     render(<AddStoryFlow plateId="p1" />);
     await user.type(screen.getByLabelText(/What do you think it means/), "single.");
     await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.upload(screen.getByLabelText(/Choose a photo or drag and drop/), new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+    await user.upload(
+      screen.getByLabelText(/Choose a photo or drag and drop/),
+      new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
+    );
     await screen.findByRole("dialog");
     expect(screen.getByText(/We couldn't find the plate in this photo/)).toBeInTheDocument();
     expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "detect_photo" });
@@ -140,7 +143,10 @@ describe("AddStoryFlow", () => {
     render(<AddStoryFlow plateId="p1" />);
     await user.type(screen.getByLabelText(/What do you think it means/), "single.");
     await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.upload(screen.getByLabelText(/Choose a photo or drag and drop/), new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+    await user.upload(
+      screen.getByLabelText(/Choose a photo or drag and drop/),
+      new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
+    );
     await screen.findByRole("dialog");
     await user.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByRole("heading", { name: "Review your photo" });
