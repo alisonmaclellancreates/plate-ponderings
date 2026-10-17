@@ -286,15 +286,19 @@ const DIALOG_AXE_OPTS = {
   },
 } as const;
 
+async function checkDialog() {
+  expect(await axe(document.body, DIALOG_AXE_OPTS)).toHaveNoViolations();
+}
+
 describe("axe: dialogs (checked against document.body for the portal)", () => {
   it("report dialog", async () => {
     render(<ReportDialog open onOpenChange={() => {}} />);
-    expect(await axe(document.body, DIALOG_AXE_OPTS)).toHaveNoViolations();
+    await checkDialog();
   });
 
   it("delete story dialog", async () => {
     render(<DeleteStoryDialog open onOpenChange={() => {}} />);
-    expect(await axe(document.body, DIALOG_AXE_OPTS)).toHaveNoViolations();
+    await checkDialog();
   });
 
   it("photo zoom dialog", async () => {
@@ -306,7 +310,7 @@ describe("axe: dialogs (checked against document.body for the portal)", () => {
         box={{ x: 0.3, y: 0.4, w: 0.25, h: 0.12 }}
       />,
     );
-    expect(await axe(document.body, DIALOG_AXE_OPTS)).toHaveNoViolations();
+    await checkDialog();
   });
 });
 
