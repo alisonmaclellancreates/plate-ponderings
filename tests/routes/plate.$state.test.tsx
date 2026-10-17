@@ -35,37 +35,66 @@ describe("plate detail route", () => {
   it("loads a real plate by id and uses its data rather than a preview alias", async () => {
     const plate = { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" };
     vi.mocked(getPlate).mockResolvedValue({ plate });
-    expect(await R.loader({ params: { state: "real-plate" } })).toEqual({ state: "real-plate", plate });
+    expect(await R.loader({ params: { state: "real-plate" } })).toEqual({
+      state: "real-plate",
+      plate,
+    });
     expect(getPlate).toHaveBeenCalledWith({ data: { id: "real-plate" } });
   });
   it("builds a real plate's share metadata from the returned safe fields", () => {
-    const meta = R.head({ loaderData: { state: "real-plate", plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" } } }).meta;
+    const meta = R.head({
+      loaderData: {
+        state: "real-plate",
+        plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" },
+      },
+    }).meta;
     const title = "DRAGON (Utah) | What the Plate?";
     const description = "Stories about the Utah plate DRAGON, and what people think it means.";
     expect(meta).toEqual([
-      { title }, { name: "description", content: description },
-      { property: "og:title", content: title }, { property: "og:description", content: description },
-      { property: "og:type", content: "article" }, { name: "twitter:card", content: "summary" },
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary" },
     ]);
   });
   it.each([
-    [{ jurisdiction: "Utah", text: "DRAGON" }, { jurisdiction: "Utah", text: "DRAGON" }],
-    [{ jurisdiction: 42, text: null }, { jurisdiction: undefined, text: undefined }],
-    [{ jurisdiction: "a".repeat(65), text: "a".repeat(65) }, { jurisdiction: undefined, text: undefined }],
-    [{ jurisdiction: "a".repeat(64), text: "a".repeat(64) }, { jurisdiction: "a".repeat(64), text: "a".repeat(64) }],
+    [
+      { jurisdiction: "Utah", text: "DRAGON" },
+      { jurisdiction: "Utah", text: "DRAGON" },
+    ],
+    [
+      { jurisdiction: 42, text: null },
+      { jurisdiction: undefined, text: undefined },
+    ],
+    [
+      { jurisdiction: "a".repeat(65), text: "a".repeat(65) },
+      { jurisdiction: undefined, text: undefined },
+    ],
+    [
+      { jurisdiction: "a".repeat(64), text: "a".repeat(64) },
+      { jurisdiction: "a".repeat(64), text: "a".repeat(64) },
+    ],
   ])("validates search return values %j", (input, expected) => {
     expect(R.validateSearch(input)).toEqual(expected);
   });
-  it.each([{}, { jurisdiction: "Utah" }, { jurisdiction: "Utah", text: "DRAGON" }])("renders the real plate with return search %j", (values) => {
-    loaderData = { state: "real-plate", plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" } };
-    search = values;
-    const C = R.component;
-    render(<C />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Utah plate DRAGON");
-    const back = screen.queryByRole("link", { name: "Back to Search" });
-    if ("text" in values) expect(back).toBeInTheDocument();
-    else expect(back).not.toBeInTheDocument();
-  });
+  it.each([{}, { jurisdiction: "Utah" }, { jurisdiction: "Utah", text: "DRAGON" }])(
+    "renders the real plate with return search %j",
+    (values) => {
+      loaderData = {
+        state: "real-plate",
+        plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" },
+      };
+      search = values;
+      const C = R.component;
+      render(<C />);
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Utah plate DRAGON");
+      const back = screen.queryByRole("link", { name: "Back to Search" });
+      if ("text" in values) expect(back).toBeInTheDocument();
+      else expect(back).not.toBeInTheDocument();
+    },
+  );
   it("loads known states and rejects unknown ones", async () => {
     expect(await R.loader({ params: { state: "mystery" } })).toEqual({
       state: "mystery",

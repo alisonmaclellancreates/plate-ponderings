@@ -65,7 +65,12 @@ it("refuses preview form submissions without making authentication calls", async
   const route = router.routesById["/previews_/account"];
   const Page = route.options.component as ComponentType;
   render(<Page />);
-  for (const title of ["Sign in, wrong password", "Sign up, email already has an account", "Sign up, weak password", "Sign up, breached password"]) {
+  for (const title of [
+    "Sign in, wrong password",
+    "Sign up, email already has an account",
+    "Sign up, weak password",
+    "Sign up, breached password",
+  ]) {
     const section = screen.getByRole("region", { name: title });
     const button = within(section).getByRole("button", { name: /Sign In|Create an Account/ });
     const form = button.closest("form");

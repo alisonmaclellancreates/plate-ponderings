@@ -42,7 +42,9 @@ const buttons = () =>
 describe("Spot a Plate form", () => {
   it.each([{ busy: true }, { isDemo: true }])("refuses submitted forms when %j", (props) => {
     const onSpot = vi.fn();
-    render(<SpotForm {...props} values={{ jurisdiction: "Utah", text: "DRAGON" }} onSpot={onSpot} />);
+    render(
+      <SpotForm {...props} values={{ jurisdiction: "Utah", text: "DRAGON" }} onSpot={onSpot} />,
+    );
     fireEvent.submit(screen.getByRole("form", { name: "Tell us the plate" }));
     expect(onSpot).not.toHaveBeenCalled();
   });
@@ -226,21 +228,36 @@ async function fillAndSpot(user: ReturnType<typeof userEvent.setup>) {
 describe("Spot a Plate live flow", () => {
   it("announces checking until the request resolves", async () => {
     let finish: ((result: { outcome: "pending" }) => void) | undefined;
-    live.spot.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    live.spot.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
     render(<SpotLivePage values={{ jurisdiction: "Utah", text: "DRAGON" }} />);
     await userEvent.click(screen.getByRole("button", { name: "Check This Plate" }));
     expect(screen.getByRole("status")).toHaveTextContent("Just a moment while we look.");
     expect(screen.queryByRole("button", { name: "Check This Plate" })).not.toBeInTheDocument();
-    await act(async () => { finish?.({ outcome: "pending" }); });
+    await act(async () => {
+      finish?.({ outcome: "pending" });
+    });
     expect(screen.getByRole("link", { name: "Go to Your Submissions" })).toBeInTheDocument();
   });
   it("uses the returned real plate id for an existing plate", async () => {
-    live.spot.mockResolvedValueOnce({ outcome: "exists", plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" } });
+    live.spot.mockResolvedValueOnce({
+      outcome: "exists",
+      plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" },
+    });
     render(<SpotLivePage />);
     await fillAndSpot(userEvent.setup());
-    expect(screen.getByRole("link", { name: "View This Plate" })).toHaveAttribute("href", "/plate/real-plate");
+    expect(screen.getByRole("link", { name: "View This Plate" })).toHaveAttribute(
+      "href",
+      "/plate/real-plate",
+    );
     expect(screen.getByText("DRAGON")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Spot Another Plate" })).toHaveAttribute("href", "/spot");
+    expect(screen.getByRole("link", { name: "Spot Another Plate" })).toHaveAttribute(
+      "href",
+      "/spot",
+    );
   });
   it("turns a rate-limited response into a pause, not a failed check", async () => {
     live.spot.mockResolvedValue({
