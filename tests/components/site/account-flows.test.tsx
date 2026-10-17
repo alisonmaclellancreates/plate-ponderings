@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { AuthWeakPasswordError } from "@supabase/supabase-js";
 const m = vi.hoisted(() => ({
@@ -239,6 +239,47 @@ it("member menus show only authorized admin actions and handle signout errors", 
   render(<SiteHeader />);
   fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
   expect(screen.getByRole("link", { name: "Admin" })).toBeInTheDocument();
+});
+it.each(["Your Submissions", "Your Profile", "Admin"])(
+  "closes the profile immediately when %s is chosen, even on the current page",
+  (label) => {
+    m.account.isAdmin = true;
+    render(<MemberProfile showHandle />);
+    const toggle = screen.getByRole("button", { name: "Traveler1234 menu" });
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole("link", { name: label }));
+    expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+  },
+);
+it("closes the profile before signout finishes", async () => {
+  render(<MemberProfile showHandle={false} />);
+  fireEvent.click(screen.getByRole("button", { name: "Traveler1234 menu" }));
+  fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+  expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
+  await waitFor(() => expect(m.out).toHaveBeenCalledTimes(1));
+});
+it.each(["Explore", "Spot a Plate", "About", "Try the Demo"])(
+  "closes the mobile menu immediately when %s is chosen",
+  (label) => {
+    render(<SiteHeader mode="signed-out" />);
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Mobile" })).getByRole("link", { name: label }));
+    expect(screen.queryByRole("navigation", { name: "Mobile" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+  },
+);
+it("closes both profile instances and the mobile menu on location changes, including back/forward and search-only changes", () => {
+  const view = render(<SiteHeader />);
+  for (const href of ["/profile", "/", "/profile", "/profile?tab=1"]) {
+    for (const toggle of screen.getAllByRole("button", { name: "Traveler1234 menu" })) fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(screen.getAllByRole("list", { name: "Profile" })).toHaveLength(2);
+    m.location = { href, pathname: href.split("?")[0] ?? href };
+    view.rerender(<SiteHeader />);
+    expect(screen.queryAllByRole("list", { name: "Profile" })).toHaveLength(0);
+    expect(screen.queryByRole("navigation", { name: "Mobile" })).toBeNull();
+  }
 });
 it("admin sees the blocked design and success only after a confirmed resume", async () => {
   m.account.isAdmin = true;
