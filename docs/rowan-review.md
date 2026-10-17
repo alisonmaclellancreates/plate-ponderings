@@ -8,6 +8,7 @@
 - Traveler3374 has the admin role. A real authenticated profile-menu → Admin flow reads Handle check status as Ready.
 - Saving the existing Traveler3374 handle returned Changes saved. Reload read the same handle back. No deliberate change to Rowan's handle was made.
 - Full suite: 536 tests across 114 files pass. Maintained lint: zero errors and warnings; repository: zero errors, six existing UI warnings. Automatic build: OK. No browser page errors in successful verification scripts.
+- Rowan confirmed on 2026-10-17 that she reviewed the admin section on Traveler3374 after the admin grant.
 
 ## Reproduce live states
 
