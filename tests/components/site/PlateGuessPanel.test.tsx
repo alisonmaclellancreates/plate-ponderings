@@ -30,7 +30,7 @@ it("captures only when visible, once per plate, with no text properties", () => 
     <PlateGuessPanel plateId="one" meaning="secret" story="fiction" />,
   );
   expect(m.observe).toHaveBeenCalledTimes(1);
-  expect(m.observe.mock.calls[0][0]).toBeInstanceOf(HTMLElement);
+  expect(m.observe.mock.calls[0]?.[0]).toBeInstanceOf(HTMLElement);
   m.callback?.([{ isIntersecting: false }]);
   expect(m.track).not.toHaveBeenCalled();
   m.callback?.([{ isIntersecting: true }]);
