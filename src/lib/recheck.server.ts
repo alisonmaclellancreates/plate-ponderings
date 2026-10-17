@@ -43,7 +43,7 @@ export async function recheckSubject(
     .update(
       approved
         ? { status: "published", published_at: new Date().toISOString() }
-        : { status: "rejected", photo_path: null, photo_box: null },
+        : { status: "rejected" },
     )
     .eq("id", subject.id)
     .eq("status", "pending")
