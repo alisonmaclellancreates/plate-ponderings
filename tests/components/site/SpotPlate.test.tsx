@@ -99,7 +99,7 @@ describe("Spot outcome previews", () => {
     const strip = within(screen.getByRole("list", { name: "Plate status" }));
     expect(strip.getByText("5 stories")).toBeInTheDocument();
     expect(strip.getByText("Mixed views")).toBeInTheDocument();
-    expect(strip.getByText("No owner yet")).toBeInTheDocument();
+    expect(strip.getByText("No owner claim yet")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "View This Plate" })).toHaveClass("brand-btn-navy");
     expect(screen.getByRole("button", { name: "Add Your Story" })).toHaveClass("brand-btn-outline");
     expect(screen.getByRole("link", { name: "Back to Spot a Plate" })).toHaveAttribute(
@@ -123,7 +123,7 @@ describe("Spot outcome previews", () => {
       render(<SpotOutcomePage outcome="exists" />);
       expect(
         within(screen.getByRole("list", { name: "Plate status" })).getByText(
-          `Owner: ${story.handle}`,
+          `Says it's their plate: ${story.handle}`,
         ),
       ).toBeInTheDocument();
     } finally {
