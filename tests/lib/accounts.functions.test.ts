@@ -31,6 +31,7 @@ import {
 import {
   HANDLE_UNAVAILABLE,
   HANDLE_REJECTED,
+  HANDLE_TAKEN,
   RATE_LIMIT_MESSAGE,
   DEMO_MESSAGE,
 } from "@/lib/account-rules";
@@ -207,7 +208,7 @@ describe("handle saves", () => {
       "Use letters, numbers, and underscores only.",
     );
     taken.data = [{ id: "other" }];
-    expect((await call(saveHandle))["message"]).toBe(HANDLE_REJECTED);
+    expect((await call(saveHandle))["message"]).toBe(HANDLE_TAKEN);
     taken.error = {};
     expect((await call(saveHandle))["message"]).toBe(HANDLE_UNAVAILABLE);
     expect(mocks.moderate).not.toHaveBeenCalled();

@@ -15,6 +15,7 @@ export const RESERVED_HANDLES = [
 export const HANDLE_UNAVAILABLE =
   "We couldn't check that handle right now. Your current handle is unchanged. Try again soon.";
 export const HANDLE_REJECTED = "That handle couldn't be used. Your current handle is unchanged.";
+export const HANDLE_TAKEN = "That handle is taken. Choose another.";
 export const RATE_LIMIT_MESSAGE =
   "You've done that a lot in a short time. Please wait a while and try again.";
 export const DEMO_MESSAGE =

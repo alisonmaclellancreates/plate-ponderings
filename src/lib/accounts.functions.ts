@@ -4,6 +4,7 @@ import {
   handleFormatValid,
   handleValidationMessage,
   HANDLE_REJECTED,
+  HANDLE_TAKEN,
   HANDLE_UNAVAILABLE,
   RATE_LIMIT_MESSAGE,
   DEMO_MESSAGE,
@@ -81,7 +82,7 @@ export const saveHandle = createServerFn({ method: "POST" })
       .ilike("handle", data.handle.replace(/_/g, "\\_"))
       .neq("id", context.userId);
     if (taken.error) return { outcome: "unavailable" as const, message: HANDLE_UNAVAILABLE };
-    if (taken.data.length) return { outcome: "rejected" as const, message: HANDLE_REJECTED };
+    if (taken.data.length) return { outcome: "rejected" as const, message: HANDLE_TAKEN };
     const settings = await supabaseAdmin
       .from("app_settings")
       .select("handle_check_block_category")
