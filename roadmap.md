@@ -1,8 +1,8 @@
 # Step 44c: stale or stuck sessions
 
-- [ ] Implement shared bounded user check, late account recovery, rejected-session cleanup and bounded project-owned attachment. No database changes.
-- [ ] Add behavioral tests and run full coverage suite and `bun run lint`.
-- [ ] Repeat seven browser saved-state search scenarios, case by case.
+- [x] Implement shared bounded user check, late account recovery, rejected-session cleanup and bounded project-owned attachment. No database changes; generated attacher unchanged.
+- [x] Add behavioral tests and run full coverage suite: 825 tests across 129 files passed, session helpers and account provider at 100% locally. `bun run lint`: zero errors, six existing UI warnings; automatic build OK.
+- [x] Repeat seven browser saved-state search scenarios: every search reached no-match, including stalled renewal in 1.87s; rejected session cleared, timeout retained session, actual PostHog persistence corrupted without blocking search. Zero page errors; result screenshots inspected.
 - [ ] Confirm 100% PR Codecov patch coverage. Blocker: Alison opens the PR; local coverage is diagnostic only.
 
 # Step 44: real stories — add, check, show on plate page
