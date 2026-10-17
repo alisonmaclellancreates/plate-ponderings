@@ -6,13 +6,18 @@ import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
 import type { PlateRecord } from "@/lib/mock-data";
 import type { ReactNode } from "react";
 
+const searchMock = vi.hoisted(() => ({ fn: vi.fn(), navigate: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ params, children, ...props }: { params: { state: string }; children: ReactNode }) => (
     <a {...props} href={`/plate/${params.state}`}>
       {children}
     </a>
   ),
+  useNavigate: () => searchMock.navigate,
 }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: () => searchMock.fn }));
+vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn() }));
+vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 
 function media({ mobile = false, reduced = false }) {
   window.matchMedia = vi.fn((q: string) => ({
