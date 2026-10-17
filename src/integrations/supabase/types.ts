@@ -244,7 +244,7 @@ export type Database = {
           id: string
           note: string | null
           reason: string
-          reporter_id: string
+          reporter_id: string | null
           story_id: string
         }
         Insert: {
@@ -252,7 +252,7 @@ export type Database = {
           id?: string
           note?: string | null
           reason: string
-          reporter_id: string
+          reporter_id?: string | null
           story_id: string
         }
         Update: {
@@ -260,10 +260,17 @@ export type Database = {
           id?: string
           note?: string | null
           reason?: string
-          reporter_id?: string
+          reporter_id?: string | null
           story_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reports_story_id_fkey"
             columns: ["story_id"]
@@ -632,6 +639,21 @@ export type Database = {
           plate_text: string
           stories_at_pick: number
           story_count: number
+          subject_id: string
+        }[]
+      }
+      get_reported_stories: {
+        Args: never
+        Returns: {
+          handle: string
+          jurisdiction: string
+          last_reported_at: string
+          meaning: string
+          plate_text: string
+          reasons: string[]
+          report_count: number
+          status: string
+          story_id: string
           subject_id: string
         }[]
       }
