@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -72,4 +72,4 @@ describe("entry screens", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
     expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
   });
-
+});
