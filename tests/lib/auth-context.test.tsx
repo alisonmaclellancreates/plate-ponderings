@@ -138,6 +138,17 @@ it("signs out with ordered cache teardown and replacement navigation", async () 
   expect(m.clear.mock.invocationCallOrder[0]).toBeLessThan(m.out.mock.invocationCallOrder[0] ?? 0);
   expect(m.track).toHaveBeenCalledWith("signed_out", {});
 });
+it("exits the demo to public home and never starts a pending recheck", async () => {
+  m.get.mockResolvedValue({ handle: "Traveler4821", isDemo: true, isAdmin: false });
+  render(<AccountProvider><Consumer /></AccountProvider>);
+  await screen.findByText("Traveler4821");
+  expect(m.setDemo).toHaveBeenCalledWith(true);
+  expect(m.recheck).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByText("out"));
+  await waitFor(() => expect(m.navigate).toHaveBeenCalledWith({ to: "/", replace: true }));
+  expect(m.track).toHaveBeenCalledWith("demo_exited", {});
+  expect(m.reset).toHaveBeenCalledOnce();
+});
 it("does not navigate after a failed signout", async () => {
   m.out.mockResolvedValue({ error: new Error("failed") });
   render(

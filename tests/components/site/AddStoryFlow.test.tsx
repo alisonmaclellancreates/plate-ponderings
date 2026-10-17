@@ -121,6 +121,35 @@ async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("AddStoryFlow", () => {
+  it("records a refused photo detection and keeps manual adjustment available", async () => {
+    m.detect.mockResolvedValue({ outcome: "demo", message: "Demo photo detection refused" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.upload(screen.getByLabelText(/Choose a photo or drag and drop/), new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+    await screen.findByRole("dialog");
+    expect(screen.getByText(/We couldn't find the plate in this photo/)).toBeInTheDocument();
+    expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "detect_photo" });
+    expect(m.upload).not.toHaveBeenCalled();
+  });
+
+  it("records a refused photo upload and does not attach or submit it", async () => {
+    m.upload.mockResolvedValue({ outcome: "demo", message: "Demo photo upload refused" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.upload(screen.getByLabelText(/Choose a photo or drag and drop/), new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+    await screen.findByRole("dialog");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", { name: "Review your photo" });
+    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "upload_photo" });
+    expect(screen.queryByAltText("Your processed photo, blurred except the plate")).toBeNull();
+    expect(m.submit).not.toHaveBeenCalled();
+  });
   it("keeps the hidden picker keyboard reachable and rings only its focus-visible drop area", async () => {
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);

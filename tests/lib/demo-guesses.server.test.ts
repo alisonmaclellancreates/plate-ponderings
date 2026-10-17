@@ -63,3 +63,9 @@ it("contains query failures and leaves failed generations missing", async () => 
   m.guess.mockResolvedValue("failed");
   expect((await fillDemoGuesses(client)).message).toBe("1 plates still need a guess.");
 });
+it("treats a successful null subject read as no missing guesses", async () => {
+  db.queue("app_settings", { data: { demo_mode: true } });
+  db.queue("subjects", { data: null }, { data: null });
+  expect(await fillDemoGuesses(client)).toEqual({ outcome: "done", message: "0 plates still need a guess." });
+  expect(m.guess).not.toHaveBeenCalled();
+});
