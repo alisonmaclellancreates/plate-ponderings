@@ -52,7 +52,7 @@ beforeEach(() => {
   m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
   m.signIn.mockResolvedValue({ data: { session: {} }, error: null });
   m.signUp.mockResolvedValue({ data: { session: {} }, error: null });
-  m.check.mockResolvedValue({ available: true });
+  m.check.mockResolvedValue({ status: "available" });
   m.save.mockResolvedValue({ outcome: "changed", message: "Changes saved." });
   m.status.mockResolvedValue({
     allowed: true,
@@ -256,7 +256,7 @@ it("ignores duplicate profile saves while the first is pending", async () => {
   expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
 });
 it("ignores a stale availability response after the draft becomes invalid", async () => {
-  let resolve: ((value: { available: boolean }) => void) | undefined;
+  let resolve: ((value: { status: "available" | "taken" | "unknown" }) => void) | undefined;
   m.check.mockReturnValueOnce(
     new Promise((r) => {
       resolve = r;
@@ -266,7 +266,7 @@ it("ignores a stale availability response after the draft becomes invalid", asyn
   await waitFor(() => expect(m.check).toHaveBeenCalledTimes(1));
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "a-" } });
   await act(async () => {
-    resolve?.({ available: true });
+    resolve?.({ status: "available" });
   });
   expect(screen.queryByText("Available")).toBeNull();
   expect(m.check).toHaveBeenCalledTimes(1);

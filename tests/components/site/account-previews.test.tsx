@@ -37,9 +37,9 @@ import { Route as AccountPreviewsRoute } from "@/routes/previews_.account";
 beforeEach(() => vi.clearAllMocks());
 
 it("handle field previews show each rule-based message and the available badge", () => {
-  const v = render(<HandleField draft="Rowan_Design" available />);
+  const v = render(<HandleField draft="Rowan_Design" status="available" />);
   expect(screen.getByText("Available")).toBeInTheDocument();
-  v.rerender(<HandleField draft="Traveler3374" message={HANDLE_TAKEN} />);
+  v.rerender(<HandleField draft="Traveler7444" status="taken" />);
   expect(screen.getByText("That handle is taken. Choose another.")).toBeInTheDocument();
   v.rerender(<HandleField draft="admin" />);
   expect(screen.getByText("That handle is reserved. Choose another.")).toBeInTheDocument();

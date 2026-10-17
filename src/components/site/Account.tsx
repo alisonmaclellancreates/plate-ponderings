@@ -146,7 +146,8 @@ export function HandleField({
   const serverError = message && !success ? message : "";
   const validationError =
     !isDemo && !available && !handleFormatValid(draft) ? handleValidationMessage(draft) : "";
-  const error = serverError || validationError || (!isDemo && status === "taken" ? HANDLE_TAKEN : "");
+  const error =
+    serverError || validationError || (!isDemo && status === "taken" ? HANDLE_TAKEN : "");
   const describedBy = [available || isDemo ? statusId : "", error ? messageId : "", helpId]
     .filter(Boolean)
     .join(" ");
@@ -226,7 +227,10 @@ export function ProfilePage() {
           if (active)
             setAvailability({
               draft,
-              status: r.status === "taken" && draft.toLowerCase() === handle.toLowerCase() ? "available" : r.status,
+              status:
+                r.status === "taken" && draft.toLowerCase() === handle.toLowerCase()
+                  ? "available"
+                  : r.status,
             });
         })
         .catch(() => {});
