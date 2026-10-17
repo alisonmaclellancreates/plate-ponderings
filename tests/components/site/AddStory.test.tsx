@@ -26,6 +26,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 import { StoryStepPage } from "@/components/site/AddStory";
 import { STORY_STEPS, type StoryStep } from "@/lib/story-form";
+import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 
 describe("Add a story previews", () => {
   it("every step has exactly one h1", () => {
@@ -59,6 +60,28 @@ describe("Add a story previews", () => {
   it("rejected keeps the words and explains", () => {
     render(<StoryStepPage step="rejected" />);
     expect(screen.getByRole("status")).toHaveTextContent("We couldn't add this story.");
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+      "Pacific Northwest love.",
+    );
+  });
+
+  it("error keeps the words and asks to try again", () => {
+    render(<StoryStepPage step="error" />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Hmm... something went wrong.");
+    expect(status).toHaveTextContent(
+      "We couldn't submit your story right now. Your words are still here. Please try again.",
+    );
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+      "Pacific Northwest love.",
+    );
+  });
+
+  it("rate-limited pauses with the wait message and keeps the words", () => {
+    render(<StoryStepPage step="rate-limited" />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Let's pause a moment.");
+    expect(status).toHaveTextContent(RATE_LIMIT_MESSAGE);
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
       "Pacific Northwest love.",
     );

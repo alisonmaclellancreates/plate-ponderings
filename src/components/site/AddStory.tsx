@@ -6,6 +6,7 @@ import { Outcome } from "@/components/site/SpotPlate";
 import { DemoBanner } from "@/components/site/DemoBanner";
 import { PLATES, STORY_PHOTO_PLACEHOLDER, type HowIKnow } from "@/lib/mock-data";
 import { HOW_OPTIONS, MEANING_MAX, MORE_MAX, SAMPLE_STORY, type StoryStep } from "@/lib/story-form";
+import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 
 const outline = "brand-btn brand-btn-outline";
 const coral = "brand-btn brand-btn-coral";
@@ -96,11 +97,13 @@ export function StoryStepOne({
   ownerExists = false,
   rejected = false,
   demo = false,
+  pause,
 }: {
   initial?: { how: HowIKnow; meaning: string; more: string };
   ownerExists?: boolean;
   rejected?: boolean;
   demo?: boolean;
+  pause?: { heading: string | null; message: string };
 }) {
   const [how, setHow] = useState<HowIKnow>(initial.how);
   const [meaning, setMeaning] = useState(initial.meaning);
@@ -133,6 +136,12 @@ export function StoryStepOne({
             Our automated check couldn't approve it. Sometimes these checks get things wrong. Your
             words are still here if you'd like to edit and try again.
           </p>
+        </div>
+      )}
+      {pause && (
+        <div role="status" className="brand-card bg-cream-warm p-4">
+          {pause.heading && <p className="font-semibold">{pause.heading}</p>}
+          <p className={pause.heading ? "mt-1" : "font-semibold"}>{pause.message}</p>
         </div>
       )}
       <fieldset disabled={demo} className={demo ? "opacity-60" : undefined}>
@@ -389,6 +398,24 @@ export function StoryStepPage({ step }: { step: StoryStep }) {
       return <StoryStepOne ownerExists />;
     case "rejected":
       return <StoryStepOne initial={SAMPLE_STORY} rejected />;
+    case "error":
+      return (
+        <StoryStepOne
+          initial={SAMPLE_STORY}
+          pause={{
+            heading: "Hmm... something went wrong.",
+            message:
+              "We couldn't submit your story right now. Your words are still here. Please try again.",
+          }}
+        />
+      );
+    case "rate-limited":
+      return (
+        <StoryStepOne
+          initial={SAMPLE_STORY}
+          pause={{ heading: "Let's pause a moment.", message: RATE_LIMIT_MESSAGE }}
+        />
+      );
     case "2":
       return <PhotoStep />;
     case "2-adjust":
