@@ -6,6 +6,13 @@ import { ScenicHeader } from "@/components/site/SpotPlate";
 import { StoryCard } from "@/components/site/PlateDetail";
 import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
 import { formatDay } from "@/lib/format-day";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useAccountAuth } from "@/lib/auth-context";
+import { checkHandle, saveHandle } from "@/lib/accounts.functions";
+import { handleFormatValid, HANDLE_UNAVAILABLE, DEMO_MESSAGE } from "@/lib/account-rules";
+import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 function RowAction({ row }: { row: Submission }) {
   if (row.action === "dismiss")
@@ -106,7 +113,51 @@ export const HANDLE_HELP =
   "3-20 characters: letters, numbers, and underscores. Handles are unique (not case sensitive). Some names are reserved. We'll run a quick safety check when you save.";
 
 export function ProfilePage() {
-  const handle = CURRENT_USER.handle;
+  const auth = useAccountAuth();
+  const handle = auth?.account?.handle ?? CURRENT_USER.handle;
+  const [draft, setDraft] = useState(handle);
+  const [available, setAvailable] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const check = useServerFn(checkHandle);
+  const save = useServerFn(saveHandle);
+  useEffect(() => {
+    setDraft(handle);
+  }, [handle]);
+  useEffect(() => {
+    setAvailable(false);
+    if (!auth?.account || auth.account.isDemo || !handleFormatValid(draft)) return;
+    let active = true;
+    const timer = setTimeout(() => {
+      void check({ data: { handle: draft } })
+        .then((r) => {
+          if (active) setAvailable(r.available);
+        })
+        .catch(() => {});
+    }, 250);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [draft, auth?.account, check]);
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy || !auth?.account) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const result = await save({ data: { handle: draft } });
+      setMessage(result.message);
+      if (result.outcome === "changed") {
+        await auth.refresh();
+        await track("handle_changed", {});
+      } else if (result.outcome === "rejected") await track("handle_rejected", {});
+    } catch {
+      setMessage(HANDLE_UNAVAILABLE);
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <main>
       <ScenicHeader
@@ -126,7 +177,7 @@ export function ProfilePage() {
                 data-testid="profile-icon"
                 className="size-24 shrink-0 text-muted-foreground"
               />
-              <form className="min-w-0 flex-1 space-y-2" onSubmit={(e) => e.preventDefault()}>
+              <form className="min-w-0 flex-1 space-y-2" onSubmit={submit}>
                 <label htmlFor="handle" className="block font-semibold text-navy">
                   Handle
                 </label>
@@ -134,23 +185,47 @@ export function ProfilePage() {
                   <input
                     id="handle"
                     name="handle"
-                    defaultValue={handle}
-                    aria-describedby="handle-status handle-help"
+                    value={draft}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      setMessage("");
+                    }}
+                    disabled={busy || auth?.account?.isDemo}
+                    aria-describedby={
+                      available || auth?.account?.isDemo || !handleFormatValid(draft)
+                        ? "handle-status handle-help"
+                        : "handle-help"
+                    }
                     className="min-w-0 flex-1 rounded-md border border-border bg-card px-3 py-2"
                   />
-                  <span id="handle-status" className="brand-badge" data-tone="green">
-                    <CheckCircle2 aria-hidden className="size-4 shrink-0" />
-                    Available
-                  </span>
+                  {available ? (
+                    <span id="handle-status" className="brand-badge" data-tone="green">
+                      <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+                      Available
+                    </span>
+                  ) : (
+                    <span id="handle-status" className="text-sm text-muted-foreground">
+                      {auth?.account?.isDemo
+                        ? DEMO_MESSAGE
+                        : handleFormatValid(draft)
+                          ? ""
+                          : "That handle couldn't be used."}
+                    </span>
+                  )}
                 </div>
                 <p id="handle-help" className="text-sm text-muted-foreground">
                   {HANDLE_HELP}
                 </p>
                 <div className="pt-2">
-                  <button type="submit" className="brand-btn brand-btn-navy">
+                  <Button
+                    type="submit"
+                    disabled={busy || auth?.account?.isDemo}
+                    className="brand-btn brand-btn-navy"
+                  >
                     Save Changes
-                  </button>
+                  </Button>
                 </div>
+                {message && <p role="status">{message}</p>}
               </form>
             </div>
           </section>

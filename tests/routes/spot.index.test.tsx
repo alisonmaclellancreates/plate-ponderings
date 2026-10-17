@@ -7,7 +7,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("@/components/site/SpotPlate", () => ({ SpotPage: () => <p>spot form</p> }));
 
-import { Route } from "@/routes/spot.index";
+import { Route } from "@/routes/_authenticated/spot.index";
 
 const R = Route as unknown as {
   head: () => { meta: Record<string, string>[] };

@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProfilePage } from "@/components/site/Account";
+import { DeleteConfirmPage } from "@/components/site/Settings";
 
-const TITLE = "Your Profile | What the Plate?";
-const DESCRIPTION = "Tell us how you'd like to appear in the community.";
+const TITLE = "Delete your account? | What the Plate?";
+const DESCRIPTION = "Confirm deleting your account.";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/_authenticated/settings_/delete-confirm")({
   head: () => ({
     meta: [
       { title: TITLE },
@@ -15,5 +15,5 @@ export const Route = createFileRoute("/profile")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <ProfilePage />,
+  component: () => <DeleteConfirmPage />,
 });

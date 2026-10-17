@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => vi.fn(),
   Link: ({
     to,
     params,
@@ -24,6 +25,15 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
+vi.mock("@tanstack/react-start", () => ({
+  useServerFn: (fn: unknown) => fn,
+  createServerFn: () => {
+    const b = { middleware: () => b, inputValidator: () => b, handler: (fn: unknown) => fn };
+    return b;
+  },
+  createMiddleware: () => ({ server: () => ({}) }),
+}));
+vi.mock("@/lib/auth-context", () => ({ useAccountAuth: () => null }));
 
 import { DemoPage, SignInPage, SignInPromptPage, SignUpPage } from "@/components/site/Entry";
 import { StoryStepOne } from "@/components/site/AddStory";

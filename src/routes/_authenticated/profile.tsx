@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminPage } from "@/components/site/Admin";
+import { ProfilePage } from "@/components/site/Account";
 
-const TITLE = "Admin | What the Plate?";
-const DESCRIPTION = "Reported stories awaiting review.";
+const TITLE = "Your Profile | What the Plate?";
+const DESCRIPTION = "Tell us how you'd like to appear in the community.";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
       { title: TITLE },
@@ -15,5 +15,5 @@ export const Route = createFileRoute("/admin")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <AdminPage />,
+  component: () => <ProfilePage />,
 });

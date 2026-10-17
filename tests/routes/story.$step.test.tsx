@@ -14,7 +14,7 @@ vi.mock("@/components/site/AddStory", async (orig) => ({
   StoryStepPage: ({ step }: { step: string }) => <p>{step}</p>,
 }));
 
-import { Route } from "@/routes/story.$step";
+import { Route } from "@/routes/_authenticated/story.$step";
 
 const R = Route as unknown as {
   loader: (a: { params: { step: string } }) => { step: string };

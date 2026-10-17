@@ -2,7 +2,14 @@
 // subject text, photo data, or AI output. Properties are only planned keys, ids,
 // booleans, counts, outcome names, and query-free page paths.
 
-export const EVENTS = { $pageview: ["path"] } as const;
+export const EVENTS = {
+  $pageview: ["path"],
+  signed_up: [],
+  signed_in: [],
+  signed_out: [],
+  handle_changed: [],
+  handle_rejected: [],
+} as const;
 
 type EventRegistry = Readonly<Record<string, readonly string[]>>;
 type EventProperties<R extends EventRegistry> = {
