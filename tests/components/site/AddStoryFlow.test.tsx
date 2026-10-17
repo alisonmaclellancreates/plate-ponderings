@@ -121,6 +121,27 @@ async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("AddStoryFlow", () => {
+  it("keeps the hidden picker keyboard reachable and rings only its focus-visible drop area", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const input = screen.getByLabelText(/Choose a photo or drag and drop/);
+    const label = input.closest("label");
+    expect(input).toHaveClass("sr-only");
+    expect(label).toHaveClass(
+      "has-[:focus-visible]:ring-2",
+      "has-[:focus-visible]:ring-navy",
+      "has-[:focus-visible]:ring-offset-2",
+    );
+    expect(label).not.toHaveClass("focus-within:ring-2", "ring-2");
+    input.focus();
+    await user.tab({ shift: true });
+    await user.tab();
+    expect(input).toHaveFocus();
+    expect(m.decode).not.toHaveBeenCalled();
+  });
+
   it("cancelled file selection does nothing", async () => {
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);

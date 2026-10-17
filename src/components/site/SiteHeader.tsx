@@ -18,6 +18,8 @@ const NAV = [
   { href: "/about", label: "About" },
 ];
 
+const headerFocus = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream";
+
 function Avatar({
   showHandle,
   handle = CURRENT_USER.handle,
@@ -63,7 +65,7 @@ function DemoProfile({ showHandle }: { showHandle: boolean }) {
         aria-controls={showHandle ? "profile-menu" : "profile-menu-mobile"}
         aria-label={showHandle ? undefined : `${CURRENT_USER.handle} menu`}
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full"
+        className={`rounded-full ${headerFocus}`}
       >
         <Avatar showHandle={showHandle} />
       </button>
@@ -94,8 +96,8 @@ function DemoProfile({ showHandle }: { showHandle: boolean }) {
   );
 }
 
-const signIn = "site-nav-link rounded-md px-2 py-1";
-const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream";
+const signIn = `site-nav-link rounded-md px-2 py-1 ${headerFocus}`;
+const tryDemo = `rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream ${headerFocus}`;
 
 export function MemberProfile({ showHandle }: { showHandle: boolean }) {
   const auth = useAccountAuth();
@@ -119,7 +121,7 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
     <div className="relative" ref={containerRef}>
       <Button
         variant="ghost"
-        className="h-auto rounded-full p-0 text-cream"
+        className={`h-auto rounded-full p-0 text-cream ${headerFocus}`}
         aria-label={`${auth.account.handle} menu`}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -206,7 +208,11 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
   return (
     <header ref={containerRef} className="bg-navy text-cream" data-mode={mode}>
       <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 md:flex md:gap-6">
-        <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
+        <Link
+          to="/"
+          aria-label="What the Plate? home"
+          className={`shrink-0 rounded-md ${headerFocus}`}
+        >
           <img
             src="/brand/what-the-plate-logo-v1.webp"
             alt=""
@@ -217,7 +223,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
         </Link>
         <nav aria-label="Main" className="hidden flex-1 items-center gap-6 md:flex">
           {NAV.map((item) => (
-            <a key={item.href} href={item.href} className="site-nav-link">
+            <a key={item.href} href={item.href} className={`site-nav-link ${headerFocus}`}>
               {item.label}
             </a>
           ))}
@@ -261,7 +267,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg p-0 text-cream"
+            className={`inline-flex size-10 shrink-0 items-center justify-center rounded-lg p-0 text-cream ${headerFocus}`}
           >
             {open ? <X aria-hidden /> : <Menu aria-hidden />}
           </Button>
@@ -278,7 +284,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
               key={item.href}
               to={item.href}
               onClick={() => setOpen(false)}
-              className="site-nav-link block py-3"
+              className={`site-nav-link block py-3 ${headerFocus}`}
             >
               {item.label}
             </Link>
