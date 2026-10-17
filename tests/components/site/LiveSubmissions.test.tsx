@@ -8,9 +8,14 @@ const m = vi.hoisted(() => ({
   dismiss: vi.fn(),
   invalidate: vi.fn(),
   track: vi.fn(),
+  fetched: vi.fn(),
+  getRows: vi.fn(),
 }));
 vi.mock("@tanstack/react-query", () => ({
-  useSuspenseQuery: () => ({ data: m.data }),
+  useSuspenseQuery: (o: { queryKey: unknown; queryFn: () => unknown }) => {
+    m.fetched(o.queryKey, o.queryFn());
+    return { data: m.data };
+  },
   useQueryClient: () => ({ invalidateQueries: m.invalidate }),
 }));
 vi.mock("@tanstack/react-start", () => ({
@@ -25,7 +30,7 @@ vi.mock("@tanstack/react-start", () => ({
   },
 }));
 vi.mock("@/lib/submissions.functions", () => ({
-  getSubmissions: vi.fn(),
+  getSubmissions: m.getRows,
   markSubmissionsRead: m.markRead,
   dismissSubmission: m.dismiss,
 }));
@@ -76,6 +81,8 @@ it("fires submissions_viewed with the unread count, marks read, refreshes the do
   expect(screen.getByText("Updated")).toBeInTheDocument();
   expect(screen.getAllByTestId("submission")).toHaveLength(2);
   expect(screen.queryAllByTestId("chevron")).toHaveLength(0);
+  expect(m.fetched).toHaveBeenCalledWith(["submissions"], undefined);
+  expect(m.getRows).toHaveBeenCalled();
 });
 
 it("still fires the event when marking read fails", async () => {
