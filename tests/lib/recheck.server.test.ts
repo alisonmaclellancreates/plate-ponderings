@@ -105,10 +105,10 @@ describe("recheckStory", () => {
   it("does nothing more when the row already changed", async () => {
     f.checkStory.mockResolvedValue({ outcome: "approved" });
     f.db.queue("stories", { data: [], error: null });
-    expect(await recheckStory(admin, story, "author")).toBe("published");
+    expect(await recheckStory(admin, story, "author")).toBe("unchanged");
     expect(f.after).not.toHaveBeenCalled();
   });
-  it("persists a block and stops on unavailable", async () => {
+  it("persists a block and stops", async () => {
     f.checkStory.mockResolvedValue({ outcome: "unavailable", block: "denied", runId: "r" });
     expect(await recheckStory(admin, story, "author")).toBe("blocked");
     expect(f.persist).toHaveBeenCalledWith(admin, "denied", "r");

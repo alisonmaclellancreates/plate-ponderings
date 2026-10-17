@@ -93,9 +93,9 @@ describe("deleteAccountData", () => {
     expect(f.db.storage.remove.mock.calls[1]?.[0]).toEqual(["me/p1000.jpg", "me/p1001.jpg"]);
   });
   it("skips photo removal when the folder is empty or unreadable as empty", async () => {
-    f.db.storage.list.mockResolvedValue({ data: [], error: null });
+    f.db.storage.list.mockReset().mockResolvedValue({ data: [], error: null });
     await deleteAccountData(admin, "me");
-    f.db.storage.list.mockResolvedValue({ data: null, error: null });
+    f.db.storage.list.mockReset().mockResolvedValue({ data: null, error: null });
     await deleteAccountData(admin, "me");
     expect(f.db.storage.remove).not.toHaveBeenCalled();
   });
