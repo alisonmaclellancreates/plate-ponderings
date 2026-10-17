@@ -43,9 +43,7 @@ describe("story step route", () => {
     const title = meta.find((m) => "title" in m)?.["title"];
     expect(title).toContain("Review and submit");
     const desc = meta.find((m) => m["name"] === "description")?.["content"];
-    expect(desc).toBe(
-      "Add your story to a plate. Step: review and submit.",
-    );
+    expect(desc).toBe("Add your story to a plate. Step: review and submit.");
     expect(desc).not.toContain("Oregon");
     expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
     expect(R.head({}).meta.find((m) => m["name"] === "robots")?.["content"]).toBe("noindex");
