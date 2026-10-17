@@ -7,7 +7,13 @@ import { MEANING_MAX, MORE_MAX } from "./story-form";
 export const HOW_KEYS = ["owner", "knows_owner", "secondhand", "guess"] as const;
 export type HowKey = (typeof HOW_KEYS)[number];
 
-type StoryInput = { plateId: string; meaning: string; source: string; more: string; photoPath: string };
+type StoryInput = {
+  plateId: string;
+  meaning: string;
+  source: string;
+  more: string;
+  photoPath: string;
+};
 
 const storyInput = (data: StoryInput): StoryInput => ({
   plateId: typeof data.plateId === "string" ? data.plateId : "",
@@ -276,7 +282,9 @@ export const getPlateStories = createServerFn({ method: "POST" })
 
     // Photos are private: published photos reach the page only through
     // short-lived signed links made here, never through a public URL.
-    const photoPaths = [...new Set(published.map((r) => r.photo_path).filter((p): p is string => Boolean(p)))];
+    const photoPaths = [
+      ...new Set(published.map((r) => r.photo_path).filter((p): p is string => Boolean(p))),
+    ];
     const photos = new Map<string, string>();
     if (photoPaths.length > 0) {
       const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");

@@ -232,7 +232,9 @@ export function PhotoEditor({
                   </div>
                 )}
               </div>
-              <p className="mt-3">{showNoBoxMessage && !initialBox ? NO_BOX_MESSAGE : ADJUST_NOTE}</p>
+              <p className="mt-3">
+                {showNoBoxMessage && !initialBox ? NO_BOX_MESSAGE : ADJUST_NOTE}
+              </p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <button
                   type="button"

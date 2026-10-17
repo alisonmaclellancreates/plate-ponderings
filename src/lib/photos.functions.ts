@@ -91,8 +91,7 @@ export const uploadStoryPhoto = createServerFn({ method: "POST" })
     if (parsed.bytes.length > PHOTO_MAX_BYTES) return { outcome: "invalid" };
     if (!isJpeg(parsed.bytes)) return { outcome: "invalid" };
     const dims = jpegDimensions(parsed.bytes);
-    if (!dims || Math.max(dims.width, dims.height) > EXPORT_MAX_SIDE)
-      return { outcome: "invalid" };
+    if (!dims || Math.max(dims.width, dims.height) > EXPORT_MAX_SIDE) return { outcome: "invalid" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const path = `${context.userId}/${crypto.randomUUID()}.jpg`;
     const uploaded = await supabaseAdmin.storage

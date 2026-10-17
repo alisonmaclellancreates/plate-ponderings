@@ -113,7 +113,9 @@ async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
   );
   await user.click(screen.getByRole("button", { name: "Use This Photo" }));
   await waitFor(() =>
-    expect(screen.getByAltText("Your processed photo, blurred except the plate")).toBeInTheDocument(),
+    expect(
+      screen.getByAltText("Your processed photo, blurred except the plate"),
+    ).toBeInTheDocument(),
   );
 }
 

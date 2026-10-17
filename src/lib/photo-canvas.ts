@@ -4,13 +4,7 @@
  * from that single decoded image. Only the blurred, re-encoded JPEG leaves
  * the browser for storage.
  */
-import {
-  boxToPixels,
-  DETECT_MAX_SIDE,
-  EXPORT_MAX_SIDE,
-  fitWithin,
-  type Box,
-} from "./photo-blur";
+import { boxToPixels, DETECT_MAX_SIDE, EXPORT_MAX_SIDE, fitWithin, type Box } from "./photo-blur";
 
 /** Decode a photo with EXIF rotation applied. Rejects unreadable files. */
 export async function decodePhoto(file: Blob): Promise<ImageBitmap> {
