@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/story/$step")({
     }
     const label = STORY_STEPS[loaderData.step];
     const title = `Add Your Story · ${label} | What the Plate?`;
-    const description = `Add your story to a plate on What the Plate?: ${label.toLowerCase()}.`;
+    const description = `Add your story to a plate. Step: ${label.toLowerCase()}.`;
     return {
       meta: [
         { title },
