@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 
 const m = vi.hoisted(() => ({ dot: vi.fn() }));
@@ -21,6 +21,8 @@ vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/lib/submissions.functions", () => ({ getUnreadDot: m.dot }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 import { MemberProfile } from "@/components/site/SiteHeader";
+
+beforeEach(() => m.dot.mockReset());
 
 function renderSignedIn() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
