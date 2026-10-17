@@ -41,7 +41,7 @@ vi.mock("@/lib/ai-block.server", () => ({
 vi.mock("@/lib/photo-detect.server", () => ({ detectPlateBoxInImage: mocks.detect }));
 
 import { detectPlateBox, uploadStoryPhoto } from "@/lib/photos.functions";
-import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
+import { DEMO_MESSAGE, RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 
 const context = { userId: "caller-uuid", supabase: { rpc: mocks.userRpc } };
 
@@ -160,6 +160,7 @@ describe("detectPlateBox", () => {
     mocks.userRpc.mockResolvedValue({ data: true, error: null });
     await expect(call(detectPlateBox, { image: jpegDataUrl() })).resolves.toEqual({
       outcome: "demo",
+      message: DEMO_MESSAGE,
     });
     mocks.userRpc.mockResolvedValue({ data: false, error: null });
     await expect(call(detectPlateBox, { image: "not a data url" })).resolves.toEqual({
@@ -221,6 +222,7 @@ describe("uploadStoryPhoto", () => {
     mocks.userRpc.mockResolvedValue({ data: true, error: null });
     await expect(call(uploadStoryPhoto, { jpeg: jpegDataUrl() })).resolves.toEqual({
       outcome: "demo",
+      message: DEMO_MESSAGE,
     });
     mocks.userRpc.mockResolvedValue({ data: false, error: null });
     mocks.upload.mockResolvedValue({ error: new Error("denied") });
