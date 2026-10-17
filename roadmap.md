@@ -1,6 +1,6 @@
 # Step 48: public facts and report labels
 
-- [ ] Keep public plate facts independent of blocking, share report labels, add regressions, run related tests and lint.
+- [x] Public facts and invitation use all published stories; visible list alone is filtered. Admin shares all report labels. Related tests: 240 passed across 26 files. Repository lint: 0 errors, 6 existing warnings. No database changes.
 
 # Step 46: real daily pick, featured shelf and archive
 
