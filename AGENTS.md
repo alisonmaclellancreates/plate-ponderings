@@ -12,12 +12,12 @@
 <!-- LOVABLE:END -->
 
 - Home: `src/routes/index.tsx`; styles: `src/styles.css`. Sample galleries use loader-free `previews_.*` routes, isolating live reads.
-- Shared handle validation classifies deterministic input failures for both profile feedback and server refusals; AI rejection remains separate so visitors receive actionable input guidance without moderation reasons.
-- Handle availability returns a three-state status (null for demo); live fields and inert previews share status rendering, and debounced results are tied to their draft so stale answers cannot leak into new input.
+- Shared handle validation classifies deterministic failures for profile feedback and server refusals; separate AI rejection keeps input guidance actionable without exposing moderation reasons.
+- Handle availability is three-state (null for demo); live/preview fields share rendering and bind debounced results to their draft to prevent stale feedback.
 - Cloud generated clients own data/auth; schema changes use additive migrations with RLS and GRANTs on all public tables.
 - CI checks and coverage run independently with frozen Bun installs; replay only `supabase/migrations/` when present, because Drizzle records are not replayable Cloud migrations.
 - Exclude generated routing and Cloud files from lint/formatting because Lovable rewrites them; retain existing rules for all non-generated source and tests.
-- Static previews read only `src/lib/mock-data.ts` and reuse site components, keeping layouts independent of live data.
+- Static previews reuse site components and read only `src/lib/mock-data.ts`, isolating live data.
 - Report labels share a browser-safe module to prevent moderation drift.
 - Compose state-specific preview stories without mutating shared plate records, so catching-up examples cannot change other previews.
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
