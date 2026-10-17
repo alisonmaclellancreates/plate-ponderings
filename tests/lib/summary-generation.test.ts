@@ -158,6 +158,44 @@ describe("generateSummary", () => {
     expect(result.outcome === "failed" && result.runId).toBe("run-9");
   });
 
+  it("reads the block type from error.type, error.code, or an unreadable body", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    for (const body of [
+      JSON.stringify({ error: { type: "payment_required" } }),
+      JSON.stringify({ error: { code: "payment_required" } }),
+      "not json",
+    ]) {
+      vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status: 403 })));
+      m.streamText.mockReset();
+      m.streamText.mockImplementation(() => ({
+        output: (async () => {
+          await m.providerOptions?.fetch("https://ai.gateway.lovable.dev/v1/responses", {});
+          throw new Error("403");
+        })(),
+      }));
+      const result = await generateSummary(STORIES);
+      expect(result.outcome).toBe("failed");
+      expect(result.outcome === "failed" && result.block).toBeTruthy();
+      expect(m.streamText).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it("passes other responses through without a block", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
+    m.streamText.mockImplementation(() => ({
+      output: (async () => {
+        await m.providerOptions?.fetch("https://ai.gateway.lovable.dev/v1/responses", {});
+        throw new Error("500");
+      })(),
+    }));
+    expect(await generateSummary(STORIES)).toEqual({
+      outcome: "failed",
+      block: null,
+      runId: undefined,
+    });
+    expect(m.streamText).toHaveBeenCalledTimes(2);
+  });
+
   it("fails without calling the AI when no key is configured", async () => {
     vi.stubEnv("LOVABLE_API_KEY", "");
     expect(await generateSummary(STORIES)).toEqual({ outcome: "failed", block: null });

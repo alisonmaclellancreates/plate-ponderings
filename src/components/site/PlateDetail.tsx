@@ -136,7 +136,6 @@ function SummaryPanel({
   historyOpen: boolean;
   catchingUp: boolean;
 }) {
-  if (!current && !catchingUp) return null;
   return (
     <section aria-labelledby="story-so-far" className="brand-card p-6">
       <div className="flex flex-wrap items-center gap-3">
