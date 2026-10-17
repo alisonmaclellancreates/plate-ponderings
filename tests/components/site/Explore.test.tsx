@@ -19,7 +19,7 @@ it("shows 12 newest plates with CANYONS today, then loads the remaining two", as
   expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("The Roadside Archive");
   expect(
     screen.getByText(
-      "Every day, a new mystery takes the spotlight. Here's where you can revisit the plates we've featured along the way.",
+      "Every day, a plate takes the spotlight. Here's where you can revisit the plates we've featured along the way.",
     ),
   ).toBeTruthy();
   const grid = screen.getByRole("region", { name: "Featured plates" });
