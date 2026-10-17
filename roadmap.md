@@ -2,6 +2,7 @@
 
 - [x] Implement shared bounded user check, late account recovery, rejected-session cleanup and bounded project-owned attachment. No database changes; generated attacher unchanged.
 - [x] Add behavioral tests and run full coverage suite: 825 tests across 129 files passed, session helpers and account provider at 100% locally. `bun run lint`: zero errors, six existing UI warnings; automatic build OK.
+- [x] 44c review fix: route guard waits up to 8 seconds (GUARD_TIMEOUT_MS) before treating a visitor as signed out; attacher and account context keep the 1-second limit. New test: a check resolving after 2 seconds lets the visitor through. 826 tests across 129 files passed; typecheck clean; lint zero errors, six existing UI warnings; build OK.
 - [x] Repeat seven browser saved-state search scenarios: every search reached no-match, including stalled renewal in 1.87s; rejected session cleared, timeout retained session, actual PostHog persistence corrupted without blocking search. Zero page errors; result screenshots inspected.
 - [ ] Confirm 100% PR Codecov patch coverage. Blocker: Alison opens the PR; local coverage is diagnostic only.
 

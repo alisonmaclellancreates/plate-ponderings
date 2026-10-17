@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { checkSignedIn } from "@/lib/session-check";
+import { checkSignedIn, GUARD_TIMEOUT_MS } from "@/lib/session-check";
 import { safeReturnPath } from "@/lib/account-rules";
 
 // Missing-layout bootstrap for the first protected child routes. Keep this
@@ -7,7 +7,7 @@ import { safeReturnPath } from "@/lib/account-rules";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ location }) => {
-    const user = await checkSignedIn();
+    const user = await checkSignedIn(undefined, GUARD_TIMEOUT_MS);
     if (!user) throw redirect({ to: "/auth", search: { returnTo: safeReturnPath(location.href) } });
   },
   component: Outlet,
