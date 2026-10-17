@@ -37,8 +37,7 @@ beforeEach(() => vi.clearAllMocks());
 it("handle field previews show each rule-based message and the available badge", () => {
   const v = render(<HandleField draft="Rowan_Design" available />);
   expect(screen.getByText("Available")).toBeInTheDocument();
-  v.unmount();
-  render(<HandleField draft="Traveler3374" message={HANDLE_TAKEN} />);
+  v.rerender(<HandleField draft="Traveler3374" message={HANDLE_TAKEN} />);
   expect(screen.getByText("That handle is taken. Choose another.")).toBeInTheDocument();
   v.rerender(<HandleField draft="admin" />);
   expect(screen.getByText("That handle is reserved. Choose another.")).toBeInTheDocument();
