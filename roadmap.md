@@ -7,7 +7,7 @@
 - [x] Process five seed JPEGs at 1200px/0.85, total 333,591 bytes; preserve literal docs/seed.md content.
 - [x] Remove mock data/media and preview-only routes last; retain shared live states.
 - [x] Write docs/step51-demo-write-audit.md and mocked repeated-reset/account/media tests.
-- [ ] Run final related tests for every retained changed source/test and lint.
+- [x] Final related run: 791 tests across 75 files passed; lint zero errors, six existing UI warnings.
 - [ ] Live demo/reset/AI verification: awaits Alison's setup and separate explicit permission; no destructive reset or real AI authorized.
 
 # Step 48c: header menu exits and submissions returns
