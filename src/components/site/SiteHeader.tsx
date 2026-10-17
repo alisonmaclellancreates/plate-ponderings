@@ -75,7 +75,7 @@ function DemoProfile({ showHandle }: { showHandle: boolean }) {
 const signIn = "site-nav-link rounded-md px-2 py-1";
 const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream";
 
-function MemberProfile({ showHandle }: { showHandle: boolean }) {
+export function MemberProfile({ showHandle }: { showHandle: boolean }) {
   const auth = useAccountAuth();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
