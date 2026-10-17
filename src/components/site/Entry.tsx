@@ -18,6 +18,8 @@ import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getPlate } from "@/lib/plates.functions";
+import { startDemo } from "@/lib/demo-login.functions";
+import { track } from "@/lib/analytics";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
 
@@ -172,11 +174,6 @@ type EntryFormProps = {
   submit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
-/** Inert submit for previews: never calls the server. */
-const inertSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-};
-
 export function SignInForm({ busy, error, submit }: EntryFormProps) {
   const errorId = useId();
   const describedBy = error ? errorId : undefined;
@@ -207,22 +204,11 @@ export function SignUpForm({ busy, error, submit }: EntryFormProps) {
   );
 }
 
-export function SignInPage({
-  returnTo = "/",
-  previewError,
-}: {
-  returnTo?: string;
-  previewError?: string;
-}) {
+export function SignInPage({ returnTo = "/" }: { returnTo?: string }) {
   const { busy, error, submit } = useEntry("signed_in", returnTo);
-  const preview = previewError !== undefined;
   return (
     <EntryShell title="Sign In" subtitle="Welcome back!">
-      <SignInForm
-        busy={preview ? false : busy}
-        error={preview ? previewError : error}
-        submit={preview ? inertSubmit : submit}
-      />
+      <SignInForm busy={busy} error={error} submit={submit} />
       <p className="mt-5 text-center">
         <Link to="/sign-up" search={{ returnTo: safeReturnPath(returnTo) }} className={link}>
           Create an account
@@ -232,22 +218,11 @@ export function SignInPage({
   );
 }
 
-export function SignUpPage({
-  returnTo = "/",
-  previewError,
-}: {
-  returnTo?: string;
-  previewError?: string;
-}) {
+export function SignUpPage({ returnTo = "/" }: { returnTo?: string }) {
   const { busy, error, submit } = useEntry("signed_up", returnTo);
-  const preview = previewError !== undefined;
   return (
     <EntryShell title="Create an Account" subtitle="Join the community and add your story.">
-      <SignUpForm
-        busy={preview ? false : busy}
-        error={preview ? previewError : error}
-        submit={preview ? inertSubmit : submit}
-      />
+      <SignUpForm busy={busy} error={error} submit={submit} />
       <p className="mt-4 text-sm text-muted-foreground">
         We'll give you a handle to start. You can change it anytime in your profile.
       </p>
@@ -262,6 +237,27 @@ export function SignUpPage({
 }
 
 export function DemoPage() {
+  const begin = useServerFn(startDemo);
+  const navigate = useNavigate();
+  const auth = useAccountAuth();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function enterDemo() {
+    setBusy(true);
+    setError("");
+    try {
+      const session = await begin();
+      const result = await supabase.auth.setSession(session);
+      if (result.error) throw result.error;
+      await auth?.refresh();
+      await track("demo_started", {});
+      await navigate({ to: "/" });
+    } catch {
+      setError("The demo is not available right now. Please try again soon.");
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <EntryShell
       title="Try the Demo"
@@ -273,9 +269,18 @@ export function DemoPage() {
           <li key={s}>{s}</li>
         ))}
       </ul>
-      <Link to="/demo-form" className="brand-btn brand-btn-navy mt-6 w-full">
-        Start the Demo
-      </Link>
+      <Button
+        className="brand-btn brand-btn-navy mt-6 w-full"
+        disabled={busy}
+        onClick={() => void enterDemo()}
+      >
+        {busy ? "Starting the Demo…" : "Start the Demo"}
+      </Button>
+      {error && (
+        <p role="alert" className="mt-3 text-coral-cta">
+          {error}
+        </p>
+      )}
     </EntryShell>
   );
 }

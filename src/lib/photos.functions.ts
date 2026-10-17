@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { RATE_LIMIT_MESSAGE } from "./account-rules";
+import { DEMO_MESSAGE, RATE_LIMIT_MESSAGE } from "./account-rules";
 import {
   dataUrlToBytes,
   isJpeg,
@@ -18,7 +18,7 @@ export type DetectPlateBoxResult =
   | { outcome: "ok"; box: Box | null }
   | { outcome: "unavailable" }
   | { outcome: "rate-limited"; message: string }
-  | { outcome: "demo" };
+  | { outcome: "demo"; message: string };
 
 /**
  * Find the plate box in a downscaled copy of the photo. Detection is a
@@ -37,7 +37,7 @@ export const detectPlateBox = createServerFn({ method: "POST" })
       _role: "demo",
     });
     if (roleError) return { outcome: "unavailable" };
-    if (demo) return { outcome: "demo" };
+    if (demo) return { outcome: "demo", message: DEMO_MESSAGE };
     const parsed = dataUrlToBytes(data.image);
     if (
       !parsed ||
@@ -66,7 +66,7 @@ export const detectPlateBox = createServerFn({ method: "POST" })
 export type UploadStoryPhotoResult =
   | { outcome: "ok"; path: string }
   | { outcome: "invalid" }
-  | { outcome: "demo" }
+  | { outcome: "demo"; message: string }
   | { outcome: "error" };
 
 /**
@@ -85,7 +85,7 @@ export const uploadStoryPhoto = createServerFn({ method: "POST" })
       _role: "demo",
     });
     if (roleError) return { outcome: "error" };
-    if (demo) return { outcome: "demo" };
+    if (demo) return { outcome: "demo", message: DEMO_MESSAGE };
     const parsed = dataUrlToBytes(data.jpeg);
     if (!parsed || parsed.mime !== "image/jpeg") return { outcome: "invalid" };
     if (parsed.bytes.length > PHOTO_MAX_BYTES) return { outcome: "invalid" };

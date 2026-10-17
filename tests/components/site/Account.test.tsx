@@ -48,18 +48,18 @@ vi.mock("@/lib/accounts.functions", () => ({
 }));
 
 import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Account";
-import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
+import { PLATES, SUBMISSIONS } from "../../fixtures/plates";
 
 describe("SubmissionsPage", () => {
   it("marks every View Plate link as coming from submissions", () => {
-    render(<SubmissionsPage />);
+    render(<SubmissionsPage rows={SUBMISSIONS} />);
     for (const link of screen.getAllByRole("link", { name: "View Plate" }))
       expect(
         new URL(link.getAttribute("href") ?? "", "https://example.test").searchParams.get("from"),
       ).toBe("submissions");
   });
   it("leaves preview Dismiss inert without a handler", () => {
-    render(<SubmissionsPage />);
+    render(<SubmissionsPage rows={SUBMISSIONS} />);
     fireEvent.click(screen.getAllByRole("button", { name: "Dismiss" })[0] as HTMLElement);
     expect(screen.getAllByTestId("submission")).toHaveLength(SUBMISSIONS.length);
     expect(screen.queryByRole("alert")).toBeNull();
@@ -82,7 +82,7 @@ describe("SubmissionsPage", () => {
   });
 
   it("matches each row's count to its plate or story in the mock data", () => {
-    render(<SubmissionsPage />);
+    render(<SubmissionsPage rows={SUBMISSIONS} />);
     const rows = screen.getAllByTestId("submission");
     const findPlate = (text: string) => PLATES.find((p) => p.text === text)!;
     const pnw = findPlate("PNW LV");
@@ -118,7 +118,7 @@ describe("SubmissionsPage", () => {
   });
 
   it("gives pending rows no action or chevron and marks updated rows", () => {
-    render(<SubmissionsPage />);
+    render(<SubmissionsPage rows={SUBMISSIONS} />);
     const rows = screen.getAllByTestId("submission");
     const pending = rows[1]!;
     expect(within(pending).queryByRole("link")).toBeNull();
@@ -143,17 +143,6 @@ describe("ProfilePage", () => {
     expect(field).toHaveValue("Traveler1234");
     expect(field).toHaveAccessibleDescription(HANDLE_HELP.trim());
     expect(screen.getByRole("button", { name: "Save Changes" })).toBeInTheDocument();
-    expect(screen.getByTestId("sample-story")).toHaveTextContent("Traveler1234");
-  });
-
-  it("renders the shared story card for the sample story", () => {
-    render(<ProfilePage />);
-    const card = screen.getByTestId("sample-story");
-    expect(within(card).getByText("Traveler1234")).toBeInTheDocument();
-    expect(within(card).getByText("Pacific Northwest love.")).toBeInTheDocument();
-    expect(
-      within(card).getByText("Saw this plate at a trailhead outside Bend."),
-    ).toBeInTheDocument();
-    expect(within(card).getByText("My best guess")).toBeInTheDocument();
+    expect(screen.queryByTestId("sample-story")).toBeNull();
   });
 });

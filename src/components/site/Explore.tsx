@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
-import { featuredPlates, TODAY } from "@/lib/mock-data";
 import type { FeaturedDisplay } from "@/lib/featured";
 
 export function Explore({
@@ -19,10 +18,9 @@ export function Explore({
       }
     | undefined;
 }) {
-  const [shown, setShown] = useState(12);
   const [focusFrom, setFocusFrom] = useState<number | null>(null);
   const list = useRef<HTMLUListElement>(null);
-  const plates = live ? live.plates : featuredPlates();
+  const plates = live?.plates ?? [];
   useEffect(() => {
     if (focusFrom === null) return;
     list.current?.querySelectorAll("a")[focusFrom]?.focus();
@@ -50,11 +48,11 @@ export function Explore({
           id="featured-plates"
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {(live ? plates : plates.slice(0, shown)).map((plate) => (
-            <li key={"day" in plate ? plate.day : plate.plateOfTheDay} className="min-w-0">
+          {plates.map((plate) => (
+            <li key={plate.day} className="min-w-0">
               <FeaturedPlateCard
                 plate={plate}
-                today={"day" in plate ? plate.day === live?.today : plate.plateOfTheDay === TODAY}
+                today={plate.day === live?.today}
                 utcToday={live?.today}
               />
             </li>
@@ -72,7 +70,7 @@ export function Explore({
             </Button>
           </div>
         )}
-        {(live ? live.hasMore : shown < plates.length) && (
+        {live?.hasMore && (
           <div className="mt-8 flex justify-center">
             <Button
               size="lg"
@@ -84,9 +82,6 @@ export function Explore({
                   const from = plates.length;
                   await live.loadMore();
                   setFocusFrom(from);
-                } else {
-                  setFocusFrom(shown);
-                  setShown(shown + 12);
                 }
               }}
             >

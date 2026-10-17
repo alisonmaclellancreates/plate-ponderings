@@ -1,4 +1,4 @@
-import type { Consensus } from "./mock-data";
+import type { Consensus } from "./domain";
 
 /** Brief score table: 0–33 Largely agree, 34–66 Mixed views, 67–100 Opinions differ. */
 export function consensusFor(score: number): Consensus {

@@ -1,12 +1,9 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertCircle, Car, MessageCircle, Search } from "lucide-react";
+import { AlertCircle, Car, Search } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
-import { ConsensusBadge } from "@/components/site/Badges";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
-import { PLATES } from "@/lib/mock-data";
-import { storyCount } from "@/lib/story-count";
 import { spotPlate, type SpotResult } from "@/lib/plates.functions";
 import { useAccountAuth } from "@/lib/account-auth";
 import { DEMO_MESSAGE, RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
@@ -16,13 +13,8 @@ import {
   TEXT_ERROR,
   validateSpot,
   type SpotErrors,
-  type SpotOutcome,
   type SpotValues,
 } from "@/lib/spot";
-
-function plateBySlug(slug: string) {
-  return PLATES.find((p) => p.slug === slug)!;
-}
 
 /** Rowan's signpost as decoration beside the sign's live text on a cream surface. */
 export function ScenicHeader({
@@ -236,85 +228,6 @@ function WhatHappensNext() {
   );
 }
 
-function AlreadySpottedPanel({ values }: { values: { jurisdiction: string; text: string } }) {
-  return (
-    <section
-      aria-labelledby="already-spotted"
-      data-testid="roadside-sign"
-      className="rounded-lg border-4 border-teal bg-card p-5 text-center"
-    >
-      <h2 id="already-spotted" className="font-display text-2xl text-teal">
-        Someone spotted this one already!
-      </h2>
-      <p className="mt-2">
-        This plate has been submitted and is waiting for its check. Try looking again soon.
-      </p>
-      <Link
-        to="/"
-        search={{ jurisdiction: values.jurisdiction, text: values.text }}
-        className="brand-btn brand-btn-navy mt-4"
-      >
-        Back to Search
-      </Link>
-    </section>
-  );
-}
-
-export function SpotPage({
-  values,
-  errors,
-  alreadySpotted,
-}: {
-  values?: SpotValues | undefined;
-  errors?: SpotErrors | undefined;
-  alreadySpotted?: boolean;
-}) {
-  return (
-    <main>
-      <ScenicHeader
-        asHeading
-        title="Spot a Plate"
-        subtitle="Seen a curious plate? Add it to the collection and let the guessing begin."
-      />
-      <div className="mx-auto grid max-w-5xl gap-6 px-4 py-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-start">
-        <div className="space-y-4">
-          <SpotForm values={values} errors={errors} />
-          {alreadySpotted && values?.jurisdiction && values.text && (
-            <AlreadySpottedPanel
-              values={{ jurisdiction: values.jurisdiction, text: values.text }}
-            />
-          )}
-        </div>
-        <WhatHappensNext />
-      </div>
-    </main>
-  );
-}
-
-function ExistsStrip() {
-  const plate = plateBySlug("bc-lv2code");
-  const owner = plate.stories.find((s) => s.howIKnow === "owner");
-  return (
-    <ul
-      aria-label="Plate status"
-      className="flex flex-wrap items-center justify-center gap-y-2 divide-x divide-border rounded-xl border border-border bg-card py-2 text-sm"
-    >
-      <li className="flex items-center gap-1 px-3 font-semibold">
-        <MessageCircle aria-hidden className="size-4" />
-        {storyCount(plate.stories.length)}
-      </li>
-      {plate.summaries[0] && (
-        <li className="px-3">
-          <ConsensusBadge consensus={plate.summaries[0].consensus} />
-        </li>
-      )}
-      <li className="px-3 font-semibold">
-        {owner ? `Says it's their plate: ${owner.handle}` : "No owner claim yet"}
-      </li>
-    </ul>
-  );
-}
-
 function RateLimitedOutcome() {
   return (
     <Outcome
@@ -331,158 +244,6 @@ function RateLimitedOutcome() {
       </p>
     </Outcome>
   );
-}
-
-export function SpotOutcomePage({ outcome }: { outcome: SpotOutcome }) {
-  switch (outcome) {
-    case "rate-limited":
-      return <RateLimitedOutcome />;
-    case "validation":
-      return (
-        <SpotPage
-          values={{ text: "HI@@!" }}
-          errors={{ jurisdiction: JURISDICTION_ERROR, text: TEXT_ERROR }}
-        />
-      );
-    case "already-spotted":
-      return <SpotPage values={{ jurisdiction: "Utah", text: "TRAILS" }} alreadySpotted />;
-    case "checking":
-      return (
-        <Outcome sign="Spot a Plate" heading="Checking the collection..." actions={null}>
-          <Placeholder label="A travelling car with a magnifying glass">
-            <Car aria-hidden className="spot-drive size-12" />
-            <Search aria-hidden className="size-8" />
-          </Placeholder>
-          <p role="status" className="text-lg">
-            Just a moment while we look.
-          </p>
-        </Outcome>
-      );
-    case "exists": {
-      const plate = plateBySlug("bc-lv2code");
-      return (
-        <Outcome
-          sign="Already in the collection"
-          heading="We already know this plate!"
-          actions={
-            <>
-              <Link
-                to="/plate/$state"
-                params={{ state: "interpreted" }}
-                className="brand-btn brand-btn-navy"
-              >
-                View This Plate
-              </Link>
-              <button type="button" className={outline}>
-                Add Your Story
-              </button>
-            </>
-          }
-          footer={
-            <Link to="/spot" className="font-semibold text-navy underline underline-offset-4">
-              Back to Spot a Plate
-            </Link>
-          }
-        >
-          <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="md" />
-          <ExistsStrip />
-        </Outcome>
-      );
-    }
-    case "new": {
-      const plate = plateBySlug("wa-b7k2l9");
-      return (
-        <Outcome
-          sign="New to the collection"
-          heading="A new mystery joins the collection!"
-          actions={
-            <>
-              <Link
-                to="/plate/$state"
-                params={{ state: "mystery" }}
-                className="brand-btn brand-btn-coral"
-              >
-                Add the First Story
-              </Link>
-              <a href="/explore" className={outline}>
-                Explore More Plates
-              </a>
-            </>
-          }
-        >
-          <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="md" />
-          <p className="text-lg">Thanks for spotting this plate. You're the first to add it!</p>
-        </Outcome>
-      );
-    }
-    case "pending":
-      return (
-        <Outcome
-          sign="Checking this one out..."
-          heading="Your mystery is waiting in the wings!"
-          actions={
-            <>
-              <a href="/submissions" className="brand-btn brand-btn-navy">
-                Go to Your Submissions
-              </a>
-              <a href="/explore" className={outline}>
-                Back to Explore
-              </a>
-            </>
-          }
-        >
-          <p className="text-lg">
-            Your plate is waiting for its safety check. You can see its status anytime in Your
-            Submissions.
-          </p>
-        </Outcome>
-      );
-    case "rejected":
-      return (
-        <Outcome
-          sign="Hmm... not this one."
-          heading="We couldn't add this plate."
-          actions={
-            <>
-              <Link to="/spot" className="brand-btn brand-btn-navy">
-                Try Another Plate
-              </Link>
-              <a href="/explore" className={outline}>
-                Back to Explore
-              </a>
-            </>
-          }
-        >
-          <Sasquatch />
-          <p className="text-lg">
-            Our automated check couldn't approve this plate for the collection. Sometimes these
-            checks get things wrong.
-          </p>
-        </Outcome>
-      );
-    case "error":
-      return (
-        <Outcome
-          sign="Spot a Plate"
-          heading="Hmm... something went wrong."
-          actions={
-            <>
-              <Link to="/spot" className="brand-btn brand-btn-navy">
-                Try Again
-              </Link>
-              <Link to="/" className={outline}>
-                Go Back
-              </Link>
-            </>
-          }
-        >
-          <Sasquatch />
-          <p className="text-lg">
-            We couldn't check this plate right now. Please try again in a few moments.
-          </p>
-        </Outcome>
-      );
-  }
 }
 
 function CheckingView() {
@@ -620,6 +381,30 @@ function SpotResultView({ result }: { result: SpotResult }) {
   }
 }
 
+function AlreadySpottedPanel({ values }: { values: { jurisdiction: string; text: string } }) {
+  return (
+    <section
+      aria-labelledby="already-spotted"
+      data-testid="roadside-sign"
+      className="rounded-lg border-4 border-teal bg-card p-5 text-center"
+    >
+      <h2 id="already-spotted" className="font-display text-2xl text-teal">
+        Someone spotted this one already!
+      </h2>
+      <p className="mt-2">
+        This plate has been submitted and is waiting for its check. Try looking again soon.
+      </p>
+      <Link
+        to="/"
+        search={{ jurisdiction: values.jurisdiction, text: values.text }}
+        className="brand-btn brand-btn-navy mt-4"
+      >
+        Back to Search
+      </Link>
+    </section>
+  );
+}
+
 type SpotStage = { kind: "form" } | { kind: "checking" } | { kind: "result"; result: SpotResult };
 
 /** The live Spot a Plate flow: form, checking, then the real outcome. */
@@ -638,6 +423,7 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
     try {
       const result = await spot({ data: next });
       setStage({ kind: "result", result });
+      if (result.outcome === "demo") await track("demo_write_refused", { action: "spot_plate" });
       const outcome =
         result.outcome === "already-spotted"
           ? "already_spotted"

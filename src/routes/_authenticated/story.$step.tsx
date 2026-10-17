@@ -1,5 +1,4 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { StoryStepPage } from "@/components/site/AddStory";
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
 import { STORY_STEPS, type StoryStep } from "@/lib/story-form";
 import { plateIdOrNull } from "@/lib/account-rules";
@@ -42,8 +41,6 @@ export const Route = createFileRoute("/_authenticated/story/$step")({
 });
 
 function StoryStepRoute() {
-  const { step } = Route.useLoaderData();
   const { plate } = Route.useSearch();
-  if (plate) return <AddStoryFlow plateId={plate} />;
-  return <StoryStepPage step={step} />;
+  return <AddStoryFlow plateId={plate ?? ""} />;
 }

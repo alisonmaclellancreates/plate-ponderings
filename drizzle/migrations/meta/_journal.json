@@ -134,6 +134,13 @@
       "when": 1792267189556,
       "tag": "0018_step49c_story_photo_box",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792276901938,
+      "tag": "0019_step51_demo_seed",
+      "breakpoints": true
     }
   ]
 }

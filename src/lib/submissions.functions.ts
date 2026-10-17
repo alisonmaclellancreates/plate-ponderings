@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { DEMO_MESSAGE } from "./account-rules";
-import type { Submission } from "./mock-data";
+import type { Submission } from "./domain";
 
 export const SUBMISSION_PENDING = "Waiting for its check. We'll let you know when it's ready.";
 export const STORY_REJECTED_LINE = "We couldn't add your story.";

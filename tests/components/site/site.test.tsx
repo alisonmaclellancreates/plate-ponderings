@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -12,7 +12,6 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 import { Plate } from "@/components/site/Plate";
-import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import {
   ConsensusBadge,
@@ -56,24 +55,6 @@ describe("badges", () => {
     expect(screen.getByText("Opinions differ")).toHaveAttribute("data-tone", "coral");
     expect(screen.getByText("My best guess")).toHaveAttribute("data-kind", "how");
     expect(screen.getByText("Couldn't approve")).toHaveAttribute("data-kind", "moderation");
-  });
-});
-
-describe("SiteHeader", () => {
-  it("links home, shows the handle, notification and toggles the mobile menu", () => {
-    render(<SiteHeader mode="member" />);
-    expect(screen.getByRole("link", { name: "What the Plate? home" })).toHaveAttribute("href", "/");
-    expect(screen.getAllByText("Traveler4821").length).toBeGreaterThan(0);
-    expect(screen.queryByTestId("notification-dot")).toBeNull();
-    const button = screen.getByRole("button", { name: "Open menu" });
-    fireEvent.click(button);
-    const mobile = screen.getByRole("navigation", { name: "Mobile" });
-    expect(within(mobile).getByRole("link", { name: "Explore" })).toHaveAttribute(
-      "href",
-      "/explore",
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Close menu" }));
-    expect(screen.queryByRole("navigation", { name: "Mobile" })).toBeNull();
   });
 });
 

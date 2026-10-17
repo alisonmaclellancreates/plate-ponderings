@@ -15,7 +15,7 @@ it("contains a failed homepage read and recovers on the next read", async () => 
   vi.mocked(getFeaturedHome).mockRejectedValueOnce(new Error("Read failed"));
   const client = new QueryClient();
   expect(await client.ensureQueryData(featuredHomeOptions)).toEqual({
-    today: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    today: "",
     pick: null,
     recent: [],
   });

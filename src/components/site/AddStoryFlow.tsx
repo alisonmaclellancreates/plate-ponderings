@@ -111,27 +111,14 @@ function Shell({
   );
 }
 
-/**
- * Inert preview input: seeds the plate, draft and notice, and makes the flow
- * read-only against the backend. No queries run, submit does nothing, and no
- * analytics events are sent. When absent, behaviour is unchanged.
- */
-export type AddStoryPreview = {
-  plate: { id: string; jurisdiction: string; text: string };
-  draft: { how: HowKey; meaning: string; more: string };
-  notice: { heading: string | null; message: string };
-};
-
 /** The real three-step story flow for a published plate. */
-export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: AddStoryPreview }) {
+export function AddStoryFlow({ plateId }: { plateId: string }) {
   const [step, setStep] = useState<FlowStep>("1");
-  const [how, setHow] = useState<HowKey>(preview?.draft.how ?? "owner");
-  const [meaning, setMeaning] = useState(preview?.draft.meaning ?? MEANING_START);
-  const [more, setMore] = useState(preview?.draft.more ?? "");
+  const [how, setHow] = useState<HowKey>("owner");
+  const [meaning, setMeaning] = useState(MEANING_START);
+  const [more, setMore] = useState("");
   const [rejected, setRejected] = useState(false);
-  const [pause, setPause] = useState<{ heading: string | null; message: string } | null>(
-    preview?.notice ?? null,
-  );
+  const [pause, setPause] = useState<{ heading: string | null; message: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [photoDraft, setPhotoDraft] = useState<PhotoDraft | null>(null);
   const [photoReady, setPhotoReady] = useState<PhotoReady | null>(null);
@@ -167,12 +154,10 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   const { data: plateData } = useQuery({
     queryKey: ["plate", plateId],
     queryFn: () => getPlate({ data: { id: plateId } }),
-    enabled: !preview,
   });
   const { data: storiesData } = useQuery({
     queryKey: ["plate-stories", plateId],
     queryFn: () => getPlateStories({ data: { plateId } }),
-    enabled: !preview,
   });
   const auth = useAccountAuth();
   const demo = Boolean(auth?.account?.isDemo);
@@ -183,14 +168,14 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   useEffect(() => {
     if (!started.current) {
       started.current = true;
-      if (!preview) void track("story_started", {});
+      void track("story_started", {});
     }
-  }, [preview]);
+  }, []);
 
-  const plate = preview?.plate ?? plateData?.plate;
+  const plate = plateData?.plate;
 
   const choosePhoto = async (file: File | undefined) => {
-    if (!file || preview) return;
+    if (!file) return;
     const selection = ++photoSelection.current;
     setPhotoUnreadable(false);
     let bitmap: ImageBitmap;
@@ -205,6 +190,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     // Detection is a shortcut, never a gate: any failure means draw the box.
     try {
       const result = await detectBox({ data: { image: toDetectDataUrl(bitmap) } });
+      if (result.outcome === "demo") void track("demo_write_refused", { action: "detect_photo" });
       draft = {
         bitmap,
         imageUrl,
@@ -243,6 +229,8 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     try {
       const uploaded = await uploadPhoto({ data: { jpeg: await blobToDataUrl(blob) } });
       if (uploaded.outcome !== "ok") {
+        if (uploaded.outcome === "demo")
+          void track("demo_write_refused", { action: "upload_photo" });
         setPause({ heading: STORY_SUBMIT_ERROR_HEADING, message: STORY_SUBMIT_ERROR_MESSAGE });
         setPhotoDraft(null);
         return;
@@ -262,15 +250,14 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   };
 
   const skipPhoto = () => {
-    if (!preview) void track("photo_skipped", {});
+    void track("photo_skipped", {});
     setStep("3");
   };
 
   if (!plate) return null;
-  const ownerExists = preview ? false : (storiesData?.hasOwnerStory ?? false);
+  const ownerExists = storiesData?.hasOwnerStory ?? false;
 
   const onSubmit = async () => {
-    if (preview) return;
     setSubmitting(true);
     setRejected(false);
     setPause(null);
@@ -308,6 +295,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         setPause({ heading: STORY_RATE_LIMIT_HEADING, message: result.message });
         setStep("1");
       } else if (result.outcome === "demo") {
+        void track("demo_write_refused", { action: "submit_story" });
         setPause({ heading: null, message: result.message });
         setStep("1");
       } else {

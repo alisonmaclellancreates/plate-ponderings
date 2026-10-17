@@ -80,8 +80,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     await track("signed_out", {});
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    if (account?.isDemo) await track("demo_exited", {});
     await reset();
-    await router.navigate({ to: "/sign-in", search: { returnTo: "/" }, replace: true });
+    if (account?.isDemo) await router.navigate({ to: "/", replace: true });
+    else await router.navigate({ to: "/sign-in", search: { returnTo: "/" }, replace: true });
   }
   async function completeSignIn(kind: "signed_in" | "signed_up") {
     await refresh();

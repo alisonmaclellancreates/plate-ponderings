@@ -48,6 +48,15 @@ beforeEach(() => {
 });
 
 describe("HeartButton", () => {
+  it("retains an existing heart when the server refuses demo unheart", async () => {
+    m.heart.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE });
+    render(<HeartButton story={{ ...story, hearted: true }} plateId="p1" />);
+    await userEvent.click(screen.getByRole("button", { pressed: true }));
+    expect(await screen.findByRole("status")).toHaveTextContent(DEMO_MESSAGE);
+    expect(screen.getByRole("button", { pressed: true })).toHaveTextContent("2hearts");
+    expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "unheart" });
+    expect(m.invalidate).not.toHaveBeenCalled();
+  });
   it("sends signed-out visitors to sign in with a return to this plate", async () => {
     m.account = null;
     render(<HeartButton story={story} plateId="p1" />);
@@ -91,7 +100,9 @@ describe("HeartButton", () => {
     await userEvent.click(screen.getByRole("button"));
     expect(await screen.findByRole("status")).toHaveTextContent(text);
     expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "false");
-    expect(m.track).not.toHaveBeenCalled();
+    if (_l === "demo")
+      expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "heart" });
+    else expect(m.track).not.toHaveBeenCalled();
   });
 });
 
@@ -210,7 +221,9 @@ describe("StoryMenuActions", () => {
     await waitFor(() => expect(m.block).toHaveBeenCalled());
     if (text) expect(await screen.findByRole("status")).toHaveTextContent(text);
     else expect(screen.queryByRole("status")).toBeNull();
-    expect(m.track).not.toHaveBeenCalled();
+    if (result.outcome === "demo")
+      expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "block" });
+    else expect(m.track).not.toHaveBeenCalled();
   });
   it("shows the error message when an action throws", async () => {
     m.block.mockRejectedValue(new Error("x"));
