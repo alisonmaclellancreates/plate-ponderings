@@ -3,9 +3,9 @@ import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
-  createFileRoute: () => (o: Record<string, unknown>) => o,
+  createFileRoute: () => (o: Record<string, unknown>) => ({ ...o, useSearch: () => ({}) }),
 }));
-vi.mock("@/components/site/SpotPlate", () => ({ SpotPage: () => <p>spot form</p> }));
+vi.mock("@/components/site/SpotPlate", () => ({ SpotLivePage: () => <p>spot form</p> }));
 
 import { Route } from "@/routes/_authenticated/spot.index";
 
