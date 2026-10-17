@@ -15,6 +15,7 @@ const m = vi.hoisted(() => ({
   status: vi.fn(),
   resume: vi.fn(),
   track: vi.fn(),
+  dotQuery: vi.fn(),
 }));
 vi.mock("@/lib/account-auth", () => ({
   useAccountAuth: () => ({
@@ -53,11 +54,14 @@ vi.mock("@/lib/accounts.functions", () => ({
   resumeAiChecks: m.resume,
 }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
+vi.mock("@tanstack/react-query", () => ({ useQuery: m.dotQuery }));
+vi.mock("@/lib/submissions.functions", () => ({ getUnreadDot: vi.fn() }));
 import { SignInPage, SignUpPage } from "@/components/site/Entry";
 import { ProfilePage } from "@/components/site/Account";
 import { MemberProfile, SiteHeader } from "@/components/site/SiteHeader";
 import { AiCheckStatus } from "@/components/site/AiCheckStatus";
 beforeEach(() => {
+  m.dotQuery.mockReturnValue({ data: undefined });
   vi.clearAllMocks();
   m.signedOut = false;
   m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
@@ -369,4 +373,17 @@ it("a signed-out member profile exposes no account menu or sign-out action", () 
   const view = render(<MemberProfile showHandle />);
   expect(view.container).toBeEmptyDOMElement();
   expect(m.out).not.toHaveBeenCalled();
+});
+
+it.each([
+  [true, 1],
+  [false, 0],
+])("the profile icon shows the unread dot only when unread is %s", (unread, count) => {
+  m.signedOut = false;
+  m.dotQuery.mockReturnValue({ data: { unread } });
+  render(<MemberProfile showHandle />);
+  expect(screen.queryAllByTestId("unread-dot")).toHaveLength(count);
+  expect(m.dotQuery).toHaveBeenCalledWith(
+    expect.objectContaining({ queryKey: ["unread-dot"], enabled: true }),
+  );
 });

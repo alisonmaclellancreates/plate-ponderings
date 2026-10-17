@@ -331,9 +331,24 @@ it("ignores late success after the visitor has signed out", async () => {
   expect(m.get).not.toHaveBeenCalled();
   expect(m.identify).not.toHaveBeenCalled();
 });
+it("refreshes the unread dot once the background recheck resolves", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(Date.now() + 8 * 60 * 1000);
+  m.recheck.mockResolvedValue(undefined);
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(m.recheck).toHaveBeenCalledTimes(1);
+  expect(m.invalidate).toHaveBeenCalledWith({ queryKey: ["unread-dot"] });
+});
 it("keeps the verified account when the background pending recheck fails", async () => {
   vi.useFakeTimers();
-  vi.setSystemTime(Date.now() + 4 * 60 * 1000);
+  vi.setSystemTime(Date.now() + 16 * 60 * 1000);
   m.recheck.mockRejectedValue(new Error("recheck unavailable"));
   render(
     <AccountProvider>
@@ -347,6 +362,7 @@ it("keeps the verified account when the background pending recheck fails", async
   expect(screen.getByText("Traveler1234")).toBeInTheDocument();
   expect(screen.queryByText("loading")).toBeNull();
   expect(m.out).not.toHaveBeenCalled();
+  expect(m.invalidate).not.toHaveBeenCalledWith({ queryKey: ["unread-dot"] });
 });
 it("finishes initial loading when the verified account read fails", async () => {
   m.get.mockRejectedValue(new Error("account unavailable"));

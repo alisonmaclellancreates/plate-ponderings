@@ -188,4 +188,4 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Step 45: summary versions, visibility on server, after-response retry; addStory and recheck do not wait for the summary
 
 ## Step 47 (planning)
-- [ ] Your Submissions live list, Updated labels, header dot, dismiss, submissions_viewed (plan revised: admin reads by userId, dot refresh after recheck, conditional dismiss delete)
+- [x] Step 47 built: live Your Submissions, Updated labels, header dot (refreshes after recheck), conditional dismiss, submissions_viewed; notifications cascade (0014). PR Codecov pending.
