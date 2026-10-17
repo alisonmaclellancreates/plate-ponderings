@@ -203,6 +203,7 @@ describe("AddStoryFlow", () => {
   it("removing a confirmed photo clears its submitted path", async () => {
     vi.mocked(URL.createObjectURL)
       .mockReturnValueOnce("blob:original")
+      .mockReturnValueOnce("blob:editor-review")
       .mockReturnValueOnce("blob:processed");
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
@@ -225,8 +226,10 @@ describe("AddStoryFlow", () => {
   it("replacing a confirmed photo releases only the previous preview until unmount", async () => {
     vi.mocked(URL.createObjectURL)
       .mockReturnValueOnce("blob:original-1")
+      .mockReturnValueOnce("blob:editor-review-1")
       .mockReturnValueOnce("blob:processed-1")
       .mockReturnValueOnce("blob:original-2")
+      .mockReturnValueOnce("blob:editor-review-2")
       .mockReturnValueOnce("blob:processed-2");
     const user = userEvent.setup();
     const { unmount } = render(<AddStoryFlow plateId="p1" />);
@@ -252,6 +255,7 @@ describe("AddStoryFlow", () => {
   it("unmount releases a confirmed preview but step changes keep it alive", async () => {
     vi.mocked(URL.createObjectURL)
       .mockReturnValueOnce("blob:original")
+      .mockReturnValueOnce("blob:editor-review")
       .mockReturnValueOnce("blob:processed");
     const user = userEvent.setup();
     const { unmount } = render(<AddStoryFlow plateId="p1" />);
@@ -472,6 +476,7 @@ describe("AddStoryFlow", () => {
     async (first) => {
       vi.mocked(URL.createObjectURL)
         .mockReturnValueOnce("blob:original")
+        .mockReturnValueOnce("blob:editor-review")
         .mockReturnValueOnce("blob:processed");
       m.submit.mockResolvedValueOnce({ outcome: first });
       const user = userEvent.setup();
