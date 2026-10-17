@@ -19,7 +19,11 @@ const PLATE = PLATES.find((p) => p.slug === "bc-lv2code")!;
 import { REPORT_REASON_OPTIONS, type ReportReasonKey } from "@/lib/report-reasons";
 export { REPORT_REASON_OPTIONS, REPORT_REASONS, type ReportReasonKey } from "@/lib/report-reasons";
 
-type MenuHandlers = { onReport?: () => void; onBlock?: () => void; onDelete?: () => void };
+type MenuHandlers = {
+  onReport?: (() => void) | undefined;
+  onBlock?: (() => void) | undefined;
+  onDelete?: (() => void) | undefined;
+};
 
 /** The story card menu: other people's stories get Report and Block; your own gets Delete. */
 export function StoryMenuList({
