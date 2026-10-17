@@ -126,8 +126,8 @@ export async function resetDemoSeed(
       step = "photo upload";
       for (const [plate, bytes] of Object.entries(photos)) {
         await renew();
-        const path = paths[plate];
-        if (!path) throw new Error("Seed photo path missing.");
+        // Every photo key received a path before the immutable seed payload was validated.
+        const path = paths[plate] as string;
         checked(await bucket.upload(path, bytes, { contentType: "image/jpeg", upsert: false }));
       }
       step = "content replacement";
@@ -150,8 +150,8 @@ export async function resetDemoSeed(
       step = "seed handles";
       for (const handle of SEED_HANDLES.slice(1)) {
         await renew();
-        const id = accounts[handle];
-        if (!id) throw new Error("Seed account missing.");
+        // The same handles were created above and validated by buildSeed before replacement.
+        const id = accounts[handle] as string;
         checked(await admin.from("profiles").update({ handle }).eq("id", id));
       }
       step = "readback";

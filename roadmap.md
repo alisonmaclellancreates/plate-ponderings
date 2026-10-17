@@ -3,8 +3,9 @@
 - [x] Add tests for Entry demo success/refusal/network/session outcomes, five decoded inline photos and exact 1 MB boundary, reset lock/renewal/first-failure/readback/release/pagination/null-list branches, seed validation/count/date offsets.
 - [x] Read PR #121 Codecov comment and its matching CI coverage artifact at head 6533e303; target the other nine reported files: Account, AddStoryFlow, DemoAdminControls, auth-context, Explore, SiteHeader, SpotPlate, StoryActions and demo-guesses.
 - [x] Final related run: 227 tests across 12 changed test files passed. Lint: zero errors, six existing warnings. No local coverage, build, typecheck, browser, reset or real AI; no production changes.
-- [ ] Confirm post-sync PR Codecov reaches 100%; latest actual PR report remains 86.54354% / 51 missing lines at 23:16:33 UTC, predating these tests. Manual push is prohibited; managed Git sync owns pushing.
-- [ ] Resolve invariant-only seed guards if CI still reports them: seed-data line 172 (all requested plates are literal entries), reset lines 130 and 154 (paths/accounts populated earlier from the same immutable local keys). No fabricated mutation tests or source changes made under the tests-only constraint.
+- [ ] Confirm post-sync PR Codecov reaches 100%; latest actual PR report is 99.20844% at head 5629a44e, predating the guard removal. Manual push is prohibited; managed Git sync owns pushing.
+- [x] Read matching CI artifact for exact partial branches: reset lines 130/154 and seed-data line 172. Alison approved removing the three unreachable guards; invariant assertions cover required plates, references, uploaded paths and assigned accounts.
+- [x] Run related tests and lint for the final guard removal and invariant assertions: 101 tests across 10 related files passed; lint has zero errors and six existing warnings. CI remains authoritative for coverage.
 
 # Step 51: demo, seed reset and removal of scaffolding
 
