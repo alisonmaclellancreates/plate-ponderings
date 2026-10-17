@@ -1,8 +1,9 @@
 # Step 48c: header menu exits and submissions returns
 
-- [ ] Close member/mobile menus on every selection and router location change; test each item and navigation.
-- [ ] Carry and validate from=submissions; test submissions, unknown marker, search priority and Explore fallback.
-- [ ] Run related tests for every changed source/test file and bun run lint; read current PR Codecov after managed sync if available. No local coverage/build/typecheck/browser/AI, database changes or branch changes.
+- [x] Close member/mobile menus on every selection and router location change; tests cover each item, both profile instances, search-only changes and real memory-history back/forward.
+- [x] Carry and validate from=submissions; tests cover submissions, unknown marker, search priority and Explore fallback. Other inbound plate links unchanged.
+- [x] Related run passed 192 tests across 23 files, listing all four changed source files and nine changed/new tests. bun run lint: zero errors, six pre-existing UI warnings, none in changed files. No local coverage/build/typecheck/browser/AI, database changes or branch changes.
+- [ ] Current PR Codecov figure unavailable: GitHub returned no open pull requests. Await Alison's PR and CI; managed Git sync owns commits.
 
 # PR #113 Copilot follow-ups
 
