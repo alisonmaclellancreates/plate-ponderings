@@ -230,7 +230,7 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
       .select("id,identity_a,identity_b,jurisdictions!subjects_identity_a_fkey(name)")
       .eq("created_by", context.userId)
       .eq("status", "pending");
-    if (pending.error || pending.data.length === 0) return { rechecked: 0 };
+    if (pending.error || !pending.data || pending.data.length === 0) return { rechecked: 0 };
     const { checkSubject } = await import("./plate-moderation.server");
     let rechecked = 0;
     for (const subject of pending.data) {
