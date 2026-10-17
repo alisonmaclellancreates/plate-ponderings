@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { DEMO_MESSAGE, RATE_LIMIT_MESSAGE } from "./account-rules";
 import { MEANING_MAX, MORE_MAX } from "./story-form";
+import { boxFromColumn, normalizeSubmittedBox, type Box } from "./photo-blur";
 
 export const HOW_KEYS = ["owner", "knows_owner", "secondhand", "guess"] as const;
 export type HowKey = (typeof HOW_KEYS)[number];
@@ -13,6 +14,8 @@ type StoryInput = {
   source: string;
   more: string;
   photoPath: string;
+  /** Confirmed plate box, as fractions of the processed photo. */
+  photoBox?: unknown;
 };
 
 const storyInput = (data: StoryInput): StoryInput => ({
@@ -21,6 +24,7 @@ const storyInput = (data: StoryInput): StoryInput => ({
   source: typeof data.source === "string" ? data.source : "",
   more: typeof data.more === "string" ? data.more : "",
   photoPath: typeof data.photoPath === "string" ? data.photoPath : "",
+  photoBox: data.photoBox ?? null,
 });
 
 /** Brief limits: meaning 3–80, source one of the four keys, more ≤ 500. */
@@ -70,6 +74,13 @@ export const addStory = createServerFn({ method: "POST" })
       trace("photo-path");
       return { outcome: "error" };
     }
+    // A photo needs a valid box; a box without a photo is refused.
+    const box = data.photoPath ? normalizeSubmittedBox(data.photoBox) : null;
+    if (data.photoPath ? !box : data.photoBox !== null) {
+      trace("photo-box");
+      if (!data.photoPath) return { outcome: "validation" };
+    }
+    const photoBox = box ? [box.x, box.y, box.w, box.h] : null;
     // Every outcome that saves no story removes the uploaded photo.
     const deletePhoto = async (): Promise<void> => {
       if (!data.photoPath) return;
@@ -81,7 +92,7 @@ export const addStory = createServerFn({ method: "POST" })
       await deletePhoto();
       return { outcome: "demo", message: DEMO_MESSAGE };
     }
-    if (!validateStory(data)) {
+    if (!validateStory(data) || (data.photoPath && !box)) {
       trace("validation");
       await deletePhoto();
       return { outcome: "validation" };
@@ -118,6 +129,7 @@ export const addStory = createServerFn({ method: "POST" })
         source: data.source,
         body: data.more.trim() || null,
         photo_path: data.photoPath || null,
+        photo_box: photoBox,
         status: "pending",
       });
       if (inserted.error) {
@@ -175,6 +187,7 @@ export const addStory = createServerFn({ method: "POST" })
       source: data.source,
       body: data.more.trim() || null,
       photo_path: data.photoPath || null,
+      photo_box: photoBox,
       status: "published",
       published_at: new Date().toISOString(),
     });
@@ -199,6 +212,8 @@ export type PlateStory = {
   publishedAt: string;
   /** Short-lived signed link to the blurred photo, when the story has one. */
   photo: string | null;
+  /** Plate box within the photo, when the story was saved with one. */
+  photoBox: Box | null;
   /** The verified viewer wrote this story. */
   isOwn: boolean;
   /** The verified viewer has hearted this story. */
@@ -224,6 +239,7 @@ type StoryRow = {
   author_id: string | null;
   published_at: string | null;
   photo_path: string | null;
+  photo_box?: number[] | null;
 };
 
 /**
@@ -268,7 +284,7 @@ export const getPlateStories = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("stories")
-      .select("id,meaning,source,body,author_id,published_at,photo_path")
+      .select("id,meaning,source,body,author_id,published_at,photo_path,photo_box")
       .eq("subject_id", plate.id)
       .eq("status", "published")
       .order("published_at", { ascending: true });
@@ -353,6 +369,7 @@ export const getPlateStories = createServerFn({ method: "POST" })
       hearts: hearts.get(r.id) ?? 0,
       publishedAt: r.published_at ?? "",
       photo: (r.photo_path && photos.get(r.photo_path)) || null,
+      photoBox: (r.photo_path && photos.has(r.photo_path) && boxFromColumn(r.photo_box)) || null,
       isOwn: viewerId !== null && r.author_id === viewerId,
       hearted: mine.has(r.id),
     });
