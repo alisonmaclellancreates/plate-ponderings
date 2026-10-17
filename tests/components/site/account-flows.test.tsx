@@ -32,6 +32,7 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => m.navigate,
 }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { signUp: m.signUp, signInWithPassword: m.signIn } },
 }));
