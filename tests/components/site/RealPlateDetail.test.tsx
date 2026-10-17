@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 const m = vi.hoisted(() => ({
   getUser: vi.fn(),
+  getPlateStories: vi.fn(),
   stories: null as unknown,
 }));
 
@@ -35,9 +36,12 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getUser: m.getUser } },
 }));
 vi.mock("@tanstack/react-query", () => ({
-  useQuery: () => ({ data: m.stories }),
+  useQuery: ({ queryFn }: { queryFn: () => unknown }) => {
+    queryFn();
+    return { data: m.stories };
+  },
 }));
-vi.mock("@/lib/stories.functions", () => ({ getPlateStories: vi.fn(), STORY_PAGE_SIZE: 5 }));
+vi.mock("@/lib/stories.functions", () => ({ getPlateStories: m.getPlateStories, STORY_PAGE_SIZE: 5 }));
 
 import { RealPlateDetail } from "@/components/site/PlateDetail";
 
@@ -189,5 +193,37 @@ describe("RealPlateDetail", () => {
     expect(screen.getByRole("link", { name: "Back to Explore" }).getAttribute("href")).toBe(
       "/explore",
     );
+  });
+
+  it("every part of the page reads stories for this plate only", () => {
+    render(<RealPlateDetail plate={plate} />);
+    expect(m.getPlateStories).toHaveBeenCalled();
+    for (const c of m.getPlateStories.mock.calls) expect(c[0]).toEqual({ data: { plateId: "p1" } });
+  });
+
+  it("says heart and story in the singular", async () => {
+    const user = userEvent.setup();
+    m.stories = {
+      stories: Array.from({ length: 6 }, (_, i) => story(String(i), { hearts: i === 0 ? 1 : 2 })),
+      pending: [],
+      total: 6,
+      storyCount: 6,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    expect(screen.getAllByText("heart")).toHaveLength(1);
+    await user.click(screen.getByRole("button", { name: "Show 1 more story" }));
+    expect(screen.getAllByRole("article")).toHaveLength(6);
+  });
+
+  it("ignores a sign-in answer that arrives after leaving the page", async () => {
+    let resolve: (v: unknown) => void = () => {};
+    m.getUser.mockReturnValue(new Promise((r) => (resolve = r)));
+    const { unmount } = render(<RealPlateDetail plate={plate} />);
+    unmount();
+    resolve({ data: { user: { id: "u1" } } });
+    await Promise.resolve();
+    expect(screen.queryByRole("link", { name: "Add Your Story" })).toBeNull();
   });
 });

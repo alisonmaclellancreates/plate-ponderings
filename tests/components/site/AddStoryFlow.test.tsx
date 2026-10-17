@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 
 const m = vi.hoisted(() => ({
   submit: vi.fn(),
+  getPlate: vi.fn(),
+  getPlateStories: vi.fn(),
   track: vi.fn(),
   navigate: vi.fn(),
   auth: { account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean } },
@@ -34,15 +36,24 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => m.navigate,
 }));
 vi.mock("@tanstack/react-query", () => ({
-  useQuery: ({ queryKey }: { queryKey: string[] }) => ({
-    data: queryKey[0] === "plate" ? m.plate : m.stories,
-  }),
+  useQuery: ({
+    queryKey,
+    queryFn,
+    enabled,
+  }: {
+    queryKey: string[];
+    queryFn: () => unknown;
+    enabled?: boolean;
+  }) => {
+    if (enabled !== false) queryFn();
+    return { data: queryKey[0] === "plate" ? m.plate : m.stories };
+  },
 }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
-vi.mock("@/lib/plates.functions", () => ({ getPlate: vi.fn() }));
+vi.mock("@/lib/plates.functions", () => ({ getPlate: m.getPlate }));
 vi.mock("@/lib/stories.functions", () => ({
   addStory: m.submit,
-  getPlateStories: vi.fn(),
+  getPlateStories: m.getPlateStories,
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => m.auth }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
@@ -247,5 +258,120 @@ describe("AddStoryFlow preview mode", () => {
       "Pacific Northwest love.",
     );
     expect(m.track).not.toHaveBeenCalled();
+  });
+});
+
+describe("AddStoryFlow branches", () => {
+  async function submitWith(result: unknown) {
+    m.submit.mockResolvedValue(result);
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    return user;
+  }
+
+  it("reads this plate and its stories by id", () => {
+    render(<AddStoryFlow plateId="p1" />);
+    expect(m.getPlate).toHaveBeenCalledWith({ data: { id: "p1" } });
+    expect(m.getPlateStories).toHaveBeenCalledWith({ data: { plateId: "p1" } });
+  });
+
+  it("tracks story_started only once across re-renders", () => {
+    const { rerender } = render(<AddStoryFlow plateId="p1" />);
+    rerender(<AddStoryFlow plateId="p1" />);
+    expect(m.track).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows no owner note while the stories are still loading", () => {
+    m.stories = undefined;
+    render(<AddStoryFlow plateId="p1" />);
+    expect(screen.queryByText(/Yours will appear alongside theirs/)).toBeNull();
+  });
+
+  it("a demo refusal shows its message without a heading, tracked as error", async () => {
+    await submitWith({ outcome: "demo", message: "Adding plates and stories is turned off in the demo." });
+    const status = await screen.findByRole("status");
+    expect(status.children).toHaveLength(1);
+    expect(status.firstElementChild).toHaveClass("font-semibold");
+    expect(status).toHaveTextContent("Adding plates and stories is turned off in the demo.");
+    expect(m.track).toHaveBeenCalledWith(
+      "story_submitted",
+      expect.objectContaining({ outcome: "error" }),
+    );
+  });
+
+  it.each([{ outcome: "validation" }, { outcome: "error" }])(
+    "a %o result shows the error notice and keeps the draft",
+    async (result) => {
+      await submitWith(result);
+      const status = await screen.findByRole("status");
+      expect(status).toHaveTextContent("Hmm... something went wrong.");
+      expect(status).toHaveTextContent(
+        "We couldn't submit your story right now. Your words are still here. Please try again.",
+      );
+      expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+        "Pacific Northwest love.",
+      );
+      expect(m.track).toHaveBeenCalledWith(
+        "story_submitted",
+        expect.objectContaining({ outcome: "error" }),
+      );
+    },
+  );
+
+  it("Back returns from review to photo, and from photo to the kept draft", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("heading", { name: "Add a photo (optional)" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+      "Pacific Northwest love.",
+    );
+  });
+
+  it("submits the picked source and the extra text", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.click(screen.getByRole("radio", { name: /My best guess/ }));
+    await user.type(screen.getByRole("textbox", { name: /Tell us more/ }), "Seen near Seattle.");
+    await fillAndReview(user);
+    expect(screen.getByText("My best guess")).toBeInTheDocument();
+    expect(screen.getByText("Seen near Seattle.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(m.submit).toHaveBeenCalledWith({
+        data: {
+          plateId: "p1",
+          meaning: "Pacific Northwest love.",
+          source: "guess",
+          more: "Seen near Seattle.",
+        },
+      }),
+    );
+    expect(m.track).toHaveBeenCalledWith("story_submitted", {
+      source: "guess",
+      has_more_text: true,
+      outcome: "published",
+    });
+  });
+
+  it("review shows an unknown source key as itself", async () => {
+    const user = userEvent.setup();
+    render(
+      <AddStoryFlow
+        plateId="x"
+        preview={{
+          plate: { id: "x", jurisdiction: "Oregon", text: "PNW LV" },
+          draft: { how: "mystery" as never, meaning: "Pacific Northwest love.", more: "" },
+          notice: { heading: null, message: "note" },
+        }}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+    expect(screen.getByText("mystery")).toBeInTheDocument();
   });
 });
