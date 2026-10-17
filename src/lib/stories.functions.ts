@@ -7,13 +7,14 @@ import { MEANING_MAX, MORE_MAX } from "./story-form";
 export const HOW_KEYS = ["owner", "knows_owner", "secondhand", "guess"] as const;
 export type HowKey = (typeof HOW_KEYS)[number];
 
-type StoryInput = { plateId: string; meaning: string; source: string; more: string };
+type StoryInput = { plateId: string; meaning: string; source: string; more: string; photoPath: string };
 
 const storyInput = (data: StoryInput): StoryInput => ({
   plateId: typeof data.plateId === "string" ? data.plateId : "",
   meaning: typeof data.meaning === "string" ? data.meaning : "",
   source: typeof data.source === "string" ? data.source : "",
   more: typeof data.more === "string" ? data.more : "",
+  photoPath: typeof data.photoPath === "string" ? data.photoPath : "",
 });
 
 /** Brief limits: meaning 3–80, source one of the four keys, more ≤ 500. */
@@ -45,22 +46,45 @@ export const addStory = createServerFn({ method: "POST" })
       _role: "demo",
     });
     if (roleError) return { outcome: "error" };
-    if (demo) return { outcome: "demo", message: DEMO_MESSAGE };
-    if (!validateStory(data)) return { outcome: "validation" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // A photo path is only ever the caller's own folder; anything else is refused.
+    if (data.photoPath && !data.photoPath.startsWith(`${context.userId}/`))
+      return { outcome: "error" };
+    // Every outcome that saves no story removes the uploaded photo.
+    const deletePhoto = async (): Promise<void> => {
+      if (!data.photoPath) return;
+      const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");
+      await supabaseAdmin.storage.from(STORY_PHOTO_BUCKET).remove([data.photoPath]);
+    };
+    if (demo) {
+      await deletePhoto();
+      return { outcome: "demo", message: DEMO_MESSAGE };
+    }
+    if (!validateStory(data)) {
+      await deletePhoto();
+      return { outcome: "validation" };
+    }
     const { data: plate, error: plateError } = await supabaseAdmin
       .from("subjects")
       .select("id,identity_b")
       .eq("id", data.plateId)
       .eq("status", "published")
       .maybeSingle();
-    if (plateError) return { outcome: "error" };
-    if (!plate) return { outcome: "error" };
+    if (plateError || !plate) {
+      await deletePhoto();
+      return { outcome: "error" };
+    }
     const attempt = await supabaseAdmin.rpc("consume_story_save_attempt", {
       _user_id: context.userId,
     });
-    if (attempt.error) return { outcome: "error" };
-    if (!attempt.data) return { outcome: "rate-limited", message: RATE_LIMIT_MESSAGE };
+    if (attempt.error) {
+      await deletePhoto();
+      return { outcome: "error" };
+    }
+    if (!attempt.data) {
+      await deletePhoto();
+      return { outcome: "rate-limited", message: RATE_LIMIT_MESSAGE };
+    }
     const insertPending = async (): Promise<AddStoryResult> => {
       const inserted = await supabaseAdmin.from("stories").insert({
         subject_id: plate.id,
@@ -68,29 +92,44 @@ export const addStory = createServerFn({ method: "POST" })
         meaning: data.meaning.trim(),
         source: data.source,
         body: data.more.trim() || null,
+        photo_path: data.photoPath || null,
         status: "pending",
       });
-      return inserted.error ? { outcome: "error" } : { outcome: "pending" };
+      if (inserted.error) {
+        await deletePhoto();
+        return { outcome: "error" };
+      }
+      return { outcome: "pending" };
     };
     const { readAiBlock, persistAiBlock } = await import("./ai-block.server");
     const block = await readAiBlock(supabaseAdmin);
-    if (!block) return { outcome: "error" };
+    if (!block) {
+      await deletePhoto();
+      return { outcome: "error" };
+    }
     if (block.category) return insertPending();
     const { checkStory } = await import("./story-moderation.server");
     const result = await checkStory(data.meaning.trim(), data.more.trim(), plate.identity_b);
     if (result.block) await persistAiBlock(supabaseAdmin, result.block, result.runId);
     if (result.outcome === "unavailable") return insertPending();
-    if (result.outcome === "rejected") return { outcome: "rejected" };
+    if (result.outcome === "rejected") {
+      await deletePhoto();
+      return { outcome: "rejected" };
+    }
     const inserted = await supabaseAdmin.from("stories").insert({
       subject_id: plate.id,
       author_id: context.userId,
       meaning: data.meaning.trim(),
       source: data.source,
       body: data.more.trim() || null,
+      photo_path: data.photoPath || null,
       status: "published",
       published_at: new Date().toISOString(),
     });
-    if (inserted.error) return { outcome: "error" };
+    if (inserted.error) {
+      await deletePhoto();
+      return { outcome: "error" };
+    }
     const { requestSummaryRefresh } = await import("./summary-refresh.server");
     const { runAfterResponse } = await import("./after-response.server");
     runAfterResponse(requestSummaryRefresh(plate.id));
