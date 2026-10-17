@@ -106,8 +106,8 @@ describe("addStory", () => {
   it("refuses the demo account with the brief message", async () => {
     context.supabase.rpc.mockResolvedValue({ data: true, error: null });
     const result = await call(addStory, INPUT);
-    expect(result.outcome).toBe("demo");
-    expect(String(result.message)).toContain("demo");
+    expect(result["outcome"]).toBe("demo");
+    expect(String(result["message"])).toContain("demo");
     expect(mocks.admin.from).not.toHaveBeenCalled();
   });
   it("refuses invalid input before touching the database", async () => {
