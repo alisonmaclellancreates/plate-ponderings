@@ -226,3 +226,8 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 
 - Step 48: plan revisions (hide/unhide refresh, reporter_id SET NULL, capped recheckAllPending, no authorKey) then build after approval
 - [ ] Step 49: story photos (choose, AI box detect, adjust, canvas blur, JPEG export, server upload).
+
+## Step 49c (story photo box, zoomed card, open view)
+- [x] Apply 0018 photo_box (tests/db/story-photo-box.sql: Alison runs in rollback)
+- [x] Server rounds box to 4 dp and clamps to photo edges before save; edge-touching test
+- [x] Save/return/clear box; zoomed card + dialog; preview

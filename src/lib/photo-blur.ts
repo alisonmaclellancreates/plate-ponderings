@@ -137,3 +137,31 @@ export function dataUrlToBytes(dataUrl: string): { mime: string; bytes: Uint8Arr
     return null;
   }
 }
+
+const round4 = (v: number) => Math.round(v * 10000) / 10000;
+
+/**
+ * The server's view of a submitted plate box: four finite numbers, rounded to
+ * four decimal places and clamped so x, y >= 0 and x + w, y + h <= 1, so a box
+ * at the photo's edge is never refused for rounding. Returns null when the
+ * input is not a box or has no area left after clamping.
+ */
+export function normalizeSubmittedBox(input: unknown): Box | null {
+  if (!input || typeof input !== "object") return null;
+  const { x, y, w, h } = input as Record<string, unknown>;
+  const values = [x, y, w, h];
+  if (!values.every((v) => typeof v === "number" && Number.isFinite(v))) return null;
+  const nx = Math.min(Math.max(round4(x as number), 0), 1);
+  const ny = Math.min(Math.max(round4(y as number), 0), 1);
+  const nw = Math.min(round4(w as number), round4(1 - nx));
+  const nh = Math.min(round4(h as number), round4(1 - ny));
+  if (nw <= 0 || nh <= 0) return null;
+  return { x: nx, y: ny, w: nw, h: nh };
+}
+
+/** A stored box column ({x, y, w, h}) as a Box, or null when absent or malformed. */
+export function boxFromColumn(value: number[] | null | undefined): Box | null {
+  if (!Array.isArray(value) || value.length !== 4) return null;
+  const [x, y, w, h] = value as [number, number, number, number];
+  return { x, y, w, h };
+}

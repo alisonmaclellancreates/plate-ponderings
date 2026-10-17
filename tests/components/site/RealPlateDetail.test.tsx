@@ -201,6 +201,29 @@ describe("RealPlateDetail", () => {
     expect(img.getAttribute("loading")).toBe("lazy");
   });
 
+  it("shows the zoomed plate as a button that opens the full photo when the story has a box", async () => {
+    const user = userEvent.setup();
+    m.stories = {
+      stories: [
+        story("1", {
+          photo: "https://signed.example/photo.jpg",
+          photoBox: { x: 0.4, y: 0.45, w: 0.2, h: 0.1 },
+        }),
+      ],
+      pending: [],
+      total: 1,
+      storyCount: 1,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    const img = screen.getByRole("img", { name: "Photo shared by Traveler1" });
+    expect(img.getAttribute("src")).toBe("https://signed.example/photo.jpg");
+    expect(img.getAttribute("loading")).toBe("lazy");
+    await user.click(screen.getByRole("button", { name: "View full photo shared by Traveler1" }));
+    expect(screen.getByRole("dialog", { name: "Meaning 1" })).toBeInTheDocument();
+  });
+
   it("renders no image and no empty space when a story has no photo", () => {
     m.stories = {
       stories: [story("1")],
@@ -212,6 +235,7 @@ describe("RealPlateDetail", () => {
     };
     render(<RealPlateDetail plate={plate} />);
     expect(screen.queryByRole("img", { name: /Photo shared by/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /View full photo/ })).toBeNull();
   });
 
   it("pages five stories at a time with Show more", async () => {

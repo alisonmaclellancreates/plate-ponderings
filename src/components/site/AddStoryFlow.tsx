@@ -43,7 +43,7 @@ type PhotoDraft = {
 };
 
 /** The confirmed photo: uploaded path plus the processed preview for review. */
-type PhotoReady = { path: string; previewUrl: string };
+type PhotoReady = { path: string; previewUrl: string; box: Box };
 
 type FlowStep = "1" | "2" | "3" | "done" | "checking";
 
@@ -238,7 +238,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     setStep("2");
   };
 
-  const handleUsePhoto = async (blob: Blob, adjusted: boolean, draft: PhotoDraft) => {
+  const handleUsePhoto = async (blob: Blob, adjusted: boolean, box: Box, draft: PhotoDraft) => {
     setPhotoBusy(true);
     try {
       const uploaded = await uploadPhoto({ data: { jpeg: await blobToDataUrl(blob) } });
@@ -251,7 +251,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         box_found: draft.suggestion !== null,
         box_adjusted: adjusted,
       });
-      setPhotoReady({ path: uploaded.path, previewUrl: URL.createObjectURL(blob) });
+      setPhotoReady({ path: uploaded.path, previewUrl: URL.createObjectURL(blob), box });
       setPhotoDraft(null);
     } catch {
       setPause({ heading: STORY_SUBMIT_ERROR_HEADING, message: STORY_SUBMIT_ERROR_MESSAGE });
@@ -282,6 +282,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
           source: how,
           more,
           photoPath: photoReady?.path ?? "",
+          photoBox: photoReady?.box ?? null,
         },
       });
       const outcome =
@@ -440,7 +441,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
             bitmap={photoDraft.bitmap}
             initialBox={photoDraft.suggestion}
             showNoBoxMessage={photoDraft.noBoxMessage}
-            onUse={(blob, adjusted) => void handleUsePhoto(blob, adjusted, photoDraft)}
+            onUse={(blob, adjusted, box) => void handleUsePhoto(blob, adjusted, box, photoDraft)}
             onRemove={skipEditorPhoto}
             onChooseAnother={chooseAnotherPhoto}
           />

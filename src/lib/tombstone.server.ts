@@ -4,7 +4,13 @@ import { STORY_PHOTO_BUCKET } from "./submissions.functions";
 
 type Admin = SupabaseClient<Database>;
 
-const TOMBSTONE = { status: "deleted", meaning: "", body: null, photo_path: null } as const;
+const TOMBSTONE = {
+  status: "deleted",
+  meaning: "",
+  body: null,
+  photo_path: null,
+  photo_box: null,
+} as const;
 
 /**
  * Tombstones the author's published or hidden stories: the conditions sit in

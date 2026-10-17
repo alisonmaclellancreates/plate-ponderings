@@ -312,6 +312,7 @@ export type Database = {
           created_at: string
           id: string
           meaning: string
+          photo_box: number[] | null
           photo_path: string | null
           published_at: string | null
           removed_at: string | null
@@ -325,6 +326,7 @@ export type Database = {
           created_at?: string
           id?: string
           meaning: string
+          photo_box?: number[] | null
           photo_path?: string | null
           published_at?: string | null
           removed_at?: string | null
@@ -338,6 +340,7 @@ export type Database = {
           created_at?: string
           id?: string
           meaning?: string
+          photo_box?: number[] | null
           photo_path?: string | null
           published_at?: string | null
           removed_at?: string | null

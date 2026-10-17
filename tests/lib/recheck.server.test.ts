@@ -155,5 +155,9 @@ describe("recheckStory", () => {
     f.db.queue("stories", { data: [{ id: "s1" }], error: null });
     expect(await recheckStory(admin, photoStory, "author")).toBe("rejected");
     expect(f.db.storage.remove).toHaveBeenCalledWith([photoStory.photo_path]);
+    expect(f.db.ops("stories")[0]?.[0]).toEqual([
+      "update",
+      [{ status: "rejected", photo_path: null, photo_box: null }],
+    ]);
   });
 });
