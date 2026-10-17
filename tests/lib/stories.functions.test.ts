@@ -150,6 +150,19 @@ describe("addStory", () => {
     expect(await call(addStory, INPUT)).toEqual({ outcome: "published" });
     expect(mocks.refresh).toHaveBeenCalledWith("plate-1");
   });
+  it("returns the published outcome while the summary run is still pending", async () => {
+    let finished = false;
+    mocks.refresh.mockReturnValue(
+      new Promise<void>(() => {
+        /* never settles: the summary is still running */
+      }).finally(() => {
+        finished = true;
+      }),
+    );
+    expect(await call(addStory, INPUT)).toEqual({ outcome: "published" });
+    expect(mocks.refresh).toHaveBeenCalledWith("plate-1");
+    expect(finished).toBe(false);
+  });
   it("does not ask for a summary when the story stays pending", async () => {
     mocks.check.mockResolvedValue({ outcome: "unavailable", block: null });
     await call(addStory, INPUT);
