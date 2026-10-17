@@ -20,10 +20,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
 
-function RowAction({ row }: { row: Submission }) {
+type OnDismiss = ((row: Submission) => void) | undefined;
+
+function RowAction({ row, onDismiss }: { row: Submission; onDismiss?: OnDismiss }) {
   if (row.action === "dismiss")
     return (
-      <button type="button" className="brand-btn brand-btn-outline">
+      <button
+        type="button"
+        className="brand-btn brand-btn-outline"
+        onClick={() => onDismiss?.(row)}
+      >
         Dismiss
       </button>
     );
@@ -46,7 +52,7 @@ function RowAction({ row }: { row: Submission }) {
   return null;
 }
 
-function SubmissionRow({ row }: { row: Submission }) {
+function SubmissionRow({ row, onDismiss }: { row: Submission; onDismiss?: OnDismiss }) {
   const opens = row.action === "view";
   return (
     <li
@@ -72,7 +78,7 @@ function SubmissionRow({ row }: { row: Submission }) {
           <p className="text-sm">{row.explanation}</p>
           {row.action && (
             <div className="pt-1">
-              <RowAction row={row} />
+              <RowAction row={row} onDismiss={onDismiss} />
             </div>
           )}
         </div>
@@ -83,7 +89,7 @@ function SubmissionRow({ row }: { row: Submission }) {
       </div>
       <div className="flex justify-end">
         <span className="hidden sm:block">
-          <RowAction row={row} />
+          <RowAction row={row} onDismiss={onDismiss} />
         </span>
         {opens && (
           <ChevronRight
@@ -97,7 +103,15 @@ function SubmissionRow({ row }: { row: Submission }) {
   );
 }
 
-export function SubmissionsPage({ rows = SUBMISSIONS }: { rows?: Submission[] }) {
+export function SubmissionsPage({
+  rows = SUBMISSIONS,
+  onDismiss,
+  message = "",
+}: {
+  rows?: Submission[];
+  onDismiss?: OnDismiss;
+  message?: string;
+}) {
   const sorted = [...rows].sort((a, b) => b.date.localeCompare(a.date));
   return (
     <main>
@@ -106,9 +120,14 @@ export function SubmissionsPage({ rows = SUBMISSIONS }: { rows?: Submission[] })
         title="Your Submissions"
         subtitle="The plates you've spotted and the stories you've shared."
       />
+      {message && (
+        <p role="alert" className="mx-auto max-w-5xl px-4 pt-6">
+          {message}
+        </p>
+      )}
       <ul className="mx-auto max-w-5xl space-y-3 px-4 py-8">
         {sorted.map((row) => (
-          <SubmissionRow key={row.id} row={row} />
+          <SubmissionRow key={row.id} row={row} onDismiss={onDismiss} />
         ))}
       </ul>
     </main>
