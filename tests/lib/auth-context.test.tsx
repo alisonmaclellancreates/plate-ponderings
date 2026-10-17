@@ -52,7 +52,7 @@ vi.mock("@/lib/analytics", () => ({
   track: m.track,
 }));
 import { AccountProvider } from "@/lib/auth-context";
-import { useAccountAuth } from "@/lib/account-auth";
+import { useAccountAuth, type Account } from "@/lib/account-auth";
 function Consumer() {
   const auth = useAccountAuth();
   return (
