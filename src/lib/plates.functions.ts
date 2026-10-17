@@ -230,39 +230,51 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
       .select("id,identity_a,identity_b,jurisdictions!subjects_identity_a_fkey(name)")
       .eq("created_by", context.userId)
       .eq("status", "pending");
-    if (pending.error || !pending.data || pending.data.length === 0) return { rechecked: 0 };
-    const { checkSubject } = await import("./plate-moderation.server");
     let rechecked = 0;
-    for (const subject of pending.data) {
-      const joined = subject.jurisdictions as unknown as { name: string } | null;
-      const result = await checkSubject(joined?.name ?? subject.identity_a, subject.identity_b);
-      if (result.block) await persistAiBlock(supabaseAdmin, result.block, result.runId);
-      if (result.outcome === "unavailable") break;
-      rechecked++;
-      if (result.outcome === "approved") {
-        await supabaseAdmin
-          .from("subjects")
-          .update({ status: "published", published_at: new Date().toISOString() })
-          .eq("id", subject.id);
-        await supabaseAdmin.from("notifications").insert({
-          user_id: context.userId,
-          kind: "subject_published",
-          subject_id: subject.id,
-        });
-      } else {
-        await supabaseAdmin.from("subjects").update({ status: "rejected" }).eq("id", subject.id);
-        await supabaseAdmin.from("notifications").insert({
-          user_id: context.userId,
-          kind: "subject_rejected",
-          subject_id: subject.id,
-        });
+    let halted = false;
+    if (!pending.error && pending.data && pending.data.length > 0) {
+      const { checkSubject } = await import("./plate-moderation.server");
+      for (const subject of pending.data) {
+        const joined = subject.jurisdictions as unknown as { name: string } | null;
+        const result = await checkSubject(joined?.name ?? subject.identity_a, subject.identity_b);
+        if (result.block) await persistAiBlock(supabaseAdmin, result.block, result.runId);
+        if (result.outcome === "unavailable") {
+          halted = true;
+          break;
+        }
+        rechecked++;
+        if (result.outcome === "approved") {
+          await supabaseAdmin
+            .from("subjects")
+            .update({ status: "published", published_at: new Date().toISOString() })
+            .eq("id", subject.id)
+            .eq("status", "pending");
+          await supabaseAdmin.from("notifications").insert({
+            user_id: context.userId,
+            kind: "subject_published",
+            subject_id: subject.id,
+          });
+        } else {
+          await supabaseAdmin
+            .from("subjects")
+            .update({ status: "rejected" })
+            .eq("id", subject.id)
+            .eq("status", "pending");
+          await supabaseAdmin.from("notifications").insert({
+            user_id: context.userId,
+            kind: "subject_rejected",
+            subject_id: subject.id,
+          });
+        }
       }
     }
-    const pendingStories = await supabaseAdmin
-      .from("stories")
-      .select("id,subject_id,meaning,body,subjects!stories_subject_id_fkey(identity_b)")
-      .eq("author_id", context.userId)
-      .eq("status", "pending");
+    const pendingStories = halted
+      ? { data: null, error: null }
+      : await supabaseAdmin
+          .from("stories")
+          .select("id,subject_id,meaning,body,subjects!stories_subject_id_fkey(identity_b)")
+          .eq("author_id", context.userId)
+          .eq("status", "pending");
     if (!pendingStories.error && pendingStories.data && pendingStories.data.length > 0) {
       const { checkStory } = await import("./story-moderation.server");
       const { requestSummaryRefresh } = await import("./summary-refresh.server");
@@ -276,7 +288,8 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
           await supabaseAdmin
             .from("stories")
             .update({ status: "published", published_at: new Date().toISOString() })
-            .eq("id", story.id);
+            .eq("id", story.id)
+            .eq("status", "pending");
           await supabaseAdmin.from("notifications").insert({
             user_id: context.userId,
             kind: "story_published",
@@ -285,7 +298,11 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
           });
           await requestSummaryRefresh(story.subject_id);
         } else {
-          await supabaseAdmin.from("stories").update({ status: "rejected" }).eq("id", story.id);
+          await supabaseAdmin
+            .from("stories")
+            .update({ status: "rejected" })
+            .eq("id", story.id)
+            .eq("status", "pending");
           await supabaseAdmin.from("notifications").insert({
             user_id: context.userId,
             kind: "story_rejected",
