@@ -1,5 +1,10 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43: Rowan rate-limit correction
+
+- [x] Separate pause outcome using the unchanged wait message; live and preview outcome tests pass. All new executable lines covered locally; 581 tests pass.
+- [x] Check the outcome at 1280px and 360px: clean wrapping, no horizontal overflow or browser errors, Go Back returns home. Changed-file lint clean; preview build OK. Jurisdiction display deferred.
+
 - [x] Diagnose lint, ignore generated files, and format remaining files.
 - [x] Run lint and coverage; inspect automatic build/typecheck signals.
 - [x] Add parallel CI jobs, Codecov configuration, and README badge.

@@ -29,3 +29,4 @@
 - Keep account context types and the consumer hook in `src/lib/account-auth.ts`, separate from the component-only provider; stabilize refresh and declare effect dependencies so auth lifecycle remains lint-safe without rule suppression.
 - The member-profile menu is an independently testable component, including its signed-out refusal, so account boundaries can be verified without artificial context changes during a parent render.
 - Protected account-required routes live under the client-only `_authenticated` gate with an `/auth` adapter to `/sign-in`; the missing-layout bootstrap validates `getUser()` before children run because SSR cannot read browser sessions.
+- Live and preview rate-limit outcomes share one renderer and the existing wait-message constant, so preview review cannot drift from the submitted flow.
