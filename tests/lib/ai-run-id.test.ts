@@ -50,8 +50,12 @@ it("extracts ids and exposes only gateway response headers", () => {
     { "Access-Control-Expose-Headers": "content-type, ", "X-Lovable-AIG-Extra": "yes" },
   );
   expect(headers.get("private")).toBeNull();
-  expect(headers.get("Access-Control-Expose-Headers")?.toLowerCase()).toContain("x-lovable-aig-run-id");
-  expect(headers.get("Access-Control-Expose-Headers")?.toLowerCase()).toContain("x-lovable-aig-extra");
+  expect(headers.get("Access-Control-Expose-Headers")?.toLowerCase()).toContain(
+    "x-lovable-aig-run-id",
+  );
+  expect(headers.get("Access-Control-Expose-Headers")?.toLowerCase()).toContain(
+    "x-lovable-aig-extra",
+  );
 });
 it.each(["id", undefined])("wraps empty-body responses with optional id %s", async (id) => {
   const response = await withLovableAiGatewayRunIdHeader(
