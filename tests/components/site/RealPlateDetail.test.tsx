@@ -28,6 +28,14 @@ import { RealPlateDetail } from "@/components/site/PlateDetail";
 const plate = { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" };
 
 describe("RealPlateDetail", () => {
+  it.each(["Newfoundland and Labrador", "Utah"])("uses the shared frame for %s", (jurisdiction) => {
+    render(<RealPlateDetail plate={{ ...plate, jurisdiction }} />);
+    const artwork = screen.getByRole("img", { name: `${jurisdiction} plate ${plate.text}` });
+    const name = screen.getByText(jurisdiction, { selector: "p" });
+    expect(artwork.nextElementSibling).toBe(name);
+    expect(name.getAttribute("aria-hidden")).toBe("true");
+  });
+
   it("renders the live plate as a mystery with no owner", () => {
     render(<RealPlateDetail plate={plate} />);
     expect(

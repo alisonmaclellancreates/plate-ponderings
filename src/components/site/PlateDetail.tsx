@@ -8,7 +8,7 @@ import {
   MoreHorizontal,
   UserCircle2,
 } from "lucide-react";
-import { Plate } from "@/components/site/Plate";
+import { PlateFrame } from "@/components/site/PlateFrame";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
 import {
@@ -270,17 +270,7 @@ export function PlateDetail({ state }: { state: string }) {
         Back to Explore
       </a>
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[auto_minmax(0,1fr)]">
-        <div className="min-w-0 rounded-2xl border-8 border-navy bg-card p-6 shadow-md">
-          <h1 className="sr-only">
-            {plate.jurisdiction} plate {plate.text}
-          </h1>
-          <Plate
-            jurisdiction={plate.jurisdiction}
-            text={plate.text}
-            size="lg"
-            className="mx-auto min-w-0"
-          />
-        </div>
+        <PlateFrame jurisdiction={plate.jurisdiction} text={plate.text} />
         <div className="min-w-0">
           {hasStories ? (
             <StorySoFar
@@ -329,17 +319,7 @@ export function RealPlateDetail({
         </a>
       )}
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[auto_minmax(0,1fr)]">
-        <div className="min-w-0 rounded-2xl border-8 border-navy bg-card p-6 shadow-md">
-          <h1 className="sr-only">
-            {plate.jurisdiction} plate {plate.text}
-          </h1>
-          <Plate
-            jurisdiction={plate.jurisdiction}
-            text={plate.text}
-            size="lg"
-            className="mx-auto min-w-0"
-          />
-        </div>
+        <PlateFrame jurisdiction={plate.jurisdiction} text={plate.text} />
         <div className="min-w-0">
           <MysteryPrompt />
         </div>
