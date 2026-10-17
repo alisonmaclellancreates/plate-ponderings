@@ -297,3 +297,60 @@ export function PlateDetail({ state }: { state: string }) {
     </main>
   );
 }
+
+/** A real published plate: frame, identity and status strip from live data.
+ *  The stories area stays on the mock design until step 44. */
+export function RealPlateDetail({
+  plate,
+  backToSearch,
+}: {
+  plate: { id: string; jurisdiction: string; text: string };
+  backToSearch?: { jurisdiction: string; text: string } | undefined;
+}) {
+  return (
+    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+      {backToSearch ? (
+        <Link
+          to="/"
+          search={{ jurisdiction: backToSearch.jurisdiction, text: backToSearch.text }}
+          className="inline-flex items-center gap-1 font-semibold text-navy underline-offset-4 hover:underline"
+        >
+          <ArrowLeft aria-hidden className="size-4" />
+          Back to Search
+        </Link>
+      ) : (
+        <a
+          href="/explore"
+          className="inline-flex items-center gap-1 font-semibold text-navy underline-offset-4 hover:underline"
+        >
+          <ArrowLeft aria-hidden className="size-4" />
+          Back to Explore
+        </a>
+      )}
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[auto_minmax(0,1fr)]">
+        <div className="min-w-0 rounded-2xl border-8 border-navy bg-card p-6 shadow-md">
+          <h1 className="sr-only">
+            {plate.jurisdiction} plate {plate.text}
+          </h1>
+          <Plate jurisdiction={plate.jurisdiction} text={plate.text} size="lg" className="mx-auto min-w-0" />
+        </div>
+        <div className="min-w-0">
+          <MysteryPrompt />
+        </div>
+      </div>
+      <ul
+        aria-label="Plate status"
+        className="flex flex-wrap items-center gap-y-2 divide-x divide-border rounded-xl border border-border bg-card py-3"
+      >
+        <li className="flex items-center gap-2 px-4 font-semibold">
+          <MessageCircle aria-hidden className="size-5" />
+          {storyCount(0)}
+        </li>
+        <li className="px-4">
+          <StatusBadge status="mystery" />
+        </li>
+        <li className="px-4 font-semibold">No owner yet</li>
+      </ul>
+    </main>
+  );
+}
