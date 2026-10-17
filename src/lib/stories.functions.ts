@@ -64,6 +64,10 @@ export const addStory = createServerFn({ method: "POST" })
       trace("role", roleError);
       return { outcome: "error" };
     }
+    if (demo) {
+      trace("demo");
+      return { outcome: "demo", message: DEMO_MESSAGE };
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // A photo path is exactly the caller's folder plus one uuid.jpg; anything
     // else (dot segments, other folders, other names) is refused.
@@ -87,11 +91,6 @@ export const addStory = createServerFn({ method: "POST" })
       const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");
       await supabaseAdmin.storage.from(STORY_PHOTO_BUCKET).remove([data.photoPath]);
     };
-    if (demo) {
-      trace("demo");
-      await deletePhoto();
-      return { outcome: "demo", message: DEMO_MESSAGE };
-    }
     if (!validateStory(data) || (data.photoPath && !box)) {
       trace("validation");
       await deletePhoto();
