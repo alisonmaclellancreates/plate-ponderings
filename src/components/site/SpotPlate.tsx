@@ -1,11 +1,16 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { AlertCircle, Car, MessageCircle, Search } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ConsensusBadge } from "@/components/site/Badges";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
 import { PLATES } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
+import { spotPlate, type SpotResult } from "@/lib/plates.functions";
+import { useAccountAuth } from "@/lib/account-auth";
+import { DEMO_MESSAGE } from "@/lib/account-rules";
+import { track } from "@/lib/analytics";
 import {
   JURISDICTION_ERROR,
   TEXT_ERROR,
@@ -115,20 +120,28 @@ function FieldError({ id, message }: { id: string; message?: string | undefined 
 export function SpotForm({
   values = {},
   errors: initialErrors = {},
+  busy = false,
+  isDemo = false,
+  onSpot,
 }: {
   values?: SpotValues | undefined;
   errors?: SpotErrors | undefined;
+  busy?: boolean;
+  isDemo?: boolean;
+  onSpot?: ((values: Required<SpotValues>) => void) | undefined;
 }) {
   const [errors, setErrors] = useState<SpotErrors>(initialErrors);
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (busy || isDemo) return;
     const data = new FormData(e.currentTarget);
-    setErrors(
-      validateSpot({
-        jurisdiction: String(data.get("jurisdiction") ?? ""),
-        text: String(data.get("text") ?? ""),
-      }),
-    );
+    const next = {
+      jurisdiction: String(data.get("jurisdiction") ?? ""),
+      text: String(data.get("text") ?? ""),
+    };
+    const found = validateSpot(next);
+    setErrors(found);
+    if (!found.jurisdiction && !found.text) onSpot?.(next);
   };
   const textDescribedBy = ["spot-text-limit", errors.text && "spot-text-error"]
     .filter(Boolean)
