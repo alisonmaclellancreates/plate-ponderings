@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
 import type { HeaderMode } from "@/lib/header-mode";
+import { useAccountAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/button";
 
 // Explore, Spot a Plate and About are built in later steps; plain anchors until then.
 const NAV = [
@@ -11,19 +13,13 @@ const NAV = [
   { href: "/about", label: "About" },
 ];
 
-function Avatar({ showHandle }: { showHandle: boolean }) {
+function Avatar({ showHandle, handle = CURRENT_USER.handle }: { showHandle: boolean; handle?: string }) {
   return (
     <span className="flex items-center gap-2">
       <span className="relative inline-flex size-9 items-center justify-center rounded-full bg-cream text-navy">
         <UserRound aria-hidden className="size-5" />
-        {CURRENT_USER.hasNotification && (
-          <span
-            data-testid="notification-dot"
-            className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-navy bg-coral"
-          />
-        )}
       </span>
-      <span className={showHandle ? "font-semibold" : "sr-only"}>{CURRENT_USER.handle}</span>
+      <span className={showHandle ? "font-semibold" : "sr-only"}>{handle}</span>
     </span>
   );
 }
@@ -73,7 +69,26 @@ function DemoProfile({ showHandle }: { showHandle: boolean }) {
 const signIn = "site-nav-link rounded-md px-2 py-1";
 const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream";
 
-export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
+function MemberProfile({ showHandle }: { showHandle: boolean }) {
+  const auth = useAccountAuth();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+  if (!auth?.account) return null;
+  return <div className="relative">
+    <Button variant="ghost" className="h-auto rounded-full p-0 text-cream" aria-label={`${auth.account.handle} menu`} aria-expanded={open} onClick={() => setOpen(v => !v)}><Avatar showHandle={showHandle} handle={auth.account.handle} /></Button>
+    {open && <ul aria-label="Profile" className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg">
+      <li><Link to="/submissions" className="block px-4 py-2 hover:bg-cream">Your Submissions</Link></li>
+      <li><Link to="/profile" className="block px-4 py-2 hover:bg-cream">Your Profile</Link></li>
+      {auth.account.isAdmin && <li><Link to="/admin" className="block px-4 py-2 hover:bg-cream">Admin</Link></li>}
+      <li className="border-t border-border"><Button variant="ghost" className="w-full justify-start px-4 text-navy" onClick={() => void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."))}>Sign out</Button></li>
+      {error && <li role="alert" className="px-4 py-2">{error}</li>}
+    </ul>}
+  </div>;
+}
+export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
+  const auth = useAccountAuth();
+  const mode = previewMode ?? (auth?.account ? "member" : "signed-out");
+  const demoEnabled = previewMode !== undefined || auth?.demoEnabled;
   const [open, setOpen] = useState(false);
   const signedOut = mode === "signed-out";
   return (
@@ -101,14 +116,14 @@ export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
               <Link to="/sign-in" className={signIn}>
                 Sign in
               </Link>
-              <Link to="/demo" className={tryDemo}>
+              {demoEnabled && <Link to="/demo" className={tryDemo}>
                 Try the Demo
-              </Link>
+              </Link>}
             </>
           ) : mode === "demo" ? (
             <DemoProfile showHandle />
           ) : (
-            <Avatar showHandle />
+            previewMode ? <Avatar showHandle /> : <MemberProfile showHandle />
           )}
         </div>
         <div className="ml-auto flex items-center gap-3 md:hidden">
@@ -119,7 +134,7 @@ export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
           ) : mode === "demo" ? (
             <DemoProfile showHandle={false} />
           ) : (
-            <Avatar showHandle={false} />
+            previewMode ? <Avatar showHandle={false} /> : <MemberProfile showHandle={false} />
           )}
           <button
             type="button"
@@ -144,7 +159,7 @@ export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
               {item.label}
             </a>
           ))}
-          {signedOut && (
+          {signedOut && demoEnabled && (
             <Link to="/demo" className={`${tryDemo} mt-2 inline-block`}>
               Try the Demo
             </Link>
