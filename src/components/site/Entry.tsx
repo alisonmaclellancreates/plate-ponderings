@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import { PlateHeader } from "@/components/site/AddStory";
 import { DEMO_SEES } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: str
         </button>
       </div>
       {hint && (
-        <p id="password-hint" className="mt-1 text-sm text-muted-foreground">
+        <p id={hintId} className="mt-1 text-sm text-muted-foreground">
           {hint}
         </p>
       )}
@@ -174,11 +174,13 @@ const inertSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 };
 
 export function SignInForm({ busy, error, submit }: EntryFormProps) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <form className="space-y-4" onSubmit={submit}>
-      <EmailField />
-      <PasswordField />
-      {error && <p role="alert">{error}</p>}
+      <EmailField describedBy={describedBy} />
+      <PasswordField describedBy={describedBy} />
+      {error && <FormError id={errorId}>{error}</FormError>}
       <Button type="submit" disabled={busy} className="brand-btn brand-btn-navy w-full">
         Sign In
       </Button>
@@ -187,11 +189,13 @@ export function SignInForm({ busy, error, submit }: EntryFormProps) {
 }
 
 export function SignUpForm({ busy, error, submit }: EntryFormProps) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <form className="space-y-4" onSubmit={submit}>
-      <EmailField />
-      <PasswordField hint="Use at least 8 characters" />
-      {error && <p role="alert">{error}</p>}
+      <EmailField describedBy={describedBy} />
+      <PasswordField hint="Use at least 8 characters" describedBy={describedBy} />
+      {error && <FormError id={errorId}>{error}</FormError>}
       <Button type="submit" disabled={busy} className="brand-btn brand-btn-coral w-full">
         Create Account
       </Button>

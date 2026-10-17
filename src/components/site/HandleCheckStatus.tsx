@@ -43,7 +43,9 @@ export function HandleCheckStatusPanel({
           </p>
           <p className="mt-1">Handle checks are paused. People can keep their current handles.</p>
           {status?.blockedAt && (
-            <p className="mt-1 text-sm">{new Date(status.blockedAt).toLocaleString()}</p>
+            <p className="mt-1 text-sm">
+              Paused since {new Date(status.blockedAt).toLocaleString()}
+            </p>
           )}
           <Button disabled={busy} className="brand-btn brand-btn-navy mt-3" onClick={onResume}>
             Resume handle checks
