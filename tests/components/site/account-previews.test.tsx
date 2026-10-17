@@ -90,6 +90,29 @@ it("status panel previews show Ready without Resume and the Blocked design", () 
   expect(screen.queryByText("Handle checks resumed.")).toBeNull();
 });
 
+it("the previews page renders every account state section", () => {
+  const AccountPreviews = AccountPreviewsRoute.options.component as React.ComponentType;
+  render(<AccountPreviews />);
+  expect(screen.getByRole("heading", { name: "Account previews" })).toBeInTheDocument();
+  for (const title of [
+    "Handle field, available",
+    "Handle field, taken",
+    "Handle field, reserved",
+    "Handle field, invalid characters",
+    "Handle field, wrong length",
+    "Handle save, rejected by the check",
+    "Handle save, changes saved",
+    "Handle check status, Ready",
+    "Handle check status, Blocked",
+  ]) {
+    expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
+  }
+  expect(screen.getByRole("heading", { name: "Sign in, wrong password" })).toBeInTheDocument();
+  expect(screen.getAllByRole("alert").length).toBe(4);
+  expect(m.signIn).not.toHaveBeenCalled();
+  expect(m.signUp).not.toHaveBeenCalled();
+});
+
 it("entry previews show the error and never call sign-in or sign-up", () => {
   const v = render(
     <SignInPage previewError="We couldn't sign you in. Check your email and password and try again." />,
