@@ -1,5 +1,13 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43b: retired columns and missing index only
+
+- [x] Confirm no active code or tests read the deprecated handle_check_* columns; matches outside generated types are historical migrations and documentation only.
+- [ ] Apply an isolated migration dropping the three deprecated columns.
+- [ ] Apply a separate subject_save_attempts (user_id, attempted_at) index migration and regenerate types.
+- [ ] Read the final columns and index from the database; run every tests/db file, full app coverage gate and lint.
+- [ ] Confirm automatic branch sync and PR coverage when available; manual git mutations are unavailable in this environment.
+
 # Step 43: Copilot pending feedback and pause analytics
 
 - [x] Retain submitted plate values; behaviour tests verify search arrivals, direct /spot submissions and edits to prefilled values, including retained fields and Back to Search destinations.
