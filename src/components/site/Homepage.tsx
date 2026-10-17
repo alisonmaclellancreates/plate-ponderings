@@ -1,9 +1,14 @@
-import { Link } from "@tanstack/react-router";
-import { Star } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { AlertCircle, Star } from "lucide-react";
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
 import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
+import { validateSpot, type SpotErrors } from "@/lib/spot";
+import { searchPlate } from "@/lib/plates.functions";
+import { track } from "@/lib/analytics";
 
 import { storyCount } from "@/lib/story-count";
 import { HEADLINES, useHeadlineIndex } from "@/lib/headlines";
@@ -39,61 +44,132 @@ export interface SearchValues {
   text?: string | undefined;
 }
 
-function SearchCard({ values }: { values: SearchValues }) {
+function SearchCard({
+  values,
+  onNoMatch,
+}: {
+  values: SearchValues;
+  onNoMatch: (values: Required<SearchValues>) => void;
+}) {
+  const [jurisdiction, setJurisdiction] = useState(values.jurisdiction ?? "");
+  const [text, setText] = useState(values.text ?? "");
+  const [errors, setErrors] = useState<SpotErrors>({});
+  const [busy, setBusy] = useState(false);
+  const search = useServerFn(searchPlate);
+  const navigate = useNavigate();
+  const textDescribedBy = ["plate-text-hint", errors.text && "plate-text-error"]
+    .filter(Boolean)
+    .join(" ");
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    const next = validateSpot({ jurisdiction, text });
+    setErrors(next);
+    if (next.jurisdiction || next.text) return;
+    setBusy(true);
+    try {
+      const result = await search({ data: { jurisdiction, text } });
+      await track("subject_searched", {
+        found: result.status === "found",
+        jurisdiction,
+      });
+      if (result.status === "found") {
+        await navigate({
+          to: "/plate/$state",
+          params: { state: result.plate.id },
+          search: { jurisdiction, text },
+        });
+      } else {
+        onNoMatch({ jurisdiction, text });
+      }
+    } catch {
+      onNoMatch({ jurisdiction, text });
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <form
       id="plate-search"
       role="search"
       aria-label="Look up a plate"
-      onSubmit={(e) => e.preventDefault()}
+      noValidate
+      onSubmit={onSubmit}
       className="brand-card bg-cream p-5"
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">State or Province</span>
-          <select
-            name="jurisdiction"
-            defaultValue={values.jurisdiction ?? ""}
-            className="h-11 w-full rounded-lg border border-input bg-card px-3"
-          >
-            <option value="" disabled>
-              Select a state or province
-            </option>
-            {JURISDICTION_GROUPS.map((g) => (
-              <optgroup key={g.label} label={g.label}>
-                {g.names.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+        <div>
+          <label className="block">
+            <span className="mb-1 block text-sm font-semibold">State or Province</span>
+            <select
+              name="jurisdiction"
+              value={jurisdiction}
+              onChange={(e) => setJurisdiction(e.target.value)}
+              aria-invalid={errors.jurisdiction ? true : undefined}
+              aria-describedby={errors.jurisdiction ? "plate-jurisdiction-error" : undefined}
+              className="h-11 w-full rounded-lg border border-input bg-card px-3"
+            >
+              <option value="" disabled>
+                Select a state or province
+              </option>
+              {JURISDICTION_GROUPS.map((g) => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.names.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+          {errors.jurisdiction && (
+            <p
+              id="plate-jurisdiction-error"
+              role="alert"
+              className="mt-1 flex items-center gap-1 text-sm text-coral-cta"
+            >
+              <AlertCircle aria-hidden className="size-4 shrink-0" />
+              {errors.jurisdiction}
+            </p>
+          )}
+        </div>
         <div>
           <label className="block">
             <span className="mb-1 block text-sm font-semibold">Plate text</span>
             <input
               name="text"
-              defaultValue={values.text ?? ""}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
               placeholder="e.g. B7K2L9"
-              aria-describedby="plate-text-hint"
+              aria-invalid={errors.text ? true : undefined}
+              aria-describedby={textDescribedBy}
               className="h-11 w-full rounded-lg border border-input bg-card px-3 uppercase placeholder:normal-case"
             />
           </label>
           <span id="plate-text-hint" className="mt-1 block text-sm text-muted-foreground">
             Spaces and dashes are ignored
           </span>
+          {errors.text && (
+            <p
+              id="plate-text-error"
+              role="alert"
+              className="mt-1 flex items-center gap-1 text-sm text-coral-cta"
+            >
+              <AlertCircle aria-hidden className="size-4 shrink-0" />
+              {errors.text}
+            </p>
+          )}
         </div>
       </div>
-      <button type="submit" className="brand-btn brand-btn-navy mt-4 w-full sm:w-auto">
+      <button type="submit" disabled={busy} className="brand-btn brand-btn-navy mt-4 w-full sm:w-auto">
         Search
       </button>
     </form>
   );
 }
 
-function NoMatchPanel() {
+function NoMatchPanel({ values }: { values: Required<SearchValues> }) {
   return (
     <section
       aria-labelledby="no-match-heading"
@@ -105,9 +181,13 @@ function NoMatchPanel() {
           No plate found. Yet!
         </h2>
         <p className="mt-1">We couldn't find this plate in the collection. Want to add it?</p>
-        <a href="/spot" className="brand-btn brand-btn-coral mt-3">
+        <Link
+          to="/spot"
+          search={{ jurisdiction: values.jurisdiction, text: values.text }}
+          className="brand-btn brand-btn-coral mt-3"
+        >
           Spot a Plate
-        </a>
+        </Link>
       </div>
     </section>
   );
