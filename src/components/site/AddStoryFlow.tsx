@@ -280,7 +280,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
           <button
             type="button"
             onClick={() => setStep("2")}
-            disabled={meaning.trim().length < 3}
+            disabled={demo || meaning.trim().length < 3}
             className={coral}
           >
             Next
@@ -288,6 +288,11 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
         </>
       }
     >
+      {demo && (
+        <div role="status" className="brand-card bg-cream-warm p-4">
+          <p className="font-semibold">{DEMO_FORM_MESSAGE}</p>
+        </div>
+      )}
       {rejected && (
         <div role="status" className="brand-card bg-cream-warm p-4">
           <p className="font-semibold">We couldn't add this story.</p>
