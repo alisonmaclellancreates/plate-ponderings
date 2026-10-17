@@ -35,7 +35,7 @@ Credits and provider access are project-wide, so the pause is shared:
 - While blocked: a handle save keeps the old handle and shows its existing message; a spot is saved as pending without calling the AI; the recheck does nothing.
 - The /admin panel keeps Rowan's approved layout with updated copy: section heading "AI check status", blocked heading "Blocked", blocked line "AI checks are paused. Nothing is published without a check. People keep their current handles.", "Paused since" with date and time, button "Resume AI checks", success after confirmed resume "AI checks resumed." The account preview's Blocked and Ready states are updated to match.
 - AGENTS.md recovery instructions updated to the new names.
-- Tests: a block set by any one check stops the others.
+- Tests: a block set by any one check stops the others, and Resume AI checks clears the block for every check, not only the one that set it.
 
 ## AI subject check (new `src/lib/plate-moderation.server.ts`)
 
@@ -59,7 +59,8 @@ Registry gains `subject_searched` ({ found, jurisdiction }) and `subject_spotted
 
 ## Tests and verification
 
-- Normalization (spacing, dashes, case, O vs 0), every spot outcome, the simultaneous-spot conflict path, the recheck transitions and throttle, demo refusal, rate limit, and the shared-block behavior (a block set by any one check stops the others). AI calls mocked.
+- Normalization (spacing, dashes, case, O vs 0), every spot outcome, the simultaneous-spot conflict path, the recheck transitions and throttle, demo refusal, rate limit, and the shared-block behavior (a block set by any one check stops the others; Resume clears it for every check). AI calls mocked.
+- The homepage look-up card focus test (pressing the button moves keyboard focus to the jurisdiction field and scrolls it into view) already exists from the static pages in `tests/components/site/Homepage.test.tsx`; I will confirm it still passes and report it as pre-existing.
 - Analytics event tests including the never-send list.
 - Rerun the step 41 database tests (`tests/db/*.sql`) after the migration and report the result.
 - Focused lint on touched files, typecheck, build. Live check of search match/no-match and a real spot with the AI gateway, reported as actually observed.
