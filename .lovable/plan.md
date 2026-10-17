@@ -1,27 +1,36 @@
 # Step 49: story photos with browser-side blur
 
-Add the optional photo to the story flow: choose, AI box detection, adjust, canvas blur, JPEG export, private upload. The original is never stored, logged, or uploaded.
+Add the optional photo to the story flow: choose, AI box detection, adjust, canvas blur, JPEG export, server-side upload. The original is never stored, logged, or uploaded.
 
 ## Database (needs approval)
 
-1. **Bucket `story-photos`** (private, via the storage tool, not SQL). Migration adds RLS on `storage.objects`: authenticated users may INSERT only into their own folder (`(storage.foldername(name))[1] = auth.uid()::text`), nothing else. Reads go through short-lived signed URLs made server-side; deletes (rejected story, account deletion) use the admin client server-side. No anon access.
-2. **Rate limit for detection**: new service-only table `photo_detect_attempts` (id, user_id, attempted_at) plus `consume_photo_detect_attempt(_user_id)` security-definer function, mirroring `story_save_attempts`. No browser grants or policies. Step 41 database tests get a matching `tests/db/photo-attempts.sql` (begin/rollback, set local role).
+The `story-photos` bucket and its owner-folder policies already exist (step 41, migration 0001); the bucket is confirmed present, so nothing is created or duplicated.
+
+One migration:
+
+1. **Drop the browser upload rule** `story-photos: author uploads own folder` on `storage.objects`. Uploads move to a server function using the admin client, so the browser no longer needs INSERT. The existing SELECT (own folder) and DELETE (own folder) policies stay.
+2. **Rate limit for detection**: new service-only table `photo_detect_attempts` (id, user_id, attempted_at) plus `consume_photo_detect_attempt(_user_id)` security-definer function, mirroring `consume_story_save_attempt` (advisory lock, 5 per 15 minutes, demo refused). No browser grants or policies. Matching `tests/db/photo-attempts.sql` (begin/rollback, set local role).
 
 No change to `stories`: `photo_path` already exists.
 
 ## Server
 
-- `src/lib/photo-detect.server.ts`: sends the image to the Lovable AI gateway (vision-capable model) asking only for the plate box as fractions of width/height, or "none". Same gateway/block handling as `checkStory`; the shared AI pause applies. The image bytes live only in the request body; nothing is written to storage or logs.
-- `detectPlateBox` server function: `requireSupabaseAuth`, refuses demo, validates input (data URL, JPEG/PNG/WebP only, size cap), consumes a detect attempt (rate limit copy as the other limits), checks the shared AI pause first, returns `{ box: {x,y,w,h} | null }` or `unavailable`.
-- `addStory` accepts optional `photoPath`. Server validates the path is inside the caller's own folder before storing it on the story. A rejected story deletes the uploaded photo (admin client). Pending/published keep it.
-- `getPlateStories` returns a short-lived signed URL per published `photo_path` (generated server-side, ~15 min expiry). Block-filtering rules from step 48 unchanged.
+- `src/lib/photo-detect.server.ts`: sends a downscaled copy (longest side about 1024 px, EXIF rotation applied, produced in the browser from the same decoded image the canvas uses) to the Lovable AI gateway with a vision-capable model, asking only for the plate box as fractions of width/height, or "none". Same gateway/block handling as `checkStory`; the shared AI pause applies. Image bytes live only in the request body; nothing is written to storage or logs.
+- `detectPlateBox` server function: `requireSupabaseAuth`, refuses demo, validates input (data URL, JPEG/PNG/WebP, size cap), checks the shared AI pause, consumes a detect attempt (shared rate-limit copy), returns `{ box: {x,y,w,h} | null }` or `unavailable`.
+- `uploadStoryPhoto` server function: `requireSupabaseAuth`, refuses demo. Receives the processed JPEG, verifies it is a JPEG, under a size cap, and at most 1600 px on its longest side (decoded and measured server-side), then stores it in the caller's own folder (`{userId}/{uuid}.jpg`) with the admin client. Returns the stored path.
+- `addStory` accepts optional `photoPath`, checks the path is in the caller's own folder, and **deletes the uploaded photo for every outcome that saves no story**: rejected, rate-limited, validation, error, demo. Pending and published keep it.
+- `getPlateStories` returns a short-lived signed URL per published `photo_path` (server-side, ~15 min expiry). Step 48 block-filtering unchanged.
 
 ## Client
 
-- `src/lib/photo-blur.ts` (pure, unit-tested): box fraction maths (clamp, min size, draw-from-drag), and `renderBlurredPhoto(image, box)` drawing to canvas: heavy blur outside the box (stacked downscale draw, no CSS overlay), sharp box, export as JPEG with longest side <= 1600 px.
-- `src/components/site/PhotoEditor.tsx`: the existing editor shell (dialog on desktop, full-screen on mobile) made real. Pointer-based drag to move, corner handles to resize, drag-on-empty to draw when no box was found. Reset restores the AI suggestion; Try again re-runs detection. Review shows the actual processed canvas image with the brief's review sentence (no ticks). Any box change after review rebuilds the preview and requires confirming again.
-- `AddStoryFlow` step 2 becomes the real photo step: file input (JPEG/PNG/WebP), unreadable file shows the brief's message with a continue-without path, "Continue without a photo" stays. On "Use This Photo": export the canvas, upload the JPEG to `story-photos/{userId}/{uuid}.jpg` via the browser client (own-folder INSERT policy), then submit with `photoPath`. Step 3 shows the processed image.
+- `src/lib/photo-blur.ts` (pure, unit-tested): decode with EXIF rotation applied (`createImageBitmap` with `imageOrientation: "from-image"`), box fraction maths (clamp, min size, draw-from-drag), downscale-to-1024 copy for detection, and `renderBlurredPhoto(image, box)`: heavy blur outside the box (stacked downscale draws on canvas, never a CSS overlay), sharp box, export as JPEG with longest side <= 1600 px.
+- `src/components/site/PhotoEditor.tsx`: the existing editor shell (dialog on desktop, full-screen on mobile) made real. Pointer drag to move, corner handles to resize, drag-on-empty to draw when no box was found. Reset restores the AI suggestion; Try again re-runs detection. Review shows the actual processed canvas image with the brief's review sentence (no ticks). Any box change after review rebuilds the preview and requires confirming again.
+- `AddStoryFlow` step 2 becomes the real photo step: file input (JPEG/PNG/WebP), unreadable file shows the brief's message with a continue-without path, "Continue without a photo" stays. On "Use This Photo": export the canvas, call `uploadStoryPhoto`, then submit with the returned `photoPath`. Step 3 shows the processed image.
 - Stop rule honored: if the adjustable box or canvas blur proves unreliable, I stop and report rather than fall back to storing the original or a CSS-only blur.
+
+## Story check with photo
+
+I will report whether adding the processed photo to the existing story check is simple (same call, image added as a vision input). If it is not simple, it stays out of this step.
 
 ## Analytics
 
@@ -29,21 +38,21 @@ No change to `stories`: `photo_path` already exists.
 
 ## Previews
 
-`/previews/story-photo` (unnested `previews_.story-photo.tsx` pattern): the real editor with a sample image covering choose, adjust-with-box, adjust-no-box, and review states; inert actions, no database. `/previews` list updated (story flow marked live where applicable, sample page listed). Step 51 deletes these.
+`/previews/story-photo` (unnested `previews_.story-photo.tsx` pattern): the real editor with a sample image covering choose, adjust-with-box, adjust-no-box, and review states; inert actions, no database. `/previews` list updated. Step 51 deletes these.
 
 ## Tests
 
-- `photo-blur.ts`: box maths (clamp, min size, drag-draw), export size cap (mock canvas).
+- `photo-blur.ts`: box maths including a rotated (EXIF) image, clamp, min size, drag-draw, export size cap (mock canvas).
 - `detectPlateBox`: input validation, demo refusal, rate limit, AI pause, box-or-none mapping (AI mocked).
-- `addStory`: photoPath ownership check, rejected story deletes the photo.
-- `getPlateStories`: signed URL present only for published stories with photos.
-- Flow/editor component tests: unreadable file path, no-box draw path, review re-confirm after box change, analytics events.
+- `uploadStoryPhoto`: JPEG/type/size/dimension checks, own-folder path, demo refusal.
+- `addStory`: photoPath ownership check; photo deleted on rejected, rate-limited, validation, error and demo outcomes.
+- `getPlateStories`: signed URL only for published stories with photos.
+- Flow/editor components: unreadable file path, no-box draw path, review re-confirm after box change, analytics events.
 - `tests/db/photo-attempts.sql` plus rerun of all `tests/db` files.
 
 Run: `bunx vitest related` on changed files, lint, prettier. CI stays authoritative.
 
 ## Assumptions
 
-- Bucket name `story-photos` (step 48's account deletion already assumes it).
 - Detection uses the same gateway with a vision-capable model; exact model chosen at build time.
 - One photo per story, replaced only by resubmission (no edit flow in this step).
