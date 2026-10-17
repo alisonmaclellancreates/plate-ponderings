@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type React from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -25,6 +26,9 @@ import {
   type Summary,
 } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
+import { track } from "@/lib/analytics";
+import { HISTORY_PAGE_SIZE } from "@/lib/summary";
+import { getPlateSummary, type PlateSummaryVersion } from "@/lib/summaries.functions";
 import { getPlateStories, STORY_PAGE_SIZE, type PlateStory } from "@/lib/stories.functions";
 import {
   PAGE_SIZE,
@@ -54,46 +58,109 @@ function StatusStrip({ plate }: { plate: PlateRecord }) {
   );
 }
 
-function EarlierSummaries({ earlier, open }: { earlier: Summary[]; open: boolean }) {
+type PanelSummary = Summary & { id?: string };
+
+function EarlierSummaries({ earlier, open }: { earlier: PanelSummary[]; open: boolean }) {
   const [expanded, setExpanded] = useState(open);
+  const [limit, setLimit] = useState(HISTORY_PAGE_SIZE);
   const [reading, setReading] = useState<string | null>(null);
+  const shown = earlier.slice(0, limit);
   return (
     <div className="mt-4 border-t border-border pt-3">
       <button
         type="button"
         aria-expanded={expanded}
         aria-controls="earlier-summaries"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => {
+          if (!expanded) {
+            void track("summary_history_opened", {
+              versions_shown: Math.min(limit, earlier.length),
+            });
+          }
+          setExpanded((v) => !v);
+        }}
         className="font-semibold text-navy underline underline-offset-4"
       >
         Earlier summaries ({earlier.length})
       </button>
       {expanded && (
-        <ul id="earlier-summaries" className="mt-3 space-y-2">
-          {earlier.map((s) => {
-            const isOpen = reading === s.date;
-            return (
-              <li key={s.date} className="rounded-lg bg-cream p-3">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                  <ConsensusBadge consensus={s.consensus} />
-                  <span>{storyCount(s.storyCount)}</span>
-                  <span className="text-muted-foreground">{formatDay(s.date)}</span>
-                  <button
-                    type="button"
-                    aria-expanded={isOpen}
-                    onClick={() => setReading(isOpen ? null : s.date)}
-                    className="ml-auto font-semibold text-navy underline underline-offset-4"
-                  >
-                    Read summary
-                  </button>
-                </div>
-                {isOpen && <p className="mt-2">{s.text}</p>}
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <ul id="earlier-summaries" className="mt-3 space-y-2">
+            {shown.map((s) => {
+              const key = s.id ?? s.date;
+              const isOpen = reading === key;
+              return (
+                <li key={key} className="rounded-lg bg-cream p-3">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                    <ConsensusBadge consensus={s.consensus} />
+                    <span>{storyCount(s.storyCount)}</span>
+                    <span className="text-muted-foreground">{formatDay(s.date)}</span>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      onClick={() => setReading(isOpen ? null : key)}
+                      className="ml-auto font-semibold text-navy underline underline-offset-4"
+                    >
+                      Read summary
+                    </button>
+                  </div>
+                  {isOpen && <p className="mt-2">{s.text}</p>}
+                </li>
+              );
+            })}
+          </ul>
+          {earlier.length > limit && (
+            <button
+              type="button"
+              onClick={() => setLimit((n) => n + HISTORY_PAGE_SIZE)}
+              className="mt-3 font-semibold text-navy underline underline-offset-4"
+            >
+              Show more history
+            </button>
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+/** The summary panel: newest visible version, catching-up note, and earlier visible versions. */
+function SummaryPanel({
+  current,
+  earlier,
+  historyOpen,
+  catchingUp,
+}: {
+  current: PanelSummary | undefined;
+  earlier: PanelSummary[];
+  historyOpen: boolean;
+  catchingUp: boolean;
+}) {
+  if (!current && !catchingUp) return null;
+  return (
+    <section aria-labelledby="story-so-far" className="brand-card p-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 id="story-so-far" className="font-display text-3xl text-navy">
+          The Story So Far
+        </h2>
+        {current && <ConsensusBadge consensus={current.consensus} />}
+      </div>
+      {current && (
+        <p className="mt-1 text-sm text-muted-foreground">
+          AI-generated summary · Based on {storyCount(current.storyCount)} · Updated{" "}
+          {formatDay(current.date)}
+        </p>
+      )}
+      {catchingUp && (
+        <p role="status" className="mt-3 rounded-lg bg-cream-warm px-3 py-2 text-sm">
+          {CATCHING_UP_MESSAGE}
+        </p>
+      )}
+      {current && <p className="mt-3 text-lg">{current.text}</p>}
+      {current && earlier.length > 0 && (
+        <EarlierSummaries earlier={earlier} open={historyOpen} />
+      )}
+    </section>
   );
 }
 
@@ -109,25 +176,35 @@ function StorySoFar({
   const [current, ...earlier] = plate.summaries;
   if (!current) return null;
   return (
-    <section aria-labelledby="story-so-far" className="brand-card p-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <h2 id="story-so-far" className="font-display text-3xl text-navy">
-          The Story So Far
-        </h2>
-        <ConsensusBadge consensus={current.consensus} />
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        AI-generated summary · Based on {storyCount(current.storyCount)} · Updated{" "}
-        {formatDay(current.date)}
-      </p>
-      {catchingUp && (
-        <p role="status" className="mt-3 rounded-lg bg-cream-warm px-3 py-2 text-sm">
-          New stories have arrived. The Story So Far is catching up.
-        </p>
-      )}
-      <p className="mt-3 text-lg">{current.text}</p>
-      {earlier.length > 0 && <EarlierSummaries earlier={earlier} open={historyOpen} />}
-    </section>
+    <SummaryPanel
+      current={current}
+      earlier={earlier}
+      historyOpen={historyOpen}
+      catchingUp={catchingUp}
+    />
+  );
+}
+
+function RealStorySoFar({ plateId, fallback }: { plateId: string; fallback: React.ReactNode }) {
+  const { data } = useQuery({
+    queryKey: ["plate-summary", plateId],
+    queryFn: () => getPlateSummary({ data: { plateId } }),
+  });
+  const toPanel = (v: PlateSummaryVersion): PanelSummary => ({
+    id: String(v.version),
+    date: v.generatedAt,
+    consensus: v.consensus,
+    storyCount: v.storyCount,
+    text: v.text,
+  });
+  if (!data || (!data.current && !data.catchingUp)) return <>{fallback}</>;
+  return (
+    <SummaryPanel
+      current={data.current ? toPanel(data.current) : undefined}
+      earlier={data.earlier.map(toPanel)}
+      historyOpen={false}
+      catchingUp={data.catchingUp}
+    />
   );
 }
 
@@ -472,10 +549,15 @@ export function RealPlateDetail({
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[auto_minmax(0,1fr)]">
         <PlateFrame jurisdiction={plate.jurisdiction} text={plate.text} />
         <div className="min-w-0">
-          <MysteryPrompt
-            signedIn={signedIn}
+          <RealStorySoFar
             plateId={plate.id}
-            storyCount={storiesData?.storyCount ?? 0}
+            fallback={
+              <MysteryPrompt
+                signedIn={signedIn}
+                plateId={plate.id}
+                storyCount={storiesData?.storyCount ?? 0}
+              />
+            }
           />
         </div>
       </div>
