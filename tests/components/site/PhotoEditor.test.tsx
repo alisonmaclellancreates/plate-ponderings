@@ -56,9 +56,14 @@ describe("PhotoEditor", () => {
     await user.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByRole("heading", { name: "Review your photo" });
     await user.click(screen.getByRole("button", { name: "Use This Photo" }));
-    await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), true, {
-      x: BOX.x, y: BOX.y, w: expect.closeTo(0.26), h: expect.closeTo(0.17),
-    }));
+    await waitFor(() =>
+      expect(onUse).toHaveBeenCalledWith(expect.any(Blob), true, {
+        x: BOX.x,
+        y: BOX.y,
+        w: expect.closeTo(0.26),
+        h: expect.closeTo(0.17),
+      }),
+    );
   });
   it("ignores movement without a drag and resets a moved box", async () => {
     const user = userEvent.setup();

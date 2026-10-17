@@ -149,7 +149,9 @@ describe("StoryMenuActions", () => {
     await userEvent.click(screen.getByRole("menuitem", { name: "Report story" }));
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByTestId("report-dialog")).toBeNull();
-    expect(screen.getByRole("button", { name: "More options for maplegirl's story" })).toHaveFocus();
+    expect(
+      screen.getByRole("button", { name: "More options for maplegirl's story" }),
+    ).toHaveFocus();
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Report story" }));
     await userEvent.click(screen.getByLabelText("Spam"));
@@ -165,7 +167,9 @@ describe("StoryMenuActions", () => {
     await userEvent.click(screen.getByRole("button", { name: "Keep Story" }));
     expect(m.remove).not.toHaveBeenCalled();
     expect(screen.queryByTestId("delete-story-dialog")).toBeNull();
-    expect(screen.getByRole("button", { name: "More options for maplegirl's story" })).toHaveFocus();
+    expect(
+      screen.getByRole("button", { name: "More options for maplegirl's story" }),
+    ).toHaveFocus();
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Delete my story" }));
     await userEvent.click(screen.getByRole("button", { name: "Delete Story" }));

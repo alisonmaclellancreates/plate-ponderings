@@ -34,7 +34,12 @@ vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 
 function OutletProbe() {
   const client = useQueryClient();
-  return <div data-testid="outlet">{client ? "has-client" : "none"}{outletContent}</div>;
+  return (
+    <div data-testid="outlet">
+      {client ? "has-client" : "none"}
+      {outletContent}
+    </div>
+  );
 }
 
 import { Route } from "@/routes/__root";
@@ -144,33 +149,47 @@ describe("root route", () => {
     }
   });
 
-  it.each([null, "0"])("focuses the navigated page heading, preserving existing tabindex %s", (tabindex) => {
-    const queryClient = new QueryClient();
-    R.useRouteContext = () => ({ queryClient });
-    outletContent = <main><h1 {...(tabindex === null ? {} : { tabIndex: Number(tabindex) })}>Page heading</h1></main>;
-    try {
-      const C = R.component;
-      const view = render(<C />);
-      const heading = screen.getByRole("heading", { name: "Page heading" });
-      const focus = vi.spyOn(heading, "focus");
-      expect(heading).not.toHaveFocus();
-      if (tabindex === null) expect(heading).not.toHaveAttribute("tabindex");
-      location.pathname = "/explore";
-      view.rerender(<C />);
-      expect(focus).toHaveBeenCalledTimes(1);
-      expect(heading).toHaveFocus();
-      expect(heading).toHaveAttribute("tabindex", tabindex ?? "-1");
-      view.rerender(<C />);
-      expect(focus).toHaveBeenCalledTimes(1);
-    } finally {
-      delete R.useRouteContext;
-    }
-  });
+  it.each([null, "0"])(
+    "focuses the navigated page heading, preserving existing tabindex %s",
+    (tabindex) => {
+      const queryClient = new QueryClient();
+      R.useRouteContext = () => ({ queryClient });
+      outletContent = (
+        <main>
+          <h1 {...(tabindex === null ? {} : { tabIndex: Number(tabindex) })}>Page heading</h1>
+        </main>
+      );
+      try {
+        const C = R.component;
+        const view = render(<C />);
+        const heading = screen.getByRole("heading", { name: "Page heading" });
+        const focus = vi.spyOn(heading, "focus");
+        expect(heading).not.toHaveFocus();
+        if (tabindex === null) expect(heading).not.toHaveAttribute("tabindex");
+        location.pathname = "/explore";
+        view.rerender(<C />);
+        expect(focus).toHaveBeenCalledTimes(1);
+        expect(heading).toHaveFocus();
+        expect(heading).toHaveAttribute("tabindex", tabindex ?? "-1");
+        view.rerender(<C />);
+        expect(focus).toHaveBeenCalledTimes(1);
+      } finally {
+        delete R.useRouteContext;
+      }
+    },
+  );
 
   it("does not move focus on first load or when the new page has no main h1", () => {
     const queryClient = new QueryClient();
     R.useRouteContext = () => ({ queryClient });
-    outletContent = <><h1 tabIndex={0}>Outside main</h1><main><button>Keep focus</button></main></>;
+    outletContent = (
+      <>
+        <h1 tabIndex={0}>Outside main</h1>
+        <main>
+          <button>Keep focus</button>
+        </main>
+      </>
+    );
     try {
       const focus = vi.spyOn(HTMLElement.prototype, "focus");
       const C = R.component;

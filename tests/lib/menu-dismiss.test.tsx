@@ -24,7 +24,9 @@ describe("useMenuDismiss", () => {
   it("does nothing while closed and ignores inside presses and other keys while open", () => {
     const add = vi.spyOn(document, "addEventListener");
     render(<Menu />);
-    expect(add.mock.calls.filter(([type]) => type === "keydown" || type === "pointerdown")).toEqual([]);
+    expect(add.mock.calls.filter(([type]) => type === "keydown" || type === "pointerdown")).toEqual(
+      [],
+    );
     fireEvent.keyDown(document, { key: "Escape" });
     fireEvent.pointerDown(screen.getByRole("button", { name: "Outside" }));
     expect(screen.queryByRole("button", { name: "Inside" })).toBeNull();
@@ -53,7 +55,9 @@ describe("useMenuDismiss", () => {
     const toggle = screen.getByRole("button", { name: "Toggle" });
     for (const exit of ["close", "unmount"]) {
       fireEvent.click(toggle);
-      const listeners = add.mock.calls.filter(([type]) => type === "keydown" || type === "pointerdown").slice(-2);
+      const listeners = add.mock.calls
+        .filter(([type]) => type === "keydown" || type === "pointerdown")
+        .slice(-2);
       expect(listeners).toHaveLength(2);
       if (exit === "close") fireEvent.click(toggle);
       else view.unmount();
