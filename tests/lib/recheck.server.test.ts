@@ -106,6 +106,8 @@ describe("recheckStory", () => {
     f.checkStory.mockResolvedValue({ outcome: "approved" });
     f.db.queue("stories", { data: [], error: null });
     expect(await recheckStory(admin, story, "author")).toBe("unchanged");
+    f.db.queue("stories", { data: null, error: { m: 1 } });
+    expect(await recheckStory(admin, story, "author")).toBe("unchanged");
     expect(f.after).not.toHaveBeenCalled();
   });
   it("persists a block and stops", async () => {
