@@ -85,8 +85,15 @@ export async function resetDemoSeed(
       ).data.user;
       if (!created) throw new Error("Seed account was not created.");
       accounts[handle] = created.id;
-      checked(await admin.from("profiles").update({ handle }).eq("id", created.id));
     }
+    // Validate the literal payload before clearing any existing content or media.
+    const paths: Record<string, string> = {};
+    for (const plate of Object.keys(photos)) {
+      const author = accounts[PHOTO_AUTHORS[plate] ?? ""];
+      if (!author) throw new Error("Seed photo author missing.");
+      paths[plate] = `${author}/${crypto.randomUUID()}.jpg`;
+    }
+    const seed = buildSeed(day, accounts, paths);
     step = "photo clearing";
     const bucket = admin.storage.from("story-photos");
     // Listing repeatedly from zero is safe as each removed batch shrinks the folder.
@@ -107,17 +114,13 @@ export async function resetDemoSeed(
     }
     await clearFolder("");
     step = "photo upload";
-    const paths: Record<string, string> = {};
     for (const [plate, bytes] of Object.entries(photos)) {
       await renew();
-      const author = accounts[PHOTO_AUTHORS[plate] ?? ""];
-      if (!author) throw new Error("Seed photo author missing.");
-      const path = `${author}/${crypto.randomUUID()}.jpg`;
+      const path = paths[plate];
+      if (!path) throw new Error("Seed photo path missing.");
       checked(await bucket.upload(path, bytes, { contentType: "image/jpeg", upsert: false }));
-      paths[plate] = path;
     }
     step = "content replacement";
-    const seed = buildSeed(day, accounts, paths);
     await renew();
     checked(
       await admin.rpc("replace_demo_seed_content", {
@@ -132,6 +135,14 @@ export async function resetDemoSeed(
       if (keep.has(user.id)) continue;
       await renew();
       checked(await admin.auth.admin.deleteUser(user.id));
+    }
+    // Old seed handles must be released before assigning them on a repeated reset.
+    step = "seed handles";
+    for (const handle of SEED_HANDLES.slice(1)) {
+      await renew();
+      const id = accounts[handle];
+      if (!id) throw new Error("Seed account missing.");
+      checked(await admin.from("profiles").update({ handle }).eq("id", id));
     }
     step = "readback";
     for (const [table, expected] of [
