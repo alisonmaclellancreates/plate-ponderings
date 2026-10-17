@@ -112,30 +112,39 @@ describe("account reads", () => {
   });
 });
 describe("availability", () => {
+  it("excludes the caller when checking their own current handle", async () => {
+    const query = chain({ data: [], error: null });
+    mocks.admin.from.mockReturnValue(query);
+    expect(await call(checkHandle, "Traveler1234")).toEqual({ status: "available" });
+    expect(query["neq"]).toHaveBeenCalledWith("id", "caller");
+  });
   it.each([42, null, {}, ["Alison_42"]])(
     "refuses non-string handle input %j before privileged reads",
     async (handle) => {
-      expect(await call(checkHandle, handle)).toEqual({ available: false });
+      expect(await call(checkHandle, handle)).toEqual({ status: "unknown" });
       expect(mocks.admin.from).not.toHaveBeenCalled();
       expect(mocks.moderate).not.toHaveBeenCalled();
     },
   );
   it("returns only availability and never calls AI or records attempts", async () => {
-    expect(await call(checkHandle)).toEqual({ available: true });
+    expect(await call(checkHandle)).toEqual({ status: "available" });
     taken.data = [{ id: "other" }];
-    expect(await call(checkHandle)).toEqual({ available: false });
+    expect(await call(checkHandle)).toEqual({ status: "taken" });
     taken.error = {};
-    expect(await call(checkHandle)).toEqual({ available: false });
+    expect(await call(checkHandle)).toEqual({ status: "unknown" });
+    taken.error = null;
+    taken.data = null;
+    expect(await call(checkHandle)).toEqual({ status: "unknown" });
     expect(mocks.moderate).not.toHaveBeenCalled();
     expect(mocks.admin.rpc).not.toHaveBeenCalled();
   });
   it("refuses demo, malformed handles and role failures", async () => {
-    expect(await call(checkHandle, "admin")).toEqual({ available: false });
+    expect(await call(checkHandle, "admin")).toEqual({ status: "unknown" });
     roleResult.data = true;
-    expect(await call(checkHandle)).toEqual({ available: false });
+    expect(await call(checkHandle)).toEqual({ status: null });
     roleResult.data = false;
     roleResult.error = {};
-    expect(await call(checkHandle)).toEqual({ available: false });
+    expect(await call(checkHandle)).toEqual({ status: "unknown" });
   });
 });
 describe("handle saves", () => {

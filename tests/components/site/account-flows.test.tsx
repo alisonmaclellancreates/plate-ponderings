@@ -52,7 +52,7 @@ beforeEach(() => {
   m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
   m.signIn.mockResolvedValue({ data: { session: {} }, error: null });
   m.signUp.mockResolvedValue({ data: { session: {} }, error: null });
-  m.check.mockResolvedValue({ available: true });
+  m.check.mockResolvedValue({ status: "available" });
   m.save.mockResolvedValue({ outcome: "changed", message: "Changes saved." });
   m.status.mockResolvedValue({
     allowed: true,
@@ -160,6 +160,50 @@ it("availability failures do not mark the handle available", async () => {
   await waitFor(() => expect(m.check).toHaveBeenCalled());
   expect(screen.queryByText("Available")).toBeNull();
 });
+it.each(["available", "taken", "unknown", null] as const)(
+  "renders the current typing check status %s without saving",
+  async (status) => {
+    m.check.mockResolvedValue({ status });
+    render(<ProfilePage />);
+    fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Traveler7444" } });
+    await waitFor(() => expect(m.check).toHaveBeenCalledWith({ data: { handle: "Traveler7444" } }));
+    if (status === "taken") {
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "That handle is taken. Choose another.",
+      );
+    } else {
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(Boolean(screen.queryByText("Available"))).toBe(status === "available");
+    }
+    expect(m.save).not.toHaveBeenCalled();
+  },
+);
+it("never shows the current own handle as taken, ignoring case", async () => {
+  m.check.mockResolvedValue({ status: "taken" });
+  render(<ProfilePage />);
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "traveler1234" } });
+  await screen.findByText("Available");
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+it("ignores a stale taken response for earlier valid input and hides resolved results on edits", async () => {
+  let resolve: ((value: { status: "taken" }) => void) | undefined;
+  m.check.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  render(<ProfilePage />);
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Traveler7444" } });
+  await waitFor(() => expect(m.check).toHaveBeenCalledTimes(1));
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Fresh_Handle" } });
+  await act(async () => {
+    resolve?.({ status: "taken" });
+  });
+  expect(screen.queryByRole("alert")).toBeNull();
+  await screen.findByText("Available");
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Another_Handle" } });
+  expect(screen.queryByText("Available")).toBeNull();
+});
 it("member menus show only authorized admin actions and handle signout errors", async () => {
   const v = render(<SiteHeader />);
   fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
@@ -256,7 +300,7 @@ it("ignores duplicate profile saves while the first is pending", async () => {
   expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
 });
 it("ignores a stale availability response after the draft becomes invalid", async () => {
-  let resolve: ((value: { available: boolean }) => void) | undefined;
+  let resolve: ((value: { status: "available" | "taken" | "unknown" }) => void) | undefined;
   m.check.mockReturnValueOnce(
     new Promise((r) => {
       resolve = r;
@@ -266,7 +310,7 @@ it("ignores a stale availability response after the draft becomes invalid", asyn
   await waitFor(() => expect(m.check).toHaveBeenCalledTimes(1));
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "a-" } });
   await act(async () => {
-    resolve?.({ available: true });
+    resolve?.({ status: "available" });
   });
   expect(screen.queryByText("Available")).toBeNull();
   expect(m.check).toHaveBeenCalledTimes(1);

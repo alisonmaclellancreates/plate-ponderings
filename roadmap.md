@@ -74,6 +74,8 @@
 
 # Step 42: accounts, handles and session-aware header
 
+- [ ] Return available/taken/unknown from typing checks, share preview status rendering, test stale and own-handle behavior, and verify Traveler7444 live.
+
 - [x] Classify weak-password errors by reasons; actual AuthWeakPasswordError tests pass. Live signup returns 422 with pwned and displays the unchanged breached-password message. 541 tests pass; account-rules coverage 100%, touched-file lint clean, build OK.
 - [x] Set and read back credit_block at 2026-10-17 06:12:55 UTC with test run marker; leave Resume to Alison. Preview and published share this setting.
 

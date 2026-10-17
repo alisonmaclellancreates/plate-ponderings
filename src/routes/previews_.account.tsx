@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HandleField } from "@/components/site/Account";
 import { SignInPage, SignUpPage } from "@/components/site/Entry";
 import { HandleCheckStatusPanel } from "@/components/site/HandleCheckStatus";
-import { HANDLE_REJECTED, HANDLE_TAKEN } from "@/lib/account-rules";
+import { HANDLE_REJECTED } from "@/lib/account-rules";
 
 export const Route = createFileRoute("/previews_/account")({
   head: () => ({
@@ -34,8 +34,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 const HANDLE_STATES = [
-  { title: "Handle field, available", props: { draft: "Rowan_Design", available: true } },
-  { title: "Handle field, taken", props: { draft: "Traveler3374", message: HANDLE_TAKEN } },
+  { title: "Handle field, available", props: { draft: "Rowan_Design", status: "available" } },
+  { title: "Handle field, taken", props: { draft: "Traveler7444", status: "taken" } },
   { title: "Handle field, reserved", props: { draft: "admin" } },
   { title: "Handle field, invalid characters", props: { draft: "rowan!" } },
   { title: "Handle field, wrong length", props: { draft: "ab" } },

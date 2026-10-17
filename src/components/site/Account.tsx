@@ -14,6 +14,7 @@ import {
   handleFormatValid,
   handleValidationMessage,
   HANDLE_UNAVAILABLE,
+  HANDLE_TAKEN,
   DEMO_MESSAGE,
 } from "@/lib/account-rules";
 import { Button } from "@/components/ui/button";
@@ -120,7 +121,7 @@ export const HANDLE_HELP =
 /** Presentational handle field; previews render it inertly with a fixed state. */
 export function HandleField({
   draft,
-  available = false,
+  status = "unknown",
   message = "",
   busy = false,
   isDemo = false,
@@ -128,7 +129,7 @@ export function HandleField({
   onSubmit,
 }: {
   draft: string;
-  available?: boolean;
+  status?: "available" | "taken" | "unknown" | null;
   message?: string;
   busy?: boolean;
   isDemo?: boolean;
@@ -140,11 +141,13 @@ export function HandleField({
   const statusId = `handle-status-${uid}`;
   const helpId = `handle-help-${uid}`;
   const messageId = `handle-message-${uid}`;
+  const available = !isDemo && status === "available";
   const success = message === "Changes saved." ? message : "";
   const serverError = message && !success ? message : "";
   const validationError =
     !isDemo && !available && !handleFormatValid(draft) ? handleValidationMessage(draft) : "";
-  const error = serverError || validationError;
+  const error =
+    serverError || validationError || (!isDemo && status === "taken" ? HANDLE_TAKEN : "");
   const describedBy = [available || isDemo ? statusId : "", error ? messageId : "", helpId]
     .filter(Boolean)
     .join(" ");
@@ -202,7 +205,11 @@ export function ProfilePage() {
   const auth = useAccountAuth();
   const handle = auth?.account?.handle ?? CURRENT_USER.handle;
   const [draft, setDraft] = useState(handle);
-  const [available, setAvailable] = useState(false);
+  const [availability, setAvailability] = useState<{
+    draft: string;
+    status: "available" | "taken" | "unknown" | null;
+  } | null>(null);
+  const status = availability?.draft === draft ? availability.status : "unknown";
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const check = useServerFn(checkHandle);
@@ -211,13 +218,20 @@ export function ProfilePage() {
     setDraft(handle);
   }, [handle]);
   useEffect(() => {
-    setAvailable(false);
+    setAvailability(null);
     if (!auth?.account || auth.account.isDemo || !handleFormatValid(draft)) return;
     let active = true;
     const timer = setTimeout(() => {
       void check({ data: { handle: draft } })
         .then((r) => {
-          if (active) setAvailable(r.available);
+          if (active)
+            setAvailability({
+              draft,
+              status:
+                r.status === "taken" && draft.toLowerCase() === handle.toLowerCase()
+                  ? "available"
+                  : r.status,
+            });
         })
         .catch(() => {});
     }, 250);
@@ -225,7 +239,7 @@ export function ProfilePage() {
       active = false;
       clearTimeout(timer);
     };
-  }, [draft, auth?.account, check]);
+  }, [draft, handle, auth?.account, check]);
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy || !auth?.account) return;
@@ -265,7 +279,7 @@ export function ProfilePage() {
               />
               <HandleField
                 draft={draft}
-                available={available}
+                status={status}
                 message={message}
                 busy={busy}
                 isDemo={Boolean(auth?.account?.isDemo)}
