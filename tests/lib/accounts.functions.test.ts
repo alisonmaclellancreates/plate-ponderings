@@ -25,8 +25,8 @@ import {
   getDemoSetting,
   checkHandle,
   saveHandle,
-  getHandleCheckStatus,
-  resumeHandleChecks,
+  getAiCheckStatus,
+  resumeAiChecks,
 } from "@/lib/accounts.functions";
 import {
   HANDLE_UNAVAILABLE,
@@ -63,7 +63,12 @@ beforeEach(() => {
   roles = { data: [{ role: "admin" }], error: null };
   profile = { data: { handle: "Traveler1234" }, error: null };
   settings = {
-    data: { demo_mode: false, handle_check_block_category: null, handle_check_blocked_at: null },
+    data: {
+      demo_mode: false,
+      ai_check_block_category: null,
+      ai_check_blocked_at: null,
+      ai_check_run_id: null,
+    },
     error: null,
   };
   taken = { data: [], error: null };
@@ -172,9 +177,9 @@ describe("handle saves", () => {
     mocks.moderate.mockResolvedValue({ outcome: "unavailable", block: "credit_block" });
     expect(await call(saveHandle)).toEqual({ outcome: "unavailable", message: HANDLE_UNAVAILABLE });
     expect(updateSettings).toHaveBeenCalledWith({
-      handle_check_block_category: "credit_block",
-      handle_check_blocked_at: expect.any(String),
-      handle_check_run_id: null,
+      ai_check_block_category: "credit_block",
+      ai_check_blocked_at: expect.any(String),
+      ai_check_run_id: null,
     });
   });
   it("writes only a verified caller's handle after approval", async () => {
@@ -223,7 +228,7 @@ describe("handle saves", () => {
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
   it("active blocks preserve handle and prevent new calls", async () => {
-    settings.data = { handle_check_block_category: "credit_block" };
+    settings.data = { ai_check_block_category: "credit_block" };
     expect((await call(saveHandle))["message"]).toBe(HANDLE_UNAVAILABLE);
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
@@ -254,24 +259,37 @@ describe("manual recovery", () => {
   it("only non-demo admins can inspect or reset state", async () => {
     for (const value of [[], [{ role: "demo" }, { role: "admin" }]]) {
       roles.data = value;
-      expect(await call(getHandleCheckStatus)).toEqual({ allowed: false });
-      expect(await call(resumeHandleChecks)).toEqual({ resumed: false });
+      expect(await call(getAiCheckStatus)).toEqual({ allowed: false });
+      expect(await call(resumeAiChecks)).toEqual({ resumed: false });
     }
     roles.error = {};
-    expect(await call(getHandleCheckStatus)).toEqual({ allowed: false });
-    expect(await call(resumeHandleChecks)).toEqual({ resumed: false });
+    expect(await call(getAiCheckStatus)).toEqual({ allowed: false });
+    expect(await call(resumeAiChecks)).toEqual({ resumed: false });
   });
   it("shows status and clears explicitly without an AI call", async () => {
-    expect(await call(getHandleCheckStatus)).toEqual({
+    expect(await call(getAiCheckStatus)).toEqual({
       allowed: true,
       category: null,
       blockedAt: null,
     });
-    expect(await call(resumeHandleChecks)).toEqual({ resumed: true });
+    const updateSettings = vi.fn(() => chain(persist));
+    mocks.admin.from.mockImplementation((table: string) => {
+      const c = chain(table === "profiles" ? taken : settings);
+      c["update"] = table === "app_settings" ? updateSettings : vi.fn(() => chain(updated));
+      return c;
+    });
+    expect(await call(resumeAiChecks)).toEqual({ resumed: true });
+    // Resume clears the whole shared block, so every AI check runs again.
+    expect(updateSettings).toHaveBeenCalledWith({
+      ai_check_block_category: null,
+      ai_check_blocked_at: null,
+      ai_check_run_id: null,
+    });
+    expect(mocks.moderate).not.toHaveBeenCalled();
     persist.error = {};
-    expect(await call(resumeHandleChecks)).toEqual({ resumed: false });
+    expect(await call(resumeAiChecks)).toEqual({ resumed: false });
     settings.error = {};
-    await expect(call(getHandleCheckStatus)).rejects.toThrow();
+    await expect(call(getAiCheckStatus)).rejects.toThrow();
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
 });

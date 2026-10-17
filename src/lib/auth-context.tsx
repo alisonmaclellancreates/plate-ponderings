@@ -4,8 +4,13 @@ import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { getAccount, getDemoSetting } from "./accounts.functions";
+import { recheckPendingSubjects } from "./plates.functions";
 import { identify, reset, setDemo, track } from "./analytics";
 import { Auth, type Account } from "./account-auth";
+
+// Client-side throttle for the pending-subject recheck; the server throttles too.
+const RECHECK_GAP_MS = 3 * 60 * 1000;
+let lastRecheckCall = 0;
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +32,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       setAccount(own);
       await setDemo(own.isDemo);
       await identify(data.user.id);
+      if (!own.isDemo && Date.now() - lastRecheckCall >= RECHECK_GAP_MS) {
+        lastRecheckCall = Date.now();
+        void recheckPendingSubjects().catch(() => {});
+      }
     } finally {
       if (current === generation.current) setLoading(false);
     }

@@ -9,6 +9,8 @@ export const EVENTS = {
   signed_out: [],
   handle_changed: [],
   handle_rejected: [],
+  subject_searched: ["found", "jurisdiction"],
+  subject_spotted: ["outcome"],
 } as const;
 
 type EventRegistry = Readonly<Record<string, readonly string[]>>;

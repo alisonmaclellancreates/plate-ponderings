@@ -6,13 +6,18 @@ import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
 import type { PlateRecord } from "@/lib/mock-data";
 import type { ReactNode } from "react";
 
+const searchMock = vi.hoisted(() => ({ fn: vi.fn(), navigate: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ params, children, ...props }: { params: { state: string }; children: ReactNode }) => (
     <a {...props} href={`/plate/${params.state}`}>
       {children}
     </a>
   ),
+  useNavigate: () => searchMock.navigate,
 }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: () => searchMock.fn }));
+vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn() }));
+vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 
 function media({ mobile = false, reduced = false }) {
   window.matchMedia = vi.fn((q: string) => ({
@@ -141,5 +146,65 @@ describe("Homepage", () => {
     render(<PlateOfTheDay plate={plate} />);
     expect(screen.getByText(/Only 1 story so far/)).toBeTruthy();
     expect(screen.queryByText(/1 stories/)).toBeNull();
+  });
+
+  async function submitSearch(user: ReturnType<typeof userEvent.setup>) {
+    await user.selectOptions(screen.getByRole("combobox", { name: "State or Province" }), "Utah");
+    await user.type(screen.getByRole("textbox", { name: /Plate Text/i }), "DRAGON");
+    await user.click(screen.getByRole("button", { name: "Look Up Plate" }));
+  }
+
+  it("navigates to the plate page when the search finds a match", async () => {
+    media({});
+    searchMock.fn.mockResolvedValue({
+      status: "found",
+      plate: { id: "plate-1", jurisdiction: "Utah", text: "DRAGON" },
+    });
+    const user = userEvent.setup();
+    render(<Homepage />);
+    await submitSearch(user);
+    expect(searchMock.fn).toHaveBeenCalledWith({
+      data: { jurisdiction: "Utah", text: "DRAGON" },
+    });
+    expect(searchMock.navigate).toHaveBeenCalledWith({
+      to: "/plate/$state",
+      params: { state: "plate-1" },
+      search: { jurisdiction: "Utah", text: "DRAGON" },
+    });
+    expect(screen.queryByRole("region", { name: "No plate found. Yet!" })).toBeNull();
+  });
+
+  it("shows the no-match panel with the searched values kept", async () => {
+    media({});
+    searchMock.fn.mockResolvedValue({ status: "no-match" });
+    const user = userEvent.setup();
+    render(<Homepage />);
+    await submitSearch(user);
+    expect(
+      screen.getAllByRole("region", { name: "No plate found. Yet!" }).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByDisplayValue("DRAGON").length).toBeGreaterThan(0);
+  });
+
+  it("shows an error, never a false no-match, when the search fails", async () => {
+    media({});
+    searchMock.fn.mockResolvedValue({ status: "error" });
+    const user = userEvent.setup();
+    render(<Homepage />);
+    await submitSearch(user);
+    expect(screen.getByRole("alert")).toHaveTextContent(/couldn't search right now/);
+    expect(screen.queryByRole("region", { name: "No plate found. Yet!" })).toBeNull();
+    searchMock.fn.mockRejectedValue(new Error("down"));
+    await submitSearch(user);
+    expect(screen.getByRole("alert")).toHaveTextContent(/couldn't search right now/);
+  });
+
+  it("keeps client validation ahead of any server call", async () => {
+    media({});
+    const user = userEvent.setup();
+    render(<Homepage />);
+    await user.click(screen.getByRole("button", { name: "Look Up Plate" }));
+    expect(screen.getByText("Please select a state or province")).toBeInTheDocument();
+    expect(searchMock.fn).not.toHaveBeenCalled();
   });
 });

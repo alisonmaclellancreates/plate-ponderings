@@ -1,11 +1,16 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { AlertCircle, Car, MessageCircle, Search } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ConsensusBadge } from "@/components/site/Badges";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
 import { PLATES } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
+import { spotPlate, type SpotResult } from "@/lib/plates.functions";
+import { useAccountAuth } from "@/lib/account-auth";
+import { DEMO_MESSAGE } from "@/lib/account-rules";
+import { track } from "@/lib/analytics";
 import {
   JURISDICTION_ERROR,
   TEXT_ERROR,
@@ -115,20 +120,28 @@ function FieldError({ id, message }: { id: string; message?: string | undefined 
 export function SpotForm({
   values = {},
   errors: initialErrors = {},
+  busy = false,
+  isDemo = false,
+  onSpot,
 }: {
   values?: SpotValues | undefined;
   errors?: SpotErrors | undefined;
+  busy?: boolean;
+  isDemo?: boolean;
+  onSpot?: ((values: { jurisdiction: string; text: string }) => void) | undefined;
 }) {
   const [errors, setErrors] = useState<SpotErrors>(initialErrors);
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (busy || isDemo) return;
     const data = new FormData(e.currentTarget);
-    setErrors(
-      validateSpot({
-        jurisdiction: String(data.get("jurisdiction") ?? ""),
-        text: String(data.get("text") ?? ""),
-      }),
-    );
+    const next = {
+      jurisdiction: String(data.get("jurisdiction") ?? ""),
+      text: String(data.get("text") ?? ""),
+    };
+    const found = validateSpot(next);
+    setErrors(found);
+    if (!found.jurisdiction && !found.text) onSpot?.(next);
   };
   const textDescribedBy = ["spot-text-limit", errors.text && "spot-text-error"]
     .filter(Boolean)
@@ -192,7 +205,16 @@ export function SpotForm({
           <FieldError id="spot-text-error" message={errors.text} />
         </div>
       </div>
-      <button type="submit" className="brand-btn brand-btn-coral mt-5 w-full sm:w-auto">
+      {isDemo && (
+        <p role="status" className="mt-4 text-sm text-muted-foreground">
+          {DEMO_MESSAGE}
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={busy || isDemo}
+        className="brand-btn brand-btn-coral mt-5 w-full sm:w-auto"
+      >
         Check This Plate
       </button>
     </form>
@@ -214,7 +236,7 @@ function WhatHappensNext() {
   );
 }
 
-function AlreadySpottedPanel({ values }: { values: Required<SpotValues> }) {
+function AlreadySpottedPanel({ values }: { values: { jurisdiction: string; text: string } }) {
   return (
     <section
       aria-labelledby="already-spotted"
@@ -439,4 +461,195 @@ export function SpotOutcomePage({ outcome }: { outcome: SpotOutcome }) {
         </Outcome>
       );
   }
+}
+
+function CheckingView() {
+  return (
+    <Outcome sign="Spot a Plate" heading="Checking the collection..." actions={null}>
+      <Placeholder label="A travelling car with a magnifying glass">
+        <Car aria-hidden className="spot-drive size-12" />
+        <Search aria-hidden className="size-8" />
+      </Placeholder>
+      <p role="status" className="text-lg">
+        Just a moment while we look.
+      </p>
+    </Outcome>
+  );
+}
+
+function SpotResultView({ result }: { result: SpotResult }) {
+  switch (result.outcome) {
+    case "new":
+      return (
+        <Outcome
+          sign="New to the collection"
+          heading="A new mystery joins the collection!"
+          actions={
+            <>
+              <Link
+                to="/plate/$state"
+                params={{ state: result.plate.id }}
+                className="brand-btn brand-btn-coral"
+              >
+                Add the First Story
+              </Link>
+              <a href="/explore" className={outline}>
+                Explore More Plates
+              </a>
+            </>
+          }
+        >
+          <Plate jurisdiction={result.plate.jurisdiction} text={result.plate.text} size="md" />
+          <p className="text-lg">Thanks for spotting this plate. You're the first to add it!</p>
+        </Outcome>
+      );
+    case "exists":
+      return (
+        <Outcome
+          sign="Already in the collection"
+          heading="We already know this plate!"
+          actions={
+            <>
+              <Link
+                to="/plate/$state"
+                params={{ state: result.plate.id }}
+                className="brand-btn brand-btn-navy"
+              >
+                View This Plate
+              </Link>
+              <Link to="/spot" className={outline}>
+                Spot Another Plate
+              </Link>
+            </>
+          }
+        >
+          <Plate jurisdiction={result.plate.jurisdiction} text={result.plate.text} size="md" />
+        </Outcome>
+      );
+    case "pending":
+      return (
+        <Outcome
+          sign="Checking this one out..."
+          heading="Your mystery is waiting in the wings!"
+          actions={
+            <>
+              <a href="/submissions" className="brand-btn brand-btn-navy">
+                Go to Your Submissions
+              </a>
+              <a href="/explore" className={outline}>
+                Back to Explore
+              </a>
+            </>
+          }
+        >
+          <p className="text-lg">
+            Your plate is waiting for its safety check. You can see its status anytime in Your
+            Submissions.
+          </p>
+        </Outcome>
+      );
+    case "rejected":
+      return (
+        <Outcome
+          sign="Hmm... not this one."
+          heading="We couldn't add this plate."
+          actions={
+            <>
+              <Link to="/spot" className="brand-btn brand-btn-navy">
+                Try Another Plate
+              </Link>
+              <a href="/explore" className={outline}>
+                Back to Explore
+              </a>
+            </>
+          }
+        >
+          <Sasquatch />
+          <p className="text-lg">
+            Our automated check couldn't approve this plate for the collection. Sometimes these
+            checks get things wrong.
+          </p>
+        </Outcome>
+      );
+    default:
+      return (
+        <Outcome
+          sign="Spot a Plate"
+          heading="Hmm... something went wrong."
+          actions={
+            <>
+              <Link to="/spot" className="brand-btn brand-btn-navy">
+                Try Again
+              </Link>
+              <Link to="/" className={outline}>
+                Go Back
+              </Link>
+            </>
+          }
+        >
+          <Sasquatch />
+          <p className="text-lg">
+            {result.outcome === "rate-limited"
+              ? result.message
+              : "We couldn't check this plate right now. Please try again in a few moments."}
+          </p>
+        </Outcome>
+      );
+  }
+}
+
+type SpotStage = { kind: "form" } | { kind: "checking" } | { kind: "result"; result: SpotResult };
+
+/** The live Spot a Plate flow: form, checking, then the real outcome. */
+export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
+  const auth = useAccountAuth();
+  const spot = useServerFn(spotPlate);
+  const [stage, setStage] = useState<SpotStage>({ kind: "form" });
+  const isDemo = Boolean(auth?.account?.isDemo);
+  async function onSpot(next: { jurisdiction: string; text: string }) {
+    setStage({ kind: "checking" });
+    try {
+      const result = await spot({ data: next });
+      setStage({ kind: "result", result });
+      const outcome =
+        result.outcome === "already-spotted"
+          ? "already_spotted"
+          : result.outcome === "new" ||
+              result.outcome === "exists" ||
+              result.outcome === "pending" ||
+              result.outcome === "rejected"
+            ? result.outcome
+            : "error";
+      await track("subject_spotted", { outcome });
+    } catch {
+      setStage({ kind: "result", result: { outcome: "error" } });
+      await track("subject_spotted", { outcome: "error" });
+    }
+  }
+  if (stage.kind === "checking") return <CheckingView />;
+  if (stage.kind === "result" && stage.result.outcome !== "already-spotted")
+    return <SpotResultView result={stage.result} />;
+  return (
+    <main>
+      <ScenicHeader
+        asHeading
+        title="Spot a Plate"
+        subtitle="Seen a curious plate? Add it to the collection and let the guessing begin."
+      />
+      <div className="mx-auto grid max-w-5xl gap-6 px-4 py-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-start">
+        <div className="space-y-4">
+          <SpotForm values={values} isDemo={isDemo} onSpot={onSpot} />
+          {stage.kind === "result" &&
+            stage.result.outcome === "already-spotted" &&
+            values?.jurisdiction &&
+            values.text && (
+              <AlreadySpottedPanel
+                values={{ jurisdiction: values.jurisdiction, text: values.text }}
+              />
+            )}
+        </div>
+        <WhatHappensNext />
+      </div>
+    </main>
+  );
 }
