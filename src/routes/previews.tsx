@@ -48,6 +48,11 @@ const PREVIEWS = [
   { to: "/privacy", label: "Privacy", note: "Storage, photos, AI, blocking, deleting" },
   { to: "/contact", label: "Contact", note: "Email link placeholder" },
   { to: "/not-found", label: "Not found", note: "Sasquatch and Back to Explore" },
+  {
+    to: "/previews/account",
+    label: "Account states",
+    note: "Handle field and save states, sign-in and sign-up errors, admin status",
+  },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */
