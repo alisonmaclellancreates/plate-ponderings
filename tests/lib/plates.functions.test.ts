@@ -413,7 +413,8 @@ describe("recheckPendingSubjects", () => {
           ? { data: [pendingRow], error: null }
           : (tables[table] ?? { data: null, error: null }),
       );
-      if (table === "subjects") c["update"] = vi.fn(() => chain({ data: null, error: null }));
+      if (table === "subjects")
+        c["update"] = vi.fn(() => chain({ data: [{ id: "subj-1" }], error: null }));
       if (table === "profiles") c["update"] = vi.fn(() => chain({ data: null, error: null }));
       if (table === "notifications")
         c["insert"] = vi.fn((row: unknown) => {
