@@ -93,9 +93,8 @@ describe("Spot a Plate live flow", () => {
     });
     render(<SpotLivePage />);
     await fillAndSpot(userEvent.setup());
-    expect(
-      await screen.findByText("Adding plates and stories is turned off in the demo."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Hmm... something went wrong.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Try Again" })).toHaveAttribute("href", "/spot");
     expect(track).toHaveBeenCalledWith("demo_write_refused", { action: "spot_plate" });
     expect(track).toHaveBeenLastCalledWith("subject_spotted", { outcome: "error" });
   });

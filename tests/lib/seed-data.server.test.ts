@@ -69,12 +69,12 @@ it.each([
   ],
   [
     "report story",
-    (text: string) => text.replace("**ParkingLotOracle**", "**MileMarker88**"),
+    (text: string) => text.replaceAll("**ParkingLotOracle**", "**MileMarker88**"),
     "Seed report story missing.",
   ],
   [
     "story count",
-    (text: string) => text.replace(/1\. \*\*RoadTripRaven\*\*[^\n]+/, "Removed story"),
+    (text: string) => text.replace(/2\. \*\*RoadTripRaven\*\*[^\n]+/, "Removed story"),
     "Approved seed content counts do not match.",
   ],
 ])("rejects malformed seed %s", async (_label, mutate, error) => {

@@ -105,14 +105,13 @@ describe("entry screens", () => {
         finish = resolve;
       }),
     );
-    demo.navigate.mockImplementation(async () => {
-      screen.getByRole("main").textContent = "Demo home";
-    });
     render(<DemoPage />);
     fireEvent.click(screen.getByRole("button", { name: "Start the Demo" }));
     expect(screen.getByRole("button", { name: "Starting the Demo…" })).toBeDisabled();
     finish?.({ access_token: "fixture-access", refresh_token: "fixture-refresh" });
-    await waitFor(() => expect(screen.getByRole("main")).toHaveTextContent("Demo home"));
+    await waitFor(() => expect(demo.navigate).toHaveBeenCalledWith({ to: "/" }));
+    expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
+    expect(screen.queryByRole("alert")).toBeNull();
     expect(demo.setSession).toHaveBeenCalledWith({
       access_token: "fixture-access",
       refresh_token: "fixture-refresh",
