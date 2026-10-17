@@ -6,6 +6,7 @@ import { getReportedStories, recheckAllPending, setStoryHidden } from "@/lib/adm
 import type { ReportedStory } from "@/lib/mock-data";
 import { track } from "@/lib/analytics";
 import { ADMIN_ERROR, ADMIN_REPORTS_KEY, RECHECK_PAUSED, recheckNote } from "@/lib/admin-copy";
+import { DemoAdminControls } from "./DemoAdminControls";
 
 /** Admin with live reported stories; every action is verified as admin on the server. */
 export function LiveAdmin() {
@@ -49,6 +50,7 @@ export function LiveAdmin() {
   return (
     <AdminPage
       rows={data}
+      demoControls={<DemoAdminControls />}
       busy={busy}
       note={note}
       message={message}
