@@ -5,6 +5,7 @@ import { Homepage, PlateOfTheDay } from "@/components/site/Homepage";
 import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
 import type { PlateRecord } from "@/lib/mock-data";
 import type { ReactNode } from "react";
+import { track } from "@/lib/analytics";
 
 const searchMock = vi.hoisted(() => ({ fn: vi.fn(), navigate: vi.fn() }));
 vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
@@ -39,6 +40,23 @@ afterEach(() => {
 });
 
 describe("Homepage", () => {
+  it("keeps the rest of the homepage when there is no eligible daily plate", () => {
+    media({});
+    render(<Homepage live={{ today: "2026-10-17", pick: null, recent: [] }} />);
+    expect(screen.queryByRole("region", { name: "Plate of the Day" })).toBeNull();
+    expect(screen.getByRole("search")).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Recently Featured" }).querySelectorAll("li")).toHaveLength(0);
+  });
+  it.each([0, 1, 2])("uses real count %i and the approved daily invitation", async (count) => {
+    media({});
+    const pick = { slug: "real-id", jurisdiction: "Ontario", text: "REAL", day: "2026-10-17", count, atPick: 0, status: count === 0 ? "mystery" as const : "interpreted" as const };
+    render(<Homepage live={{ today: pick.day, pick, recent: [{ ...pick, day: "2026-10-16" }] }} />);
+    const daily = screen.getByRole("region", { name: "Plate of the Day" });
+    expect(daily.textContent).toContain(count === 0 ? "No stories yet." : `Only ${count} ${count === 1 ? "story" : "stories"} so far.`);
+    await userEvent.setup().click(within(daily).getByRole("link", { name: "View This Plate" }));
+    expect(track).toHaveBeenLastCalledWith("featured_subject_opened", { is_mystery: count === 0, days_ago: 0 });
+    expect(screen.getByRole("region", { name: "Recently Featured" }).querySelectorAll("li")).toHaveLength(1);
+  });
   it.each([
     { reduced: false, behavior: "smooth" },
     { reduced: true, behavior: "instant" },
