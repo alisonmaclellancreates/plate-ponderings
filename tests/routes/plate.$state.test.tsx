@@ -12,6 +12,9 @@ vi.mock("@tanstack/react-router", () => ({
     useSearch: () => search,
   }),
   notFound: () => new Error("not found"),
+  Link: ({ to, search: values, children }: { to: string; search?: Record<string, string>; children: ReactNode }) => (
+    <a href={to + (values ? `?${new URLSearchParams(values)}` : "")}>{children}</a>
+  ),
 }));
 
 vi.mock("@/lib/plates.functions", () => ({ getPlate: vi.fn(async () => ({ plate: null })) }));

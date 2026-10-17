@@ -72,7 +72,7 @@ it("refuses preview form submissions without making authentication calls", async
     "Sign up, breached password",
   ]) {
     const section = screen.getByRole("region", { name: title });
-    const button = within(section).getByRole("button", { name: /Sign In|Create an Account/ });
+    const button = within(section).getByRole("button", { name: /Sign In|Create Account/ });
     const form = button.closest("form");
     if (!form) throw new Error("Preview form missing");
     expect(fireEvent.submit(form)).toBe(false);
