@@ -33,7 +33,7 @@ function BrandBadge({ spec, kind }: { spec: BadgeSpec; kind: string }) {
 const STATUS: Record<PlateStatus, BadgeSpec> = {
   mystery: { label: "Mystery", icon: HelpCircle, tone: "mystery" },
   interpreted: { label: "Interpreted", icon: Lightbulb, tone: "amber" },
-  owner: { label: "Owner weighed in", icon: Key, tone: "teal" },
+  owner: { label: "Owner claim", icon: Key, tone: "teal" },
 };
 
 const CONSENSUS: Record<Consensus, BadgeSpec> = {

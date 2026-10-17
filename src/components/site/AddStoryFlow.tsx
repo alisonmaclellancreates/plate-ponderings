@@ -89,7 +89,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
   const [meaning, setMeaning] = useState("");
   const [more, setMore] = useState("");
   const [rejected, setRejected] = useState(false);
-  const [pauseMessage, setPauseMessage] = useState<string | null>(null);
+  const [pause, setPause] = useState<{ heading: string | null; message: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const started = useRef(false);
 
@@ -119,7 +119,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
   const onSubmit = async () => {
     setSubmitting(true);
     setRejected(false);
-    setPauseMessage(null);
+    setPause(null);
     try {
       const result = await submitStory({
         data: { plateId, meaning, source: how, more },
@@ -140,11 +140,18 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
       else if (result.outcome === "rejected") {
         setRejected(true);
         setStep("1");
-      } else if (result.outcome === "rate-limited" || result.outcome === "demo") {
-        setPauseMessage(result.message);
+      } else if (result.outcome === "rate-limited") {
+        setPause({ heading: "Let's pause a moment.", message: result.message });
+        setStep("1");
+      } else if (result.outcome === "demo") {
+        setPause({ heading: null, message: result.message });
         setStep("1");
       } else {
-        setPauseMessage("Hmm... something went wrong.");
+        setPause({
+          heading: "Hmm... something went wrong.",
+          message:
+            "We couldn't submit your story right now. Your words are still here. Please try again.",
+        });
         setStep("1");
       }
     } catch {
@@ -153,7 +160,11 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
         has_more_text: more.trim().length > 0,
         outcome: "error",
       });
-      setPauseMessage("Hmm... something went wrong.");
+      setPause({
+        heading: "Hmm... something went wrong.",
+        message:
+          "We couldn't submit your story right now. Your words are still here. Please try again.",
+      });
       setStep("1");
     } finally {
       setSubmitting(false);
@@ -296,9 +307,10 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
           </p>
         </div>
       )}
-      {pauseMessage && (
+      {pause && (
         <div role="status" className="brand-card bg-cream-warm p-4">
-          <p className="font-semibold">{pauseMessage}</p>
+          {pause.heading && <p className="font-semibold">{pause.heading}</p>}
+          <p className={pause.heading ? "mt-1" : "font-semibold"}>{pause.message}</p>
         </div>
       )}
       <fieldset>
