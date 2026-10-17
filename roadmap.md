@@ -69,5 +69,24 @@
 - [x] Verify tests, coverage gate, lint, and preview event requests: 438 tests pass, coverage gate holds, lint 0 errors, build OK; decoded page views for / and /explore contain no query strings, both ingest requests return 200, no browser errors.
 - [ ] Alison confirms page views arrive in PostHog.
 - [x] Require an explicit analytics host with no default when connector region is absent; all analytics statements, branches, functions and lines are 100% locally. Full suite: 442 tests / 107 files pass; coverage gate holds; lint 0 errors / 6 existing warnings; build OK.
-- [ ] Verify Codecov patch coverage after CI. Blocked: unauthenticated Codecov and GitHub check APIs return 404 for this repository; an accessible CI/Codecov result is needed.
+- [x] Verify Codecov patch coverage after CI. Alison confirmed 100% patch coverage for Step 41b.
 - [x] Consolidate event definitions into one runtime registry; test-only second event passes capture and before_send with only listed properties and identifiers. All 439 tests / 107 files pass; coverage gate holds (99.35% statements, 98.31% branches, 99.44% functions, 99.74% lines); lint 0 errors / 6 existing warnings; build OK; real query-free page views accepted with HTTP 200.
+
+# Step 42: accounts, handles and session-aware header
+
+- [x] Rowan review: 278px handle input at 360px with feedback below; actionable validation, truncated mobile header with full accessible name. 536 tests pass; maintained lint 0 errors/0 warnings, six existing UI warnings; build OK.
+- [x] Grant Traveler3374 admin access and verify Handle check status: real account menu opens Admin, status reads Ready; handle remains Traveler3374 after save and reload.
+- [x] Capture saved/rejected handle and password/account error review states, distinguishing live results from simulated provider responses; review PDF supplied with reproducible steps in docs/rowan-review.md.
+- [x] Patch coverage: 533 tests pass; all eight reported files have 100% statement/branch/line coverage locally; no production branches removed. Maintained lint 0 errors/0 warnings; build OK.
+- [ ] Patch coverage: re-read PR #86 Codecov after follow-up sync and CI. Blocker: latest completed CI predates these tests; current PR report remains 94.60154%, not a result for this follow-up. GitHub read access is verified.
+- [x] Pre-merge: separate the account hook, resolve the provider effect dependency without suppression; maintained files have 0 errors/0 warnings, repository-wide 0 errors/6 existing UI warnings. All 509 tests pass; build OK; protected profile redirect verified.
+- [x] Pre-merge: original desktop fixture auth user and SullyTest42 profile are absent; the handle-save attempts table is empty. Already deleted, no additional deletion needed.
+- [x] Scope terminal blocks to handle moderation only; verified admin status/manual reset; safe logs and gateway quotes documented in docs/step42-report.md and AGENTS.md.
+- [x] Approved plan revised; separate pause table removed; Traveler4821 excluded; five saves per 15 minutes enforced.
+- [x] Approved database changes applied; validated constraints, privileges and rollback-only account tests checked.
+- [x] Email/password signup, signin, signout and safe return paths verified in the running app.
+- [x] Real profile, availability, moderated save/readback, demo refusal and session/role-driven header implemented and tested.
+- [x] Privacy-limited account/handle analytics registry and filtering tests pass.
+- [x] 507 tests pass; coverage 99.22/97.26/99.02/99.68 meets 95% gate; lint 0 errors/8 warnings; build OK; summary visibility and account DB tests pass; live admin reset verified; verification fixtures cleaned.
+- [ ] Alison checks hosted HIBP and password minimum in More → Users → Auth settings. Blocker: supported independent hosted-setting readback unavailable.
+- [ ] Confirm all five new events in PostHog. Blocker: event delivery not independently inspected; filtering is tested.

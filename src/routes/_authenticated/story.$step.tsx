@@ -4,7 +4,7 @@ import { STORY_STEPS, type StoryStep } from "@/lib/story-form";
 
 const isStep = (s: string): s is StoryStep => Object.hasOwn(STORY_STEPS, s);
 
-export const Route = createFileRoute("/story/$step")({
+export const Route = createFileRoute("/_authenticated/story/$step")({
   loader: ({ params }) => {
     if (!isStep(params.step)) throw notFound();
     return { step: params.step };

@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DeleteConfirmPage } from "@/components/site/Settings";
+import { SubmissionsPage } from "@/components/site/Account";
 
-const TITLE = "Delete your account? | What the Plate?";
-const DESCRIPTION = "Confirm deleting your account.";
+const TITLE = "Your Submissions | What the Plate?";
+const DESCRIPTION = "The plates you've spotted and the stories you've shared.";
 
-export const Route = createFileRoute("/settings_/delete-confirm")({
+export const Route = createFileRoute("/_authenticated/submissions")({
   head: () => ({
     meta: [
       { title: TITLE },
@@ -15,5 +15,5 @@ export const Route = createFileRoute("/settings_/delete-confirm")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <DeleteConfirmPage />,
+  component: () => <SubmissionsPage />,
 });

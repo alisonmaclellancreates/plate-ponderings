@@ -3,6 +3,11 @@ import { Link } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { PlateHeader } from "@/components/site/AddStory";
 import { DEMO_SEES } from "@/lib/demo";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAccountAuth } from "@/lib/account-auth";
+import { safeReturnPath, signupErrorMessage } from "@/lib/account-rules";
+import { useNavigate } from "@tanstack/react-router";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
 
@@ -45,6 +50,9 @@ function PasswordField({ hint }: { hint?: string }) {
       <div className="relative">
         <input
           id="password"
+          name="password"
+          required
+          minLength={hint ? 8 : undefined}
           type={shown ? "text" : "password"}
           autoComplete={hint ? "new-password" : "current-password"}
           aria-describedby={hint ? "password-hint" : undefined}
@@ -79,25 +87,72 @@ function EmailField() {
       <label htmlFor="email" className="mb-1 block font-semibold">
         Email
       </label>
-      <input id="email" type="email" autoComplete="email" className={field} />
+      <input id="email" name="email" required type="email" autoComplete="email" className={field} />
     </div>
   );
 }
 
 const link = "font-semibold text-teal underline underline-offset-4";
 
-export function SignInPage() {
+function useEntry(kind: "signed_in" | "signed_up", returnTo: string) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const auth = useAccountAuth();
+  const navigate = useNavigate();
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    const data = new FormData(e.currentTarget);
+    const email = String(data.get("email") ?? "");
+    const password = String(data.get("password") ?? "");
+    if (!email || !password) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result =
+        kind === "signed_up"
+          ? await supabase.auth.signUp({ email, password })
+          : await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) {
+        setError(
+          kind === "signed_up"
+            ? signupErrorMessage(result.error)
+            : "We couldn't sign you in. Check your email and password and try again.",
+        );
+        return;
+      }
+      if (!result.data.session) {
+        setError("Your account couldn't be signed in. Please try signing in.");
+        return;
+      }
+      await auth?.completeSignIn(kind);
+      await navigate({ to: safeReturnPath(returnTo) });
+    } catch {
+      setError(
+        kind === "signed_up"
+          ? "Your account couldn't be created. You can try again or sign in."
+          : "We couldn't sign you in. Check your email and password and try again.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  return { busy, error, submit };
+}
+export function SignInPage({ returnTo = "/" }: { returnTo?: string }) {
+  const { busy, error, submit } = useEntry("signed_in", returnTo);
   return (
     <EntryShell title="Sign In" subtitle="Welcome back!">
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-4" onSubmit={submit}>
         <EmailField />
         <PasswordField />
-        <button type="submit" className="brand-btn brand-btn-navy w-full">
+        {error && <p role="alert">{error}</p>}
+        <Button type="submit" disabled={busy} className="brand-btn brand-btn-navy w-full">
           Sign In
-        </button>
+        </Button>
       </form>
       <p className="mt-5 text-center">
-        <Link to="/sign-up" className={link}>
+        <Link to="/sign-up" search={{ returnTo: safeReturnPath(returnTo) }} className={link}>
           Create an account
         </Link>
       </p>
@@ -105,22 +160,24 @@ export function SignInPage() {
   );
 }
 
-export function SignUpPage() {
+export function SignUpPage({ returnTo = "/" }: { returnTo?: string }) {
+  const { busy, error, submit } = useEntry("signed_up", returnTo);
   return (
     <EntryShell title="Create an Account" subtitle="Join the community and add your story.">
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-4" onSubmit={submit}>
         <EmailField />
         <PasswordField hint="Use at least 8 characters" />
-        <button type="submit" className="brand-btn brand-btn-coral w-full">
+        {error && <p role="alert">{error}</p>}
+        <Button type="submit" disabled={busy} className="brand-btn brand-btn-coral w-full">
           Create Account
-        </button>
+        </Button>
       </form>
       <p className="mt-4 text-sm text-muted-foreground">
         We'll give you a handle to start. You can change it anytime in your profile.
       </p>
       <p className="mt-5 text-center">
         Already have an account?{" "}
-        <Link to="/sign-in" className={link}>
+        <Link to="/sign-in" search={{ returnTo: safeReturnPath(returnTo) }} className={link}>
           Sign in
         </Link>
       </p>
@@ -175,6 +232,7 @@ export function SignInPromptPage() {
             <li key={c.to}>
               <Link
                 to={c.to}
+                search={c.to === "/demo" ? {} : { returnTo: "/story/1" }}
                 aria-describedby={`cap-${c.to.slice(1)}`}
                 className={`brand-btn ${c.cls} w-full`}
               >
