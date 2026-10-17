@@ -1,7 +1,8 @@
 # PR #113 Copilot follow-ups
 
 - [x] Stage exact 0017 SQL in docs/proposed-migrations (managed migration directory cannot be written without applying); add index-existence assertion. 0016 untouched.
-- [ ] Create/apply managed migration 0017 and run database assertion. Blocker: Alison's approval.
+- [ ] Apply approved 0017 using the staged SQL unchanged, confirm numbering, and run the rollback-only database test.
+- [x] Stop local coverage runs going forward; only the PR Codecov figure is authoritative, per Alison's 19:27 UTC instruction.
 - [x] Release confirmed-photo preview URLs on removal/replacement, no-save submission and unmount; test each lifecycle. Review/back keeps the active URL alive.
 - [x] Requested related tests: 66 passed across 7 files. Local AddStoryFlow coverage 100% in all metrics. Lint zero errors/six existing warnings. Build OK. Replied to both Copilot comments.
 - [ ] Confirm follow-up PR Codecov after managed sync/CI. Latest PR report at 19:07:17 UTC says all modified coverable lines covered (100%), predating this follow-up.
