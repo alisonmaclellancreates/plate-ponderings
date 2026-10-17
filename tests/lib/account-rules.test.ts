@@ -58,6 +58,14 @@ describe("gateway blocks", () => {
   });
 });
 describe("password failures", () => {
+  it("handles password errors without a provider message safely", () => {
+    expect(signupErrorMessage({ code: "weak_password" })).toBe(
+      "Please choose a stronger password with at least 8 characters.",
+    );
+    expect(signupErrorMessage({ code: "validation_failed" })).toBe(
+      "Your account couldn't be created. You can try again or sign in.",
+    );
+  });
   it("gives a breached password an actionable message without revealing account existence", () => {
     expect(
       signupErrorMessage({ code: "weak_password", message: "Password found in breach list" }),

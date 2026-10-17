@@ -69,3 +69,23 @@ it("handles malformed denial bodies and network failures without inventing a blo
   });
   expect((await moderateHandle("test")).block).toBeNull();
 });
+it.each([
+  { type: "permission_error" },
+  { error: { code: "credit_limit_reached" } },
+  {},
+])("classifies denial body %j using its safe code fallback", async (body) => {
+  mocks.fetch.mockResolvedValue(new Response(JSON.stringify(body), { status: 403 }));
+  mocks.stream.mockImplementation(() => ({
+    output: (async () => {
+      await mocks.provider.mock.calls[0]?.[0].fetch("https://ai.gateway.lovable.dev/v1/responses");
+      throw new Error("denied");
+    })(),
+  }));
+  expect(await moderateHandle("test")).toEqual({
+    outcome: "unavailable",
+    block: "type" in body ? "provider_access_denied" : "error" in body ? "credit_block" : null,
+    runId: "safe-id",
+  });
+  expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  expect(mocks.stream).toHaveBeenCalledTimes(1);
+});

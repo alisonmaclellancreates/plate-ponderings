@@ -121,3 +121,21 @@ it("forwards cancellation upstream", async () => {
   await response.body?.cancel("stop");
   expect(cancel).toHaveBeenCalledWith("stop");
 });
+it("relays every chunk in a multi-chunk response in order", async () => {
+  const encoder = new TextEncoder();
+  const chunks = ["first", " second", " third"];
+  let index = 0;
+  const upstream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      const chunk = chunks[index++];
+      if (chunk === undefined) controller.close();
+      else controller.enqueue(encoder.encode(chunk));
+    },
+  });
+  const response = await withLovableAiGatewayRunIdHeader(
+    new Response(upstream),
+    { getRunId: () => "gateway-id", waitForRunId: async () => "gateway-id" },
+  );
+  expect(await response.text()).toBe("first second third");
+  expect(response.headers.get("X-Lovable-AIG-Run-ID")).toBe("gateway-id");
+});
