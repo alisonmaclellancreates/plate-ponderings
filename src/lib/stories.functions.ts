@@ -215,7 +215,7 @@ export const getPlateStories = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("stories")
-      .select("id,meaning,source,body,author_id,published_at")
+      .select("id,meaning,source,body,author_id,published_at,photo_path")
       .eq("subject_id", plate.id)
       .eq("status", "published")
       .order("published_at", { ascending: true });
