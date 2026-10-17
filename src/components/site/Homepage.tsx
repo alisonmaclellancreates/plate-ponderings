@@ -444,6 +444,7 @@ export function Homepage({
   const [noMatch, setNoMatch] = useState<Required<SearchValues> | null>(
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : null,
   );
+  const [searchError, setSearchError] = useState<string | null>(null);
   const featured = PLATES.find((p) =>
     variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
   );
@@ -452,7 +453,13 @@ export function Homepage({
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (
     <main>
-      <Hero search={search} noMatch={noMatch} onNoMatch={setNoMatch} />
+      <Hero
+        search={search}
+        noMatch={noMatch}
+        onNoMatch={setNoMatch}
+        searchError={searchError}
+        onSearchError={setSearchError}
+      />
       <ActionCards />
       <HowItWorks />
       <PlateOfTheDay plate={featured} />
