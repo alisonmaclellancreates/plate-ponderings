@@ -431,6 +431,10 @@ export function RealPlateDetail({
   backToSearch?: { jurisdiction: string; text: string } | undefined;
 }) {
   const [signedIn, setSignedIn] = useState(false);
+  const { data: storiesData } = useQuery({
+    queryKey: ["plate-stories", plate.id],
+    queryFn: () => getPlateStories({ data: { plateId: plate.id } }),
+  });
   useEffect(() => {
     let active = true;
     void supabase.auth.getUser().then(({ data }) => {
@@ -463,7 +467,11 @@ export function RealPlateDetail({
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[auto_minmax(0,1fr)]">
         <PlateFrame jurisdiction={plate.jurisdiction} text={plate.text} />
         <div className="min-w-0">
-          <MysteryPrompt signedIn={signedIn} plateId={plate.id} />
+          <MysteryPrompt
+            signedIn={signedIn}
+            plateId={plate.id}
+            storyCount={storiesData?.storyCount ?? 0}
+          />
         </div>
       </div>
       <RealStatusStrip plateId={plate.id} />
