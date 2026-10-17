@@ -330,17 +330,77 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
             <button type="button" onClick={() => setStep("1")} className={outline}>
               Back
             </button>
-            <button type="button" onClick={() => setStep("3")} className={coral}>
+            <button type="button" onClick={skipPhoto} className={coral}>
               Continue without a photo
             </button>
           </>
         }
       >
         <h2 className="font-display text-2xl text-navy">Add a photo (optional)</h2>
-        <p className="flex items-start gap-2 rounded-lg bg-cream-warm p-4">
-          <Info aria-hidden className="mt-0.5 size-5 shrink-0 text-teal" />
-          Photo sharing is on its way. For now, you can continue without a photo.
-        </p>
+        {photoReady ? (
+          <div className="space-y-3">
+            <img
+              src={photoReady.previewUrl}
+              alt="Your processed photo, blurred except the plate"
+              className="w-full rounded-lg"
+            />
+            <button
+              type="button"
+              className={outline}
+              onClick={() => {
+                setPhotoReady(null);
+                if (!preview) void track("photo_skipped", {});
+              }}
+            >
+              Remove Photo
+            </button>
+            <button type="button" className={coral} onClick={() => setStep("3")}>
+              Next
+            </button>
+          </div>
+        ) : (
+          <>
+            <label
+              htmlFor="story-photo"
+              className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-teal bg-card px-4 py-10 text-center"
+            >
+              <Camera aria-hidden className="size-10 text-teal" />
+              <span className="font-semibold">Choose a photo or drag and drop</span>
+              <span className="text-sm text-muted-foreground">JPEG, PNG, or WebP</span>
+              <input
+                id="story-photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={demo || photoBusy}
+                onChange={(e) => void choosePhoto(e.target.files?.[0])}
+              />
+            </label>
+            {photoUnreadable && (
+              <p role="status" className="rounded-lg bg-cream-warm p-4">
+                {UNREADABLE_PHOTO_MESSAGE}
+              </p>
+            )}
+            <p className="flex items-start gap-2 rounded-lg bg-cream-warm p-4">
+              <Info aria-hidden className="mt-0.5 size-5 shrink-0 text-teal" />
+              {PHOTO_UPLOAD_NOTE}
+            </p>
+          </>
+        )}
+        {photoDraft && (
+          <PhotoEditor
+            imageUrl={photoDraft.imageUrl}
+            bitmap={photoDraft.bitmap}
+            initialBox={photoDraft.suggestion}
+            showNoBoxMessage={photoDraft.noBoxMessage}
+            onUse={(blob, adjusted) => void usePhoto(blob, adjusted)}
+            onRemove={() => {
+              setPhotoDraft(null);
+              if (!preview) void track("photo_skipped", {});
+            }}
+            onRetry={() => void retryDetect()}
+          />
+        )}
       </Shell>
     );
   }
@@ -368,22 +428,37 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         }
       >
         <h2 className="font-display text-2xl text-navy">Review &amp; Submit</h2>
-        <dl className="brand-card space-y-4 bg-card p-5">
-          <div>
-            <dt className="text-sm font-semibold text-muted-foreground">How I know</dt>
-            <dd>{howLabel}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-semibold text-muted-foreground">What you think it means</dt>
-            <dd>{meaning}</dd>
-          </div>
-          {more.trim() && (
-            <div>
-              <dt className="text-sm font-semibold text-muted-foreground">Your story</dt>
-              <dd>{more}</dd>
-            </div>
+        <div
+          className={
+            photoReady ? "grid gap-5 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start" : ""
+          }
+        >
+          {photoReady && (
+            <img
+              src={photoReady.previewUrl}
+              alt="Your blurred photo"
+              className="w-full rounded-lg"
+            />
           )}
-        </dl>
+          <dl className="brand-card space-y-4 bg-card p-5">
+            <div>
+              <dt className="text-sm font-semibold text-muted-foreground">How I know</dt>
+              <dd>{howLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-muted-foreground">
+                What you think it means
+              </dt>
+              <dd>{meaning}</dd>
+            </div>
+            {more.trim() && (
+              <div>
+                <dt className="text-sm font-semibold text-muted-foreground">Your story</dt>
+                <dd>{more}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
       </Shell>
     );
   }
