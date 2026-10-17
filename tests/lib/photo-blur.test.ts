@@ -17,13 +17,21 @@ describe("box maths", () => {
     expect(boxFromDrag({ x: 0, y: 0 }, { x: 0.01, y: 0.2 })).toBeNull();
     expect(boxFromDrag({ x: 0, y: 0 }, { x: 0.2, y: 0.01 })).toBeNull();
     expect(boxFromDrag({ x: 0, y: 0 }, { x: 0.05, y: 0.05 })).toEqual({
-      x: 0, y: 0, w: 0.05, h: 0.05,
+      x: 0,
+      y: 0,
+      w: 0.05,
+      h: 0.05,
     });
   });
   it.each(["nw", "ne", "sw", "se"] as const)("enforces minimum dimensions from %s", (corner) => {
     const left = corner === "nw" || corner === "sw";
     const top = corner === "nw" || corner === "ne";
-    const result = resizeBox({ x: 0.4, y: 0.4, w: 0.2, h: 0.2 }, corner, left ? 1 : -1, top ? 1 : -1);
+    const result = resizeBox(
+      { x: 0.4, y: 0.4, w: 0.2, h: 0.2 },
+      corner,
+      left ? 1 : -1,
+      top ? 1 : -1,
+    );
     expect(result.w).toBe(0.05);
     expect(result.h).toBe(0.05);
     expect(result.x).toBeCloseTo(left ? 0.55 : 0.4);
@@ -86,12 +94,18 @@ describe("JPEG helpers", () => {
   it("contains malformed markers, lengths and truncated non-frame segments", () => {
     expect(jpegDimensions(new Uint8Array([255, 216, 255, 224, 0, 2, 0, 0, 0, 0, 0, 0]))).toBeNull();
     expect(jpegDimensions(new Uint8Array([255, 216, 255, 224, 0, 1, 0, 0, 0, 0, 0, 0]))).toBeNull();
-    expect(jpegDimensions(new Uint8Array([255, 216, 255, 224, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]))).toBeNull();
+    expect(
+      jpegDimensions(new Uint8Array([255, 216, 255, 224, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])),
+    ).toBeNull();
     for (const marker of [0xc4, 0xc8, 0xcc, 0xd0]) {
-      expect(jpegDimensions(new Uint8Array([255, 216, 255, marker, 0, 2, 0, 0, 0, 0, 0, 0]))).toBeNull();
+      expect(
+        jpegDimensions(new Uint8Array([255, 216, 255, marker, 0, 2, 0, 0, 0, 0, 0, 0])),
+      ).toBeNull();
     }
     expect(dataUrlToBytes("data:image/jpeg;base64,A")).toBeNull();
-    expect(dataUrlToBytes("data:IMAGE/JPEG;base64,Y W J j\n")?.bytes).toEqual(new Uint8Array([97, 98, 99]));
+    expect(dataUrlToBytes("data:IMAGE/JPEG;base64,Y W J j\n")?.bytes).toEqual(
+      new Uint8Array([97, 98, 99]),
+    );
   });
   function jpeg(width: number, height: number): Uint8Array {
     // Minimal header: SOI, an APP0 segment, then an SOF0 carrying the size.

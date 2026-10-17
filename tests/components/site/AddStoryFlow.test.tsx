@@ -126,7 +126,9 @@ describe("AddStoryFlow", () => {
     render(<AddStoryFlow plateId="p1" />);
     await user.type(screen.getByLabelText(/What do you think it means/), "single.");
     await user.click(screen.getByRole("button", { name: "Next" }));
-    fireEvent.change(document.getElementById("story-photo") as HTMLInputElement, { target: { files: [] } });
+    fireEvent.change(document.getElementById("story-photo") as HTMLInputElement, {
+      target: { files: [] },
+    });
     expect(m.decode).not.toHaveBeenCalled();
   });
 
@@ -136,7 +138,10 @@ describe("AddStoryFlow", () => {
     render(<AddStoryFlow plateId="p1" />);
     await user.type(screen.getByLabelText(/What do you think it means/), "single.");
     await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.upload(document.getElementById("story-photo") as HTMLInputElement, new File(["x"], "x.jpg", { type: "image/jpeg" }));
+    await user.upload(
+      document.getElementById("story-photo") as HTMLInputElement,
+      new File(["x"], "x.jpg", { type: "image/jpeg" }),
+    );
     await screen.findByRole("dialog");
     expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
     expect(screen.getByText(/We couldn't find the plate in this photo/)).toBeInTheDocument();
@@ -144,39 +149,56 @@ describe("AddStoryFlow", () => {
 
   it("disposes a stale detection result after unmount", async () => {
     let resolve: ((result: unknown) => void) | undefined;
-    m.detect.mockReturnValue(new Promise((done) => { resolve = done; }));
+    m.detect.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
     const user = userEvent.setup();
     const { unmount } = render(<AddStoryFlow plateId="p1" />);
     await user.type(screen.getByLabelText(/What do you think it means/), "single.");
     await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.upload(document.getElementById("story-photo") as HTMLInputElement, new File(["x"], "x.jpg", { type: "image/jpeg" }));
+    await user.upload(
+      document.getElementById("story-photo") as HTMLInputElement,
+      new File(["x"], "x.jpg", { type: "image/jpeg" }),
+    );
     await waitFor(() => expect(m.detect).toHaveBeenCalled());
     unmount();
-    await act(async () => { resolve?.({ outcome: "ok", box: null }); });
+    await act(async () => {
+      resolve?.({ outcome: "ok", box: null });
+    });
     expect(m.close).toHaveBeenCalledTimes(1);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
     expect(m.upload).not.toHaveBeenCalled();
   });
 
-  it.each(["returned", "thrown"])("a %s upload failure closes the editor and allows continuing without a photo", async (kind) => {
-    if (kind === "returned") m.upload.mockResolvedValue({ outcome: "error" });
-    else m.upload.mockRejectedValue(new Error("offline"));
-    const user = userEvent.setup();
-    render(<AddStoryFlow plateId="p1" />);
-    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
-    await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.upload(document.getElementById("story-photo") as HTMLInputElement, new File(["x"], "x.jpg", { type: "image/jpeg" }));
-    await screen.findByRole("dialog");
-    await user.click(screen.getByRole("button", { name: "Next" }));
-    await screen.findByRole("heading", { name: "Review your photo" });
-    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-    expect(m.close).toHaveBeenCalledTimes(1);
-    expect(m.track).not.toHaveBeenCalledWith("photo_added", expect.anything());
-    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
-    await user.click(screen.getByRole("button", { name: "Submit Story" }));
-    await waitFor(() => expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }));
-  });
+  it.each(["returned", "thrown"])(
+    "a %s upload failure closes the editor and allows continuing without a photo",
+    async (kind) => {
+      if (kind === "returned") m.upload.mockResolvedValue({ outcome: "error" });
+      else m.upload.mockRejectedValue(new Error("offline"));
+      const user = userEvent.setup();
+      render(<AddStoryFlow plateId="p1" />);
+      await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await user.upload(
+        document.getElementById("story-photo") as HTMLInputElement,
+        new File(["x"], "x.jpg", { type: "image/jpeg" }),
+      );
+      await screen.findByRole("dialog");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await screen.findByRole("heading", { name: "Review your photo" });
+      await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(m.close).toHaveBeenCalledTimes(1);
+      expect(m.track).not.toHaveBeenCalledWith("photo_added", expect.anything());
+      await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() =>
+        expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }),
+      );
+    },
+  );
 
   it("removing a confirmed photo clears its submitted path", async () => {
     const user = userEvent.setup();
@@ -184,11 +206,15 @@ describe("AddStoryFlow", () => {
     await user.type(screen.getByLabelText(/What do you think it means/), "single.");
     await addPhoto(user);
     await user.click(screen.getByRole("button", { name: "Remove Photo" }));
-    expect(screen.queryByAltText("Your processed photo, blurred except the plate")).not.toBeInTheDocument();
+    expect(
+      screen.queryByAltText("Your processed photo, blurred except the plate"),
+    ).not.toBeInTheDocument();
     expect(m.track).toHaveBeenCalledWith("photo_skipped", {});
     await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
     await user.click(screen.getByRole("button", { name: "Submit Story" }));
-    await waitFor(() => expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }));
+    await waitFor(() =>
+      expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }),
+    );
   });
   it("requires more than the prefilled starter before continuing", async () => {
     const user = userEvent.setup();

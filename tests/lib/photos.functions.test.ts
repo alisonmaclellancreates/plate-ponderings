@@ -101,14 +101,20 @@ describe("detectPlateBox", () => {
   );
   it("contains role and AI-state read failures", async () => {
     mocks.userRpc.mockResolvedValueOnce({ data: false, error: new Error("offline") });
-    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({ outcome: "unavailable" });
+    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({
+      outcome: "unavailable",
+    });
     mocks.readBlock.mockResolvedValueOnce(null);
-    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({ outcome: "unavailable" });
+    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({
+      outcome: "unavailable",
+    });
     expect(mocks.adminRpc).not.toHaveBeenCalled();
   });
   it.each([null, "credit_block"])("persists only terminal detector blocks: %s", async (block) => {
     mocks.detect.mockResolvedValue({ outcome: "unavailable", block, runId: "r1" });
-    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({ outcome: "unavailable" });
+    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({
+      outcome: "unavailable",
+    });
     if (block) expect(mocks.persistBlock).toHaveBeenCalledWith(expect.anything(), block, "r1");
     else expect(mocks.persistBlock).not.toHaveBeenCalled();
   });
