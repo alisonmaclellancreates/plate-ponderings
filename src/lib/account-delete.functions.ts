@@ -3,9 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { DEMO_MESSAGE } from "./account-rules";
 
 export type DeleteAccountResult =
-  | { outcome: "deleted" }
-  | { outcome: "demo"; message: string }
-  | { outcome: "error" };
+  { outcome: "deleted" } | { outcome: "demo"; message: string } | { outcome: "error" };
 
 export const deleteAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

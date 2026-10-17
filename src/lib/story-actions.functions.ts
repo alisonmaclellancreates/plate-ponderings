@@ -7,9 +7,7 @@ export type ReportReason = (typeof REPORT_REASON_KEYS)[number];
 export const REPORT_NOTE_MAX = 200;
 
 export type ActionResult =
-  | { outcome: "done" }
-  | { outcome: "demo"; message: string }
-  | { outcome: "error" };
+  { outcome: "done" } | { outcome: "demo"; message: string } | { outcome: "error" };
 
 const id = (data: { storyId: string }) => ({
   storyId: typeof data.storyId === "string" ? data.storyId : "",
@@ -17,7 +15,10 @@ const id = (data: { storyId: string }) => ({
 
 type Ctx = {
   supabase: {
-    rpc: (fn: "has_role", args: { _user_id: string; _role: "demo" }) => PromiseLike<{
+    rpc: (
+      fn: "has_role",
+      args: { _user_id: string; _role: "demo" },
+    ) => PromiseLike<{
       data: boolean | null;
       error: unknown;
     }>;

@@ -5,7 +5,10 @@ export const RECHECK_CAP = 10;
 
 type RoleCtx = {
   supabase: {
-    rpc: (fn: "has_role", args: { _user_id: string; _role: "admin" }) => PromiseLike<{
+    rpc: (
+      fn: "has_role",
+      args: { _user_id: string; _role: "admin" },
+    ) => PromiseLike<{
       data: boolean | null;
       error: unknown;
     }>;
