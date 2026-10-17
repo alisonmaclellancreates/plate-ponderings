@@ -20,7 +20,7 @@ const BOX = { x: 0.3, y: 0.4, w: 0.25, h: 0.12 };
 function setup(props: Partial<Parameters<typeof PhotoEditor>[0]> = {}) {
   const onUse = vi.fn();
   const onRemove = vi.fn();
-  const onRetry = vi.fn();
+  const onChooseAnother = vi.fn();
   render(
     <PhotoEditor
       imageUrl="/photo.jpg"
@@ -29,11 +29,11 @@ function setup(props: Partial<Parameters<typeof PhotoEditor>[0]> = {}) {
       showNoBoxMessage={false}
       onUse={onUse}
       onRemove={onRemove}
-      onRetry={onRetry}
+      onChooseAnother={onChooseAnother}
       {...props}
     />,
   );
-  return { onUse, onRemove, onRetry };
+  return { onUse, onRemove, onChooseAnother };
 }
 
 beforeEach(() => {
@@ -99,11 +99,29 @@ describe("PhotoEditor", () => {
     expect(onUse.mock.calls[0]![1]).toBe(true);
   });
 
-  it("Adjust returns to the box, and Remove Photo and Try again call back", async () => {
+  it.each([BOX, null])("adjustment can skip or choose another photo with box %o without processing", async (initialBox) => {
     const user = userEvent.setup();
-    const { onRemove, onRetry } = setup();
-    await user.click(screen.getByRole("button", { name: "Try again" }));
-    expect(onRetry).toHaveBeenCalled();
+    const { onRemove, onChooseAnother } = setup({ initialBox });
+    await user.click(screen.getByRole("button", { name: "Choose another photo" }));
+    expect(onChooseAnother).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: "Skip photo" }));
+    expect(onRemove).toHaveBeenCalledTimes(1);
+    expect(m.renderBlurred).not.toHaveBeenCalled();
+    expect(m.toJpeg).not.toHaveBeenCalled();
+  });
+
+  it("Next cannot process a photo without a box", async () => {
+    const user = userEvent.setup();
+    setup({ initialBox: null });
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    expect(m.renderBlurred).not.toHaveBeenCalled();
+    expect(m.toJpeg).not.toHaveBeenCalled();
+  });
+
+  it("Adjust returns to the box, and Remove Photo calls back", async () => {
+    const user = userEvent.setup();
+    const { onRemove } = setup();
     await user.click(screen.getByRole("button", { name: "Next" }));
     await waitFor(() =>
       expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
@@ -120,7 +138,7 @@ describe("PhotoEditor", () => {
   });
 });
 
-/** The processed JPEG is built for the review, never for remove or retry. */
+/** The processed JPEG is built for the review, never for remove or selection. */
 function onUseCallbackCheck(toJpeg: ReturnType<typeof vi.fn>) {
   return toJpeg.mock.calls.length > 0;
 }

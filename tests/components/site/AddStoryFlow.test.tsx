@@ -14,6 +14,7 @@ const m = vi.hoisted(() => ({
   decode: vi.fn(),
   renderBlurred: vi.fn(),
   toJpeg: vi.fn(),
+  close: vi.fn(),
   auth: { account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean } },
   plate: { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } } as unknown,
   stories: { hasOwnerStory: false } as unknown,
@@ -89,7 +90,7 @@ beforeEach(() => {
   m.plate = { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } };
   m.stories = { hasOwnerStory: false };
   m.submit.mockResolvedValue({ outcome: "published" });
-  m.decode.mockResolvedValue({ width: 800, height: 600 });
+  m.decode.mockResolvedValue({ width: 800, height: 600, close: m.close });
   m.detect.mockResolvedValue({ outcome: "ok", box: { x: 0.3, y: 0.4, w: 0.25, h: 0.12 } });
   m.renderBlurred.mockResolvedValue(undefined);
   m.toJpeg.mockResolvedValue(new Blob(["jpeg"], { type: "image/jpeg" }));
@@ -361,6 +362,56 @@ describe("AddStoryFlow", () => {
       ).toBeInTheDocument(),
     );
   });
+
+  it("opens a cleared picker, preserves the editor on cancel, and detects the same file when selected again", async () => {
+    m.detect.mockResolvedValue({ outcome: "ok", box: null });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const input = document.getElementById("story-photo") as HTMLInputElement;
+    const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(input, file);
+    await screen.findByRole("dialog");
+    const click = vi.spyOn(input, "click");
+    await user.click(screen.getByRole("button", { name: "Choose another photo" }));
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(input.value).toBe("");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(m.detect).toHaveBeenCalledTimes(1);
+    expect(m.close).not.toHaveBeenCalled();
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+    await user.upload(input, file);
+    await waitFor(() => expect(m.detect).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(m.close).toHaveBeenCalledTimes(1));
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+    expect(m.upload).not.toHaveBeenCalled();
+  });
+
+  it.each([null, { x: 0.3, y: 0.4, w: 0.25, h: 0.12 }])(
+    "skipping adjustment with box %o frees the photo and returns to the photo step without uploading",
+    async (box) => {
+      m.detect.mockResolvedValue({ outcome: "ok", box });
+      const user = userEvent.setup();
+      render(<AddStoryFlow plateId="p1" />);
+      await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      const input = document.getElementById("story-photo") as HTMLInputElement;
+      await user.upload(input, new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+      await screen.findByRole("dialog");
+      await user.click(screen.getByRole("button", { name: "Skip photo" }));
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(input.value).toBe("");
+      expect(m.close).toHaveBeenCalledTimes(1);
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+      expect(m.track.mock.calls.filter(([event]) => event === "photo_skipped")).toEqual([["photo_skipped", {}]]);
+      expect(m.upload).not.toHaveBeenCalled();
+      expect(m.toJpeg).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() => expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }));
+    },
+  );
 
   it("an unreadable photo shows the message and lets the visitor continue", async () => {
     m.decode.mockRejectedValue(new Error("bad file"));
