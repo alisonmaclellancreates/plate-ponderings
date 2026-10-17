@@ -20,9 +20,6 @@ export type Database = {
           ai_check_blocked_at: string | null
           ai_check_run_id: string | null
           demo_mode: boolean
-          handle_check_block_category: string | null
-          handle_check_blocked_at: string | null
-          handle_check_run_id: string | null
           id: boolean
         }
         Insert: {
@@ -30,9 +27,6 @@ export type Database = {
           ai_check_blocked_at?: string | null
           ai_check_run_id?: string | null
           demo_mode?: boolean
-          handle_check_block_category?: string | null
-          handle_check_blocked_at?: string | null
-          handle_check_run_id?: string | null
           id?: boolean
         }
         Update: {
@@ -40,9 +34,6 @@ export type Database = {
           ai_check_blocked_at?: string | null
           ai_check_run_id?: string | null
           demo_mode?: boolean
-          handle_check_block_category?: string | null
-          handle_check_blocked_at?: string | null
-          handle_check_run_id?: string | null
           id?: boolean
         }
         Relationships: []
