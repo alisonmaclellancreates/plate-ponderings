@@ -48,6 +48,7 @@ vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => m.auth }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
 
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
+import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 
 async function fillAndReview(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
