@@ -10,11 +10,17 @@ const m = vi.hoisted(() => ({
   account: null as unknown,
 }));
 
-const href = (to: string, params?: Record<string, string>, search?: Record<string, string>) => {
+const href = (
+  to: string,
+  params?: Record<string, string>,
+  search?: Record<string, string>,
+  hash?: string,
+) => {
   const path = params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to;
   const qs = search && Object.keys(search).length ? `?${new URLSearchParams(search)}` : "";
-  return path + qs;
+  return path + qs + (hash ? `#${hash}` : "");
 };
+
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => vi.fn(),

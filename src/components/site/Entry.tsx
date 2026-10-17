@@ -318,16 +318,22 @@ export function SignInPromptPage({ plateId }: { plateId?: string | undefined } =
           <h2 className="font-display text-2xl text-navy">We couldn't find that plate.</h2>
           <p className="mt-2">Look it up again, or spot it if it's new to the collection.</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link to="/spot" className="brand-btn brand-btn-coral">
+            <Link to="/" hash="plate-search" className="brand-btn brand-btn-coral">
+              Look Up a Plate
+            </Link>
+            <Link to="/spot" className="brand-btn brand-btn-outline">
               Spot a Plate
             </Link>
-            <Link to="/explore" className="brand-btn brand-btn-outline">
+          </div>
+          <p className="mt-6 text-center">
+            <Link to="/explore" className={link}>
               Explore
             </Link>
-          </div>
+          </p>
         </section>
       </main>
     );
+
   const returnTo = storyReturnPath(plate.id);
   return (
     <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:py-10">
