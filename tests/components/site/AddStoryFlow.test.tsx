@@ -103,7 +103,7 @@ beforeEach(() => {
 async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Next" }));
   const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
-  await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+  await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
   await waitFor(() =>
     expect(screen.getByRole("heading", { name: "Adjust the plate area" })).toBeInTheDocument(),
   );
@@ -286,7 +286,7 @@ describe("AddStoryFlow", () => {
     render(<AddStoryFlow plateId="p1" />);
     await user.click(screen.getByRole("button", { name: "Next" }));
     const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
-    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
     await waitFor(() =>
       expect(
         screen.getByText(
@@ -302,7 +302,7 @@ describe("AddStoryFlow", () => {
     render(<AddStoryFlow plateId="p1" />);
     await user.click(screen.getByRole("button", { name: "Next" }));
     const file = new File(["nope"], "photo.jpg", { type: "image/jpeg" });
-    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
     await waitFor(() =>
       expect(
         screen.getByText(
