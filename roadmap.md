@@ -1,5 +1,11 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43: PR #90 coverage correction
+
+- [ ] Add real moderation, server error/race/recheck, route and UI edge tests without removing reachable branches.
+- [ ] Run the full CI-equivalent coverage suite and maintained-file lint.
+- [ ] Read PR #90 Codecov after CI; report its actual figure, not local diagnostic coverage.
+
 # Step 43: Rowan rate-limit correction
 
 - [x] Separate pause outcome using the unchanged wait message; live and preview outcome tests pass. All new executable lines covered locally; 581 tests pass.
