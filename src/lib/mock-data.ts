@@ -1,5 +1,5 @@
 /** Static preview data shared by every preview page. Replaced by Cloud data in a later step. */
-import { storyCount } from "@/lib/story-count";
+
 
 export type PlateStatus = "mystery" | "interpreted" | "owner";
 export type Consensus = "agree" | "mixed" | "differ";
