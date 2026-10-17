@@ -10,7 +10,10 @@ vi.mock("@/lib/mock-data", async (importOriginal) => {
   if (!base) throw new Error("Missing Utah preview fixture");
   return {
     ...original,
-    PLATES: [...original.PLATES, { ...base, slug: "test-nl", jurisdiction: "Newfoundland and Labrador", text: "ROW43XYZ" }],
+    PLATES: [
+      ...original.PLATES,
+      { ...base, slug: "test-nl", jurisdiction: "Newfoundland and Labrador", text: "ROW43XYZ" },
+    ],
   };
 });
 
