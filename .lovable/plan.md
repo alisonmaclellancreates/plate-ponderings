@@ -45,7 +45,7 @@ I will report whether adding the processed photo to the existing story check is 
 ## Tests
 
 - `photo-blur.ts`: box maths including a rotated (EXIF) image, clamp, min size, drag-draw, export size cap (mock canvas).
-- `detectPlateBox`: input validation, demo refusal, rate limit, AI pause, box-or-none mapping (AI mocked).
+- `detectPlateBox`: input validation, demo refusal, rate limit, AI pause, box-or-none mapping (AI mocked), and `consume_photo_detect_attempt` erroring (including not existing) returning `unavailable`.
 - `uploadStoryPhoto`: JPEG/type/size/dimension checks, own-folder path, demo refusal.
 - `addStory`: photoPath ownership check; photo deleted on rejected, rate-limited, validation, error and demo outcomes.
 - `getPlateStories`: signed URL only for published stories with photos.
