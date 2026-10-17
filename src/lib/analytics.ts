@@ -16,6 +16,7 @@ export const EVENTS = {
   summary_history_opened: ["versions_shown"],
   ai_guess_revealed: [],
   featured_subject_opened: ["is_mystery", "days_ago"],
+  submissions_viewed: ["unread_count"],
 } as const;
 
 type EventRegistry = Readonly<Record<string, readonly string[]>>;

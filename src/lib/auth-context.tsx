@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { getAccount, getDemoSetting } from "./accounts.functions";
 import { recheckPendingSubjects } from "./plates.functions";
+import { UNREAD_DOT_KEY } from "./submissions-queries";
 import { identify, reset, setDemo, track } from "./analytics";
 import { Auth, type Account } from "./account-auth";
 import { checkSignedIn } from "./session-check";
@@ -35,7 +36,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       await identify(user.id);
       if (!own.isDemo && Date.now() - lastRecheckCall >= RECHECK_GAP_MS) {
         lastRecheckCall = Date.now();
-        void recheckPendingSubjects().catch(() => {});
+        void recheckPendingSubjects()
+          .then(() => queryClient.invalidateQueries({ queryKey: UNREAD_DOT_KEY }))
+          .catch(() => {});
       }
     };
     try {
@@ -43,7 +46,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     } finally {
       if (current === generation.current) setLoading(false);
     }
-  }, [getOwnAccount]);
+  }, [getOwnAccount, queryClient]);
   useEffect(() => {
     const requests = generation;
     void refresh().catch(() => setLoading(false));

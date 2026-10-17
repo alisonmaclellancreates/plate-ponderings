@@ -43,7 +43,16 @@ const PREVIEWS = [
     label: "Plate and badges",
     note: "Plate in three sizes, every badge",
   },
-  { to: "/submissions", label: "Your Submissions", note: "Plates and stories, newest first" },
+  {
+    to: "/submissions",
+    label: "Your Submissions",
+    note: "Live data: your plates and stories, newest first",
+  },
+  {
+    to: "/previews/submissions",
+    label: "Your Submissions, sample data",
+    note: "Every plate and story status, some Updated, inert Dismiss",
+  },
   { to: "/profile", label: "Your Profile", note: "Handle, help text and preview card" },
   { to: "/sign-in-prompt", label: "Sign in prompt", note: "Add Your Story for PNW LV, signed out" },
   { to: "/sign-in", label: "Sign In", note: "Email and password" },

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -46,6 +46,12 @@ import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Acc
 import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
 
 describe("SubmissionsPage", () => {
+  it("leaves preview Dismiss inert without a handler", () => {
+    render(<SubmissionsPage />);
+    fireEvent.click(screen.getAllByRole("button", { name: "Dismiss" })[0] as HTMLElement);
+    expect(screen.getAllByTestId("submission")).toHaveLength(SUBMISSIONS.length);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
   it("lists rows newest first with one h1", () => {
     render(<SubmissionsPage rows={[...SUBMISSIONS].reverse()} />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);

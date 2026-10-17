@@ -44,6 +44,18 @@ describe("analytics", () => {
       }),
     ).toEqual({ event: "featured_subject_opened", properties: { is_mystery: false, days_ago: 3 } });
   });
+  it("submissions_viewed sends only the unread count", async () => {
+    const analytics = await import("@/lib/analytics");
+    await analytics.track("submissions_viewed", { unread_count: 2 });
+    expect(sdk.capture).toHaveBeenLastCalledWith("submissions_viewed", { unread_count: 2 });
+    const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+    expect(
+      beforeSend({
+        event: "submissions_viewed",
+        properties: { unread_count: 2, text: "private", handle: "private", story_id: "x" },
+      }),
+    ).toEqual({ event: "submissions_viewed", properties: { unread_count: 2 } });
+  });
   it("allows rate_limited and preserves each planned spot outcome through capture and before_send", async () => {
     const analytics = await import("@/lib/analytics");
     expect(analytics.SUBJECT_SPOTTED_OUTCOMES).toContain("rate_limited");
