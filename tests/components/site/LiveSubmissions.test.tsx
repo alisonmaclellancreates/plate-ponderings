@@ -25,6 +25,8 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 vi.mock("@/lib/accounts.functions", () => ({ checkHandle: vi.fn(), saveHandle: vi.fn() }));
+vi.mock("@/integrations/supabase/auth-middleware", () => ({ requireSupabaseAuth: {} }));
+vi.mock("@/lib/plates.functions", () => ({}));
 
 import { LiveSubmissions } from "@/components/site/LiveSubmissions";
 
