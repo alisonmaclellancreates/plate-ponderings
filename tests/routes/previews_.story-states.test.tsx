@@ -64,7 +64,7 @@ describe.each([
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent(heading);
     expect(status).toHaveTextContent(message);
-    expect(screen.getByText("PNW LV", { selector: "span" })).toBeInTheDocument();
+    expect(screen.getByTestId("plate-header")).toHaveTextContent("PNW LV · Oregon");
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(SAMPLE_STORY.meaning);
     expect(screen.getByRole("textbox", { name: /Tell us more/ })).toHaveValue(SAMPLE_STORY.more);
   });
