@@ -200,8 +200,12 @@ describe("handle saves", () => {
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
   it("rejects invalid, reserved or taken handles without AI", async () => {
-    expect((await call(saveHandle, "ADMIN"))["message"]).toBe("That handle is reserved. Choose another.");
-    expect((await call(saveHandle, "rowan!"))["message"]).toBe("Use letters, numbers, and underscores only.");
+    expect((await call(saveHandle, "ADMIN"))["message"]).toBe(
+      "That handle is reserved. Choose another.",
+    );
+    expect((await call(saveHandle, "rowan!"))["message"]).toBe(
+      "Use letters, numbers, and underscores only.",
+    );
     taken.data = [{ id: "other" }];
     expect((await call(saveHandle))["message"]).toBe(HANDLE_REJECTED);
     taken.error = {};

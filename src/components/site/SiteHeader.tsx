@@ -25,7 +25,12 @@ function Avatar({
       <span className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-cream text-navy">
         <UserRound aria-hidden className="size-5" />
       </span>
-      <span className={showHandle ? "font-semibold" : "max-w-20 truncate font-semibold"} title={handle}>{handle}</span>
+      <span
+        className={showHandle ? "font-semibold" : "max-w-20 truncate font-semibold"}
+        title={handle}
+      >
+        {handle}
+      </span>
     </span>
   );
 }

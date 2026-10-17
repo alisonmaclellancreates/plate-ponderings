@@ -10,7 +10,12 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAccountAuth } from "@/lib/account-auth";
 import { checkHandle, saveHandle } from "@/lib/accounts.functions";
-import { handleFormatValid, handleValidationMessage, HANDLE_UNAVAILABLE, DEMO_MESSAGE } from "@/lib/account-rules";
+import {
+  handleFormatValid,
+  handleValidationMessage,
+  HANDLE_UNAVAILABLE,
+  DEMO_MESSAGE,
+} from "@/lib/account-rules";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
 
@@ -204,7 +209,10 @@ export function ProfilePage() {
                       Available
                     </span>
                   ) : (
-                    <span id="handle-status" className="min-w-0 text-sm text-muted-foreground sm:max-w-48">
+                    <span
+                      id="handle-status"
+                      className="min-w-0 text-sm text-muted-foreground sm:max-w-48"
+                    >
                       {auth?.account?.isDemo
                         ? DEMO_MESSAGE
                         : handleFormatValid(draft)

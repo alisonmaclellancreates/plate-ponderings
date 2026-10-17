@@ -119,13 +119,18 @@ it("profile saves update identity and emit an empty event", async () => {
   await waitFor(() => expect(m.refresh).toHaveBeenCalled());
   expect(m.track).toHaveBeenCalledWith("handle_changed", {});
 });
-it.each(["admin", "rowan!"])("invalid draft %s never triggers availability or refresh", async (draft) => {
-  render(<ProfilePage />);
-  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: draft } });
-  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 300)); });
-  expect(m.check).not.toHaveBeenCalled();
-  expect(m.refresh).not.toHaveBeenCalled();
-});
+it.each(["admin", "rowan!"])(
+  "invalid draft %s never triggers availability or refresh",
+  async (draft) => {
+    render(<ProfilePage />);
+    fireEvent.change(screen.getByLabelText("Handle"), { target: { value: draft } });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    });
+    expect(m.check).not.toHaveBeenCalled();
+    expect(m.refresh).not.toHaveBeenCalled();
+  },
+);
 it("profile rejection and unavailable save preserve the account", async () => {
   m.save.mockResolvedValue({ outcome: "rejected", message: "rejected" });
   const v = render(<ProfilePage />);
