@@ -22,7 +22,10 @@ vi.mock("@tanstack/react-query", () => ({
     return { data: undefined };
   },
 }));
-vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@tanstack/react-start", () => ({
+  createMiddleware: () => ({}),
+  useServerFn: (fn: unknown) => fn,
+}));
 vi.mock("@/lib/plates.functions", () => ({ getPlate: m.getPlate }));
 vi.mock("@/lib/stories.functions", () => ({
   addStory: m.addStory,
