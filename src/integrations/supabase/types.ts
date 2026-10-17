@@ -16,6 +16,9 @@ export type Database = {
     Tables: {
       app_settings: {
         Row: {
+          ai_check_block_category: string | null
+          ai_check_blocked_at: string | null
+          ai_check_run_id: string | null
           demo_mode: boolean
           handle_check_block_category: string | null
           handle_check_blocked_at: string | null
@@ -23,6 +26,9 @@ export type Database = {
           id: boolean
         }
         Insert: {
+          ai_check_block_category?: string | null
+          ai_check_blocked_at?: string | null
+          ai_check_run_id?: string | null
           demo_mode?: boolean
           handle_check_block_category?: string | null
           handle_check_blocked_at?: string | null
@@ -30,6 +36,9 @@ export type Database = {
           id?: boolean
         }
         Update: {
+          ai_check_block_category?: string | null
+          ai_check_blocked_at?: string | null
+          ai_check_run_id?: string | null
           demo_mode?: boolean
           handle_check_block_category?: string | null
           handle_check_blocked_at?: string | null
@@ -222,16 +231,19 @@ export type Database = {
           created_at: string
           handle: string
           id: string
+          last_recheck_at: string | null
         }
         Insert: {
           created_at?: string
           handle: string
           id: string
+          last_recheck_at?: string | null
         }
         Update: {
           created_at?: string
           handle?: string
           id?: string
+          last_recheck_at?: string | null
         }
         Relationships: []
       }
@@ -333,6 +345,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subject_save_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       subjects: {
         Row: {
@@ -502,6 +532,10 @@ export type Database = {
     }
     Functions: {
       consume_handle_save_attempt: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      consume_subject_save_attempt: {
         Args: { _user_id: string }
         Returns: boolean
       }
