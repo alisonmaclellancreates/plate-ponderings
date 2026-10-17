@@ -151,8 +151,8 @@ it("two entry forms on one page keep their own field ids", () => {
   );
   const emails = screen.getAllByLabelText("Email");
   const passwords = screen.getAllByLabelText("Password");
-  expect(emails[0].id).not.toBe(emails[1].id);
-  expect(passwords[0].id).not.toBe(passwords[1].id);
+  expect(emails[0]!.id).not.toBe(emails[1].id);
+  expect(passwords[0]!.id).not.toBe(passwords[1].id);
   expect(emails[0].getAttribute("aria-describedby")).not.toBe(
     emails[1].getAttribute("aria-describedby"),
   );
@@ -176,7 +176,7 @@ it("the previews page renders every account state section", () => {
     expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
   }
   expect(screen.getByRole("heading", { name: "Sign in, wrong password" })).toBeInTheDocument();
-  expect(screen.getAllByRole("alert").length).toBe(4);
+  expect(screen.getAllByRole("alert").length).toBe(9);
   expect(m.signIn).not.toHaveBeenCalled();
   expect(m.signUp).not.toHaveBeenCalled();
 });
