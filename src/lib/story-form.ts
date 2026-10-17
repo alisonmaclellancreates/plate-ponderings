@@ -1,7 +1,17 @@
 import type { HowIKnow } from "@/lib/mock-data";
 
 export type StoryStep =
-  "1" | "1-owner-exists" | "2" | "2-adjust" | "2-review" | "3" | "done" | "checking" | "rejected";
+  | "1"
+  | "1-owner-exists"
+  | "2"
+  | "2-adjust"
+  | "2-review"
+  | "3"
+  | "done"
+  | "checking"
+  | "rejected"
+  | "error"
+  | "rate-limited";
 
 export const STORY_STEPS: Record<StoryStep, string> = {
   "1": "Your story",
@@ -13,6 +23,8 @@ export const STORY_STEPS: Record<StoryStep, string> = {
   done: "Story submitted",
   checking: "Being checked",
   rejected: "Couldn't add this story",
+  error: "Something went wrong",
+  "rate-limited": "Paused for a while",
 };
 
 export const MEANING_MAX = 80;
