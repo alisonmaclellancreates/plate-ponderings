@@ -7,7 +7,6 @@ import type { ReportedStory } from "@/lib/mock-data";
 import { track } from "@/lib/analytics";
 import { ADMIN_ERROR, ADMIN_REPORTS_KEY, RECHECK_PAUSED, recheckNote } from "@/lib/admin-copy";
 
-
 /** Admin with live reported stories; every action is verified as admin on the server. */
 export function LiveAdmin() {
   const fetchRows = useServerFn(getReportedStories);
