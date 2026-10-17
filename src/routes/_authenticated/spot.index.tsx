@@ -4,7 +4,7 @@ import { SpotPage } from "@/components/site/SpotPlate";
 const TITLE = "Spot a Plate | What the Plate?";
 const DESCRIPTION = "Seen a curious plate? Add it to the collection and let the guessing begin.";
 
-export const Route = createFileRoute("/spot/")({
+export const Route = createFileRoute("/_authenticated/spot/")({
   head: () => ({
     meta: [
       { title: TITLE },

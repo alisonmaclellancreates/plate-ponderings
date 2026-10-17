@@ -4,7 +4,7 @@ import { SettingsPage } from "@/components/site/Settings";
 const TITLE = "Settings | What the Plate?";
 const DESCRIPTION = "Blocked people and account settings.";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: TITLE },
