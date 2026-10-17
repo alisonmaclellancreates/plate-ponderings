@@ -32,6 +32,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenticated/submissions'
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
+import { Route as PreviewsAccountRouteImport } from './routes/previews.account'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
 import { Route as AuthenticatedSettingsDeleteConfirmRouteImport } from './routes/_authenticated/settings_.delete-confirm'
 import { Route as AuthenticatedSpotIndexRouteImport } from './routes/_authenticated/spot.index'
@@ -152,6 +153,11 @@ const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
   path: '/preview/components',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreviewsAccountRoute = PreviewsAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => PreviewsRoute,
+} as any)
 const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
   id: '/spot/$outcome',
   path: '/spot/$outcome',
@@ -185,7 +191,7 @@ export interface FileRoutesByFullPath {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/not-found': typeof NotFoundRoute
-  '/previews': typeof PreviewsRoute
+  '/previews': typeof PreviewsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
+  '/previews/account': typeof PreviewsAccountRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
@@ -213,7 +220,7 @@ export interface FileRoutesByTo {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/not-found': typeof NotFoundRoute
-  '/previews': typeof PreviewsRoute
+  '/previews': typeof PreviewsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
+  '/previews/account': typeof PreviewsAccountRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
@@ -243,7 +251,7 @@ export interface FileRoutesById {
   '/home-fallback': typeof HomeFallbackRoute
   '/home-no-match': typeof HomeNoMatchRoute
   '/not-found': typeof NotFoundRoute
-  '/previews': typeof PreviewsRoute
+  '/previews': typeof PreviewsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/_authenticated/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
+  '/previews/account': typeof PreviewsAccountRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/_authenticated/settings_/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/_authenticated/story/$step': typeof AuthenticatedStoryStepRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
+    | '/previews/account'
     | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
+    | '/previews/account'
     | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
@@ -342,6 +353,7 @@ export interface FileRouteTypes {
     | '/_authenticated/submissions'
     | '/plate/$state'
     | '/preview/components'
+    | '/previews/account'
     | '/spot/$outcome'
     | '/_authenticated/settings_/delete-confirm'
     | '/_authenticated/story/$step'
@@ -360,7 +372,7 @@ export interface RootRouteChildren {
   HomeFallbackRoute: typeof HomeFallbackRoute
   HomeNoMatchRoute: typeof HomeNoMatchRoute
   NotFoundRoute: typeof NotFoundRoute
-  PreviewsRoute: typeof PreviewsRoute
+  PreviewsRoute: typeof PreviewsRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   SignInRoute: typeof SignInRoute
   SignInPromptRoute: typeof SignInPromptRoute
@@ -534,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/previews/account': {
+      id: '/previews/account'
+      path: '/account'
+      fullPath: '/previews/account'
+      preLoaderRoute: typeof PreviewsAccountRouteImport
+      parentRoute: typeof PreviewsRoute
+    }
     '/spot/$outcome': {
       id: '/spot/$outcome'
       path: '/spot/$outcome'
@@ -589,6 +608,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface PreviewsRouteChildren {
+  PreviewsAccountRoute: typeof PreviewsAccountRoute
+}
+
+const PreviewsRouteChildren: PreviewsRouteChildren = {
+  PreviewsAccountRoute: PreviewsAccountRoute,
+}
+
+const PreviewsRouteWithChildren = PreviewsRoute._addFileChildren(
+  PreviewsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -601,7 +632,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeFallbackRoute: HomeFallbackRoute,
   HomeNoMatchRoute: HomeNoMatchRoute,
   NotFoundRoute: NotFoundRoute,
-  PreviewsRoute: PreviewsRoute,
+  PreviewsRoute: PreviewsRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   SignInRoute: SignInRoute,
   SignInPromptRoute: SignInPromptRoute,
