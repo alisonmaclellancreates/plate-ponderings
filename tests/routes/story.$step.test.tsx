@@ -42,6 +42,9 @@ describe("story step route", () => {
     const meta = R.head({ loaderData: { step: "3" } }).meta;
     const title = meta.find((m) => "title" in m)?.["title"];
     expect(title).toContain("Review and submit");
+    const desc = meta.find((m) => m["name"] === "description")?.["content"];
+    expect(desc).toContain("Add your story to a plate on What the Plate?");
+    expect(desc).not.toContain("Oregon");
     expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
     expect(R.head({}).meta.find((m) => m["name"] === "robots")?.["content"]).toBe("noindex");
   });
@@ -51,8 +54,12 @@ describe("story step route", () => {
     expect(render(<C />).container.textContent).toBe("done");
   });
 
-  it("keeps only a non-empty string plate from the search", () => {
-    expect(R.validateSearch({ plate: "p1" })).toEqual({ plate: "p1" });
+  it("keeps only a well-formed plate id from the search", () => {
+    const id = "123e4567-e89b-42d3-a456-426614174000";
+    expect(R.validateSearch({ plate: id.toUpperCase() })).toEqual({ plate: id });
+    expect(R.validateSearch({ plate: "p1" })).toEqual({});
+    expect(R.validateSearch({ plate: `${id}0` })).toEqual({});
+    expect(R.validateSearch({ plate: id + "x".repeat(500) })).toEqual({});
     expect(R.validateSearch({ plate: "" })).toEqual({});
     expect(R.validateSearch({ plate: 7 })).toEqual({});
     expect(R.validateSearch({})).toEqual({});
