@@ -43,6 +43,13 @@
       "when": 1792221587956,
       "tag": "0005_step43_subject_attempts_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792225154022,
+      "tag": "0006_step43b_drop_deprecated_handle_check_columns",
+      "breakpoints": true
     }
   ]
 }
