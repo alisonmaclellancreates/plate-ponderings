@@ -9,12 +9,11 @@ import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
 import { validateSpot, type SpotErrors } from "@/lib/spot";
 import { searchPlate } from "@/lib/plates.functions";
 import { track } from "@/lib/analytics";
-import { openFeatured, previewFeatured, type FeaturedDisplay } from "@/lib/featured";
+import { openFeatured, type FeaturedDisplay } from "@/lib/featured";
 import type { FeaturedHome } from "@/lib/featured.functions";
 
 import { storyCount } from "@/lib/story-count";
 import { HEADLINES, useHeadlineIndex } from "@/lib/headlines";
-import { PLATES, featuredPlates, TODAY, type PlateRecord } from "@/lib/mock-data";
 
 function Headline() {
   const active = useHeadlineIndex();
@@ -361,11 +360,11 @@ export function PlateOfTheDay({
   utcToday,
   headingId = "potd-heading",
 }: {
-  plate: PlateRecord | FeaturedDisplay;
+  plate: FeaturedDisplay;
   utcToday?: string | undefined;
   headingId?: string;
 }) {
-  const display = "day" in plate ? plate : previewFeatured(plate);
+  const display = plate;
   const status = display.status;
   const n = display.count;
   const copy =
@@ -414,11 +413,7 @@ export function PlateOfTheDay({
 }
 
 export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
-  const recent = live
-    ? live.recent
-    : featuredPlates()
-        .filter((p) => p.plateOfTheDay !== TODAY)
-        .slice(0, 4);
+  const recent = live?.recent ?? [];
   if (recent.length === 0) return null;
   return (
     <section aria-labelledby="recent-heading" className="mx-auto max-w-6xl px-4 py-12">
@@ -435,7 +430,7 @@ export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) 
       </div>
       <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {recent.map((p) => (
-          <li key={"day" in p ? p.day : p.plateOfTheDay} className="min-w-0">
+          <li key={p.day} className="min-w-0">
             <FeaturedPlateCard plate={p} utcToday={live?.today} />
           </li>
         ))}
@@ -444,28 +439,17 @@ export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) 
   );
 }
 
-export type HomepageVariant = "default" | "no-match" | "fallback";
-
 export function Homepage({
-  variant = "default",
   prefill,
   live,
 }: {
-  variant?: HomepageVariant;
   prefill?: SearchValues;
   live?: FeaturedHome | undefined;
 }) {
-  const [noMatch, setNoMatch] = useState<Required<SearchValues> | null>(
-    variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : null,
-  );
+  const [noMatch, setNoMatch] = useState<Required<SearchValues> | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const featured = live
-    ? live.pick
-    : PLATES.find((p) =>
-        variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
-      );
-  const search =
-    variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
+  const featured = live?.pick;
+  const search = prefill ?? {};
   return (
     <main>
       <Hero

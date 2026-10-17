@@ -121,6 +121,41 @@ async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("AddStoryFlow", () => {
+  it("records a refused photo detection and keeps manual adjustment available", async () => {
+    m.detect.mockResolvedValue({ outcome: "demo", message: "Demo photo detection refused" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.upload(
+      screen.getByLabelText(/Choose a photo or drag and drop/),
+      new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
+    );
+    await screen.findByRole("dialog");
+    expect(screen.getByText(/We couldn't find the plate in this photo/)).toBeInTheDocument();
+    expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "detect_photo" });
+    expect(m.upload).not.toHaveBeenCalled();
+  });
+
+  it("records a refused photo upload and does not attach or submit it", async () => {
+    m.upload.mockResolvedValue({ outcome: "demo", message: "Demo photo upload refused" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.upload(
+      screen.getByLabelText(/Choose a photo or drag and drop/),
+      new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
+    );
+    await screen.findByRole("dialog");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", { name: "Review your photo" });
+    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "upload_photo" });
+    expect(screen.queryByAltText("Your processed photo, blurred except the plate")).toBeNull();
+    expect(m.submit).not.toHaveBeenCalled();
+  });
   it("keeps the hidden picker keyboard reachable and rings only its focus-visible drop area", async () => {
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
@@ -624,65 +659,6 @@ describe("AddStoryFlow", () => {
   });
 });
 
-describe("AddStoryFlow preview mode", () => {
-  const preview = {
-    plate: { id: "preview-story-states", jurisdiction: "Oregon", text: "PNW LV" },
-    draft: {
-      how: "owner" as const,
-      meaning: "Pacific Northwest love.",
-      more: "I grew up near Portland and wanted a plate that says where my heart is.",
-    },
-    notice: {
-      heading: "Hmm... something went wrong." as string | null,
-      message:
-        "We couldn't submit your story right now. Your words are still here. Please try again.",
-    },
-  };
-
-  it("shows the error notice and the kept draft, and submitting calls nothing", async () => {
-    const user = userEvent.setup();
-    render(<AddStoryFlow plateId="preview-story-states" preview={preview} />);
-    const status = screen.getByRole("status");
-    expect(status).toHaveTextContent("Hmm... something went wrong.");
-    expect(status).toHaveTextContent(
-      "We couldn't submit your story right now. Your words are still here. Please try again.",
-    );
-    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
-    );
-    expect(screen.getByRole("textbox", { name: /Tell us more/ })).toHaveValue(
-      "I grew up near Portland and wanted a plate that says where my heart is.",
-    );
-    expect(screen.getByRole("radio", { name: /It's my plate/ })).toBeChecked();
-    expect(m.track).not.toHaveBeenCalled();
-
-    await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
-    await user.click(screen.getByRole("button", { name: "Submit Story" }));
-    expect(m.submit).not.toHaveBeenCalled();
-    expect(m.track).not.toHaveBeenCalled();
-  });
-
-  it("shows the pause heading and wait message with the kept draft", () => {
-    render(
-      <AddStoryFlow
-        plateId="preview-story-states"
-        preview={{
-          ...preview,
-          notice: { heading: "Let's pause a moment.", message: RATE_LIMIT_MESSAGE },
-        }}
-      />,
-    );
-    const status = screen.getByRole("status");
-    expect(status).toHaveTextContent("Let's pause a moment.");
-    expect(status).toHaveTextContent(RATE_LIMIT_MESSAGE);
-    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
-    );
-    expect(m.track).not.toHaveBeenCalled();
-  });
-});
-
 describe("AddStoryFlow branches", () => {
   async function submitWith(result: unknown) {
     m.submit.mockResolvedValue(result);
@@ -791,26 +767,5 @@ describe("AddStoryFlow branches", () => {
       has_more_text: true,
       outcome: "published",
     });
-  });
-
-  it("review shows an unknown source key as itself", async () => {
-    const user = userEvent.setup();
-    render(
-      <AddStoryFlow
-        plateId="x"
-        preview={{
-          plate: { id: "x", jurisdiction: "Oregon", text: "PNW LV" },
-          draft: {
-            how: "mystery" as never,
-            meaning: "They might be Pacific Northwest love.",
-            more: "",
-          },
-          notice: { heading: null, message: "note" },
-        }}
-      />,
-    );
-    await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
-    expect(screen.getByText("mystery")).toBeInTheDocument();
   });
 });

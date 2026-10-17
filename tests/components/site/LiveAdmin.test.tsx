@@ -17,6 +17,7 @@ vi.mock("@/lib/admin.functions", () => ({
   recheckAllPending: m.recheck,
 }));
 vi.mock("@/components/site/AiCheckStatus", () => ({ AiCheckStatus: () => null }));
+vi.mock("@/components/site/DemoAdminControls", () => ({ DemoAdminControls: () => null }));
 
 import { LiveAdmin } from "@/components/site/LiveAdmin";
 import { ADMIN_ERROR, ADMIN_REPORTS_KEY, RECHECK_PAUSED, recheckNote } from "@/lib/admin-copy";

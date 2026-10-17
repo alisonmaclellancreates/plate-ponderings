@@ -2,18 +2,18 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 
 import { AdminPage } from "@/components/site/Admin";
-import { REPORTED_STORIES } from "@/lib/mock-data";
+import { REPORTED_STORIES } from "../../fixtures/plates";
 
 describe("AdminPage", () => {
   it("shows the heading and the recheck row", () => {
-    render(<AdminPage />);
+    render(<AdminPage rows={REPORTED_STORIES} note="2 items waiting for a safety check." />);
     expect(screen.getByRole("heading", { level: 1, name: "Admin" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Recheck pending" })).toBeTruthy();
     expect(screen.getByText("2 items waiting for a safety check.")).toBeTruthy();
   });
 
   it("keeps the table inside a horizontally scrollable container", () => {
-    render(<AdminPage />);
+    render(<AdminPage rows={REPORTED_STORIES} note="2 items waiting for a safety check." />);
     const scroll = screen.getByTestId("admin-table-scroll");
     expect(scroll.className).toContain("overflow-x-auto");
     expect(within(scroll).getByRole("table", { name: "Reported stories" })).toBeTruthy();
@@ -34,7 +34,7 @@ describe("AdminPage", () => {
   });
 
   it("lists every reported story with its status action", () => {
-    render(<AdminPage />);
+    render(<AdminPage rows={REPORTED_STORIES} note="2 items waiting for a safety check." />);
     const table = within(screen.getByRole("table", { name: "Reported stories" }));
     const rows = table.getAllByRole("row").slice(1);
     expect(rows).toHaveLength(REPORTED_STORIES.length);

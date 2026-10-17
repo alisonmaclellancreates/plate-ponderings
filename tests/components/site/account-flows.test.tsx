@@ -3,6 +3,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { AuthWeakPasswordError } from "@supabase/supabase-js";
 const m = vi.hoisted(() => ({
   signedOut: false,
+  demoEnabled: false,
   account: { handle: "Traveler1234", isDemo: false, isAdmin: false },
   refresh: vi.fn(),
   out: vi.fn(),
@@ -24,7 +25,7 @@ vi.mock("@/lib/account-auth", () => ({
     refresh: m.refresh,
     signOut: m.out,
     completeSignIn: m.complete,
-    demoEnabled: false,
+    demoEnabled: m.demoEnabled,
   }),
 }));
 vi.mock("@tanstack/react-router", () => ({
@@ -77,10 +78,33 @@ import { ProfilePage } from "@/components/site/Account";
 import { MemberProfile, SiteHeader } from "@/components/site/SiteHeader";
 import { AiCheckStatus } from "@/components/site/AiCheckStatus";
 
+it("displays a server demo refusal on handle save without refreshing the profile", async () => {
+  m.save.mockResolvedValue({ outcome: "demo", message: "Demo handle changes refused" });
+  render(<ProfilePage />);
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "NewTraveler" } });
+  await screen.findByText("Available");
+  fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+  await screen.findByText("Demo handle changes refused");
+  expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "save_handle" });
+  expect(m.refresh).not.toHaveBeenCalled();
+});
+
+it("labels the sample account's sign-out action Exit Demo and invokes sign-out", async () => {
+  m.account.isDemo = true;
+  render(<MemberProfile showHandle />);
+  fireEvent.click(screen.getByRole("button", { name: "Traveler1234 menu" }));
+  fireEvent.click(screen.getByRole("button", { name: "Exit Demo" }));
+  await waitFor(() => expect(m.out).toHaveBeenCalledOnce());
+  expect(screen.queryByRole("link", { name: "Admin" })).toBeNull();
+});
+
 it.each(["signed-out", "demo", undefined] as const)(
   "uses cream keyboard rings for every navy-header control in %s mode",
   (mode) => {
-    render(mode === undefined ? <SiteHeader /> : <SiteHeader mode={mode} />);
+    m.signedOut = mode === "signed-out" || mode === undefined;
+    m.account.isDemo = mode === "demo";
+    m.demoEnabled = true;
+    render(<SiteHeader />);
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
     const header = screen.getByRole("banner");
     const controls = Array.from(header.querySelectorAll("a, button")).filter(
@@ -98,6 +122,7 @@ beforeEach(() => {
   m.dotQuery.mockReturnValue({ data: undefined });
   vi.clearAllMocks();
   m.signedOut = false;
+  m.demoEnabled = false;
   m.location = { href: "/", pathname: "/" };
   m.out.mockResolvedValue(undefined);
   m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
@@ -297,7 +322,9 @@ it("a successful sign-out leaves the menu open until the route change closes it"
 it.each(["Explore", "Spot a Plate", "About", "Try the Demo"])(
   "closes the mobile menu immediately when %s is chosen",
   (label) => {
-    render(<SiteHeader mode="signed-out" />);
+    m.demoEnabled = true;
+    m.signedOut = true;
+    render(<SiteHeader />);
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
     fireEvent.click(
       within(screen.getByRole("navigation", { name: "Mobile" })).getByRole("link", { name: label }),
@@ -470,6 +497,7 @@ it.each([
   [false, 0],
 ])("the profile icon shows the unread dot only when unread is %s", (unread, count) => {
   m.signedOut = false;
+  m.demoEnabled = false;
   m.dotQuery.mockReturnValue({ data: { unread } });
   render(<MemberProfile showHandle />);
   expect(screen.queryAllByTestId("unread-dot")).toHaveLength(count);

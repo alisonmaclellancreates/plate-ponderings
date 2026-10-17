@@ -82,7 +82,9 @@ describe("LiveSettings", () => {
     renderWith(<LiveSettings />);
     await userEvent.click(screen.getByRole("button", { name: "Unblock" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(text);
-    expect(m.track).not.toHaveBeenCalled();
+    if (_l === "demo")
+      expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "unblock" });
+    else expect(m.track).not.toHaveBeenCalled();
   });
 });
 
@@ -112,7 +114,9 @@ describe("LiveDeleteConfirm", () => {
       renderWith(<LiveDeleteConfirm />);
       await userEvent.click(screen.getByRole("button", { name: "Delete Account" }));
       expect(await screen.findByRole("alert")).toHaveTextContent(text);
-      expect(m.track).not.toHaveBeenCalled();
+      if (_l === "demo")
+        expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "delete_account" });
+      else expect(m.track).not.toHaveBeenCalled();
       expect(m.signOut).not.toHaveBeenCalled();
       expect(screen.getByRole("button", { name: "Delete Account" })).toBeEnabled();
     },

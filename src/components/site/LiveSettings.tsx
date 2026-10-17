@@ -23,8 +23,10 @@ export function LiveSettings() {
     setMessage("");
     try {
       const result = await unblock({ data: { key: entry.key } });
-      if (result.outcome === "demo") setMessage(result.message);
-      else if (result.outcome === "error") setMessage(SETTINGS_ERROR);
+      if (result.outcome === "demo") {
+        setMessage(result.message);
+        void track("demo_write_refused", { action: "unblock" });
+      } else if (result.outcome === "error") setMessage(SETTINGS_ERROR);
       else {
         void track("user_unblocked", {});
         await queryClient.invalidateQueries({ queryKey: BLOCKED_KEY });
@@ -56,8 +58,10 @@ export function LiveDeleteConfirm() {
     setMessage("");
     try {
       const result = await remove();
-      if (result.outcome === "demo") setMessage(result.message);
-      else if (result.outcome === "error") setMessage(SETTINGS_ERROR);
+      if (result.outcome === "demo") {
+        setMessage(result.message);
+        void track("demo_write_refused", { action: "delete_account" });
+      } else if (result.outcome === "error") setMessage(SETTINGS_ERROR);
       else {
         await track("account_deleted", {});
         await reset();

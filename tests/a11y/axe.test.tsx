@@ -56,7 +56,16 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getUser: vi.fn(), signOut: vi.fn() } },
 }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
-vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn(), getPlate: vi.fn() }));
+vi.mock("@/lib/demo-login.functions", () => ({ startDemo: vi.fn() }));
+vi.mock("@/lib/demo-admin.functions", () => ({
+  resetSeedData: vi.fn(),
+  fillMissingGuesses: vi.fn(),
+}));
+vi.mock("@/lib/plates.functions", () => ({
+  searchPlate: vi.fn(),
+  getPlate: vi.fn(),
+  spotPlate: vi.fn(),
+}));
 vi.mock("@/lib/stories.functions", () => ({
   getPlateStories: vi.fn(),
   addStory: vi.fn(),
@@ -107,7 +116,7 @@ import { Homepage } from "@/components/site/Homepage";
 import { RealPlateDetail } from "@/components/site/PlateDetail";
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
 import { SignInPage, SignUpPage, SignInPromptPage } from "@/components/site/Entry";
-import { SpotPage, SpotOutcomePage } from "@/components/site/SpotPlate";
+import { SpotLivePage } from "@/components/site/SpotPlate";
 import { SubmissionsPage } from "@/components/site/Account";
 import { LiveSettings } from "@/components/site/LiveSettings";
 import { LiveAdmin } from "@/components/site/LiveAdmin";
@@ -174,7 +183,7 @@ describe("axe: full pages", () => {
 
   it("plate page with stories, summary history and a revealed guess", async () => {
     m.queryData = {
-      "plate-stories": { stories: [STORY], pending: false },
+      "plate-stories": { stories: [STORY], pending: [] },
       "plate-summary": {
         current: {
           version: 2,
@@ -203,7 +212,7 @@ describe("axe: full pages", () => {
 
   it("mystery plate with the guess teaser", async () => {
     m.queryData = {
-      "plate-stories": { stories: [], pending: false },
+      "plate-stories": { stories: [], pending: [] },
       "plate-guess": { status: "hidden" },
     };
     await checkPage(
@@ -224,15 +233,7 @@ describe("axe: full pages", () => {
   });
 
   it("spot a plate", async () => {
-    await checkPage(<SpotPage />);
-  });
-
-  it("spot outcomes", async () => {
-    for (const outcome of ["exists", "new", "pending", "rejected", "already-spotted"] as const) {
-      const { container, unmount } = render(<SpotOutcomePage outcome={outcome} />);
-      expect(await axe(container, AXE_OPTS)).toHaveNoViolations();
-      unmount();
-    }
+    await checkPage(<SpotLivePage />);
   });
 
   it("your submissions", async () => {
@@ -250,30 +251,32 @@ describe("axe: full pages", () => {
 });
 
 describe("axe: story form steps", () => {
-  const preview = {
-    plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" },
-    draft: {
-      how: "owner" as const,
-      meaning: "They might be big fans of the Mariners.",
-      more: "",
-    },
-    notice: { heading: null as string | null, message: "" },
-  };
-
+  beforeEach(() => {
+    m.queryData["plate"] = { plate: { id: "p1", jurisdiction: "Washington", text: "B7K2L9" } };
+    m.queryData["plate-stories"] = { hasOwnerStory: false };
+  });
   it("step 1", async () => {
-    await checkPage(<AddStoryFlow plateId="p1" preview={preview} />);
+    await checkPage(<AddStoryFlow plateId="p1" />);
   });
 
   it("step 2", async () => {
     const user = userEvent.setup();
-    const { container } = render(<AddStoryFlow plateId="p1" preview={preview} />);
+    const { container } = render(<AddStoryFlow plateId="p1" />);
+    await user.type(
+      screen.getByLabelText(/What do you think it means/),
+      "big fans of the Mariners",
+    );
     await user.click(screen.getByRole("button", { name: /next/i }));
     expect(await axe(container, AXE_OPTS)).toHaveNoViolations();
   });
 
   it("step 3", async () => {
     const user = userEvent.setup();
-    const { container } = render(<AddStoryFlow plateId="p1" preview={preview} />);
+    const { container } = render(<AddStoryFlow plateId="p1" />);
+    await user.type(
+      screen.getByLabelText(/What do you think it means/),
+      "big fans of the Mariners",
+    );
     await user.click(screen.getByRole("button", { name: /next/i }));
     await user.click(screen.getByRole("button", { name: /continue without a photo/i }));
     expect(await axe(container, AXE_OPTS)).toHaveNoViolations();

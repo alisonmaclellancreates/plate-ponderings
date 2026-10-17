@@ -42,8 +42,10 @@ export function HeartButton({ story, plateId }: { story: Story; plateId: string 
     const next = !hearted;
     try {
       const result = await toggle({ data: { storyId: story.id, hearted: next } });
-      if (result.outcome === "demo") setMessage(result.message);
-      else if (result.outcome === "error") setMessage(ACTION_ERROR);
+      if (result.outcome === "demo") {
+        setMessage(result.message);
+        void track("demo_write_refused", { action: next ? "heart" : "unheart" });
+      } else if (result.outcome === "error") setMessage(ACTION_ERROR);
       else {
         setHearted(next);
         setCount((c) => c + (next ? 1 : -1));
@@ -100,13 +102,16 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
   async function run<R extends { outcome: string; message?: string }>(
     action: () => Promise<R>,
     done: (result: R) => void,
+    actionName: string,
   ) {
     setBusy(true);
     setMessage("");
     try {
       const result = await action();
-      if (result.outcome === "demo") setMessage(result.message ?? "");
-      else if (result.outcome === "error" || result.outcome === "validation")
+      if (result.outcome === "demo") {
+        setMessage(result.message ?? "");
+        void track("demo_write_refused", { action: actionName });
+      } else if (result.outcome === "error" || result.outcome === "validation")
         setMessage(ACTION_ERROR);
       else done(result);
     } catch {
@@ -141,6 +146,7 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
                 void track("user_blocked", {});
                 refresh();
               },
+              "block",
             )
           }
         />
@@ -162,6 +168,7 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
                 void track("story_reported", { reason });
               }
             },
+            "report",
           )
         }
       />
@@ -179,6 +186,7 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
               void track("story_deleted", {});
               refresh();
             },
+            "delete_story",
           )
         }
       />

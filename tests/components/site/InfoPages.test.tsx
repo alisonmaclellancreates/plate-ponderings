@@ -17,7 +17,7 @@ import {
   NotFoundPage,
   PrivacyPage,
 } from "@/components/site/InfoPages";
-import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
+import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "../../fixtures/plates";
 
 describe("AboutPage", () => {
   it("tells the story and mentions #SheBuilds", () => {

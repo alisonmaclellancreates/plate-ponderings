@@ -17,6 +17,7 @@ import { AccountProvider } from "@/lib/auth-context";
 import { SiteFooter } from "../components/site/SiteFooter";
 import { NotFoundPage } from "../components/site/InfoPages";
 import { track } from "@/lib/analytics";
+import { LiveDemoBanner } from "@/components/site/LiveDemoBanner";
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
@@ -139,6 +140,7 @@ function RootComponent() {
             Skip to main content
           </a>
           <SiteHeader />
+          <LiveDemoBanner />
           {/* Skip target is a div, not main: every page renders its own <main> and landmarks must not nest. */}
           <div id="main-content" tabIndex={-1} className="flex-1">
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}

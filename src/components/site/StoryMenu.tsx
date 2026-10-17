@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Flag, Trash2, UserX } from "lucide-react";
-import { Plate } from "@/components/site/Plate";
-import { StoryCard } from "@/components/site/PlateDetail";
+import { Flag, Trash2, UserX } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -12,9 +9,6 @@ import {
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CURRENT_USER, PLATES, publishedStories, type Story } from "@/lib/mock-data";
-
-const PLATE = PLATES.find((p) => p.slug === "bc-lv2code")!;
 
 import { REPORT_REASON_OPTIONS, type ReportReasonKey } from "@/lib/report-reasons";
 export { REPORT_REASON_OPTIONS, REPORT_REASONS, type ReportReasonKey } from "@/lib/report-reasons";
@@ -80,25 +74,6 @@ export function StoryMenuList({
         </>
       )}
     </ul>
-  );
-}
-
-function StoryMenuRow({
-  story,
-  menu,
-  onReport,
-  onDelete,
-}: {
-  story: Story;
-  menu: "other" | "own";
-  onReport?: () => void;
-  onDelete?: () => void;
-}) {
-  return (
-    <li className="relative">
-      <StoryCard story={story} />
-      <StoryMenuList handle={story.handle} menu={menu} onReport={onReport} onDelete={onDelete} />
-    </li>
   );
 }
 
@@ -223,42 +198,5 @@ export function DeleteStoryDialog({
         </DialogContent>
       </DialogPortal>
     </Dialog>
-  );
-}
-
-/** Preview: the interpreted LV2CODE page with both story menus; each dialog opens from its menu. */
-export function StoryMenuPage() {
-  const stories = publishedStories(PLATE);
-  const other = stories.find((s) => s.handle === "maplegirl")!;
-  const own = stories.find((s) => s.handle === CURRENT_USER.handle)!;
-  const [reportOpen, setReportOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  return (
-    <main className="mx-auto max-w-3xl space-y-8 px-4 py-8">
-      <Link
-        to="/explore"
-        className="inline-flex items-center gap-1 font-semibold text-navy underline-offset-4 hover:underline"
-      >
-        <ArrowLeft aria-hidden className="size-4" />
-        Back to Explore
-      </Link>
-      <div className="rounded-2xl border-8 border-navy bg-card p-6 shadow-md">
-        <h1 className="sr-only">
-          {PLATE.jurisdiction} plate {PLATE.text}
-        </h1>
-        <Plate
-          jurisdiction={PLATE.jurisdiction}
-          text={PLATE.text}
-          size="lg"
-          className="mx-auto min-w-0"
-        />
-      </div>
-      <ul className="space-y-10">
-        <StoryMenuRow story={other} menu="other" onReport={() => setReportOpen(true)} />
-        <StoryMenuRow story={own} menu="own" onDelete={() => setDeleteOpen(true)} />
-      </ul>
-      <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
-      <DeleteStoryDialog open={deleteOpen} onOpenChange={setDeleteOpen} />
-    </main>
   );
 }

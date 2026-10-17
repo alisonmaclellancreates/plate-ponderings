@@ -1,10 +1,22 @@
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
+const demo = vi.hoisted(() => ({
+  begin: vi.fn(),
+  setSession: vi.fn(),
+  refresh: vi.fn(),
+  navigate: vi.fn(),
+  track: vi.fn(),
+}));
+vi.mock("@/lib/demo-login.functions", () => ({ startDemo: demo.begin }));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { auth: { setSession: demo.setSession } },
+}));
+vi.mock("@/lib/analytics", () => ({ track: demo.track }));
 vi.mock("@tanstack/react-router", () => ({
   useRouterState: () => "/",
-  useNavigate: () => vi.fn(),
+  useNavigate: () => demo.navigate,
   Link: ({
     to,
     params,
@@ -34,11 +46,18 @@ vi.mock("@tanstack/react-start", () => ({
   },
   createMiddleware: () => ({ server: () => ({}) }),
 }));
-vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => ({ refresh: demo.refresh }) }));
 
 import { DemoPage, SignInPage, SignUpPage } from "@/components/site/Entry";
-import { StoryStepOne } from "@/components/site/AddStory";
-import { SiteHeader } from "@/components/site/SiteHeader";
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  demo.begin.mockResolvedValue({
+    access_token: "fixture-access",
+    refresh_token: "fixture-refresh",
+  });
+  demo.setSession.mockResolvedValue({ error: null });
+});
 
 describe("entry screens", () => {
   it("sign in toggles password visibility and has no extras", () => {
@@ -50,7 +69,9 @@ describe("entry screens", () => {
     expect(pw).toHaveAttribute("type", "text");
     fireEvent.click(screen.getByRole("button", { name: "Hide password" }));
     expect(pw).toHaveAttribute("type", "password");
-    fireEvent.submit(pw.closest("form")!);
+    const form = pw.closest("form");
+    if (!form) throw new Error("Sign-in form missing");
+    fireEvent.submit(form);
     expect(screen.getByRole("link", { name: "Create an account" })).toHaveAttribute(
       "href",
       "/sign-up",
@@ -64,7 +85,9 @@ describe("entry screens", () => {
       "Use at least 8 characters",
     );
     expect(screen.getByRole("button", { name: "Create Account" })).toHaveClass("brand-btn-coral");
-    fireEvent.submit(screen.getByLabelText("Email").closest("form")!);
+    const form = screen.getByLabelText("Email").closest("form");
+    if (!form) throw new Error("Sign-up form missing");
+    fireEvent.submit(form);
     expect(screen.queryByLabelText(/handle/i)).toBeNull();
     expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/sign-in");
   });
@@ -72,44 +95,51 @@ describe("entry screens", () => {
   it("demo lists what you'll see and starts the demo", () => {
     render(<DemoPage />);
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
-    expect(screen.getByRole("link", { name: "Start the Demo" })).toHaveAttribute(
-      "href",
-      "/demo-form",
+    expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
+  });
+
+  it("starts the demo, installs the session and leaves the entry screen for home", async () => {
+    let finish: ((value: { access_token: string; refresh_token: string }) => void) | undefined;
+    demo.begin.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
     );
+    render(<DemoPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Start the Demo" }));
+    expect(screen.getByRole("button", { name: "Starting the Demo…" })).toBeDisabled();
+    finish?.({ access_token: "fixture-access", refresh_token: "fixture-refresh" });
+    await waitFor(() => expect(demo.navigate).toHaveBeenCalledWith({ to: "/" }));
+    expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(demo.setSession).toHaveBeenCalledWith({
+      access_token: "fixture-access",
+      refresh_token: "fixture-refresh",
+    });
+    expect(demo.refresh).toHaveBeenCalledOnce();
+    expect(demo.track).toHaveBeenCalledWith("demo_started", {});
+    expect(demo.navigate).toHaveBeenCalledWith({ to: "/" });
   });
 
-  it("demo form shows the banner and disables every control", () => {
-    render(<StoryStepOne demo />);
-    expect(screen.getByTestId("demo-banner")).toHaveTextContent(/turned off/);
-    for (const r of screen.getAllByRole("radio")) expect(r).toBeDisabled();
-    const meaning = screen.getByLabelText(/What do you think it means/);
-    expect(meaning).toBeDisabled();
-    expect(meaning).toHaveAttribute("placeholder", "Adding stories is turned off in the demo.");
-    expect(screen.getByLabelText(/Tell us more/)).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
-  });
-});
-
-describe("header modes", () => {
-  it("signed out shows Sign in, Try the Demo, and moves the demo into the mobile menu", () => {
-    render(<SiteHeader mode="signed-out" />);
-    expect(screen.getAllByRole("link", { name: "Sign in" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "Try the Demo" })).toHaveLength(1);
-    expect(screen.queryByText("Traveler4821")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
-    const mobile = screen.getByRole("navigation", { name: "Mobile" });
-    expect(within(mobile).getByRole("link", { name: "Try the Demo" })).toHaveAttribute(
-      "href",
-      "/demo",
-    );
-  });
-
-  it("demo shows Traveler4821 with the profile menu open, including Exit Demo", () => {
-    render(<SiteHeader mode="demo" />);
-    expect(screen.getAllByText("Traveler4821").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "Exit Demo" }).length).toBeGreaterThan(0);
-    const toggle = screen.getByRole("button", { expanded: true, name: "Traveler4821" });
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-  });
+  it.each(["mode off", "server refusal", "network failure", "session refusal"])(
+    "shows a retryable visible result for %s",
+    async (failure) => {
+      if (failure === "session refusal")
+        demo.setSession.mockResolvedValue({ error: new Error("Session rejected") });
+      else
+        demo.begin.mockRejectedValue(
+          failure === "network failure" ? new TypeError("Failed to fetch") : new Error(failure),
+        );
+      render(<DemoPage />);
+      fireEvent.click(screen.getByRole("button", { name: "Start the Demo" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "The demo is not available right now. Please try again soon.",
+      );
+      expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
+      expect(demo.refresh).not.toHaveBeenCalled();
+      expect(demo.track).not.toHaveBeenCalled();
+      expect(demo.navigate).not.toHaveBeenCalled();
+      if (failure !== "session refusal") expect(demo.setSession).not.toHaveBeenCalled();
+    },
+  );
 });

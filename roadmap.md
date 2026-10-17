@@ -1,3 +1,24 @@
+# PR #121: tests-only patch coverage
+
+- [x] Add tests for Entry demo success/refusal/network/session outcomes, five decoded inline photos and exact 1 MB boundary, reset lock/renewal/first-failure/readback/release/pagination/null-list branches, seed validation/count/date offsets.
+- [x] Read PR #121 Codecov comment and its matching CI coverage artifact at head 6533e303; target the other nine reported files: Account, AddStoryFlow, DemoAdminControls, auth-context, Explore, SiteHeader, SpotPlate, StoryActions and demo-guesses.
+- [x] Final related run: 227 tests across 12 changed test files passed. Lint: zero errors, six existing warnings. No local coverage, build, typecheck, browser, reset or real AI; no production changes.
+- [ ] Confirm post-sync PR Codecov reaches 100%; latest actual PR report is 99.20844% at head 5629a44e, predating the guard removal. Manual push is prohibited; managed Git sync owns pushing.
+- [x] Read matching CI artifact for exact partial branches: reset lines 130/154 and seed-data line 172. Alison approved removing the three unreachable guards; invariant assertions cover required plates, references, uploaded paths and assigned accounts.
+- [x] Run related tests and lint for the final guard removal and invariant assertions: 101 tests across 10 related files passed; lint has zero errors and six existing warnings. CI remains authoritative for coverage.
+
+# Step 51: demo, seed reset and removal of scaffolding
+
+- [x] Apply approved 0019 unchanged; rerun 11 existing database tests in rollbacks and verify fixture cleanup.
+- [x] Add and run demo-reset rollback checks for frozen date, leases, refusals and grants.
+- [x] Build demo login/banner/exits, server/database refusals and recheck/read exclusions.
+- [x] Implement shared effective date, non-demo admin reset and sequential missing-guess fill.
+- [x] Process five seed JPEGs at 1200px/0.85, total 333,591 bytes; preserve literal docs/seed.md content.
+- [x] Remove mock data/media and preview-only routes last; retain shared live states.
+- [x] Write docs/step51-demo-write-audit.md and mocked repeated-reset/account/media tests.
+- [x] Final related run: 791 tests across 75 files passed; lint zero errors, six existing UI warnings.
+- [ ] Live demo/reset/AI verification: awaits Alison's setup and separate explicit permission; no destructive reset or real AI authorized.
+
 # Step 48c: header menu exits and submissions returns
 
 - [x] Close member/mobile menus on every selection and router location change; tests cover each item, both profile instances, search-only changes and real memory-history back/forward.
