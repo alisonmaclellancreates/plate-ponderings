@@ -58,7 +58,13 @@ async function call(fn: unknown, data: unknown) {
   return await (fn as (a: unknown) => Promise<Record<string, unknown>>)({ data, context });
 }
 
-const INPUT = { plateId: "plate-1", meaning: "Pacific Northwest love.", source: "guess", more: "", photoPath: "" };
+const INPUT = {
+  plateId: "plate-1",
+  meaning: "Pacific Northwest love.",
+  source: "guess",
+  more: "",
+  photoPath: "",
+};
 
 let tables: Record<string, Result>;
 let storyInsert: Result;
