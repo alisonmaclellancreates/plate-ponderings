@@ -241,5 +241,5 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - Skip link, focus to heading on route change, dialog focus trap/return tests
 - Menus close on Esc and outside click with focus return (profile, mobile header, story menu)
 - Report/Delete become real modal dialogs on existing dialog primitives
-- Unread dot beside Your Submissions in profile menu; headline respects reduced motion; no aria-live on rotation (noisy)
+- Unread dot beside Your Submissions in profile menu
 - Progress issue #54: fix if used, else leave open and say so
