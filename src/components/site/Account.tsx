@@ -191,7 +191,11 @@ export function ProfilePage() {
                       setMessage("");
                     }}
                     disabled={busy || auth?.account?.isDemo}
-                    aria-describedby={available || auth?.account?.isDemo || !handleFormatValid(draft) ? "handle-status handle-help" : "handle-help"}
+                    aria-describedby={
+                      available || auth?.account?.isDemo || !handleFormatValid(draft)
+                        ? "handle-status handle-help"
+                        : "handle-help"
+                    }
                     className="min-w-0 flex-1 rounded-md border border-border bg-card px-3 py-2"
                   />
                   {available ? (

@@ -27,7 +27,9 @@ export function handleFormatValid(handle: string) {
   );
 }
 export function safeReturnPath(value: unknown): string {
-  const unsafe = (path: string) => /\\/.test(path) || [...path].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127);
+  const unsafe = (path: string) =>
+    /\\/.test(path) ||
+    [...path].some((char) => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127);
   if (
     typeof value !== "string" ||
     !value.startsWith("/") ||
@@ -49,7 +51,10 @@ export function safeReturnPath(value: unknown): string {
     return "/";
   }
 }
-export function signupErrorMessage(error: { code?: string | undefined; message?: string | undefined }) {
+export function signupErrorMessage(error: {
+  code?: string | undefined;
+  message?: string | undefined;
+}) {
   if (
     error.code === "weak_password" ||
     (error.code === "validation_failed" && /password/i.test(error.message ?? ""))

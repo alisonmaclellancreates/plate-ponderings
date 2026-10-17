@@ -4,7 +4,9 @@ import { QueryClient } from "@tanstack/react-query";
 import { createMemoryHistory, createRouter } from "@tanstack/react-router";
 import type { ComponentType, ReactNode } from "react";
 import { routeTree } from "@/routeTree.gen";
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getUser: async () => ({ data: { user: { id: "test" } }, error: null }) } } }));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { auth: { getUser: async () => ({ data: { user: { id: "test" } }, error: null }) } },
+}));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-router")>();
