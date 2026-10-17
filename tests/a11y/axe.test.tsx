@@ -56,6 +56,7 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getUser: vi.fn(), signOut: vi.fn() } },
 }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
+vi.mock("@/lib/demo-login.functions", () => ({ startDemo: vi.fn() }));
 vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn(), getPlate: vi.fn() }));
 vi.mock("@/lib/stories.functions", () => ({
   getPlateStories: vi.fn(),

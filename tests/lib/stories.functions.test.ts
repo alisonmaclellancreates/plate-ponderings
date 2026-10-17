@@ -129,6 +129,18 @@ describe("addStory", () => {
     expect(String(result["message"])).toContain("demo");
     expect(mocks.admin.from).not.toHaveBeenCalled();
   });
+  it("refuses demo before validating or deleting an existing photo", async () => {
+    context.supabase.rpc.mockResolvedValue({ data: true, error: null });
+    const result = await call(addStory, {
+      ...INPUT,
+      photoPath: "caller/11111111-1111-1111-1111-111111111111.jpg",
+      photoBox: { x: 0.2, y: 0.2, w: 0.3, h: 0.3 },
+    });
+    expect(result["outcome"]).toBe("demo");
+    expect(mocks.remove).not.toHaveBeenCalled();
+    expect(mocks.admin.storage.from).not.toHaveBeenCalled();
+    expect(mocks.check).not.toHaveBeenCalled();
+  });
   it("refuses invalid input before touching the database", async () => {
     expect(await call(addStory, { ...INPUT, meaning: "hi" })).toEqual({
       outcome: "validation",

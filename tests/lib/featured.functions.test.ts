@@ -1,5 +1,8 @@
 import { beforeEach, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({ rpc: vi.fn() }));
+vi.mock("@/lib/effective-today.server", () => ({
+  effectiveToday: () => new Date().toISOString().slice(0, 10),
+}));
 vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: m }));
 vi.mock("@tanstack/react-start", () => ({
   createServerFn: () => {
@@ -27,7 +30,8 @@ const row = (day: string, count = 0, owner = false) => ({
 });
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.useRealTimers();
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-17T12:00:00Z"));
 });
 it("selects today and only the four prior UTC calendar dates, without backfilling gaps", async () => {
   m.rpc

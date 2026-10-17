@@ -7,7 +7,7 @@ type RoleCtx = {
   supabase: {
     rpc: (
       fn: "has_role",
-      args: { _user_id: string; _role: "admin" },
+      args: { _user_id: string; _role: "admin" | "demo" },
     ) => PromiseLike<{
       data: boolean | null;
       error: unknown;
@@ -22,7 +22,12 @@ async function isAdmin(context: RoleCtx): Promise<boolean> {
     _user_id: context.userId,
     _role: "admin",
   });
-  return !error && data === true;
+  if (error || data !== true) return false;
+  const demo = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "demo",
+  });
+  return !demo.error && demo.data === false;
 }
 
 export const getAdminAccess = createServerFn({ method: "GET" })
