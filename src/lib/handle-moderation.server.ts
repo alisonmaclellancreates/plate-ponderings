@@ -7,7 +7,7 @@ import { handleBlockCategory, type HandleBlockCategory } from "./account-rules";
 export type ModerationResult = {
   outcome: "approved" | "rejected" | "unavailable";
   block: HandleBlockCategory | null;
-  runId?: string;
+  runId?: string | undefined;
 };
 export async function moderateHandle(handle: string): Promise<ModerationResult> {
   const key = process.env["LOVABLE_API_KEY"];

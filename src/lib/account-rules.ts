@@ -48,7 +48,7 @@ export function safeReturnPath(value: unknown): string {
     return "/";
   }
 }
-export function signupErrorMessage(error: { code?: string; message?: string }) {
+export function signupErrorMessage(error: { code?: string | undefined; message?: string | undefined }) {
   if (
     error.code === "weak_password" ||
     (error.code === "validation_failed" && /password/i.test(error.message ?? ""))

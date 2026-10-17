@@ -22,6 +22,9 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
+vi.mock("@/lib/auth-context", () => ({ useAccountAuth: () => ({ account: { handle: "Traveler1234", isDemo: false }, refresh: vi.fn() }) }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/lib/accounts.functions", () => ({ checkHandle: async () => ({ available: true }), saveHandle: vi.fn() }));
 
 import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Account";
 import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
@@ -103,16 +106,16 @@ describe("ProfilePage", () => {
     render(<ProfilePage />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     const field = screen.getByLabelText("Handle");
-    expect(field).toHaveValue("Traveler4821");
-    expect(field).toHaveAccessibleDescription(`Available ${HANDLE_HELP}`);
+    expect(field).toHaveValue("Traveler1234");
+    expect(field).toHaveAccessibleDescription(HANDLE_HELP);
     expect(screen.getByRole("button", { name: "Save Changes" })).toBeInTheDocument();
-    expect(screen.getByTestId("sample-story")).toHaveTextContent("Traveler4821");
+    expect(screen.getByTestId("sample-story")).toHaveTextContent("Traveler1234");
   });
 
   it("renders the shared story card for the sample story", () => {
     render(<ProfilePage />);
     const card = screen.getByTestId("sample-story");
-    expect(within(card).getByText("Traveler4821")).toBeInTheDocument();
+    expect(within(card).getByText("Traveler1234")).toBeInTheDocument();
     expect(within(card).getByText("Pacific Northwest love.")).toBeInTheDocument();
     expect(
       within(card).getByText("Saw this plate at a trailhead outside Bend."),

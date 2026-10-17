@@ -232,7 +232,7 @@ export function SignInPromptPage() {
             <li key={c.to}>
               <Link
                 to={c.to}
-                search={c.to === "/demo" ? undefined : { returnTo: "/story/one" }}
+                search={c.to === "/demo" ? {} : { returnTo: "/story/1" }}
                 aria-describedby={`cap-${c.to.slice(1)}`}
                 className={`brand-btn ${c.cls} w-full`}
               >

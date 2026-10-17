@@ -78,7 +78,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     await reset();
-    await router.navigate({ to: "/sign-in", replace: true });
+    await router.navigate({ to: "/sign-in", search: { returnTo: "/" }, replace: true });
   }
   async function completeSignIn(kind: "signed_in" | "signed_up") {
     await refresh();

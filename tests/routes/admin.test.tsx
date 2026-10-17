@@ -7,7 +7,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("@/components/site/Admin", () => ({ AdminPage: () => <p>page</p> }));
 
-import { Route } from "@/routes/admin";
+import { Route } from "@/routes/_authenticated/admin";
 
 const R = Route as unknown as {
   head: () => { meta: Record<string, string>[] };
