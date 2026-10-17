@@ -49,7 +49,11 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await withExecutionContext(ctx, () => handler.fetch(request, env, ctx));
+      // The built Worker hands this entry the request only; Nitro puts the
+      // Worker's waitUntil on the request itself. A direct ctx wins when present.
+      const response = await withExecutionContext(ctx ?? request, () =>
+        handler.fetch(request, env, ctx),
+      );
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
