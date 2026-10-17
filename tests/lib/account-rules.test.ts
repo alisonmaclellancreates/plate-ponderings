@@ -92,11 +92,13 @@ describe("password failures", () => {
   });
   it("classifies actual weak-password errors by reasons rather than message text", () => {
     expect(
-      signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, ["length", "characters"])),
+      signupErrorMessage(
+        new AuthWeakPasswordError("Password is too weak", 422, ["length", "characters"]),
+      ),
     ).toBe("Please choose a stronger password with at least 8 characters.");
-    expect(
-      signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, [])),
-    ).toBe("Please choose a stronger password with at least 8 characters.");
+    expect(signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, []))).toBe(
+      "Please choose a stronger password with at least 8 characters.",
+    );
     expect(
       signupErrorMessage(new AuthWeakPasswordError("breach leak pwned", 422, ["length"])),
     ).toBe("Please choose a stronger password with at least 8 characters.");

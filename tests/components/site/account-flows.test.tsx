@@ -91,7 +91,9 @@ it("signin failures are generic and do not navigate", async () => {
   expect(m.navigate).not.toHaveBeenCalled();
 });
 it("handles signup password failure, absent session and network error", async () => {
-  m.signUp.mockResolvedValue({ error: new AuthWeakPasswordError("Password is too weak", 422, ["pwned"]) });
+  m.signUp.mockResolvedValue({
+    error: new AuthWeakPasswordError("Password is too weak", 422, ["pwned"]),
+  });
   const v = render(<SignUpPage />);
   fillEntry();
   await screen.findByRole("alert");
