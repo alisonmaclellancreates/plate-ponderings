@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, ChevronRight, UserCircle2 } from "lucide-react";
+import { CheckCircle2, TriangleAlert, ChevronRight, UserCircle2 } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ModerationBadge } from "@/components/site/Badges";
 import { ScenicHeader } from "@/components/site/SpotPlate";
