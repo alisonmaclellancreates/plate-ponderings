@@ -18,9 +18,15 @@ vi.mock("@/lib/submissions.functions", () => ({
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: (id: string) => (options: Record<string, unknown>) => ({ ...options, id }),
-  Link: ({ params, search, children }: { params: { state: string }; search: Record<string, string>; children: ReactNode }) => (
-    <a href={`/plate/${params.state}?${new URLSearchParams(search)}`}>{children}</a>
-  ),
+  Link: ({
+    params,
+    search,
+    children,
+  }: {
+    params: { state: string };
+    search: Record<string, string>;
+    children: ReactNode;
+  }) => <a href={`/plate/${params.state}?${new URLSearchParams(search)}`}>{children}</a>,
 }));
 import { Route } from "@/routes/previews_.submissions";
 

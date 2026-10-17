@@ -41,7 +41,11 @@ type Meta = Record<string, string>[];
 const R = Route as unknown as {
   loader: (a: { params: { state: string } }) => Promise<{ state: string; plate: PlateData | null }>;
   head: (a: { loaderData?: { state: string; plate?: PlateData | null } }) => { meta: Meta };
-  validateSearch: (s: Record<string, unknown>) => { jurisdiction?: string; text?: string; from?: "submissions" };
+  validateSearch: (s: Record<string, unknown>) => {
+    jurisdiction?: string;
+    text?: string;
+    from?: "submissions";
+  };
   component: () => ReactNode;
 };
 
@@ -97,15 +101,27 @@ describe("plate detail route", () => {
   ])("validates search return values %j", (input, expected) => {
     expect(R.validateSearch(input)).toEqual({ ...expected, from: undefined });
   });
-  it.each(["submissions", "unknown", "Submissions", "", null, 42])("accepts only the exact submissions marker %j", (from) => {
-    expect(R.validateSearch({ from }).from).toBe(from === "submissions" ? "submissions" : undefined);
-  });
+  it.each(["submissions", "unknown", "Submissions", "", null, 42])(
+    "accepts only the exact submissions marker %j",
+    (from) => {
+      expect(R.validateSearch({ from }).from).toBe(
+        from === "submissions" ? "submissions" : undefined,
+      );
+    },
+  );
   it.each([
     [{ from: "submissions" }, "Back to Your Submissions", "/submissions"],
     [{ from: "unknown" }, "Back to Explore", "/explore"],
-    [{ from: "submissions", jurisdiction: "Utah", text: "DRAGON" }, "Back to Search", "/?jurisdiction=Utah&text=DRAGON"],
+    [
+      { from: "submissions", jurisdiction: "Utah", text: "DRAGON" },
+      "Back to Search",
+      "/?jurisdiction=Utah&text=DRAGON",
+    ],
   ])("renders the validated return destination for %j", (values, label, href) => {
-    loaderData = { state: "real-plate", plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" } };
+    loaderData = {
+      state: "real-plate",
+      plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" },
+    };
     search = R.validateSearch(values);
     const C = R.component;
     render(<C />);

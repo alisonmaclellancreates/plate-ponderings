@@ -30,8 +30,18 @@ vi.mock("@/lib/account-auth", () => ({
 vi.mock("@tanstack/react-router", () => ({
   useRouterState: ({ select }: { select: (state: { location: typeof m.location }) => unknown }) =>
     select({ location: m.location }),
-  Link: ({ to, children, onClick }: { to: string; children: React.ReactNode; onClick?: () => void }) => (
-    <a href={to} onClick={onClick}>{children}</a>
+  Link: ({
+    to,
+    children,
+    onClick,
+  }: {
+    to: string;
+    children: React.ReactNode;
+    onClick?: () => void;
+  }) => (
+    <a href={to} onClick={onClick}>
+      {children}
+    </a>
   ),
   useNavigate: () => m.navigate,
 }));
@@ -264,15 +274,21 @@ it.each(["Explore", "Spot a Plate", "About", "Try the Demo"])(
   (label) => {
     render(<SiteHeader mode="signed-out" />);
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
-    fireEvent.click(within(screen.getByRole("navigation", { name: "Mobile" })).getByRole("link", { name: label }));
+    fireEvent.click(
+      within(screen.getByRole("navigation", { name: "Mobile" })).getByRole("link", { name: label }),
+    );
     expect(screen.queryByRole("navigation", { name: "Mobile" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
   },
 );
 it("closes both profile instances and the mobile menu on location changes, including back/forward and search-only changes", () => {
   const view = render(<SiteHeader />);
   for (const href of ["/profile", "/", "/profile", "/profile?tab=1"]) {
-    for (const toggle of screen.getAllByRole("button", { name: "Traveler1234 menu" })) fireEvent.click(toggle);
+    for (const toggle of screen.getAllByRole("button", { name: "Traveler1234 menu" }))
+      fireEvent.click(toggle);
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
     expect(screen.getAllByRole("list", { name: "Profile" })).toHaveLength(2);
     m.location = { href, pathname: href.split("?")[0] ?? href };

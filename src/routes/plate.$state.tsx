@@ -11,7 +11,11 @@ const str = (v: unknown) => (typeof v === "string" && v.length <= 64 ? v : undef
 export const Route = createFileRoute("/plate/$state")({
   validateSearch: (
     s: Record<string, unknown>,
-  ): { jurisdiction?: string | undefined; text?: string | undefined; from?: "submissions" | undefined } => ({
+  ): {
+    jurisdiction?: string | undefined;
+    text?: string | undefined;
+    from?: "submissions" | undefined;
+  } => ({
     jurisdiction: str(s["jurisdiction"]),
     text: str(s["text"]),
     from: s["from"] === "submissions" ? "submissions" : undefined,

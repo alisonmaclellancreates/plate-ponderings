@@ -131,18 +131,30 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
           className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
         >
           <li>
-            <Link to="/submissions" onClick={() => setOpen(false)} className="block px-4 py-2 hover:bg-cream">
+            <Link
+              to="/submissions"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 hover:bg-cream"
+            >
               Your Submissions
             </Link>
           </li>
           <li>
-            <Link to="/profile" onClick={() => setOpen(false)} className="block px-4 py-2 hover:bg-cream">
+            <Link
+              to="/profile"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 hover:bg-cream"
+            >
               Your Profile
             </Link>
           </li>
           {auth.account.isAdmin && (
             <li>
-              <Link to="/admin" onClick={() => setOpen(false)} className="block px-4 py-2 hover:bg-cream">
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 hover:bg-cream"
+              >
                 Admin
               </Link>
             </li>
@@ -250,12 +262,21 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
           className="border-t border-cream/20 px-4 pb-4 md:hidden"
         >
           {NAV.map((item) => (
-            <Link key={item.href} to={item.href} onClick={() => setOpen(false)} className="site-nav-link block py-3">
+            <Link
+              key={item.href}
+              to={item.href}
+              onClick={() => setOpen(false)}
+              className="site-nav-link block py-3"
+            >
               {item.label}
             </Link>
           ))}
           {signedOut && demoEnabled && (
-            <Link to="/demo" onClick={() => setOpen(false)} className={`${tryDemo} mt-2 inline-block`}>
+            <Link
+              to="/demo"
+              onClick={() => setOpen(false)}
+              className={`${tryDemo} mt-2 inline-block`}
+            >
               Try the Demo
             </Link>
           )}

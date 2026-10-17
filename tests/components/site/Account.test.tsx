@@ -17,7 +17,10 @@ vi.mock("@tanstack/react-router", () => ({
     className?: string;
   }) => (
     <a
-      href={(params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to) + (search ? `?${new URLSearchParams(search)}` : "")}
+      href={
+        (params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to) +
+        (search ? `?${new URLSearchParams(search)}` : "")
+      }
       className={className}
     >
       {children}
@@ -51,7 +54,9 @@ describe("SubmissionsPage", () => {
   it("marks every View Plate link as coming from submissions", () => {
     render(<SubmissionsPage />);
     for (const link of screen.getAllByRole("link", { name: "View Plate" }))
-      expect(new URL(link.getAttribute("href") ?? "", "https://example.test").searchParams.get("from")).toBe("submissions");
+      expect(
+        new URL(link.getAttribute("href") ?? "", "https://example.test").searchParams.get("from"),
+      ).toBe("submissions");
   });
   it("leaves preview Dismiss inert without a handler", () => {
     render(<SubmissionsPage />);

@@ -19,9 +19,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 
 it("closes both menus on real router navigation, browser back and browser forward", async () => {
   const root = createRootRoute({ component: () => <SiteHeader /> });
-  const routes = ["/", "/profile"].map((path) =>
-    createRoute({ getParentRoute: () => root, path }),
-  );
+  const routes = ["/", "/profile"].map((path) => createRoute({ getParentRoute: () => root, path }));
   const history = createMemoryHistory({ initialEntries: ["/"] });
   const router = createRouter({ routeTree: root.addChildren(routes), history });
   render(<RouterProvider router={router} />);
