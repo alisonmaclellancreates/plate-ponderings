@@ -11,18 +11,22 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 import { DeleteConfirmPage, SettingsPage } from "@/components/site/Settings";
-import { BLOCKED_HANDLES, BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "../../fixtures/plates";
+import {
+  BLOCKED_HANDLES,
+  BLOCKING_EXPLANATION,
+  DELETE_ACCOUNT_WARNING,
+} from "../../fixtures/plates";
 
 describe("SettingsPage", () => {
   it("lists each blocked handle with an Unblock button and the blocking explanation", () => {
-    render(<SettingsPage />);
+    render(<SettingsPage blocked={BLOCKED_HANDLES.map((handle) => ({ key: handle, handle }))} />);
     expect(screen.getAllByRole("button", { name: "Unblock" })).toHaveLength(BLOCKED_HANDLES.length);
     for (const handle of BLOCKED_HANDLES) expect(screen.getByText(handle)).toBeTruthy();
     expect(screen.getByText(BLOCKING_EXPLANATION)).toBeTruthy();
   });
 
   it("shows the delete warning and links Delete My Account to the confirmation", () => {
-    render(<SettingsPage />);
+    render(<SettingsPage blocked={BLOCKED_HANDLES.map((handle) => ({ key: handle, handle }))} />);
     expect(screen.getByText(DELETE_ACCOUNT_WARNING)).toBeTruthy();
     const link = screen.getByRole("link", { name: "Delete My Account" });
     expect(link.getAttribute("href")).toBe("/settings/delete-confirm");

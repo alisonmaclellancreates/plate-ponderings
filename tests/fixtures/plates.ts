@@ -481,3 +481,15 @@ export const SUBMISSIONS_SAMPLE: Submission[] = [
     updated: true,
   },
 ];
+
+export function asFeatured(p: PlateRecord) {
+  return {
+    slug: p.slug,
+    jurisdiction: p.jurisdiction,
+    text: p.text,
+    day: p.plateOfTheDay ?? "",
+    count: publishedStories(p).length,
+    atPick: p.featuredStoryCount ?? 0,
+    status: plateStatus(p),
+  };
+}

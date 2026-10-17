@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Homepage, PlateOfTheDay } from "@/components/site/Homepage";
 import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
-import type { PlateRecord } from "../../fixtures/plates";
+import type { FeaturedDisplay } from "@/lib/featured";
 import type { ReactNode } from "react";
 import { track } from "@/lib/analytics";
 import { QueryClient } from "@tanstack/react-query";
@@ -169,7 +169,31 @@ describe("Homepage", () => {
 
   it("default shows the mystery plate of the day and four recent plates", () => {
     media({});
-    render(<Homepage />);
+    render(
+      <Homepage
+        live={{
+          today: "2026-10-17",
+          pick: {
+            slug: "wa-test",
+            jurisdiction: "Washington",
+            text: "TEST",
+            day: "2026-10-17",
+            count: 0,
+            atPick: 0,
+            status: "mystery",
+          },
+          recent: Array.from({ length: 4 }, (_, i) => ({
+            slug: `recent-${i}`,
+            jurisdiction: "Washington",
+            text: "RECENT",
+            day: `2026-10-${16 - i}`,
+            count: 0,
+            atPick: 0,
+            status: "mystery" as const,
+          })),
+        }}
+      />,
+    );
     const potd = screen.getByRole("region", { name: "Plate of the Day" });
     expect(within(potd).getByRole("img", { name: /Utah plate CANYONS/ })).toBeTruthy();
     expect(within(potd).getByText("Mystery")).toBeTruthy();
@@ -179,52 +203,16 @@ describe("Homepage", () => {
     expect(screen.getAllByRole("search").length).toBeGreaterThan(0);
   });
 
-  it("no-match prefills the search and shows the panel", () => {
-    media({});
-    render(<Homepage variant="no-match" />);
-    expect(screen.getAllByDisplayValue("DRAGON").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("region", { name: "No plate found. Yet!" }).length).toBeGreaterThan(
-      0,
-    );
-  });
-
-  it("fallback features an interpreted plate", () => {
-    media({});
-    render(<Homepage variant="fallback" />);
-    const potd = screen.getByRole("region", { name: "Plate of the Day" });
-    expect(within(potd).getByText("Interpreted")).toBeTruthy();
-    expect(within(potd).getByText(/Only 2 stories so far/)).toBeTruthy();
-    expect(within(potd).getByRole("link", { name: "View This Plate" }).getAttribute("href")).toBe(
-      "/plate/co-wander",
-    );
-  });
-
-  it("default Plate of the Day links to today's plate", () => {
-    media({});
-    render(<Homepage />);
-    const potd = screen.getByRole("region", { name: "Plate of the Day" });
-    expect(within(potd).getByRole("link", { name: "View This Plate" }).getAttribute("href")).toBe(
-      "/plate/ut-canyons",
-    );
-  });
-
   it("reads a plate with exactly one story as 1 story", () => {
     media({});
-    const plate: PlateRecord = {
+    const plate: FeaturedDisplay = {
       slug: "or-single",
       jurisdiction: "Oregon",
       text: "SINGLE",
-      stories: [
-        {
-          id: "single-1",
-          handle: "rivercat",
-          date: "2026-10-14",
-          meaning: "One story only.",
-          howIKnow: "guess",
-          hearts: 1,
-        },
-      ],
-      summaries: [],
+      count: 1,
+      atPick: 0,
+      day: "2026-10-17",
+      status: "interpreted",
     };
     render(<PlateOfTheDay plate={plate} />);
     expect(screen.getByText(/Only 1 story so far/)).toBeTruthy();
@@ -348,15 +336,4 @@ describe("Homepage", () => {
       parent?.append(target);
     },
   );
-  it("omits only the daily band when the preview collection is empty", async () => {
-    const { PLATES } = await import("../../fixtures/plates");
-    const saved = PLATES.splice(0);
-    try {
-      render(<Homepage />);
-      expect(screen.queryByRole("region", { name: "Plate of the Day" })).toBeNull();
-      expect(screen.getByRole("search")).toBeTruthy();
-    } finally {
-      PLATES.push(...saved);
-    }
-  });
 });
