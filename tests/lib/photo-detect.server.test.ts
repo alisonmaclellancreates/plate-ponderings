@@ -1,57 +1,85 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const m = vi.hoisted(() => ({
-  rpc: vi.fn(),
-  block: { current: null as null | string },
+  streamText: vi.fn(),
+  responses: vi.fn(() => "model"),
 }));
 
-vi.mock("@/lib/ai-block.server", () => ({
-  readAiBlock: () => Promise.resolve(m.block.current),
+vi.mock("ai", () => ({
+  streamText: m.streamText,
+  Output: { object: (opts: unknown) => opts },
 }));
-vi.mock("@/integrations/supabase/client.server", () => ({
-  supabaseAdmin: { rpc: m.rpc },
+vi.mock("@ai-sdk/openai", () => ({
+  createOpenAI: () => ({ responses: m.responses }),
+}));
+vi.mock("@/lib/ai/run-id.server", () => ({
+  createLovableAiGatewayRunIdFetch: () => ({
+    fetch: (input: unknown, init: unknown) => fetch(input as RequestInfo, init),
+    getRunId: () => "run-1",
+  }),
 }));
 
-import { detectPlateBoxIn } from "@/lib/photo-detect.server";
+import { detectPlateBoxInImage } from "@/lib/photo-detect.server";
 
-describe("detectPlateBoxIn", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.block.current = null;
-    m.rpc.mockResolvedValue({ data: true, error: null });
+const DATA_URL = "data:image/jpeg;base64,AAAA";
+
+function aiReturns(output: unknown) {
+  m.streamText.mockReturnValue({ output: Promise.resolve(output) });
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.unstubAllEnvs();
+  vi.stubEnv("LOVABLE_API_KEY", "test-key");
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+describe("detectPlateBoxInImage", () => {
+  it("returns unavailable without a gateway key, never calling the AI", async () => {
+    vi.stubEnv("LOVABLE_API_KEY", "");
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({
+      outcome: "unavailable",
+      block: null,
+    });
+    expect(m.streamText).not.toHaveBeenCalled();
   });
 
-  it("returns unavailable when AI checks are paused, without spending an attempt", async () => {
-    m.block.current = "credit";
-    await expect(detectPlateBoxIn("u1", "data:image/jpeg;base64,AAAA")).resolves.toEqual({
+  it("returns unavailable when the test switch forces it", async () => {
+    vi.stubEnv("PHOTO_DETECT_FORCE_UNAVAILABLE", "1");
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({
       outcome: "unavailable",
+      block: null,
     });
-    expect(m.rpc).not.toHaveBeenCalled();
+    expect(m.streamText).not.toHaveBeenCalled();
   });
 
-  it("returns unavailable when the attempt counter errors, including a missing function", async () => {
-    m.rpc.mockResolvedValue({
-      data: null,
-      error: { code: "42883", message: "function consume_photo_detect_attempt does not exist" },
-    });
-    await expect(detectPlateBoxIn("u1", "data:image/jpeg;base64,AAAA")).resolves.toEqual({
-      outcome: "unavailable",
-    });
-  });
-
-  it("returns unavailable when the attempt is refused", async () => {
-    m.rpc.mockResolvedValue({ data: false, error: null });
-    await expect(detectPlateBoxIn("u1", "data:image/jpeg;base64,AAAA")).resolves.toEqual({
-      outcome: "unavailable",
+  it("returns the plate box as clamped fractions", async () => {
+    aiReturns({ found: true, x: 0.1, y: 0.2, w: 0.3, h: 0.1 });
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({
+      outcome: "ok",
+      box: { x: 0.1, y: 0.2, w: 0.3, h: 0.1 },
     });
   });
 
-  it("returns unavailable when the photo is not a JPEG", async () => {
-    await expect(detectPlateBoxIn("u1", "data:image/png;base64,AAAA")).resolves.toEqual({
+  it("returns no box when the model finds none", async () => {
+    aiReturns({ found: false });
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({ outcome: "ok", box: null });
+  });
+
+  it("returns no box when the box is smaller than the minimum", async () => {
+    aiReturns({ found: true, x: 0.1, y: 0.2, w: 0.01, h: 0.01 });
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({ outcome: "ok", box: null });
+  });
+
+  it("a thrown failure becomes unavailable, never an exception", async () => {
+    m.streamText.mockReturnValue({ output: Promise.reject(new Error("gateway down")) });
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({
       outcome: "unavailable",
-    });
-    await expect(detectPlateBoxIn("u1", "not a data url")).resolves.toEqual({
-      outcome: "unavailable",
+      block: null,
+      runId: "run-1",
     });
   });
 });
