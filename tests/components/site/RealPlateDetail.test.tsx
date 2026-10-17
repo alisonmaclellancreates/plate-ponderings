@@ -15,6 +15,7 @@ const m = vi.hoisted(() => ({
 vi.mock("@/lib/plate-guesses.functions", () => ({ getPlateGuess: () => Promise.resolve(m.guess) }));
 vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
 vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => vi.fn(),
   Link: ({
     to,
     params,
@@ -41,7 +42,15 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getUser: m.getUser } },
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => ({ account: m.account }) }));
+vi.mock("@/lib/story-actions.functions", () => ({
+  toggleHeart: vi.fn(),
+  reportStory: vi.fn(),
+  blockAuthor: vi.fn(),
+  deleteMyStory: vi.fn(),
+}));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
   useQuery: ({ queryFn, queryKey }: { queryFn: () => unknown; queryKey: string[] }) => {
     queryFn();
     return {
