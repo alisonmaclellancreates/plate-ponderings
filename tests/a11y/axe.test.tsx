@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import * as matchers from "vitest-axe/matchers";
+import "vitest-axe/extend-expect";
 import type { ReactNode } from "react";
 
 expect.extend(matchers);
@@ -215,7 +216,7 @@ describe("axe: full pages", () => {
   });
 
   it("spot outcomes", async () => {
-    for (const outcome of ["exists", "new", "pending", "rejected", "unavailable"] as const) {
+    for (const outcome of ["exists", "new", "pending", "rejected", "already-spotted"] as const) {
       const { container, unmount } = render(<SpotOutcomePage outcome={outcome} />);
       expect(await axe(container, AXE_OPTS)).toHaveNoViolations();
       unmount();
@@ -290,10 +291,9 @@ describe("axe: dialogs (checked against document.body for the portal)", () => {
   it("photo zoom dialog", async () => {
     render(
       <StoryPhotoZoom
-        open
-        onOpenChange={() => {}}
-        src="https://example.com/photo.jpg"
+        photo="https://example.com/photo.jpg"
         handle="maplegirl"
+        meaning="They might be cat lovers"
         box={{ x: 0.3, y: 0.4, w: 0.25, h: 0.12 }}
       />,
     );
@@ -309,6 +309,7 @@ describe("axe: photo editor", () => {
         imageUrl="blob:mock"
         bitmap={bitmap}
         initialBox={{ x: 0.3, y: 0.4, w: 0.25, h: 0.12 }}
+        showNoBoxMessage={false}
         onUse={() => {}}
         onRemove={() => {}}
         onChooseAnother={() => {}}
