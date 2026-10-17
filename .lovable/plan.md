@@ -22,7 +22,8 @@ Branch: current feature branch. No database changes. No feature, wording, or lay
 - Verify Tab order and visible focus styles (global :focus-visible already exists; extend where missing).
 - Dialogs: focus trap, Esc close, focus return to opener (Radix provides this; verify with tests).
 - Route change: focus moves to the new page's main heading (or skip-link target). Add a skip link to main content in the root layout.
-- Tests for dialog focus behaviour.
+- PhotoEditor: the draggable plate box gets an accessible name ("Plate area") and is movable and resizable from the keyboard (arrow keys to move, modifier+arrows to resize). If keyboard resizing would need a layout change, list it and ask Alison first.
+- Tests for dialog focus behaviour and keyboard box control.
 
 ## 5. Screen reader semantics
 - Audit: one h1 per page, heading order, landmarks (header/nav/main/footer), images described or decorative, icon-only buttons named, status changes announced (role="status"/aria-live), plate artwork announced once by accessible name.
