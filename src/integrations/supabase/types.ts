@@ -17,14 +17,23 @@ export type Database = {
       app_settings: {
         Row: {
           demo_mode: boolean
+          handle_check_block_category: string | null
+          handle_check_blocked_at: string | null
+          handle_check_run_id: string | null
           id: boolean
         }
         Insert: {
           demo_mode?: boolean
+          handle_check_block_category?: string | null
+          handle_check_blocked_at?: string | null
+          handle_check_run_id?: string | null
           id?: boolean
         }
         Update: {
           demo_mode?: boolean
+          handle_check_block_category?: string | null
+          handle_check_blocked_at?: string | null
+          handle_check_run_id?: string | null
           id?: boolean
         }
         Relationships: []
@@ -79,6 +88,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      handle_save_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       hearts: {
         Row: {
@@ -474,6 +501,14 @@ export type Database = {
       }
     }
     Functions: {
+      consume_handle_save_attempt: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      create_generated_profile: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
