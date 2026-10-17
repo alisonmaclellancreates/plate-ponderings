@@ -30,7 +30,7 @@ describe("AdminPage", () => {
     render(<AdminPage rows={[{ ...sample, reasons: [reason] }]} />);
     const table = within(screen.getByRole("table", { name: "Reported stories" }));
     expect(table.getByRole("cell", { name: label })).toBeInTheDocument();
-    expect(table.queryByRole("cell", { name: reason, exact: true })).toBeNull();
+    expect(table.queryByRole("cell", { name: reason })).toBeNull();
   });
 
   it("lists every reported story with its status action", () => {
