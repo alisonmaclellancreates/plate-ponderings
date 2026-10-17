@@ -22,9 +22,14 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
-vi.mock("@/lib/auth-context", () => ({ useAccountAuth: () => ({ account: { handle: "Traveler1234", isDemo: false }, refresh: vi.fn() }) }));
+vi.mock("@/lib/auth-context", () => ({
+  useAccountAuth: () => ({ account: { handle: "Traveler1234", isDemo: false }, refresh: vi.fn() }),
+}));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
-vi.mock("@/lib/accounts.functions", () => ({ checkHandle: async () => ({ available: true }), saveHandle: vi.fn() }));
+vi.mock("@/lib/accounts.functions", () => ({
+  checkHandle: async () => ({ available: true }),
+  saveHandle: vi.fn(),
+}));
 
 import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Account";
 import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
