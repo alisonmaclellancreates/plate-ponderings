@@ -33,6 +33,7 @@ vi.mock("@tanstack/react-router", () => ({
     to,
     params,
     search,
+    hash,
     children,
     className,
     ...rest
@@ -40,14 +41,16 @@ vi.mock("@tanstack/react-router", () => ({
     to: string;
     params?: Record<string, string>;
     search?: Record<string, string>;
+    hash?: string;
     children: ReactNode;
     className?: string;
   }) => (
-    <a className={className} href={href(to, params, search)} {...rest}>
+    <a className={className} href={href(to, params, search, hash)} {...rest}>
       {children}
     </a>
   ),
 }));
+
 vi.mock("@tanstack/react-start", () => ({
   useServerFn: (fn: unknown) => fn,
   createServerFn: () => {
@@ -81,12 +84,25 @@ beforeEach(() => {
 
 function expectFallback() {
   expect(screen.getByText("We couldn't find that plate.")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Spot a Plate" })).toHaveAttribute("href", "/spot");
-  expect(screen.getByRole("link", { name: "Explore" })).toHaveAttribute("href", "/explore");
+  expect(
+    screen.getByText("Look it up again, or spot it if it's new to the collection."),
+  ).toBeInTheDocument();
+  const lookUp = screen.getByRole("link", { name: "Look Up a Plate" });
+  expect(lookUp).toHaveAttribute("href", "/#plate-search");
+  expect(lookUp).toHaveClass("brand-btn", "brand-btn-coral");
+  const spot = screen.getByRole("link", { name: "Spot a Plate" });
+  expect(spot).toHaveAttribute("href", "/spot");
+  expect(spot).toHaveClass("brand-btn", "brand-btn-outline");
+  const explore = screen.getByRole("link", { name: "Explore" });
+  expect(explore).toHaveAttribute("href", "/explore");
+  expect(explore.className).not.toContain("brand-btn");
+  const order = screen.getAllByRole("link").map((l) => l.getAttribute("href"));
+  expect(order.slice(0, 3)).toEqual(["/#plate-search", "/spot", "/explore"]);
   expect(screen.queryByTestId("plate-header")).toBeNull();
   expect(screen.queryByRole("img")).toBeNull();
   expect(screen.queryByRole("link", { name: "Sign In" })).toBeNull();
 }
+
 
 describe("sign-in prompt", () => {
   it("shows the plate the visitor came from, with choices that return to its story form", () => {
