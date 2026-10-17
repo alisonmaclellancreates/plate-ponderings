@@ -65,6 +65,7 @@
   --color-coral-cta: var(--coral-cta);
   --color-coral-pale: var(--coral-pale);
   --color-teal: var(--teal);
+  --color-teal-pale: var(--teal-pale);
   --color-gold: var(--gold);
   --color-slate: var(--slate);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -84,6 +85,7 @@
   --coral-cta-pressed: #923520;
   --coral-pale: #f2d7ca;
   --teal: #287c80;
+  --teal-pale: #e7f2f0;
   --gold: #e9b85c;
   --slate: #dce5e7;
   --plate-wa: #b9d3ea;

@@ -34,6 +34,7 @@ vi.mock("@tanstack/react-query", () => ({
     };
   },
 }));
+vi.mock("@/lib/plate-guesses.functions", () => ({ getPlateGuess: vi.fn() }));
 vi.mock("@/lib/stories.functions", () => ({ getPlateStories: vi.fn(), STORY_PAGE_SIZE: 5 }));
 vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: m.getPlateSummary }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));

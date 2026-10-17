@@ -14,6 +14,7 @@ export const EVENTS = {
   story_started: [],
   story_submitted: ["source", "has_more_text", "outcome"],
   summary_history_opened: ["versions_shown"],
+  ai_guess_revealed: [],
 } as const;
 
 type EventRegistry = Readonly<Record<string, readonly string[]>>;
