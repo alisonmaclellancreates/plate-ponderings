@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminPage } from "@/components/site/Admin";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { LiveAdmin } from "@/components/site/LiveAdmin";
+import { getAdminAccess } from "@/lib/admin.functions";
 
 const TITLE = "Admin | What the Plate?";
 const DESCRIPTION = "Reported stories awaiting review.";
@@ -15,5 +16,10 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <AdminPage />,
+  // Non-admins are sent home here, never by a redirect thrown from a server function.
+  beforeLoad: async () => {
+    const access = await getAdminAccess().catch(() => ({ admin: false }));
+    if (!access.admin) throw redirect({ to: "/", replace: true });
+  },
+  component: () => <LiveAdmin />,
 });

@@ -2,7 +2,20 @@ import { Link } from "@tanstack/react-router";
 import { ScenicHeader } from "@/components/site/SpotPlate";
 import { BLOCKED_HANDLES, BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
 
-export function SettingsPage({ blocked = BLOCKED_HANDLES }: { blocked?: string[] }) {
+export type BlockedEntry = { key: string; handle: string };
+const SAMPLE_BLOCKED: BlockedEntry[] = BLOCKED_HANDLES.map((handle) => ({ key: handle, handle }));
+
+export function SettingsPage({
+  blocked = SAMPLE_BLOCKED,
+  onUnblock,
+  busy = false,
+  message = "",
+}: {
+  blocked?: BlockedEntry[];
+  onUnblock?: (entry: BlockedEntry) => void;
+  busy?: boolean;
+  message?: string;
+}) {
   return (
     <main>
       <ScenicHeader asHeading title="Settings" subtitle="Your account, your call." />
@@ -12,15 +25,25 @@ export function SettingsPage({ blocked = BLOCKED_HANDLES }: { blocked?: string[]
             Blocked people
           </h2>
           <ul className="mt-4 space-y-3">
-            {blocked.map((handle) => (
-              <li key={handle} className="flex items-center justify-between gap-4">
-                <span className="font-semibold">{handle}</span>
-                <button type="button" className="brand-btn brand-btn-outline">
+            {blocked.map((entry) => (
+              <li key={entry.key} className="flex items-center justify-between gap-4">
+                <span className="font-semibold">{entry.handle}</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onUnblock?.(entry)}
+                  className="brand-btn brand-btn-outline"
+                >
                   Unblock
                 </button>
               </li>
             ))}
           </ul>
+          {message && (
+            <p role="alert" className="mt-4">
+              {message}
+            </p>
+          )}
           <p className="mt-4 text-sm text-muted-foreground">{BLOCKING_EXPLANATION}</p>
         </section>
         <section aria-labelledby="delete-account" className="brand-card p-6">
@@ -39,7 +62,15 @@ export function SettingsPage({ blocked = BLOCKED_HANDLES }: { blocked?: string[]
   );
 }
 
-export function DeleteConfirmPage() {
+export function DeleteConfirmPage({
+  onDelete,
+  busy = false,
+  message = "",
+}: {
+  onDelete?: () => void;
+  busy?: boolean;
+  message?: string;
+}) {
   return (
     <main>
       <ScenicHeader asHeading title="Settings" subtitle="Your account, your call." />
@@ -53,10 +84,20 @@ export function DeleteConfirmPage() {
             <Link to="/settings" className="brand-btn brand-btn-navy">
               Keep My Account
             </Link>
-            <button type="button" className="brand-btn brand-btn-coral">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onDelete}
+              className="brand-btn brand-btn-coral"
+            >
               Delete Account
             </button>
           </div>
+          {message && (
+            <p role="alert" className="mt-4">
+              {message}
+            </p>
+          )}
         </section>
       </div>
     </main>

@@ -7,65 +7,96 @@ import { CURRENT_USER, PLATES, publishedStories, type Story } from "@/lib/mock-d
 
 const PLATE = PLATES.find((p) => p.slug === "bc-lv2code")!;
 
-export const REPORT_REASONS = [
-  "Personal information",
-  "Hurtful or harassing",
-  "Spam",
-  "Something else",
+/** Report reasons in display order: stored key and shown label. */
+export const REPORT_REASON_OPTIONS = [
+  { key: "personal_info", label: "Personal information" },
+  { key: "harassment", label: "Hurtful or harassing" },
+  { key: "spam", label: "Spam" },
+  { key: "other", label: "Something else" },
 ] as const;
+export const REPORT_REASONS = REPORT_REASON_OPTIONS.map((r) => r.label);
+export type ReportReasonKey = (typeof REPORT_REASON_OPTIONS)[number]["key"];
+
+type MenuHandlers = { onReport?: () => void; onBlock?: () => void; onDelete?: () => void };
+
+/** The story card menu: other people's stories get Report and Block; your own gets Delete. */
+export function StoryMenuList({
+  handle,
+  menu,
+  className = "brand-card absolute right-4 top-12 z-10 w-56 p-2 shadow-md",
+  onReport,
+  onBlock,
+  onDelete,
+}: { handle: string; menu: "other" | "own"; className?: string } & MenuHandlers) {
+  return (
+    <ul
+      role="menu"
+      aria-label={menu === "own" ? "Your story options" : `Options for ${handle}'s story`}
+      data-testid={menu === "own" ? "own-menu" : "other-menu"}
+      className={className}
+    >
+      {menu === "own" ? (
+        <li>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={onDelete}
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left hover:bg-muted"
+          >
+            <Trash2 aria-hidden className="size-4" />
+            Delete my story
+          </button>
+        </li>
+      ) : (
+        <>
+          <li>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={onReport}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left hover:bg-muted"
+            >
+              <Flag aria-hidden className="size-4" />
+              Report story
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={onBlock}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left hover:bg-muted"
+            >
+              <UserX aria-hidden className="size-4" />
+              Block {handle}
+            </button>
+          </li>
+        </>
+      )}
+    </ul>
+  );
+}
 
 function StoryMenuRow({ story, menu }: { story: Story; menu: "other" | "own" }) {
   return (
     <li className="relative">
       <StoryCard story={story} />
-      <ul
-        role="menu"
-        aria-label={menu === "own" ? "Your story options" : `Options for ${story.handle}'s story`}
-        data-testid={menu === "own" ? "own-menu" : "other-menu"}
-        className="brand-card absolute right-4 top-12 z-10 w-56 p-2 shadow-md"
-      >
-        {menu === "own" ? (
-          <li>
-            <button
-              type="button"
-              role="menuitem"
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left hover:bg-muted"
-            >
-              <Trash2 aria-hidden className="size-4" />
-              Delete my story
-            </button>
-          </li>
-        ) : (
-          <>
-            <li>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left hover:bg-muted"
-              >
-                <Flag aria-hidden className="size-4" />
-                Report story
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left hover:bg-muted"
-              >
-                <UserX aria-hidden className="size-4" />
-                Block {story.handle}
-              </button>
-            </li>
-          </>
-        )}
-      </ul>
+      <StoryMenuList handle={story.handle} menu={menu} />
     </li>
   );
 }
 
-function ReportDialog() {
+export function ReportDialog({
+  onCancel,
+  onSend,
+  busy = false,
+}: {
+  onCancel?: () => void;
+  onSend?: (reason: ReportReasonKey, note: string) => void;
+  busy?: boolean;
+}) {
   const [note, setNote] = useState("");
+  const [reason, setReason] = useState<ReportReasonKey | null>(null);
   return (
     <section
       role="dialog"
@@ -78,13 +109,19 @@ function ReportDialog() {
       </h2>
       <fieldset className="mt-4 space-y-2">
         <legend className="sr-only">Report reason</legend>
-        {REPORT_REASONS.map((reason) => (
+        {REPORT_REASON_OPTIONS.map((option) => (
           <label
-            key={reason}
+            key={option.key}
             className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 hover:bg-muted"
           >
-            <input type="radio" name="report-reason" value={reason} />
-            {reason}
+            <input
+              type="radio"
+              name="report-reason"
+              value={option.key}
+              checked={reason === option.key}
+              onChange={() => setReason(option.key)}
+            />
+            {option.label}
           </label>
         ))}
       </fieldset>
@@ -105,10 +142,15 @@ function ReportDialog() {
         {note.length}/200
       </p>
       <div className="mt-4 flex flex-wrap justify-end gap-3">
-        <button type="button" className="brand-btn brand-btn-outline">
+        <button type="button" onClick={onCancel} className="brand-btn brand-btn-outline">
           Cancel
         </button>
-        <button type="button" className="brand-btn brand-btn-navy">
+        <button
+          type="button"
+          disabled={busy || reason === null}
+          onClick={() => reason && onSend?.(reason, note)}
+          className="brand-btn brand-btn-navy"
+        >
           Send Report
         </button>
       </div>
@@ -116,7 +158,15 @@ function ReportDialog() {
   );
 }
 
-function DeleteStoryDialog() {
+export function DeleteStoryDialog({
+  onKeep,
+  onDelete,
+  busy = false,
+}: {
+  onKeep?: () => void;
+  onDelete?: () => void;
+  busy?: boolean;
+}) {
   return (
     <section
       role="dialog"
@@ -132,10 +182,15 @@ function DeleteStoryDialog() {
         The Story So Far.
       </p>
       <div className="mt-4 flex flex-wrap justify-end gap-3">
-        <button type="button" className="brand-btn brand-btn-navy">
+        <button type="button" onClick={onKeep} className="brand-btn brand-btn-navy">
           Keep Story
         </button>
-        <button type="button" className="brand-btn brand-btn-coral">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onDelete}
+          className="brand-btn brand-btn-coral"
+        >
           Delete Story
         </button>
       </div>
