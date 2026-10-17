@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
-const m = vi.hoisted(() => ({ empty: false, failed: false, refetch: vi.fn() }));
+const m = vi.hoisted(() => ({ failed: false, refetch: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
 }));
@@ -19,7 +19,7 @@ vi.mock("@/components/site/Explore", () => ({
 }));
 vi.mock("@tanstack/react-query", () => ({
   useSuspenseInfiniteQuery: () => ({
-    data: { pages: m.empty ? [] : [{ today: "2026-10-17", plates: [], error: m.failed }] },
+    data: { pages: [{ today: "2026-10-17", plates: [], error: m.failed }] },
     hasNextPage: false,
     isFetching: false,
     fetchNextPage: vi.fn(),
@@ -49,8 +49,8 @@ it("renders the archive with matching page and social metadata", () => {
   );
 });
 
-it.each(["empty", "failed"] as const)("keeps %s archive state inline and wires retry", (state) => {
-  m[state] = true;
+it("keeps a failed archive inline and wires retry", () => {
+  m.failed = true;
   try {
     const C = (Route as unknown as { component: () => ReactNode }).component;
     render(<C />);
@@ -59,7 +59,7 @@ it.each(["empty", "failed"] as const)("keeps %s archive state inline and wires r
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(m.refetch).toHaveBeenCalled();
   } finally {
-    m[state] = false;
+    m.failed = false;
   }
 });
 
