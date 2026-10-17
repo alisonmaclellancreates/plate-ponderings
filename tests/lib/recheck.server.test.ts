@@ -129,4 +129,31 @@ describe("recheckStory", () => {
     expect(await recheckStory(admin, story, "author")).toBe("blocked");
     expect(f.persist).toHaveBeenCalledWith(admin, "denied", "r");
   });
+  it("checks a story with its photo, exactly as addStory does", async () => {
+    f.db.storage.download.mockResolvedValue({ data: photoBlob, error: null });
+    f.checkStory.mockResolvedValue({ outcome: "approved" });
+    f.db.queue("stories", { data: [{ id: "s1" }], error: null });
+    expect(await recheckStory(admin, photoStory, "author")).toBe("published");
+    expect(f.db.storage.download).toHaveBeenCalledWith(photoStory.photo_path);
+    expect(f.checkStory).toHaveBeenCalledWith(
+      "M",
+      "",
+      "ABC",
+      `data:image/jpeg;base64,${btoa("\u0001\u0002\u0003")}`,
+    );
+    expect(f.db.storage.remove).not.toHaveBeenCalled();
+  });
+  it("leaves the story pending when the photo download fails", async () => {
+    f.db.storage.download.mockResolvedValue({ data: null, error: { message: "missing" } });
+    expect(await recheckStory(admin, photoStory, "author")).toBe("unavailable");
+    expect(f.checkStory).not.toHaveBeenCalled();
+    expect(f.db.ops("stories")).toEqual([]);
+  });
+  it("deletes the photo when the recheck rejects the story", async () => {
+    f.db.storage.download.mockResolvedValue({ data: photoBlob, error: null });
+    f.checkStory.mockResolvedValue({ outcome: "rejected" });
+    f.db.queue("stories", { data: [{ id: "s1" }], error: null });
+    expect(await recheckStory(admin, photoStory, "author")).toBe("rejected");
+    expect(f.db.storage.remove).toHaveBeenCalledWith([photoStory.photo_path]);
+  });
 });
