@@ -625,7 +625,10 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
   const auth = useAccountAuth();
   const spot = useServerFn(spotPlate);
   const [stage, setStage] = useState<SpotStage>({ kind: "form" });
-  const [submittedValues, setSubmittedValues] = useState<SpotValues>();
+  const [submittedValues, setSubmittedValues] = useState<{
+    jurisdiction: string;
+    text: string;
+  }>();
   const isDemo = Boolean(auth?.account?.isDemo);
   async function onSpot(next: { jurisdiction: string; text: string }) {
     setSubmittedValues(next);
