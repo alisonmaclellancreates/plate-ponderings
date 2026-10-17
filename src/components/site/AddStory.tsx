@@ -5,7 +5,14 @@ import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
 import { DemoBanner } from "@/components/site/DemoBanner";
 import { PLATES, STORY_PHOTO_PLACEHOLDER, type HowIKnow } from "@/lib/mock-data";
-import { HOW_OPTIONS, MEANING_MAX, MORE_MAX, SAMPLE_STORY, type StoryStep } from "@/lib/story-form";
+import {
+  HOW_OPTIONS,
+  MEANING_MAX,
+  MEANING_START,
+  MORE_MAX,
+  SAMPLE_STORY,
+  type StoryStep,
+} from "@/lib/story-form";
 
 const outline = "brand-btn brand-btn-outline";
 const coral = "brand-btn brand-btn-coral";
@@ -94,7 +101,7 @@ function Counter({ id, value, max }: { id: string; value: string; max: number })
 }
 
 export function StoryStepOne({
-  initial = { how: "owner", meaning: "", more: "" },
+  initial = { how: "owner", meaning: MEANING_START, more: "" },
   ownerExists = false,
   rejected = false,
   demo = false,
