@@ -66,7 +66,8 @@ it("redirects safely rather than waiting forever on a stuck session", async () =
 it("lets a slow visitor through once the check resolves", async () => {
   vi.useFakeTimers();
   user.mockImplementation(
-    () => new Promise((resolve) => setTimeout(() => resolve({ data: { user: {} }, error: null }), 2000)),
+    () =>
+      new Promise((resolve) => setTimeout(() => resolve({ data: { user: {} }, error: null }), 2000)),
   );
   const result = gate.beforeLoad({ location: { href: "/profile" } });
   await vi.advanceTimersByTimeAsync(2000);
