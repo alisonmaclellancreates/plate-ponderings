@@ -9,6 +9,7 @@ vi.mock("@tanstack/react-router", () => ({
   Outlet: () => null,
   redirect: (options: unknown) => ({ options }),
 }));
+import { GUARD_TIMEOUT_MS } from "@/lib/session-check";
 import { Route as Gate } from "@/routes/_authenticated/route";
 import { Route as Adapter } from "@/routes/auth";
 import { Route as SignIn } from "@/routes/sign-in";
