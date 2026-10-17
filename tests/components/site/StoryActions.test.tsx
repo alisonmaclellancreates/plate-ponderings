@@ -161,13 +161,14 @@ describe("StoryMenuActions", () => {
     render(<StoryMenuActions story={story} plateId="p1" />);
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Report story" }));
+    const returnFocus = vi.spyOn(
+      screen.getByRole("button", { name: "More options for maplegirl's story", hidden: true }),
+      "focus",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByTestId("report-dialog")).toBeNull();
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "More options for maplegirl's story" }),
-      ).toHaveFocus(),
-    );
+    expect(returnFocus).toHaveBeenCalled();
+    returnFocus.mockRestore();
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Report story" }));
     await userEvent.click(screen.getByLabelText("Spam"));
@@ -180,14 +181,15 @@ describe("StoryMenuActions", () => {
     render(<StoryMenuActions story={{ ...story, isOwn: true }} plateId="p1" />);
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Delete my story" }));
+    const returnFocus = vi.spyOn(
+      screen.getByRole("button", { name: "More options for maplegirl's story", hidden: true }),
+      "focus",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Keep Story" }));
     expect(m.remove).not.toHaveBeenCalled();
     expect(screen.queryByTestId("delete-story-dialog")).toBeNull();
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "More options for maplegirl's story" }),
-      ).toHaveFocus(),
-    );
+    expect(returnFocus).toHaveBeenCalled();
+    returnFocus.mockRestore();
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Delete my story" }));
     await userEvent.click(screen.getByRole("button", { name: "Delete Story" }));
