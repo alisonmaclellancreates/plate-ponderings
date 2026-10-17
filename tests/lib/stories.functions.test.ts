@@ -83,7 +83,7 @@ beforeEach(() => {
     if (table === "stories") c["insert"] = vi.fn(() => chain(storyInsert));
     return c;
   });
-  mocks.admin.rpc.mockResolvedValue({ data: true, error: null });
+  mocks.admin.rpc.mockResolvedValue({ data: [], error: null });
   mocks.admin.auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
   context.supabase.rpc.mockResolvedValue({ data: false, error: null });
   mocks.readBlock.mockResolvedValue({ category: null, blockedAt: null });
@@ -128,6 +128,7 @@ describe("addStory", () => {
   });
   it("rate limits after five submissions per 15 minutes", async () => {
     mocks.admin.rpc.mockResolvedValue({ data: false, error: null });
+    mocks.admin.rpc.mockResolvedValueOnce({ data: true, error: null });
     expect(await call(addStory, INPUT)).toEqual({
       outcome: "rate-limited",
       message: RATE_LIMIT_MESSAGE,
