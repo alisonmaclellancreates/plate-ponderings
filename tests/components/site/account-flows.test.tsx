@@ -14,7 +14,7 @@ const m = vi.hoisted(() => ({
   resume: vi.fn(),
   track: vi.fn(),
 }));
-vi.mock("@/lib/auth-context", () => ({
+vi.mock("@/lib/account-auth", () => ({
   useAccountAuth: () => ({
     account: m.account,
     refresh: m.refresh,

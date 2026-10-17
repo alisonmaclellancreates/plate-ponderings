@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
 import type { HeaderMode } from "@/lib/header-mode";
-import { useAccountAuth } from "@/lib/auth-context";
+import { useAccountAuth } from "@/lib/account-auth";
 import { Button } from "@/components/ui/button";
 
 // Explore, Spot a Plate and About are built in later steps; plain anchors until then.

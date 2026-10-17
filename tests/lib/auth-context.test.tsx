@@ -15,6 +15,7 @@ const m = vi.hoisted(() => ({
   routerInvalidate: vi.fn(),
   navigate: vi.fn(),
   unsubscribe: vi.fn(),
+  subscribe: vi.fn(),
   listener: null as null | ((event: string) => void),
 }));
 vi.mock("@/integrations/supabase/client", () => ({
@@ -23,6 +24,7 @@ vi.mock("@/integrations/supabase/client", () => ({
       getUser: m.user,
       signOut: m.out,
       onAuthStateChange: (listener: (event: string) => void) => {
+        m.subscribe();
         m.listener = listener;
         return { data: { subscription: { unsubscribe: m.unsubscribe } } };
       },
@@ -31,23 +33,26 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 vi.mock("@/lib/accounts.functions", () => ({ getAccount: m.get, getDemoSetting: m.demo }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
-vi.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({
+vi.mock("@tanstack/react-query", () => {
+  const client = {
     cancelQueries: m.cancel,
     clear: m.clear,
     invalidateQueries: m.invalidate,
-  }),
-}));
-vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => ({ invalidate: m.routerInvalidate, navigate: m.navigate }),
-}));
+  };
+  return { useQueryClient: () => client };
+});
+vi.mock("@tanstack/react-router", () => {
+  const router = { invalidate: m.routerInvalidate, navigate: m.navigate };
+  return { useRouter: () => router };
+});
 vi.mock("@/lib/analytics", () => ({
   identify: m.identify,
   reset: m.reset,
   setDemo: m.setDemo,
   track: m.track,
 }));
-import { AccountProvider, useAccountAuth } from "@/lib/auth-context";
+import { AccountProvider } from "@/lib/auth-context";
+import { useAccountAuth } from "@/lib/account-auth";
 function Consumer() {
   const auth = useAccountAuth();
   return (
@@ -189,4 +194,38 @@ it("ignores a stale account read after signout", async () => {
   });
   expect(screen.queryByText("stale")).toBeNull();
   await screen.findByText("signed out");
+});
+it("keeps one auth subscription across account updates and rerenders", async () => {
+  const content = (
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>
+  );
+  const v = render(content);
+  await screen.findByText("Traveler1234");
+  v.rerender(content);
+  await act(async () => {
+    m.listener?.("USER_UPDATED");
+  });
+  expect(m.subscribe).toHaveBeenCalledTimes(1);
+  expect(m.unsubscribe).not.toHaveBeenCalled();
+  v.unmount();
+  expect(m.unsubscribe).toHaveBeenCalledTimes(1);
+});
+it("invalidates an in-flight account read when the provider unmounts", async () => {
+  let resolve: ((value: Account) => void) | undefined;
+  m.get.mockReturnValue(new Promise<Account>((r) => (resolve = r)));
+  const v = render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await waitFor(() => expect(m.get).toHaveBeenCalled());
+  v.unmount();
+  await act(async () => {
+    resolve?.({ handle: "stale", isDemo: false, isAdmin: false });
+  });
+  expect(m.identify).not.toHaveBeenCalled();
+  expect(m.setDemo).not.toHaveBeenCalled();
+  expect(m.unsubscribe).toHaveBeenCalledTimes(1);
 });

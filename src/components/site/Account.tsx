@@ -8,7 +8,7 @@ import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from
 import { formatDay } from "@/lib/format-day";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useAccountAuth } from "@/lib/auth-context";
+import { useAccountAuth } from "@/lib/account-auth";
 import { checkHandle, saveHandle } from "@/lib/accounts.functions";
 import { handleFormatValid, HANDLE_UNAVAILABLE, DEMO_MESSAGE } from "@/lib/account-rules";
 import { Button } from "@/components/ui/button";
