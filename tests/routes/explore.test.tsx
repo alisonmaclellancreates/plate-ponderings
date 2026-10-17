@@ -5,7 +5,18 @@ const m = vi.hoisted(() => ({ empty: false, failed: false, refetch: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
 }));
-vi.mock("@/components/site/Explore", () => ({ Explore: ({ live }: { live: { error: boolean; retry: () => void } }) => <><p>archive</p>{live.error && <div role="alert"><button onClick={live.retry}>Try again</button></div>}</> }));
+vi.mock("@/components/site/Explore", () => ({
+  Explore: ({ live }: { live: { error: boolean; retry: () => void } }) => (
+    <>
+      <p>archive</p>
+      {live.error && (
+        <div role="alert">
+          <button onClick={live.retry}>Try again</button>
+        </div>
+      )}
+    </>
+  ),
+}));
 vi.mock("@tanstack/react-query", () => ({
   useSuspenseInfiniteQuery: () => ({
     data: { pages: m.empty ? [] : [{ today: "2026-10-17", plates: [], error: m.failed }] },

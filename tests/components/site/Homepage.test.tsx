@@ -23,7 +23,10 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@tanstack/react-start", () => ({ useServerFn: () => searchMock.fn }));
 vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn() }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
-vi.mock("@/lib/featured.functions", () => ({ getFeaturedHome: vi.fn(), getFeaturedArchive: vi.fn() }));
+vi.mock("@/lib/featured.functions", () => ({
+  getFeaturedHome: vi.fn(),
+  getFeaturedArchive: vi.fn(),
+}));
 
 function media({ mobile = false, reduced = false }) {
   window.matchMedia = vi.fn((q: string) => ({
