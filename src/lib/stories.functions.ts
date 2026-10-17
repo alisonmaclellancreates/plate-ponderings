@@ -117,8 +117,30 @@ export const addStory = createServerFn({ method: "POST" })
       return { outcome: "error" };
     }
     if (block.category) return insertPending();
+    // A photo joins the same single check: download the processed JPEG and
+    // pass it alongside the text. A failed download saves no story.
+    let photoDataUrl: string | undefined;
+    if (data.photoPath) {
+      const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");
+      const downloaded = await supabaseAdmin.storage
+        .from(STORY_PHOTO_BUCKET)
+        .download(data.photoPath);
+      if (downloaded.error || !downloaded.data) {
+        await deletePhoto();
+        return { outcome: "error" };
+      }
+      const bytes = new Uint8Array(await downloaded.data.arrayBuffer());
+      let binary = "";
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      photoDataUrl = `data:image/jpeg;base64,${btoa(binary)}`;
+    }
     const { checkStory } = await import("./story-moderation.server");
-    const result = await checkStory(data.meaning.trim(), data.more.trim(), plate.identity_b);
+    const result = await checkStory(
+      data.meaning.trim(),
+      data.more.trim(),
+      plate.identity_b,
+      photoDataUrl,
+    );
     if (result.block) await persistAiBlock(supabaseAdmin, result.block, result.runId);
     if (result.outcome === "unavailable") return insertPending();
     if (result.outcome === "rejected") {
