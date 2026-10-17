@@ -9,13 +9,13 @@ import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
 import { validateSpot, type SpotErrors } from "@/lib/spot";
 import { searchPlate } from "@/lib/plates.functions";
 import { track } from "@/lib/analytics";
+import { openFeatured, previewFeatured, type FeaturedDisplay } from "@/lib/featured";
+import type { FeaturedHome } from "@/lib/featured.functions";
 
 import { storyCount } from "@/lib/story-count";
 import { HEADLINES, useHeadlineIndex } from "@/lib/headlines";
 import {
   PLATES,
-  plateStatus,
-  publishedStories,
   featuredPlates,
   TODAY,
   type PlateRecord,
@@ -361,9 +361,10 @@ function HowItWorks() {
   );
 }
 
-export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
-  const status = plateStatus(plate);
-  const n = publishedStories(plate).length;
+export function PlateOfTheDay({ plate, utcToday }: { plate: PlateRecord | FeaturedDisplay; utcToday?: string | undefined }) {
+  const display = "day" in plate ? plate : previewFeatured(plate);
+  const status = display.status;
+  const n = display.count;
   const copy =
     status === "mystery"
       ? `No stories yet. What do you think ${plate.text} means? Be the first to share your interpretation!`
@@ -396,6 +397,7 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
               <Link
                 to="/plate/$state"
                 params={{ state: plate.slug }}
+                onClick={utcToday ? () => openFeatured(display, utcToday) : undefined}
                 className="brand-btn brand-btn-navy mt-4"
               >
                 View This Plate
@@ -408,8 +410,8 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
   );
 }
 
-function RecentlyFeatured() {
-  const recent = featuredPlates()
+function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
+  const recent = live ? live.recent : featuredPlates()
     .filter((p) => p.plateOfTheDay !== TODAY)
     .slice(0, 4);
   return (
@@ -427,8 +429,8 @@ function RecentlyFeatured() {
       </div>
       <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {recent.map((p) => (
-          <li key={p.slug} className="min-w-0">
-            <FeaturedPlateCard plate={p} />
+          <li key={"day" in p ? p.day : p.plateOfTheDay} className="min-w-0">
+            <FeaturedPlateCard plate={p} utcToday={live?.today} />
           </li>
         ))}
       </ul>
@@ -441,18 +443,19 @@ export type HomepageVariant = "default" | "no-match" | "fallback";
 export function Homepage({
   variant = "default",
   prefill,
+  live,
 }: {
   variant?: HomepageVariant;
   prefill?: SearchValues;
+  live?: FeaturedHome | undefined;
 }) {
   const [noMatch, setNoMatch] = useState<Required<SearchValues> | null>(
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : null,
   );
   const [searchError, setSearchError] = useState<string | null>(null);
-  const featured = PLATES.find((p) =>
+  const featured = live ? live.pick : PLATES.find((p) =>
     variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
   );
-  if (!featured) return null;
   const search =
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (
@@ -466,8 +469,8 @@ export function Homepage({
       />
       <ActionCards />
       <HowItWorks />
-      <PlateOfTheDay plate={featured} />
-      <RecentlyFeatured />
+      {featured && <PlateOfTheDay plate={featured} utcToday={live?.today} />}
+      <RecentlyFeatured live={live} />
       <p className="font-display px-4 pt-4 text-center text-4xl text-navy">
         Different roads. Different stories. What's yours?
       </p>
