@@ -47,7 +47,9 @@ function StatusStrip({ plate }: { plate: PlateRecord }) {
       <li className="px-4">
         <StatusBadge status={plateStatus(plate)} />
       </li>
-      <li className="px-4 font-semibold">{owner ? `Owner: ${owner.handle}` : "No owner yet"}</li>
+      <li className="px-4 font-semibold">
+        {owner ? `Says it's their plate: ${owner.handle}` : "No owner claim yet"}
+      </li>
     </ul>
   );
 }
@@ -132,9 +134,11 @@ function StorySoFar({
 function MysteryPrompt({
   signedIn,
   plateId,
+  storyCount = 0,
 }: {
   signedIn?: boolean;
   plateId?: string;
+  storyCount?: number;
 } = {}) {
   return (
     <section aria-labelledby="first-story" className="space-y-6">
@@ -142,7 +146,11 @@ function MysteryPrompt({
         <h2 id="first-story" className="font-display text-3xl text-navy">
           What do you think this plate means?
         </h2>
-        <p className="mt-2 text-lg">Every story starts somewhere. Be the first to share yours!</p>
+        <p className="mt-2 text-lg">
+          {storyCount === 0
+            ? "Every story starts somewhere. Be the first to share yours!"
+            : "Have another interpretation? Add your story."}
+        </p>
         {signedIn && plateId ? (
           <Link
             to="/story/$step"
@@ -183,7 +191,7 @@ export function StoryCard({ story }: { story: Story }) {
             <span className="text-muted-foreground">· {formatDay(story.date)}</span>
             {owner && (
               <span className="ml-2 rounded-full bg-coral-pale px-2 py-0.5 text-xs font-semibold text-navy">
-                Owner weighed in
+                Owner claim
               </span>
             )}
           </p>
@@ -323,7 +331,7 @@ function RealStoryCard({ story }: { story: PlateStory }) {
           <span className="font-semibold">{story.handle}</span>
           {owner && (
             <span className="ml-2 rounded-full bg-coral-pale px-2 py-0.5 text-xs font-semibold text-navy">
-              Owner weighed in
+              Owner claim
             </span>
           )}
         </p>
@@ -408,7 +416,7 @@ function RealStatusStrip({ plateId }: { plateId: string }) {
         <StatusBadge status={status} />
       </li>
       <li className="px-4 font-semibold">
-        {data?.ownerHandle ? `Owner: ${data.ownerHandle}` : "No owner yet"}
+        {data?.ownerHandle ? `Says it's their plate: ${data.ownerHandle}` : "No owner claim yet"}
       </li>
     </ul>
   );
