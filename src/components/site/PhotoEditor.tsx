@@ -11,8 +11,10 @@ import {
 import { canvasToJpegBlob, renderBlurredPhoto } from "@/lib/photo-canvas";
 import { Button } from "@/components/ui/button";
 
-const outline = "brand-btn brand-btn-outline min-h-11 h-auto whitespace-normal";
-const coral = "brand-btn brand-btn-coral min-h-11 h-auto whitespace-normal";
+const outline =
+  "brand-btn brand-btn-outline min-h-11 h-auto whitespace-normal border-2 border-navy bg-card text-navy text-base font-semibold hover:bg-cream";
+const coral =
+  "brand-btn brand-btn-coral min-h-11 h-auto whitespace-normal bg-coral-cta text-primary-foreground text-base font-semibold hover:bg-coral-cta-hover";
 
 export const NO_BOX_MESSAGE =
   "We couldn't find the plate in this photo. Draw a box around it to keep it clear.";

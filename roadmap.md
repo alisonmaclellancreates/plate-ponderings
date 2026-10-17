@@ -1,6 +1,6 @@
 # Photo editor exits
 
-- [ ] Replace retry detection with replacement picker, add adjustment skip cleanup, preserve box validation and 44px targets, update sample preview, and run focused tests and lint.
+- [x] Replacement picker and adjustment skip implemented; cleanup, same-file reselection, cancellation, no-upload skip and box validation pass 45 changed tests. Preview updated. Lint zero errors/six existing warnings; automatic build OK. Desktop and 360×640 sample editor verified: exits visible, buttons/handles at least 44px, drawing enables Next and changes instruction, skip closes editor. Real file selection and cleanup are mocked tests, not live AI.
 
 # Story meaning framing
 
