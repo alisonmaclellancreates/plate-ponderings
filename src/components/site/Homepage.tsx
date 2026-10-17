@@ -359,9 +359,11 @@ function HowItWorks() {
 export function PlateOfTheDay({
   plate,
   utcToday,
+  headingId = "potd-heading",
 }: {
   plate: PlateRecord | FeaturedDisplay;
   utcToday?: string | undefined;
+  headingId?: string;
 }) {
   const display = "day" in plate ? plate : previewFeatured(plate);
   const status = display.status;
@@ -372,7 +374,7 @@ export function PlateOfTheDay({
       : `Only ${storyCount(n)} so far. What do you think ${plate.text} means? Add yours to the conversation!`;
   return (
     <section
-      aria-labelledby="potd-heading"
+      aria-labelledby={headingId}
       className="bg-cover bg-center py-12"
       style={{ backgroundImage: "url(/brand/plate-of-the-day-landscape-v2.webp)" }}
     >
@@ -380,7 +382,7 @@ export function PlateOfTheDay({
         <div className="rounded-2xl bg-cream p-6 shadow-sm md:p-8">
           <div className="flex items-center gap-2">
             <Star aria-hidden className="size-6 fill-gold text-gold" />
-            <h2 id="potd-heading" className="font-display text-4xl text-navy">
+            <h2 id={headingId} className="font-display text-4xl text-navy">
               Plate of the Day
             </h2>
           </div>
@@ -411,7 +413,7 @@ export function PlateOfTheDay({
   );
 }
 
-function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
+export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
   const recent = live
     ? live.recent
     : featuredPlates()

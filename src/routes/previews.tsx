@@ -16,8 +16,10 @@ export const Route = createFileRoute("/previews")({
 
 /** Every static preview route. Add one entry per new preview page. */
 const PREVIEWS = [
-  { to: "/", label: "Homepage", note: "Hero, search, Plate of the Day, recently featured" },
-  { to: "/explore", label: "The Roadside Archive", note: "14 featured plates, newest first" },
+  { to: "/", label: "Homepage", note: "Live data: search, Plate of the Day, recently featured" },
+  { to: "/explore", label: "The Roadside Archive", note: "Live data: featured days, newest first" },
+  { to: "/previews/explore", label: "Archive, sample data", note: "14 featured days, all progress states and Load More" },
+  { to: "/previews/homepage-featured", label: "Homepage featured, sample data", note: "Mystery, singular and plural fallback bands, four-card shelf" },
   {
     to: "/home-no-match",
     label: "Homepage, no match",
@@ -129,7 +131,7 @@ function Previews() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="font-display text-4xl text-navy">Previews</h1>
-      <p className="mt-2 text-lg">Static page previews. Mock data only.</p>
+      <p className="mt-2 text-lg">Sample previews and live pages, labelled below.</p>
       <ul className="mt-8 space-y-3">
         {PREVIEWS.map((p) => (
           <li key={p.to}>
