@@ -2,9 +2,9 @@
 
 # Step 43: PR #90 coverage correction
 
-- [ ] Add real moderation, server error/race/recheck, route and UI edge tests without removing reachable branches.
-- [ ] Run the full CI-equivalent coverage suite and maintained-file lint.
-- [ ] Read PR #90 Codecov after CI; report its actual figure, not local diagnostic coverage.
+- [x] Add real moderation, server error/race/recheck, route and UI edge tests; no production code or branches removed. Force-unavailable switch unset in sandbox and absent from default configuration.
+- [x] Run the full CI-equivalent coverage suite: 662 tests across 120 files pass; all seven requested files have zero missing statements or branches locally. Changed-file lint clean; automatic build OK.
+- [ ] Read PR #90 Codecov after CI. Latest actual report read through Alison's GitHub connection is 75.09434% with 66 missing lines on the previous PR head; the new tests have not synced to that head yet. Await automatic sync and CI, never substitute the local diagnostic result.
 
 # Step 43: Rowan rate-limit correction
 
