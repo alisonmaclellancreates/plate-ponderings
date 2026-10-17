@@ -76,9 +76,7 @@ describe("AddStoryFlow", () => {
     await fillAndReview(user);
     expect(screen.getByText("How I know")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Submit Story" }));
-    await waitFor(() =>
-      expect(screen.getByText("Story submitted!")).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText("Story submitted!")).toBeInTheDocument());
     expect(m.submit).toHaveBeenCalledWith({
       data: { plateId: "p1", meaning: "Pacific Northwest love.", source: "owner", more: "" },
     });
@@ -133,7 +131,10 @@ describe("AddStoryFlow", () => {
   });
 
   it("a rate limit is recorded as rate_limited and shows the wait message", async () => {
-    m.submit.mockResolvedValue({ outcome: "rate-limited", message: "You've done that a lot in a short time. Please wait a while and try again." });
+    m.submit.mockResolvedValue({
+      outcome: "rate-limited",
+      message: "You've done that a lot in a short time. Please wait a while and try again.",
+    });
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
     await fillAndReview(user);

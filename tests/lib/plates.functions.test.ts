@@ -524,7 +524,11 @@ describe("recheckPendingSubjects", () => {
 
     it("stops on unavailable and on a block", async () => {
       withStories([storyRow, { ...storyRow, id: "story-2" }]);
-      mocks.checkStory.mockResolvedValue({ outcome: "unavailable", block: "credit_block", runId: "r" });
+      mocks.checkStory.mockResolvedValue({
+        outcome: "unavailable",
+        block: "credit_block",
+        runId: "r",
+      });
       expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
       expect(mocks.checkStory).toHaveBeenCalledTimes(1);
       expect(mocks.persistBlock).toHaveBeenCalledWith(mocks.admin, "credit_block", "r");

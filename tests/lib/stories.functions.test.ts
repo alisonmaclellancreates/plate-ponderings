@@ -36,12 +36,7 @@ vi.mock("@/lib/ai-block.server", () => ({
 }));
 vi.mock("@/lib/summary-refresh.server", () => ({ requestSummaryRefresh: mocks.refresh }));
 
-import {
-  addStory,
-  getPlateStories,
-  validateStory,
-  HOW_KEYS,
-} from "@/lib/stories.functions";
+import { addStory, getPlateStories, validateStory, HOW_KEYS } from "@/lib/stories.functions";
 import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 
 type Result = { data: unknown; error: unknown };
@@ -49,8 +44,7 @@ type Result = { data: unknown; error: unknown };
 /** A chainable query mock; terminal methods resolve `result`. */
 function chain(result: Result) {
   const b: Record<string, unknown> = {};
-  for (const name of ["select", "eq", "in", "order", "insert", "update"])
-    b[name] = vi.fn(() => b);
+  for (const name of ["select", "eq", "in", "order", "insert", "update"]) b[name] = vi.fn(() => b);
   b["maybeSingle"] = vi.fn(async () => result);
   b["single"] = vi.fn(async () => result);
   b["then"] = (resolve: (r: Result) => void) => resolve(result);
@@ -249,7 +243,10 @@ describe("getPlateStories", () => {
       error: null,
     });
     tables["blocks"] = { data: [{ blocked_id: "a2" }], error: null };
-    const published = [row("s1", "guess", "a1", "2026-10-01"), row("s2", "guess", "a2", "2026-10-02")];
+    const published = [
+      row("s1", "guess", "a1", "2026-10-01"),
+      row("s2", "guess", "a2", "2026-10-02"),
+    ];
     const pendingRows = [row("p1", "guess", "viewer", "")];
     mocks.admin.from.mockImplementation((table: string) => {
       if (table === "stories") {
