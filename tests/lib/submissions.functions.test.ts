@@ -148,11 +148,20 @@ it("lists published, pending and rejected subjects and stories, newest first, wi
 
 it("keeps subjects free of hearts and pluralises counts", () => {
   const { rows } = buildSubmissions(
-    [subject("ONE", "published", "2026-10-02T00:00:00Z"), { ...subject("NOJ", "published", "2026-10-01T00:00:00Z"), jurisdictions: null }],
-    [story("S", "published", "2026-10-03T00:00:00Z"), { ...story("X", "published", "2026-10-00T00:00:00Z"), subjects: null }],
+    [
+      subject("ONE", "published", "2026-10-02T00:00:00Z"),
+      { ...subject("NOJ", "published", "2026-10-01T00:00:00Z"), jurisdictions: null },
+    ],
+    [
+      story("S", "published", "2026-10-03T00:00:00Z"),
+      { ...story("X", "published", "2026-10-00T00:00:00Z"), subjects: null },
+    ],
     new Map([["ONE", 1]]),
     new Map([["S", 3]]),
-    [{ subject_id: "ONE", story_id: null }, { subject_id: null, story_id: null }],
+    [
+      { subject_id: "ONE", story_id: null },
+      { subject_id: null, story_id: null },
+    ],
   );
   expect(rows.map((r) => r.explanation)).toEqual([
     "Your story is live and has 3 hearts.",
@@ -160,7 +169,9 @@ it("keeps subjects free of hearts and pluralises counts", () => {
     "This plate is live with 0 stories.",
     "Your story is live and has 0 hearts.",
   ]);
-  expect(rows.filter((r) => r.kind === "plate").every((r) => !r.explanation.includes("heart"))).toBe(true);
+  expect(
+    rows.filter((r) => r.kind === "plate").every((r) => !r.explanation.includes("heart")),
+  ).toBe(true);
   expect(rows[1]?.updated).toBe(true);
   expect(rows[2]?.jurisdiction).toBe("");
   expect(rows[3]).toMatchObject({ jurisdiction: "", text: "", action: null });
@@ -186,14 +197,14 @@ it.each([
   expect(await getUnreadDot()).toEqual({ unread });
 });
 
-it.each([
-  [{ data: true, error: null }],
-  [{ data: null, error: { message: "x" } }],
-])("never marks anything read for the demo account or an unknown role (%j)", async (role) => {
-  m.rpc.mockResolvedValue(role);
-  expect(await markSubmissionsRead()).toEqual({ marked: false });
-  expect(m.calls).toHaveLength(0);
-});
+it.each([[{ data: true, error: null }], [{ data: null, error: { message: "x" } }]])(
+  "never marks anything read for the demo account or an unknown role (%j)",
+  async (role) => {
+    m.rpc.mockResolvedValue(role);
+    expect(await markSubmissionsRead()).toEqual({ marked: false });
+    expect(m.calls).toHaveLength(0);
+  },
+);
 
 it.each([
   [null, true],
@@ -206,17 +217,17 @@ it.each([
   expect(m.calls[0]?.ops).toContainEqual(["eq", ["user_id", "me"]]);
 });
 
-it.each([
-  [{ data: true, error: null }],
-  [{ data: null, error: { message: "x" } }],
-])("refuses dismiss for the demo account before any delete (%j)", async (role) => {
-  m.rpc.mockResolvedValue(role);
-  expect(await dismissSubmission({ data: { kind: "story", id: "S" } })).toEqual({
-    outcome: "demo",
-    message: DEMO_MESSAGE,
-  });
-  expect(m.calls).toHaveLength(0);
-});
+it.each([[{ data: true, error: null }], [{ data: null, error: { message: "x" } }]])(
+  "refuses dismiss for the demo account before any delete (%j)",
+  async (role) => {
+    m.rpc.mockResolvedValue(role);
+    expect(await dismissSubmission({ data: { kind: "story", id: "S" } })).toEqual({
+      outcome: "demo",
+      message: DEMO_MESSAGE,
+    });
+    expect(m.calls).toHaveLength(0);
+  },
+);
 
 it("dismisses a rejected story with every condition in the delete, then removes its photo", async () => {
   m.rpc.mockResolvedValue({ data: false, error: null });
@@ -244,32 +255,35 @@ it("dismisses a rejected story without a photo", async () => {
   expect(m.remove).not.toHaveBeenCalled();
 });
 
-it.each([
-  [{ data: [], error: null }],
-  [{ data: null, error: { message: "x" } }],
-])("leaves everything alone when no story matches (%j)", async (result) => {
-  m.rpc.mockResolvedValue({ data: false, error: null });
-  m.results["stories"] = [result];
-  expect(await dismissSubmission({ data: { kind: "story", id: "S" } })).toEqual({
-    outcome: "not_found",
-  });
-  expect(m.remove).not.toHaveBeenCalled();
-});
+it.each([[{ data: [], error: null }], [{ data: null, error: { message: "x" } }]])(
+  "leaves everything alone when no story matches (%j)",
+  async (result) => {
+    m.rpc.mockResolvedValue({ data: false, error: null });
+    m.results["stories"] = [result];
+    expect(await dismissSubmission({ data: { kind: "story", id: "S" } })).toEqual({
+      outcome: "not_found",
+    });
+    expect(m.remove).not.toHaveBeenCalled();
+  },
+);
 
 it.each([
   [{ data: [{ id: "P" }], error: null }, "dismissed"],
   [{ data: [], error: null }, "not_found"],
   [{ data: null, error: null }, "not_found"],
-])("dismisses a rejected plate only when the conditional delete matches", async (result, outcome) => {
-  m.rpc.mockResolvedValue({ data: false, error: null });
-  m.results["subjects"] = [result];
-  expect(await dismissSubmission({ data: { kind: "plate", id: "P" } })).toEqual({ outcome });
-  expect(m.calls[0]?.ops).toEqual([
-    ["delete", []],
-    ["eq", ["id", "P"]],
-    ["eq", ["created_by", "me"]],
-    ["eq", ["status", "rejected"]],
-    ["select", ["id"]],
-  ]);
-  expect(m.remove).not.toHaveBeenCalled();
-});
+])(
+  "dismisses a rejected plate only when the conditional delete matches",
+  async (result, outcome) => {
+    m.rpc.mockResolvedValue({ data: false, error: null });
+    m.results["subjects"] = [result];
+    expect(await dismissSubmission({ data: { kind: "plate", id: "P" } })).toEqual({ outcome });
+    expect(m.calls[0]?.ops).toEqual([
+      ["delete", []],
+      ["eq", ["id", "P"]],
+      ["eq", ["created_by", "me"]],
+      ["eq", ["status", "rejected"]],
+      ["select", ["id"]],
+    ]);
+    expect(m.remove).not.toHaveBeenCalled();
+  },
+);

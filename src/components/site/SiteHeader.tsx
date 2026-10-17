@@ -115,7 +115,11 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <Avatar showHandle={showHandle} handle={auth.account.handle} dot={dot.data?.unread === true} />
+        <Avatar
+          showHandle={showHandle}
+          handle={auth.account.handle}
+          dot={dot.data?.unread === true}
+        />
       </Button>
       {open && (
         <ul
