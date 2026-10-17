@@ -9,8 +9,10 @@ vi.mock("@tanstack/react-start", () => ({
         validate = fn;
         return builder;
       },
-      handler: (fn: (args: { data: unknown; context: unknown }) => unknown) =>
-        (args: { data: unknown; context: unknown }) => fn({ ...args, data: validate(args.data) }),
+      handler:
+        (fn: (args: { data: unknown; context: unknown }) => unknown) =>
+        (args: { data: unknown; context: unknown }) =>
+          fn({ ...args, data: validate(args.data) }),
     };
     return builder;
   },
@@ -109,11 +111,14 @@ describe("account reads", () => {
   });
 });
 describe("availability", () => {
-  it.each([42, null, {}, ["Alison_42"]])("refuses non-string handle input %j before privileged reads", async (handle) => {
-    expect(await call(checkHandle, handle)).toEqual({ available: false });
-    expect(mocks.admin.from).not.toHaveBeenCalled();
-    expect(mocks.moderate).not.toHaveBeenCalled();
-  });
+  it.each([42, null, {}, ["Alison_42"]])(
+    "refuses non-string handle input %j before privileged reads",
+    async (handle) => {
+      expect(await call(checkHandle, handle)).toEqual({ available: false });
+      expect(mocks.admin.from).not.toHaveBeenCalled();
+      expect(mocks.moderate).not.toHaveBeenCalled();
+    },
+  );
   it("returns only availability and never calls AI or records attempts", async () => {
     expect(await call(checkHandle)).toEqual({ available: true });
     taken.data = [{ id: "other" }];
@@ -133,12 +138,20 @@ describe("availability", () => {
   });
 });
 describe("handle saves", () => {
-  it.each([42, null, {}, ["Alison_42"]])("rejects non-string handle input %j without moderation or writes", async (handle) => {
-    expect(await call(saveHandle, handle)).toEqual({ outcome: "rejected", message: HANDLE_REJECTED });
-    expect(mocks.admin.rpc).toHaveBeenCalledWith("consume_handle_save_attempt", { _user_id: "caller" });
-    expect(mocks.admin.from).not.toHaveBeenCalled();
-    expect(mocks.moderate).not.toHaveBeenCalled();
-  });
+  it.each([42, null, {}, ["Alison_42"]])(
+    "rejects non-string handle input %j without moderation or writes",
+    async (handle) => {
+      expect(await call(saveHandle, handle)).toEqual({
+        outcome: "rejected",
+        message: HANDLE_REJECTED,
+      });
+      expect(mocks.admin.rpc).toHaveBeenCalledWith("consume_handle_save_attempt", {
+        _user_id: "caller",
+      });
+      expect(mocks.admin.from).not.toHaveBeenCalled();
+      expect(mocks.moderate).not.toHaveBeenCalled();
+    },
+  );
   it("persists a terminal block with a null run id when the gateway supplies none", async () => {
     const updateSettings = vi.fn(() => chain(persist));
     mocks.admin.from.mockImplementation((table: string) => {

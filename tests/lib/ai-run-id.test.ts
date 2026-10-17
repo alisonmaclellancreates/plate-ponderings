@@ -132,10 +132,10 @@ it("relays every chunk in a multi-chunk response in order", async () => {
       else controller.enqueue(encoder.encode(chunk));
     },
   });
-  const response = await withLovableAiGatewayRunIdHeader(
-    new Response(upstream),
-    { getRunId: () => "gateway-id", waitForRunId: async () => "gateway-id" },
-  );
+  const response = await withLovableAiGatewayRunIdHeader(new Response(upstream), {
+    getRunId: () => "gateway-id",
+    waitForRunId: async () => "gateway-id",
+  });
   expect(await response.text()).toBe("first second third");
   expect(response.headers.get("X-Lovable-AIG-Run-ID")).toBe("gateway-id");
 });

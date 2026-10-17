@@ -230,22 +230,40 @@ it("invalidates an in-flight account read when the provider unmounts", async () 
   expect(m.unsubscribe).toHaveBeenCalledTimes(1);
 });
 it("finishes loading when an auth-change account refresh fails", async () => {
-  render(<AccountProvider><Consumer /></AccountProvider>);
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
   await screen.findByText("Traveler1234");
   m.get.mockRejectedValueOnce(new Error("account unavailable"));
-  await act(async () => { m.listener?.("USER_UPDATED"); });
+  await act(async () => {
+    m.listener?.("USER_UPDATED");
+  });
   expect(screen.queryByText("loading")).toBeNull();
   expect(screen.getByText("Traveler1234")).toBeInTheDocument();
   expect(m.identify).toHaveBeenCalledTimes(1);
 });
 it("does not erase a newer account when an older signed-out read resolves", async () => {
   let resolve: ((value: { data: { user: null } }) => void) | undefined;
-  m.user.mockReturnValueOnce(new Promise((r) => { resolve = r; }));
-  render(<AccountProvider><Consumer /></AccountProvider>);
+  m.user.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
   await waitFor(() => expect(m.user).toHaveBeenCalledTimes(1));
-  await act(async () => { m.listener?.("SIGNED_IN"); });
+  await act(async () => {
+    m.listener?.("SIGNED_IN");
+  });
   await screen.findByText("Traveler1234");
-  await act(async () => { resolve?.({ data: { user: null } }); });
+  await act(async () => {
+    resolve?.({ data: { user: null } });
+  });
   expect(screen.getByText("Traveler1234")).toBeInTheDocument();
   expect(m.identify).toHaveBeenCalledTimes(1);
 });
