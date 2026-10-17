@@ -48,7 +48,7 @@ I will report whether adding the processed photo to the existing story check is 
 - `uploadStoryPhoto`: JPEG/type/size/dimension checks, own-folder path, demo refusal.
 - `addStory`: photoPath ownership check; photo deleted on rejected, rate-limited, validation, error and demo outcomes.
 - `getPlateStories`: signed URL only for published stories with photos.
-- Flow/editor components: unreadable file path, no-box draw path, review re-confirm after box change, analytics events.
+- Flow/editor components: unreadable file path, no-box draw path, detection unavailable/rate-limited/paused each landing on the draw-a-box path with the brief's message, review re-confirm after box change, analytics events.
 - `tests/db/photo-attempts.sql` plus rerun of all `tests/db` files.
 
 Run: `bunx vitest related` on changed files, lint, prettier. CI stays authoritative.
