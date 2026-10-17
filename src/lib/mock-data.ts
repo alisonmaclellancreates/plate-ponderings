@@ -3,7 +3,7 @@ import { storyCount } from "@/lib/story-count";
 
 export type PlateStatus = "mystery" | "interpreted" | "owner";
 export type Consensus = "agree" | "mixed" | "differ";
-export type HowIKnow = "owner" | "knows" | "asked" | "guess";
+export type HowIKnow = "owner" | "knows_owner" | "secondhand" | "guess";
 export type Moderation = "published" | "pending" | "rejected";
 
 export interface Story {
@@ -79,7 +79,7 @@ export const PLATES: PlateRecord[] = [
         "Saw it parked outside a data centre in Burnaby. Felt like an inside joke.",
       ),
 
-      s("bc3", "rivercat", "2026-10-05", "Live to code.", "knows", 11),
+      s("bc3", "rivercat", "2026-10-05", "Live to code.", "knows_owner", 11),
       s(
         "bc4",
         "Traveler4821",
@@ -88,7 +88,14 @@ export const PLATES: PlateRecord[] = [
         "guess",
         2,
       ),
-      s("bc5", "teadragon", "2026-10-09", "The driver said it's about their bootcamp.", "asked", 9),
+      s(
+        "bc5",
+        "teadragon",
+        "2026-10-09",
+        "The driver said it's about their bootcamp.",
+        "secondhand",
+        9,
+      ),
     ],
     summaries: [
       {
@@ -133,13 +140,13 @@ export const PLATES: PlateRecord[] = [
         "My grandmother poured me my first cup when I was five. I've been hooked ever since.",
       ),
       s("ca2", "maplegirl", "2026-09-21", "A tea lover, obviously.", "guess", 5),
-      s("ca3", "rivercat", "2026-09-22", "Someone who really loves tea.", "knows", 8),
+      s("ca3", "rivercat", "2026-09-22", "Someone who really loves tea.", "knows_owner", 8),
       withPhoto(
         "ca4",
         "northshore",
         "2026-09-24",
         "Asked at a light: they just love tea.",
-        "asked",
+        "secondhand",
         7,
       ),
       s("ca5", "Traveler4821", "2026-09-26", "Afternoon tea enthusiast.", "guess", 3),
@@ -178,7 +185,7 @@ export const PLATES: PlateRecord[] = [
     summaries: [],
     stories: [
       s(`${slug}-1`, "rivercat", day, meaning, "guess", 4 + i),
-      s(`${slug}-2`, "northshore", day, meaning, "knows", 2 + i),
+      s(`${slug}-2`, "northshore", day, meaning, "knows_owner", 2 + i),
     ],
     ...(slug === "co-wander" ? { featuredStoryCount: 2 } : {}),
   })),

@@ -33,6 +33,8 @@ import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenti
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 import { Route as PreviewsAccountRouteImport } from './routes/previews_.account'
+import { Route as PreviewsStoryErrorRouteImport } from './routes/previews_.story-error'
+import { Route as PreviewsStoryRateLimitedRouteImport } from './routes/previews_.story-rate-limited'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
 import { Route as AuthenticatedSettingsDeleteConfirmRouteImport } from './routes/_authenticated/settings_.delete-confirm'
 import { Route as AuthenticatedSpotIndexRouteImport } from './routes/_authenticated/spot.index'
@@ -158,6 +160,17 @@ const PreviewsAccountRoute = PreviewsAccountRouteImport.update({
   path: '/previews/account',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreviewsStoryErrorRoute = PreviewsStoryErrorRouteImport.update({
+  id: '/previews_/story-error',
+  path: '/previews/story-error',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewsStoryRateLimitedRoute =
+  PreviewsStoryRateLimitedRouteImport.update({
+    id: '/previews_/story-rate-limited',
+    path: '/previews/story-rate-limited',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
   id: '/spot/$outcome',
   path: '/spot/$outcome',
@@ -204,6 +217,8 @@ export interface FileRoutesByFullPath {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews/account': typeof PreviewsAccountRoute
+  '/previews/story-error': typeof PreviewsStoryErrorRoute
+  '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
@@ -233,6 +248,8 @@ export interface FileRoutesByTo {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews/account': typeof PreviewsAccountRoute
+  '/previews/story-error': typeof PreviewsStoryErrorRoute
+  '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
@@ -264,6 +281,8 @@ export interface FileRoutesById {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews_/account': typeof PreviewsAccountRoute
+  '/previews_/story-error': typeof PreviewsStoryErrorRoute
+  '/previews_/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/_authenticated/settings_/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/_authenticated/story/$step': typeof AuthenticatedStoryStepRoute
@@ -295,6 +314,8 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews/account'
+    | '/previews/story-error'
+    | '/previews/story-rate-limited'
     | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
@@ -324,6 +345,8 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews/account'
+    | '/previews/story-error'
+    | '/previews/story-rate-limited'
     | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
@@ -354,6 +377,8 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews_/account'
+    | '/previews_/story-error'
+    | '/previews_/story-rate-limited'
     | '/spot/$outcome'
     | '/_authenticated/settings_/delete-confirm'
     | '/_authenticated/story/$step'
@@ -381,6 +406,8 @@ export interface RootRouteChildren {
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
   PreviewsAccountRoute: typeof PreviewsAccountRoute
+  PreviewsStoryErrorRoute: typeof PreviewsStoryErrorRoute
+  PreviewsStoryRateLimitedRoute: typeof PreviewsStoryRateLimitedRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
 }
 
@@ -554,6 +581,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewsAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/previews_/story-error': {
+      id: '/previews_/story-error'
+      path: '/previews/story-error'
+      fullPath: '/previews/story-error'
+      preLoaderRoute: typeof PreviewsStoryErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/previews_/story-rate-limited': {
+      id: '/previews_/story-rate-limited'
+      path: '/previews/story-rate-limited'
+      fullPath: '/previews/story-rate-limited'
+      preLoaderRoute: typeof PreviewsStoryRateLimitedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spot/$outcome': {
       id: '/spot/$outcome'
       path: '/spot/$outcome'
@@ -630,6 +671,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
   PreviewsAccountRoute: PreviewsAccountRoute,
+  PreviewsStoryErrorRoute: PreviewsStoryErrorRoute,
+  PreviewsStoryRateLimitedRoute: PreviewsStoryRateLimitedRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,
 }
 export const routeTree = rootRouteImport

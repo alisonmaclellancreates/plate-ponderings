@@ -53,6 +53,16 @@ const PREVIEWS = [
     label: "Account states",
     note: "Handle field and save states, sign-in and sign-up errors, admin status",
   },
+  {
+    to: "/previews/story-error",
+    label: "Add a story, error (live form)",
+    note: "Real form, inert: error notice, words kept",
+  },
+  {
+    to: "/previews/story-rate-limited",
+    label: "Add a story, paused (live form)",
+    note: "Real form, inert: Let's pause a moment, words kept",
+  },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */

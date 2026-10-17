@@ -2,10 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 
+const search = vi.hoisted(() => ({ value: {} as { plate?: string } }));
+
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => ({
     ...o,
     useLoaderData: () => ({ step: "done" }),
+    useSearch: () => search.value,
   }),
   notFound: () => new Error("not found"),
 }));
@@ -14,9 +17,14 @@ vi.mock("@/components/site/AddStory", async (orig) => ({
   StoryStepPage: ({ step }: { step: string }) => <p>{step}</p>,
 }));
 
+vi.mock("@/components/site/AddStoryFlow", () => ({
+  AddStoryFlow: ({ plateId }: { plateId: string }) => <p>flow:{plateId}</p>,
+}));
+
 import { Route } from "@/routes/_authenticated/story.$step";
 
 const R = Route as unknown as {
+  validateSearch: (s: Record<string, unknown>) => { plate?: string };
   loader: (a: { params: { step: string } }) => { step: string };
   head: (a: { loaderData?: { step: string } }) => { meta: Record<string, string>[] };
   component: () => ReactNode;
@@ -41,5 +49,19 @@ describe("story step route", () => {
   it("renders the step from loader data", () => {
     const C = R.component;
     expect(render(<C />).container.textContent).toBe("done");
+  });
+
+  it("keeps only a non-empty string plate from the search", () => {
+    expect(R.validateSearch({ plate: "p1" })).toEqual({ plate: "p1" });
+    expect(R.validateSearch({ plate: "" })).toEqual({});
+    expect(R.validateSearch({ plate: 7 })).toEqual({});
+    expect(R.validateSearch({})).toEqual({});
+  });
+
+  it("renders the real flow for the plate in the search", () => {
+    search.value = { plate: "p1" };
+    const C = R.component;
+    expect(render(<C />).container.textContent).toBe("flow:p1");
+    search.value = {};
   });
 });

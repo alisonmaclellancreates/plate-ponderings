@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   admin: { from: vi.fn(), rpc: vi.fn() },
   check: vi.fn(),
+  checkStory: vi.fn(),
+  refresh: vi.fn(),
   readBlock: vi.fn(),
   persistBlock: vi.fn(),
 }));
@@ -27,6 +29,8 @@ vi.mock("@tanstack/react-start", () => ({
 vi.mock("@/integrations/supabase/auth-middleware", () => ({ requireSupabaseAuth: {} }));
 vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: mocks.admin }));
 vi.mock("@/lib/plate-moderation.server", () => ({ checkSubject: mocks.check }));
+vi.mock("@/lib/story-moderation.server", () => ({ checkStory: mocks.checkStory }));
+vi.mock("@/lib/summary-refresh.server", () => ({ requestSummaryRefresh: mocks.refresh }));
 vi.mock("@/lib/ai-block.server", () => ({
   readAiBlock: mocks.readBlock,
   persistAiBlock: mocks.persistBlock,
@@ -82,11 +86,10 @@ beforeEach(() => {
   mocks.admin.from.mockImplementation((table: string) => {
     const c = chain(tables[table] ?? { data: null, error: null });
     if (table === "subjects" || table === "profiles") {
-      const insertOrUpdate = vi.fn(() =>
+      c["insert"] = vi.fn(() =>
         chain(table === "subjects" ? insertResult : { data: null, error: null }),
       );
-      c["insert"] = insertOrUpdate;
-      c["update"] = insertOrUpdate;
+      c["update"] = vi.fn(() => chain({ data: [{ id: "row-1" }], error: null }));
     }
     return c;
   });
@@ -98,6 +101,8 @@ beforeEach(() => {
   mocks.readBlock.mockResolvedValue({ category: null, blockedAt: null });
   mocks.persistBlock.mockResolvedValue(undefined);
   mocks.check.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
+  mocks.checkStory.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
+  mocks.refresh.mockResolvedValue(undefined);
 });
 
 describe("searchPlate", () => {
@@ -347,7 +352,7 @@ describe("recheckPendingSubjects", () => {
   it.each([null, "provider_access_denied"])(
     "stops on unavailable with block %s after completed work",
     async (block) => {
-      const updates = vi.fn(() => chain({ data: null, error: null }));
+      const updates = vi.fn(() => chain({ data: [{ id: "subj-1" }], error: null }));
       const notifications = vi.fn(() => chain({ data: null, error: null }));
       mocks.admin.from.mockImplementation((table: string) => {
         const c = chain(
@@ -408,7 +413,8 @@ describe("recheckPendingSubjects", () => {
           ? { data: [pendingRow], error: null }
           : (tables[table] ?? { data: null, error: null }),
       );
-      if (table === "subjects") c["update"] = vi.fn(() => chain({ data: null, error: null }));
+      if (table === "subjects")
+        c["update"] = vi.fn(() => chain({ data: [{ id: "subj-1" }], error: null }));
       if (table === "profiles") c["update"] = vi.fn(() => chain({ data: null, error: null }));
       if (table === "notifications")
         c["insert"] = vi.fn((row: unknown) => {
@@ -443,5 +449,141 @@ describe("recheckPendingSubjects", () => {
     expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
     expect(mocks.check).toHaveBeenCalledTimes(1);
     expect(mocks.persistBlock).toHaveBeenCalledWith(mocks.admin, "credit_block", "r");
+  });
+
+  describe("pending stories", () => {
+    const storyRow = {
+      id: "story-1",
+      subject_id: "subj-9",
+      meaning: "Pacific Northwest love.",
+      body: null,
+      subjects: { identity_b: "PNW LV" },
+    };
+    function withStories(stories: unknown[], storyError: unknown = null) {
+      tables["subjects"] = {
+        data: [
+          {
+            id: "subj-9",
+            identity_a: "US-WA",
+            identity_b: "PNW LV",
+            jurisdictions: { name: "Washington" },
+          },
+        ],
+        error: null,
+      };
+      const notifications: unknown[] = [];
+      const updates = vi.fn(() => chain({ data: [{ id: "row-1" }], error: null }));
+      mocks.admin.from.mockImplementation((table: string) => {
+        const c = chain(
+          table === "stories"
+            ? { data: stories, error: storyError }
+            : (tables[table] ?? { data: null, error: null }),
+        );
+        if (table === "stories" || table === "profiles" || table === "subjects")
+          c["update"] = updates;
+        if (table === "notifications")
+          c["insert"] = vi.fn((row: unknown) => {
+            notifications.push(row);
+            return chain({ data: null, error: null });
+          });
+        return c;
+      });
+      return { notifications, updates };
+    }
+
+    it("publishes an approved story, notifies, and asks for a fresh summary", async () => {
+      const { notifications } = withStories([storyRow]);
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "", "PNW LV");
+      expect(notifications).toEqual([
+        { user_id: "caller", kind: "subject_published", subject_id: "subj-9" },
+        {
+          user_id: "caller",
+          kind: "story_published",
+          subject_id: "subj-9",
+          story_id: "story-1",
+        },
+      ]);
+      expect(mocks.refresh).toHaveBeenCalledWith("subj-9");
+    });
+
+    it("rejects a failed story and notifies without a summary request", async () => {
+      const { notifications } = withStories([storyRow]);
+      mocks.checkStory.mockResolvedValue({ outcome: "rejected", block: null });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(notifications).toEqual([
+        { user_id: "caller", kind: "subject_published", subject_id: "subj-9" },
+        {
+          user_id: "caller",
+          kind: "story_rejected",
+          subject_id: "subj-9",
+          story_id: "story-1",
+        },
+      ]);
+      expect(mocks.refresh).not.toHaveBeenCalled();
+    });
+
+    it("stops on unavailable and on a block", async () => {
+      withStories([storyRow, { ...storyRow, id: "story-2" }]);
+      mocks.checkStory.mockResolvedValue({
+        outcome: "unavailable",
+        block: "credit_block",
+        runId: "r",
+      });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(mocks.checkStory).toHaveBeenCalledTimes(1);
+      expect(mocks.persistBlock).toHaveBeenCalledWith(mocks.admin, "credit_block", "r");
+    });
+
+    it("skips a failed pending-story read", async () => {
+      withStories(null as unknown as unknown[], { message: "offline" });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(mocks.checkStory).not.toHaveBeenCalled();
+    });
+
+    it("rechecks a pending story when there are no pending plates", async () => {
+      withStories([storyRow]);
+      tables["subjects"] = { data: [], error: null };
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(mocks.check).not.toHaveBeenCalled();
+      expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "", "PNW LV");
+      expect(mocks.refresh).toHaveBeenCalledWith("subj-9");
+    });
+
+    it("skips the story loop when the plate loop stops on unavailable", async () => {
+      withStories([storyRow]);
+      mocks.check.mockResolvedValue({ outcome: "unavailable", block: "credit_block", runId: "r" });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+      expect(mocks.checkStory).not.toHaveBeenCalled();
+      expect(mocks.admin.from).not.toHaveBeenCalledWith("stories");
+    });
+
+    it("notifies and refreshes only when the guarded update matched a row", async () => {
+      const { notifications, updates } = withStories([storyRow]);
+      updates.mockImplementation(() => chain({ data: [], error: null }));
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(notifications).toEqual([]);
+      expect(mocks.refresh).not.toHaveBeenCalled();
+    });
+    it("rejected plates and stories notify nobody when the guarded update matched no row", async () => {
+      const { notifications, updates } = withStories([storyRow]);
+      updates.mockImplementation(() => chain({ data: [], error: null }));
+      mocks.check.mockResolvedValue({ outcome: "rejected", block: null });
+      mocks.checkStory.mockResolvedValue({ outcome: "rejected", block: null });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(notifications).toEqual([]);
+      expect(mocks.refresh).not.toHaveBeenCalled();
+    });
+
+    it("checks a story with an empty plate text when its plate join is missing", async () => {
+      withStories([{ ...storyRow, body: "Seen near Seattle.", subjects: null }]);
+      tables["subjects"] = { data: [], error: null };
+      await call(recheckPendingSubjects, {});
+      expect(mocks.checkStory).toHaveBeenCalledWith(
+        "Pacific Northwest love.",
+        "Seen near Seattle.",
+        "",
+      );
+    });
   });
 });

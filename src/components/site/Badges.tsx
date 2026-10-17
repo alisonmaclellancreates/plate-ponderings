@@ -33,7 +33,7 @@ function BrandBadge({ spec, kind }: { spec: BadgeSpec; kind: string }) {
 const STATUS: Record<PlateStatus, BadgeSpec> = {
   mystery: { label: "Mystery", icon: HelpCircle, tone: "mystery" },
   interpreted: { label: "Interpreted", icon: Lightbulb, tone: "amber" },
-  owner: { label: "Owner weighed in", icon: Key, tone: "teal" },
+  owner: { label: "Owner claim", icon: Key, tone: "teal" },
 };
 
 const CONSENSUS: Record<Consensus, BadgeSpec> = {
@@ -44,8 +44,8 @@ const CONSENSUS: Record<Consensus, BadgeSpec> = {
 
 const HOW: Record<HowIKnow, BadgeSpec> = {
   owner: { label: "It's my plate", icon: Key, tone: "how-owner" },
-  knows: { label: "I know the owner", icon: Users, tone: "how-knows" },
-  asked: { label: "I asked the driver", icon: Car, tone: "how-asked" },
+  knows_owner: { label: "I know the owner", icon: Users, tone: "how-knows" },
+  secondhand: { label: "I asked the driver", icon: Car, tone: "how-asked" },
   guess: { label: "My best guess", icon: Lightbulb, tone: "how-guess" },
 };
 

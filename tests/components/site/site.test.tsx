@@ -51,7 +51,7 @@ describe("badges", () => {
         <ModerationBadge state="rejected" />
       </>,
     );
-    expect(screen.getByText("Owner weighed in")).toHaveAttribute("data-tone", "teal");
+    expect(screen.getByText("Owner claim")).toHaveAttribute("data-tone", "teal");
     expect(screen.getByText("Opinions differ")).toHaveAttribute("data-tone", "coral");
     expect(screen.getByText("My best guess")).toHaveAttribute("data-kind", "how");
     expect(screen.getByText("Couldn't approve")).toHaveAttribute("data-kind", "moderation");

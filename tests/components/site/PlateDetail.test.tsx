@@ -13,6 +13,11 @@ vi.mock("@/lib/mock-data", async (importOriginal) => {
     PLATES: [
       ...original.PLATES,
       { ...base, slug: "test-nl", jurisdiction: "Newfoundland and Labrador", text: "ROW43XYZ" },
+      {
+        ...(original.PLATES.find((plate) => plate.summaries.length > 0) ?? base),
+        slug: "test-no-summary",
+        summaries: [],
+      },
     ],
   };
 });
@@ -77,7 +82,7 @@ describe("PlateDetail", () => {
     expect(screen.queryByText("The Story So Far")).toBeNull();
     expect(within(strip()).getByText("0 stories")).toBeTruthy();
     expect(within(strip()).getByText("Mystery")).toBeTruthy();
-    expect(within(strip()).getByText("No owner yet")).toBeTruthy();
+    expect(within(strip()).getByText("No owner claim yet")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Back to Explore" }).getAttribute("href")).toBe(
       "/explore",
     );
@@ -95,18 +100,18 @@ describe("PlateDetail", () => {
     expect(handles).toEqual(["maplegirl", "northshore", "rivercat", "Traveler4821", "teadragon"]);
     expect(screen.queryByText(/more stor/)).toBeNull();
     expect(screen.getAllByRole("img", { name: /Photo shared by/ })).toHaveLength(1);
-    expect(within(strip()).getByText("No owner yet")).toBeTruthy();
+    expect(within(strip()).getByText("No owner claim yet")).toBeTruthy();
   });
 
   it("owner: attributes ownership, owner first, no earlier control, shows more", async () => {
     render(<PlateDetail state="owner" />);
     expect(screen.getByText(/a contributor who says it's their plate explains/)).toBeTruthy();
     expect(screen.queryByText(/Earlier summaries/)).toBeNull();
-    expect(within(strip()).getByText("Owner: teadragon")).toBeTruthy();
+    expect(within(strip()).getByText("Says it's their plate: teadragon")).toBeTruthy();
     const cards = screen.getAllByRole("article");
     expect(cards).toHaveLength(5);
     expect(cards[0]?.getAttribute("data-owner")).toBe("true");
-    expect(within(cards[0]!).getByText("Owner weighed in")).toBeTruthy();
+    expect(within(cards[0]!).getByText("Owner claim")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Show 1 more story" }));
     expect(screen.getAllByRole("article")).toHaveLength(6);
   });
@@ -200,4 +205,10 @@ it("reads a story with 1 heart as 1 heart", () => {
   );
   expect(screen.getByText("heart").previousSibling?.textContent).toBe("1");
   expect(screen.queryByText("hearts")).toBeNull();
+});
+
+it("a plate with stories but no summary yet shows no Story So Far", () => {
+  render(<PlateDetail state="test-no-summary" />);
+  expect(screen.queryByRole("heading", { name: "The Story So Far" })).toBeNull();
+  expect(screen.queryByRole("heading", { name: "What do you think this plate means?" })).toBeNull();
 });

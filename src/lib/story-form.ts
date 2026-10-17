@@ -18,10 +18,24 @@ export const STORY_STEPS: Record<StoryStep, string> = {
 export const MEANING_MAX = 80;
 export const MORE_MAX = 500;
 
+/** Shared story-submit notices, so the live flow and its previews cannot drift. */
+export const STORY_SUBMIT_ERROR_HEADING = "Hmm... something went wrong.";
+export const STORY_SUBMIT_ERROR_MESSAGE =
+  "We couldn't submit your story right now. Your words are still here. Please try again.";
+export const STORY_RATE_LIMIT_HEADING = "Let's pause a moment.";
+
 export const HOW_OPTIONS: { value: HowIKnow; label: string; image: string }[] = [
   { value: "owner", label: "It's my plate", image: "/brand/how-i-know-owner-v1.webp" },
-  { value: "knows", label: "I know the owner", image: "/brand/how-i-know-knows-owner-v1.webp" },
-  { value: "asked", label: "I asked the driver", image: "/brand/how-i-know-asked-driver-v1.webp" },
+  {
+    value: "knows_owner",
+    label: "I know the owner",
+    image: "/brand/how-i-know-knows-owner-v1.webp",
+  },
+  {
+    value: "secondhand",
+    label: "I asked the driver",
+    image: "/brand/how-i-know-asked-driver-v1.webp",
+  },
   { value: "guess", label: "My best guess", image: "/brand/how-i-know-guess-v1.webp" },
 ];
 

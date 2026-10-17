@@ -1,31 +1,80 @@
-import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+
+const m = vi.hoisted(() => ({
+  getUser: vi.fn(),
+  getPlateStories: vi.fn(),
+  stories: null as unknown,
+}));
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
     to,
+    params,
     search,
     children,
     className,
   }: {
     to: string;
+    params?: Record<string, string>;
     search?: Record<string, string>;
     children: ReactNode;
     className?: string;
   }) => {
+    const path = params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to;
     const qs = search ? `?${new URLSearchParams(search)}` : "";
     return (
-      <a href={to + qs} className={className}>
+      <a href={path + qs} className={className}>
         {children}
       </a>
     );
   },
 }));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { auth: { getUser: m.getUser } },
+}));
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: ({ queryFn }: { queryFn: () => unknown }) => {
+    queryFn();
+    return { data: m.stories };
+  },
+}));
+vi.mock("@/lib/stories.functions", () => ({
+  getPlateStories: m.getPlateStories,
+  STORY_PAGE_SIZE: 5,
+}));
 
 import { RealPlateDetail } from "@/components/site/PlateDetail";
 
 const plate = { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" };
+
+function story(id: string, over: Record<string, unknown> = {}) {
+  return {
+    id,
+    meaning: `Meaning ${id}`,
+    source: "guess",
+    body: null,
+    handle: `Traveler${id}`,
+    hearts: 0,
+    publishedAt: "2026-10-01",
+    ...over,
+  };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  m.getUser.mockResolvedValue({ data: { user: null } });
+  m.stories = {
+    stories: [],
+    pending: [],
+    total: 0,
+    storyCount: 0,
+    hasOwnerStory: false,
+    ownerHandle: null,
+  };
+});
 
 describe("RealPlateDetail", () => {
   it.each(["Newfoundland and Labrador", "Utah"])("uses the shared frame for %s", (jurisdiction) => {
@@ -44,7 +93,91 @@ describe("RealPlateDetail", () => {
     const strip = screen.getByRole("list", { name: "Plate status" });
     expect(within(strip).getByText("0 stories")).toBeTruthy();
     expect(within(strip).getByText("Mystery")).toBeTruthy();
-    expect(within(strip).getByText("No owner yet")).toBeTruthy();
+    expect(within(strip).getByText("No owner claim yet")).toBeTruthy();
+    expect(
+      screen.getByText("Every story starts somewhere. Be the first to share yours!"),
+    ).toBeTruthy();
+  });
+
+  it("shows the derived status and owner line from live stories", () => {
+    m.stories = {
+      stories: [story("1", { source: "owner", handle: "OwnerOne" })],
+      pending: [],
+      storyCount: 1,
+      hasOwnerStory: true,
+      ownerHandle: "OwnerOne",
+    };
+    render(<RealPlateDetail plate={plate} />);
+    const strip = screen.getByRole("list", { name: "Plate status" });
+    expect(within(strip).getByText("1 story")).toBeTruthy();
+    expect(within(strip).getByText("Owner claim")).toBeTruthy();
+    expect(within(strip).getByText("Says it's their plate: OwnerOne")).toBeTruthy();
+    expect(screen.getByText("Have another interpretation? Add your story.")).toBeTruthy();
+    expect(screen.queryByText(/Every story starts somewhere/)).toBeNull();
+  });
+
+  it("lists published stories with handle, meaning, source badge and hearts", () => {
+    m.stories = {
+      stories: [
+        story("1", { source: "knows_owner", handle: "Knower", hearts: 3, body: "Met them once." }),
+      ],
+      pending: [],
+      storyCount: 1,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    expect(screen.getByText("Knower")).toBeInTheDocument();
+    expect(screen.getByText("Meaning 1")).toBeInTheDocument();
+    expect(screen.getByText("I know the owner")).toBeInTheDocument();
+    expect(screen.getByText("Met them once.")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
+  });
+
+  it("pages five stories at a time with Show more", async () => {
+    const user = userEvent.setup();
+    const stories = Array.from({ length: 7 }, (_, i) => story(String(i + 1)));
+    m.stories = {
+      stories,
+      pending: [],
+      total: 7,
+      storyCount: 7,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    expect(screen.getAllByRole("article")).toHaveLength(5);
+    await user.click(screen.getByRole("button", { name: /Show 2 more stories/ }));
+    expect(screen.getAllByRole("article")).toHaveLength(7);
+    expect(screen.queryByRole("button", { name: /Show .* more/ })).toBeNull();
+  });
+
+  it("shows the private pending panel only when the viewer has pending stories", () => {
+    m.stories = {
+      stories: [],
+      pending: [story("p", { meaning: "Waiting meaning" })],
+      storyCount: 0,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    expect(screen.getByText(/Only you can see this for now/)).toBeInTheDocument();
+  });
+
+  it("offers Add Your Story as a link only to signed-in visitors", async () => {
+    const { unmount } = render(<RealPlateDetail plate={plate} />);
+    await waitFor(() => expect(m.getUser).toHaveBeenCalled());
+    expect(screen.queryByRole("link", { name: "Add Your Story" })).toBeNull();
+    unmount();
+    m.getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    render(<RealPlateDetail plate={plate} />);
+    await waitFor(() => {
+      const links = screen.getAllByRole("link", { name: "Add Your Story" });
+      expect(links.length).toBeGreaterThan(0);
+      for (const link of links) {
+        expect(link).toHaveAttribute("href", "/story/1?plate=p1");
+      }
+    });
   });
 
   it("links Back to Search with the searched values when arriving from search", () => {
@@ -63,5 +196,37 @@ describe("RealPlateDetail", () => {
     expect(screen.getByRole("link", { name: "Back to Explore" }).getAttribute("href")).toBe(
       "/explore",
     );
+  });
+
+  it("every part of the page reads stories for this plate only", () => {
+    render(<RealPlateDetail plate={plate} />);
+    expect(m.getPlateStories).toHaveBeenCalled();
+    for (const c of m.getPlateStories.mock.calls) expect(c[0]).toEqual({ data: { plateId: "p1" } });
+  });
+
+  it("says heart and story in the singular", async () => {
+    const user = userEvent.setup();
+    m.stories = {
+      stories: Array.from({ length: 6 }, (_, i) => story(String(i), { hearts: i === 0 ? 1 : 2 })),
+      pending: [],
+      total: 6,
+      storyCount: 6,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    expect(screen.getAllByText("heart")).toHaveLength(1);
+    await user.click(screen.getByRole("button", { name: "Show 1 more story" }));
+    expect(screen.getAllByRole("article")).toHaveLength(6);
+  });
+
+  it("ignores a sign-in answer that arrives after leaving the page", async () => {
+    let resolve: (v: unknown) => void = () => {};
+    m.getUser.mockReturnValue(new Promise((r) => (resolve = r)));
+    const { unmount } = render(<RealPlateDetail plate={plate} />);
+    unmount();
+    resolve({ data: { user: { id: "u1" } } });
+    await Promise.resolve();
+    expect(screen.queryByRole("link", { name: "Add Your Story" })).toBeNull();
   });
 });
