@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Homepage, PlateOfTheDay } from "@/components/site/Homepage";
 import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
@@ -213,5 +213,53 @@ describe("Homepage", () => {
     await user.click(screen.getByRole("button", { name: "Search" }));
     expect(screen.getByText("Please select a state or province")).toBeInTheDocument();
     expect(searchMock.fn).not.toHaveBeenCalled();
+  });
+  it("ignores duplicate submissions while a search is in flight, then accepts another", async () => {
+    media({});
+    let finish: ((value: { status: "no-match" }) => void) | undefined;
+    searchMock.fn.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    render(<Homepage prefill={{ jurisdiction: "Utah", text: "DRAGON" }} />);
+    const form = screen.getByRole("search");
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+    expect(searchMock.fn).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Search" })).toBeDisabled();
+    await act(async () => { finish?.({ status: "no-match" }); });
+    expect(screen.getByRole("button", { name: "Search" })).toBeEnabled();
+    searchMock.fn.mockResolvedValueOnce({ status: "no-match" });
+    await act(async () => { fireEvent.submit(form); });
+    expect(searchMock.fn).toHaveBeenCalledTimes(2);
+  });
+  it("shows a recoverable search error if navigation fails", async () => {
+    media({});
+    searchMock.fn.mockResolvedValue({ status: "found", plate: { id: "p1", jurisdiction: "Utah", text: "DRAGON" } });
+    searchMock.navigate.mockRejectedValue(new Error("navigation failed"));
+    render(<Homepage prefill={{ jurisdiction: "Utah", text: "DRAGON" }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("couldn't search right now");
+    expect(screen.getByRole("button", { name: "Search" })).toBeEnabled();
+    expect(screen.queryByRole("region", { name: "No plate found. Yet!" })).not.toBeInTheDocument();
+  });
+  it.each(["form", "field"])("does not move focus when the search %s is absent", async (missing) => {
+    media({});
+    render(<Homepage />);
+    const form = screen.getByRole("search");
+    const select = screen.getByRole("combobox", { name: "State or Province" });
+    const scroll = vi.fn();
+    form.scrollIntoView = scroll;
+    const target = missing === "form" ? form : select;
+    const parent = target.parentElement;
+    target.remove();
+    const button = screen.getByRole("button", { name: "Look Up a Plate" });
+    await userEvent.click(button);
+    expect(document.activeElement).toBe(button);
+    expect(scroll).not.toHaveBeenCalled();
+    parent?.append(target);
+  });
+  it("renders no homepage when the featured collection is empty", async () => {
+    const { PLATES } = await import("@/lib/mock-data");
+    const saved = PLATES.splice(0);
+    try { expect(render(<Homepage />).container).toBeEmptyDOMElement(); }
+    finally { PLATES.push(...saved); }
   });
 });
