@@ -507,6 +507,13 @@ describe("recheckPendingSubjects", () => {
       expect(mocks.refresh).toHaveBeenCalledWith("subj-9");
     });
 
+    it("finishes the recheck while the summary run is still pending", async () => {
+      withStories([storyRow]);
+      mocks.refresh.mockReturnValue(new Promise(() => {}));
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(mocks.refresh).toHaveBeenCalledWith("subj-9");
+    });
+
     it("rejects a failed story and notifies without a summary request", async () => {
       const { notifications } = withStories([storyRow]);
       mocks.checkStory.mockResolvedValue({ outcome: "rejected", block: null });

@@ -92,7 +92,8 @@ export const addStory = createServerFn({ method: "POST" })
     });
     if (inserted.error) return { outcome: "error" };
     const { requestSummaryRefresh } = await import("./summary-refresh.server");
-    await requestSummaryRefresh(plate.id);
+    const { runAfterResponse } = await import("./after-response.server");
+    runAfterResponse(requestSummaryRefresh(plate.id));
     return { outcome: "published" };
   });
 

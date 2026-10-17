@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { PlateDetail, Stories, StoryCard } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
 
+vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
 vi.mock("@/lib/mock-data", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/mock-data")>();
   const base = original.PLATES.find((plate) => plate.slug === "ut-canyons");

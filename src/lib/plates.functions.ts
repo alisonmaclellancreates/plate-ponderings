@@ -284,6 +284,7 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
     if (!pendingStories.error && pendingStories.data && pendingStories.data.length > 0) {
       const { checkStory } = await import("./story-moderation.server");
       const { requestSummaryRefresh } = await import("./summary-refresh.server");
+      const { runAfterResponse } = await import("./after-response.server");
       for (const story of pendingStories.data) {
         const joined = story.subjects as unknown as { identity_b: string } | null;
         const result = await checkStory(story.meaning, story.body ?? "", joined?.identity_b ?? "");
@@ -304,7 +305,7 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
               subject_id: story.subject_id,
               story_id: story.id,
             });
-            await requestSummaryRefresh(story.subject_id);
+            runAfterResponse(requestSummaryRefresh(story.subject_id));
           }
         } else {
           const updated = await supabaseAdmin

@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   stories: null as unknown,
 }));
 
+vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
     to,

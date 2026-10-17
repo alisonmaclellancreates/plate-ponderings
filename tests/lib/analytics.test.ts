@@ -73,6 +73,24 @@ describe("analytics", () => {
     await analytics.track("story_started", {});
     expect(sdk.capture).toHaveBeenLastCalledWith("story_started", {});
   });
+  it("summary_history_opened carries only versions_shown, never summary text or AI output", async () => {
+    const analytics = await import("@/lib/analytics");
+    expect(analytics.EVENTS.summary_history_opened).toEqual(["versions_shown"]);
+    await analytics.track("summary_history_opened", { versions_shown: 3 });
+    expect(sdk.capture).toHaveBeenLastCalledWith("summary_history_opened", { versions_shown: 3 });
+    const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+    expect(
+      beforeSend({
+        event: "summary_history_opened",
+        properties: {
+          versions_shown: 3,
+          text: "AI summary text",
+          subject: "B7K2L9",
+          $current_url: "https://whattheplate.lovable.app/plate/x",
+        },
+      }),
+    ).toEqual({ event: "summary_history_opened", properties: { versions_shown: 3 } });
+  });
   it("account events carry no email, handle, password or moderation output", async () => {
     const analytics = await import("@/lib/analytics");
     for (const event of [
