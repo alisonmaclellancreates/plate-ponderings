@@ -35,7 +35,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <section aria-label={title} className="brand-card p-6">
       <h2 className="font-display text-2xl text-navy">{title}</h2>
       <div className="mt-4">{children}</div>
-    </Section>
+    </section>
   );
 }
 
