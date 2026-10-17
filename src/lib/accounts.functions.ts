@@ -86,26 +86,13 @@ export const saveHandle = createServerFn({ method: "POST" })
       .neq("id", context.userId);
     if (taken.error) return { outcome: "unavailable" as const, message: HANDLE_UNAVAILABLE };
     if (taken.data.length) return { outcome: "rejected" as const, message: HANDLE_TAKEN };
-    const settings = await supabaseAdmin
-      .from("app_settings")
-      .select("handle_check_block_category")
-      .eq("id", true)
-      .single();
-    if (settings.error || settings.data.handle_check_block_category)
+    const { readAiBlock, persistAiBlock } = await import("./ai-block.server");
+    const block = await readAiBlock(supabaseAdmin);
+    if (!block || block.category)
       return { outcome: "unavailable" as const, message: HANDLE_UNAVAILABLE };
     const { moderateHandle } = await import("./handle-moderation.server");
     const result = await moderateHandle(data.handle);
-    if (result.block) {
-      const persisted = await supabaseAdmin
-        .from("app_settings")
-        .update({
-          handle_check_block_category: result.block,
-          handle_check_blocked_at: new Date().toISOString(),
-          handle_check_run_id: result.runId ?? null,
-        })
-        .eq("id", true);
-      if (persisted.error) throw new Error("Could not persist handle check access block");
-    }
+    if (result.block) await persistAiBlock(supabaseAdmin, result.block, result.runId);
     if (result.outcome === "unavailable")
       return { outcome: "unavailable" as const, message: HANDLE_UNAVAILABLE };
     if (result.outcome === "rejected")
@@ -120,7 +107,7 @@ export const saveHandle = createServerFn({ method: "POST" })
     return { outcome: "changed" as const, message: "Changes saved.", handle: updated.data.handle };
   });
 
-export const getHandleCheckStatus = createServerFn({ method: "POST" })
+export const getAiCheckStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const roles = await context.supabase
@@ -134,19 +121,16 @@ export const getHandleCheckStatus = createServerFn({ method: "POST" })
     )
       return { allowed: false as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
-      .from("app_settings")
-      .select("handle_check_block_category,handle_check_blocked_at")
-      .eq("id", true)
-      .single();
-    if (error) throw new Error("Handle check status unavailable");
+    const { readAiBlock } = await import("./ai-block.server");
+    const block = await readAiBlock(supabaseAdmin);
+    if (!block) throw new Error("AI check status unavailable");
     return {
       allowed: true as const,
-      category: data.handle_check_block_category,
-      blockedAt: data.handle_check_blocked_at,
+      category: block.category,
+      blockedAt: block.blockedAt,
     };
   });
-export const resumeHandleChecks = createServerFn({ method: "POST" })
+export const resumeAiChecks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const roles = await context.supabase
@@ -163,9 +147,9 @@ export const resumeHandleChecks = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from("app_settings")
       .update({
-        handle_check_block_category: null,
-        handle_check_blocked_at: null,
-        handle_check_run_id: null,
+        ai_check_block_category: null,
+        ai_check_blocked_at: null,
+        ai_check_run_id: null,
       })
       .eq("id", true);
     return { resumed: !error };
