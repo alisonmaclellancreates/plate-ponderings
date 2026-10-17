@@ -76,6 +76,6 @@ export const getFeaturedArchive = createServerFn({ method: "POST" })
     return {
       today: new Date().toISOString().slice(0, 10),
       plates,
-      next: (rows?.length ?? 0) > 12 ? (plates[11]?.day ?? null) : null,
+      next: rows && rows.length > 12 ? (plates[11] as FeaturedDisplay).day : null,
     };
   });
