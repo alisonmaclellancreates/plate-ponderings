@@ -33,7 +33,7 @@ it("uses an unnested sample-only route with real mystery and fallback bands and 
     ["Mystery", "No stories yet."],
     ["Fallback, singular", "Only 1 story so far."],
     ["Fallback, plural", "Only 2 stories so far."],
-  ]) {
+  ] as const) {
     const section = screen.getByRole("region", { name });
     expect(section.textContent).toContain(copy);
     expect(within(section).getByRole("link", { name: "View This Plate" })).toBeTruthy();
