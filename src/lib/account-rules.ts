@@ -27,16 +27,17 @@ export function handleFormatValid(handle: string) {
   );
 }
 export function safeReturnPath(value: unknown): string {
+  const unsafe = (path: string) => /\\/.test(path) || [...path].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127);
   if (
     typeof value !== "string" ||
     !value.startsWith("/") ||
     value.startsWith("//") ||
-    /[\\\u0000-\u0020\u007f]/.test(value)
+    unsafe(value)
   )
     return "/";
   try {
     const decoded = decodeURIComponent(value);
-    if (decoded.startsWith("//") || /[\\\u0000-\u0020\u007f]/.test(decoded)) return "/";
+    if (decoded.startsWith("//") || unsafe(decoded)) return "/";
     const url = new URL(value, "https://whattheplate.lovable.app");
     if (
       url.origin !== "https://whattheplate.lovable.app" ||
@@ -69,11 +70,7 @@ export function handleBlockCategory(status: number, type?: string): HandleBlockC
     return "credit_block";
   if (
     status === 403 &&
-    ![
-      "provider_not_available_in_region",
-      "model_requires_retention_consent",
-      "model_vendor_not_enabled",
-    ].includes(type ?? "")
+    ["permission_error", "provider_access_denied", "provider_access_denial"].includes(type ?? "")
   )
     return "provider_access_denied";
   return null;
