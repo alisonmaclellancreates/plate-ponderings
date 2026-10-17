@@ -86,7 +86,10 @@ describe("RealPlateDetail", () => {
     const strip = screen.getByRole("list", { name: "Plate status" });
     expect(within(strip).getByText("0 stories")).toBeTruthy();
     expect(within(strip).getByText("Mystery")).toBeTruthy();
-    expect(within(strip).getByText("No owner yet")).toBeTruthy();
+    expect(within(strip).getByText("No owner claim yet")).toBeTruthy();
+    expect(
+      screen.getByText("Every story starts somewhere. Be the first to share yours!"),
+    ).toBeTruthy();
   });
 
   it("shows the derived status and owner line from live stories", () => {
@@ -100,8 +103,10 @@ describe("RealPlateDetail", () => {
     render(<RealPlateDetail plate={plate} />);
     const strip = screen.getByRole("list", { name: "Plate status" });
     expect(within(strip).getByText("1 story")).toBeTruthy();
-    expect(within(strip).getByText("Owner weighed in")).toBeTruthy();
-    expect(within(strip).getByText("Owner: OwnerOne")).toBeTruthy();
+    expect(within(strip).getByText("Owner claim")).toBeTruthy();
+    expect(within(strip).getByText("Says it's their plate: OwnerOne")).toBeTruthy();
+    expect(screen.getByText("Have another interpretation? Add your story.")).toBeTruthy();
+    expect(screen.queryByText(/Every story starts somewhere/)).toBeNull();
   });
 
   it("lists published stories with handle, meaning, source badge and hearts", () => {
