@@ -26,6 +26,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 import { StoryStepPage } from "@/components/site/AddStory";
 import { STORY_STEPS, type StoryStep } from "@/lib/story-form";
+import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 
 describe("Add a story previews", () => {
   it("every step has exactly one h1", () => {
