@@ -74,7 +74,7 @@
 
 # Step 42: accounts, handles and session-aware header
 
-- [ ] Return available/taken/unknown from typing checks, share preview status rendering, test stale and own-handle behavior, and verify Traveler7444 live.
+- [x] Return available/taken/unknown (null for demo); shared preview status rendering and stale/own-handle tests. Live Rowan session shows Traveler7444 taken beneath input without Save and own handle Available. 548 tests pass; all three changed source files 100% local coverage; focused lint clean.
 
 - [x] Classify weak-password errors by reasons; actual AuthWeakPasswordError tests pass. Live signup returns 422 with pwned and displays the unchanged breached-password message. 541 tests pass; account-rules coverage 100%, touched-file lint clean, build OK.
 - [x] Set and read back credit_block at 2026-10-17 06:12:55 UTC with test run marker; leave Resume to Alison. Preview and published share this setting.
