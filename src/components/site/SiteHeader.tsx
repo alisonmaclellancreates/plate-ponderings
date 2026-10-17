@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getUnreadDot } from "@/lib/submissions.functions";
 import { UNREAD_DOT_KEY } from "@/lib/submissions-queries";
+import { useMenuDismiss } from "@/lib/menu-dismiss";
 
 // Explore, Spot a Plate and About are built in later steps; plain anchors until then.
 const NAV = [
@@ -52,8 +53,10 @@ function Avatar({
 /** Demo profile menu, shown open in the preview so Exit Demo is visible. */
 function DemoProfile({ showHandle }: { showHandle: boolean }) {
   const [open, setOpen] = useState(true);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useMenuDismiss(open, setOpen, containerRef);
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         type="button"
         aria-expanded={open}
@@ -109,9 +112,11 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
     queryFn: () => fetchDot(),
     enabled: signedIn,
   });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useMenuDismiss(open, setOpen, containerRef);
   if (!auth?.account) return null;
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <Button
         variant="ghost"
         className="h-auto rounded-full p-0 text-cream"
@@ -134,9 +139,14 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
             <Link
               to="/submissions"
               onClick={() => setOpen(false)}
-              className="block px-4 py-2 hover:bg-cream"
+              className="flex items-center gap-2 px-4 py-2 hover:bg-cream"
             >
               Your Submissions
+              {dot.data?.unread === true && (
+                <span data-testid="menu-unread-dot" className="size-2.5 rounded-full bg-coral-cta">
+                  <span className="sr-only">New updates</span>
+                </span>
+              )}
             </Link>
           </li>
           <li>
@@ -190,9 +200,11 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
   useEffect(() => {
     setOpen(false);
   }, [location]);
+  const containerRef = useRef<HTMLElement | null>(null);
+  useMenuDismiss(open, setOpen, containerRef);
   const signedOut = mode === "signed-out";
   return (
-    <header className="bg-navy text-cream" data-mode={mode}>
+    <header ref={containerRef} className="bg-navy text-cream" data-mode={mode}>
       <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 md:flex md:gap-6">
         <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
           <img

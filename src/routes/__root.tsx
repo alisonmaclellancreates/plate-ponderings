@@ -8,7 +8,7 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -114,15 +114,35 @@ function RootComponent() {
     void track("$pageview", { path: pathname });
   }, [pathname]);
 
+  // Move focus to the new page's heading after each navigation (not on first load).
+  const firstLoad = useRef(true);
+  useEffect(() => {
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+    const heading = document.querySelector("main h1");
+    if (heading instanceof HTMLElement) {
+      if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+      heading.focus();
+    }
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AccountProvider>
         <div className="flex min-h-screen flex-col">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-navy focus:px-4 focus:py-2 focus:font-semibold focus:text-cream"
+          >
+            Skip to main content
+          </a>
           <SiteHeader />
-          <div className="flex-1">
+          <main id="main-content" tabIndex={-1} className="flex-1">
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
-          </div>
+          </main>
           <SiteFooter />
         </div>
       </AccountProvider>

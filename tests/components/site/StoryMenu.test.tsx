@@ -28,6 +28,9 @@ describe("StoryMenuPage", () => {
 
   it("shows the report dialog with every reason and a live note counter", () => {
     render(<StoryMenuPage />);
+    fireEvent.click(
+      within(screen.getByTestId("other-menu")).getByRole("menuitem", { name: "Report story" }),
+    );
     const dialog = within(screen.getByTestId("report-dialog"));
     expect(dialog.getByText("Why are you reporting this story?")).toBeTruthy();
     for (const reason of REPORT_REASONS)
@@ -41,6 +44,9 @@ describe("StoryMenuPage", () => {
 
   it("shows the delete confirmation with both actions", () => {
     render(<StoryMenuPage />);
+    fireEvent.click(
+      within(screen.getByTestId("own-menu")).getByRole("menuitem", { name: "Delete my story" }),
+    );
     const dialog = within(screen.getByTestId("delete-story-dialog"));
     expect(dialog.getByText("Delete your story?")).toBeTruthy();
     expect(

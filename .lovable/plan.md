@@ -42,7 +42,11 @@ Branch: current feature branch. No database changes. No feature, wording, or lay
 ## 9. Unread dot in profile menu
 - Repeat the header's unread dot beside "Your Submissions" in the profile menu, with the same hidden "New updates" text.
 
-## 10. Progress component (issue #54)
+## 10. Rotating homepage headline
+- When it rotates, announce each change politely with aria-live="polite".
+- Reduced motion already stops the rotation; leave that as it is.
+
+## 11. Progress component (issue #54)
 - Check whether any page uses src/components/ui/progress.tsx (only FeaturedPlateCard matched a loose grep; verify real usage). If used, expose value to screen readers (role/aria-valuenow). If unused, leave issue #54 open and say so.
 
 ## Verification
