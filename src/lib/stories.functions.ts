@@ -53,9 +53,12 @@ export const addStory = createServerFn({ method: "POST" })
     });
     if (roleError) return { outcome: "error" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // A photo path is only ever the caller's own folder; anything else is refused.
-    if (data.photoPath && !data.photoPath.startsWith(`${context.userId}/`))
-      return { outcome: "error" };
+    // A photo path is exactly the caller's folder plus one uuid.jpg; anything
+    // else (dot segments, other folders, other names) is refused.
+    const photoPathPattern = new RegExp(
+      `^${context.userId}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.jpg$`,
+    );
+    if (data.photoPath && !photoPathPattern.test(data.photoPath)) return { outcome: "error" };
     // Every outcome that saves no story removes the uploaded photo.
     const deletePhoto = async (): Promise<void> => {
       if (!data.photoPath) return;
@@ -114,8 +117,30 @@ export const addStory = createServerFn({ method: "POST" })
       return { outcome: "error" };
     }
     if (block.category) return insertPending();
+    // A photo joins the same single check: download the processed JPEG and
+    // pass it alongside the text. A failed download saves no story.
+    let photoDataUrl: string | undefined;
+    if (data.photoPath) {
+      const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");
+      const downloaded = await supabaseAdmin.storage
+        .from(STORY_PHOTO_BUCKET)
+        .download(data.photoPath);
+      if (downloaded.error || !downloaded.data) {
+        await deletePhoto();
+        return { outcome: "error" };
+      }
+      const bytes = new Uint8Array(await downloaded.data.arrayBuffer());
+      let binary = "";
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      photoDataUrl = `data:image/jpeg;base64,${btoa(binary)}`;
+    }
     const { checkStory } = await import("./story-moderation.server");
-    const result = await checkStory(data.meaning.trim(), data.more.trim(), plate.identity_b);
+    const result = await checkStory(
+      data.meaning.trim(),
+      data.more.trim(),
+      plate.identity_b,
+      photoDataUrl,
+    );
     if (result.block) await persistAiBlock(supabaseAdmin, result.block, result.runId);
     if (result.outcome === "unavailable") return insertPending();
     if (result.outcome === "rejected") {
