@@ -142,6 +142,7 @@ describe("AddStoryFlow", () => {
     await waitFor(() =>
       expect(screen.getByText(/Please wait a while and try again/)).toBeInTheDocument(),
     );
+    expect(screen.getByText("Let's pause a moment.")).toBeInTheDocument();
     expect(m.track).toHaveBeenCalledWith(
       "story_submitted",
       expect.objectContaining({ outcome: "rate_limited" }),
@@ -157,6 +158,12 @@ describe("AddStoryFlow", () => {
     await waitFor(() =>
       expect(screen.getByText("Hmm... something went wrong.")).toBeInTheDocument(),
     );
+    expect(
+      screen.getByText(
+        "We couldn't submit your story right now. Your words are still here. Please try again.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue("A fine meaning");
     expect(m.track).toHaveBeenCalledWith(
       "story_submitted",
       expect.objectContaining({ outcome: "error" }),
