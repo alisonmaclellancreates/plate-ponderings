@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { useQuery, useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Info } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
