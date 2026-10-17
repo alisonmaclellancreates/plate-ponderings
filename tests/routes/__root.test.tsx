@@ -3,9 +3,11 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
-const { invalidate, reportLovableError } = vi.hoisted(() => ({
+const { invalidate, reportLovableError, track, location } = vi.hoisted(() => ({
   invalidate: vi.fn(),
   reportLovableError: vi.fn(),
+  track: vi.fn(),
+  location: { pathname: "/" },
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -19,9 +21,14 @@ vi.mock("@tanstack/react-router", () => ({
   HeadContent: () => <meta data-testid="head-content" />,
   Scripts: () => <span data-testid="scripts" />,
   useRouter: () => ({ invalidate }),
-  useRouterState: () => "/",
+  useRouterState: () => location.pathname,
 }));
 vi.mock("@/lib/lovable-error-reporting", () => ({ reportLovableError }));
+vi.mock("@/lib/analytics", () => ({ track }));
+vi.mock("@/lib/auth-context", () => ({
+  AccountProvider: ({ children }: { children: ReactNode }) => children,
+}));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 
 function OutletProbe() {
   const client = useQueryClient();
@@ -45,6 +52,8 @@ describe("root route", () => {
     vi.restoreAllMocks();
     invalidate.mockClear();
     reportLovableError.mockClear();
+    track.mockClear();
+    location.pathname = "/";
   });
 
   it("head sets a title, viewport meta and the stylesheet link", () => {
@@ -113,5 +122,22 @@ describe("root route", () => {
     );
     expect(screen.getByText("child content")).toBeInTheDocument();
     expect(screen.getByTestId("scripts")).toBeInTheDocument();
+  });
+
+  it("tracks initial and changed routes without tracking unchanged rerenders", () => {
+    R.useRouteContext = () => ({ queryClient: new QueryClient() });
+    try {
+      const C = R.component;
+      const { rerender } = render(<C />);
+      expect(track).toHaveBeenCalledWith("$pageview", { path: "/" });
+      rerender(<C />);
+      expect(track).toHaveBeenCalledTimes(1);
+      location.pathname = "/explore";
+      rerender(<C />);
+      expect(track).toHaveBeenLastCalledWith("$pageview", { path: "/explore" });
+      expect(track).toHaveBeenCalledTimes(2);
+    } finally {
+      delete R.useRouteContext;
+    }
   });
 });

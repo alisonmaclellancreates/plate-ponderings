@@ -1,0 +1,122 @@
+import { describe, expect, it } from "vitest";
+import { AuthWeakPasswordError } from "@supabase/supabase-js";
+import {
+  handleFormatValid,
+  handleValidationMessage,
+  RESERVED_HANDLES,
+  plateIdOrNull,
+  safeReturnPath,
+  storyReturnPath,
+  signupErrorMessage,
+  handleBlockCategory,
+} from "@/lib/account-rules";
+
+describe("handle rules", () => {
+  it("classifies reserved handles separately from invalid characters and length", () => {
+    expect(handleValidationMessage("admin")).toBe("That handle is reserved. Choose another.");
+    expect(handleValidationMessage("ADMIN")).toBe("That handle is reserved. Choose another.");
+    expect(handleValidationMessage("rowan!")).toBe("Use letters, numbers, and underscores only.");
+    expect(handleValidationMessage("ab")).toBe("Use 3 to 20 characters.");
+    expect(handleValidationMessage("a".repeat(21))).toBe("Use 3 to 20 characters.");
+    expect(handleValidationMessage("Rowan_42")).toBe("");
+  });
+  it("allows 3 through 20 ASCII letters, numbers and underscores", () => {
+    expect(handleFormatValid("a_9")).toBe(true);
+    expect(handleFormatValid("a".repeat(20))).toBe(true);
+    for (const value of ["ab", "a".repeat(21), "a b", "a-b", "éabc", "abc\n"])
+      expect(handleFormatValid(value)).toBe(false);
+  });
+  it("rejects every reserved handle ignoring case and the demo handle", () => {
+    for (const value of [...RESERVED_HANDLES, "Traveler4821"])
+      expect(handleFormatValid(value.toUpperCase())).toBe(false);
+    expect(handleFormatValid("Traveler4822")).toBe(true);
+  });
+});
+describe("return paths", () => {
+  it("preserves same-site paths and rejects external and encoded escape paths", () => {
+    expect(safeReturnPath("/profile?tab=one#handle")).toBe("/profile?tab=one#handle");
+    for (const value of [
+      undefined,
+      42,
+      "https://evil.example",
+      "//evil.example",
+      "/\\evil.example",
+      "/%2fevil.example",
+      "/%5cevil",
+      "/%00foo",
+      "/profile\n",
+      "/bad%",
+      "/auth",
+      "/sign-in?returnTo=/profile",
+      "/sign-up",
+    ])
+      expect(safeReturnPath(value)).toBe("/");
+  });
+});
+describe("gateway blocks", () => {
+  it("blocks explicit credit denials and provider access denials only", () => {
+    expect(handleBlockCategory(402)).toBe("credit_block");
+    for (const type of ["credit_limit_reached", "ai_disabled", "workspace_ai_disabled"])
+      expect(handleBlockCategory(403, type)).toBe("credit_block");
+    expect(handleBlockCategory(403, "permission_error")).toBe("provider_access_denied");
+    for (const status of [0, 400, 401, 404, 408, 429, 500, 503])
+      expect(handleBlockCategory(status)).toBeNull();
+    for (const type of [
+      "provider_not_available_in_region",
+      "model_requires_retention_consent",
+      "model_vendor_not_enabled",
+    ])
+      expect(handleBlockCategory(403, type)).toBeNull();
+  });
+});
+describe("password failures", () => {
+  it("handles password errors without a provider message safely", () => {
+    expect(signupErrorMessage({ code: "weak_password" })).toBe(
+      "Please choose a stronger password with at least 8 characters.",
+    );
+    expect(signupErrorMessage({ code: "validation_failed" })).toBe(
+      "Your account couldn't be created. You can try again or sign in.",
+    );
+  });
+  it("gives a breached password an actionable message without revealing account existence", () => {
+    expect(
+      signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, ["pwned"])),
+    ).toBe("This password has appeared in a data breach. Please choose a different password.");
+    expect(signupErrorMessage({ code: "validation_failed", message: "Password too weak" })).toBe(
+      "Please choose a stronger password with at least 8 characters.",
+    );
+    expect(signupErrorMessage({ code: "user_already_exists" })).toBe(
+      "Your account couldn't be created. You can try again or sign in.",
+    );
+    expect(signupErrorMessage({})).toBe(
+      "Your account couldn't be created. You can try again or sign in.",
+    );
+  });
+  it("classifies actual weak-password errors by reasons rather than message text", () => {
+    expect(
+      signupErrorMessage(
+        new AuthWeakPasswordError("Password is too weak", 422, ["length", "characters"]),
+      ),
+    ).toBe("Please choose a stronger password with at least 8 characters.");
+    expect(signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, []))).toBe(
+      "Please choose a stronger password with at least 8 characters.",
+    );
+    expect(
+      signupErrorMessage(new AuthWeakPasswordError("breach leak pwned", 422, ["length"])),
+    ).toBe("Please choose a stronger password with at least 8 characters.");
+  });
+});
+
+describe("plate ids for the sign-in prompt", () => {
+  const id = "c10edcdd-6349-4041-a9b9-2bd648e86a14";
+  it("accepts a well-formed id and lowercases it", () => {
+    expect(plateIdOrNull(id.toUpperCase())).toBe(id);
+  });
+  it.each([undefined, 7, "", "p1", `${id}x`, "../sign-in", "//evil.example"])(
+    "rejects %s",
+    (value) => expect(plateIdOrNull(value)).toBeNull(),
+  );
+  it("returns to the story form for that plate, on this site", () => {
+    expect(storyReturnPath(id)).toBe(`/story/1?plate=${id}`);
+  });
+});

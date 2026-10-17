@@ -2,6 +2,13 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
+import type { HeaderMode } from "@/lib/header-mode";
+import { useAccountAuth } from "@/lib/account-auth";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getUnreadDot } from "@/lib/submissions.functions";
+import { UNREAD_DOT_KEY } from "@/lib/submissions-queries";
 
 // Explore, Spot a Plate and About are built in later steps; plain anchors until then.
 const NAV = [
@@ -10,29 +17,34 @@ const NAV = [
   { href: "/about", label: "About" },
 ];
 
-/** member: signed in. signed-out: Sign in + Try the Demo. demo: sample traveler with Exit Demo. */
-export type HeaderMode = "member" | "signed-out" | "demo";
-
-/** Which header each preview path shows; every other path is the signed-in member header. */
-export function headerModeFor(pathname: string): HeaderMode {
-  if (["/sign-in-prompt", "/sign-in", "/sign-up", "/demo"].includes(pathname)) return "signed-out";
-  if (pathname === "/demo-form") return "demo";
-  return "member";
-}
-
-function Avatar({ showHandle }: { showHandle: boolean }) {
+function Avatar({
+  showHandle,
+  handle = CURRENT_USER.handle,
+  dot = false,
+}: {
+  showHandle: boolean;
+  handle?: string;
+  dot?: boolean;
+}) {
   return (
-    <span className="flex items-center gap-2">
-      <span className="relative inline-flex size-9 items-center justify-center rounded-full bg-cream text-navy">
+    <span className="flex min-w-0 items-center gap-2">
+      <span className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-cream text-navy">
         <UserRound aria-hidden className="size-5" />
-        {CURRENT_USER.hasNotification && (
+        {dot && (
           <span
-            data-testid="notification-dot"
-            className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-navy bg-coral"
-          />
+            data-testid="unread-dot"
+            className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-cream bg-coral-cta"
+          >
+            <span className="sr-only">New updates</span>
+          </span>
         )}
       </span>
-      <span className={showHandle ? "font-semibold" : "sr-only"}>{CURRENT_USER.handle}</span>
+      <span
+        className={showHandle ? "font-semibold" : "max-w-20 truncate font-semibold"}
+        title={handle}
+      >
+        {handle}
+      </span>
     </span>
   );
 }
@@ -82,12 +94,85 @@ function DemoProfile({ showHandle }: { showHandle: boolean }) {
 const signIn = "site-nav-link rounded-md px-2 py-1";
 const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream";
 
-export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
+export function MemberProfile({ showHandle }: { showHandle: boolean }) {
+  const auth = useAccountAuth();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+  const fetchDot = useServerFn(getUnreadDot);
+  const signedIn = Boolean(auth?.account);
+  const dot = useQuery({
+    queryKey: UNREAD_DOT_KEY,
+    queryFn: () => fetchDot(),
+    enabled: signedIn,
+  });
+  if (!auth?.account) return null;
+  return (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        className="h-auto rounded-full p-0 text-cream"
+        aria-label={`${auth.account.handle} menu`}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Avatar
+          showHandle={showHandle}
+          handle={auth.account.handle}
+          dot={dot.data?.unread === true}
+        />
+      </Button>
+      {open && (
+        <ul
+          aria-label="Profile"
+          className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
+        >
+          <li>
+            <Link to="/submissions" className="block px-4 py-2 hover:bg-cream">
+              Your Submissions
+            </Link>
+          </li>
+          <li>
+            <Link to="/profile" className="block px-4 py-2 hover:bg-cream">
+              Your Profile
+            </Link>
+          </li>
+          {auth.account.isAdmin && (
+            <li>
+              <Link to="/admin" className="block px-4 py-2 hover:bg-cream">
+                Admin
+              </Link>
+            </li>
+          )}
+          <li className="border-t border-border">
+            <Button
+              variant="ghost"
+              className="w-full justify-start px-4 text-navy"
+              onClick={() =>
+                void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."))
+              }
+            >
+              Sign out
+            </Button>
+          </li>
+          {error && (
+            <li role="alert" className="px-4 py-2">
+              {error}
+            </li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
+export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
+  const auth = useAccountAuth();
+  const mode = previewMode ?? (auth?.account ? "member" : "signed-out");
+  const demoEnabled = previewMode !== undefined || auth?.demoEnabled;
   const [open, setOpen] = useState(false);
   const signedOut = mode === "signed-out";
   return (
     <header className="bg-navy text-cream" data-mode={mode}>
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-2">
+      <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 md:flex md:gap-6">
         <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
           <img
             src="/brand/what-the-plate-logo-v1.webp"
@@ -107,39 +192,46 @@ export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
         <div className="ml-auto hidden items-center gap-4 md:flex">
           {signedOut ? (
             <>
-              <Link to="/sign-in" className={signIn}>
+              <Link to="/sign-in" search={{ returnTo: "/" }} className={signIn}>
                 Sign in
               </Link>
-              <Link to="/demo" className={tryDemo}>
-                Try the Demo
-              </Link>
+              {demoEnabled && (
+                <Link to="/demo" className={tryDemo}>
+                  Try the Demo
+                </Link>
+              )}
             </>
           ) : mode === "demo" ? (
             <DemoProfile showHandle />
-          ) : (
+          ) : previewMode ? (
             <Avatar showHandle />
+          ) : (
+            <MemberProfile showHandle />
           )}
         </div>
-        <div className="ml-auto flex items-center gap-3 md:hidden">
+        <div className="ml-auto flex min-w-0 items-center gap-2 md:hidden">
           {signedOut ? (
-            <Link to="/sign-in" className={signIn}>
+            <Link to="/sign-in" search={{ returnTo: "/" }} className={signIn}>
               Sign in
             </Link>
           ) : mode === "demo" ? (
             <DemoProfile showHandle={false} />
-          ) : (
+          ) : previewMode ? (
             <Avatar showHandle={false} />
+          ) : (
+            <MemberProfile showHandle={false} />
           )}
-          <button
+          <Button
+            variant="ghost"
             type="button"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-10 items-center justify-center rounded-lg"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg p-0 text-cream"
           >
             {open ? <X aria-hidden /> : <Menu aria-hidden />}
-          </button>
+          </Button>
         </div>
       </div>
       {open && (
@@ -153,7 +245,7 @@ export function SiteHeader({ mode = "member" }: { mode?: HeaderMode }) {
               {item.label}
             </a>
           ))}
-          {signedOut && (
+          {signedOut && demoEnabled && (
             <Link to="/demo" className={`${tryDemo} mt-2 inline-block`}>
               Try the Demo
             </Link>

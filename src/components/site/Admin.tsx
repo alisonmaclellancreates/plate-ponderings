@@ -1,7 +1,19 @@
 import { Plate } from "@/components/site/Plate";
 import { REPORTED_STORIES, type ReportedStory } from "@/lib/mock-data";
+import { REPORT_REASON_OPTIONS } from "@/lib/report-reasons";
+import { AiCheckStatus } from "./AiCheckStatus";
 
-function ReportRow({ row }: { row: ReportedStory }) {
+type Toggle = ((row: ReportedStory) => void) | undefined;
+
+function ReportRow({
+  row,
+  onToggle,
+  busy,
+}: {
+  row: ReportedStory;
+  onToggle: Toggle;
+  busy: boolean;
+}) {
   return (
     <tr className="border-t border-border">
       <td className="p-3">
@@ -10,10 +22,22 @@ function ReportRow({ row }: { row: ReportedStory }) {
       <td className="p-3 font-semibold">{row.handle}</td>
       <td className="p-3">{row.meaning}</td>
       <td className="p-3 text-center">{row.reports}</td>
-      <td className="p-3">{row.reasons.join(", ")}</td>
+      <td className="p-3">
+        {row.reasons
+          .map(
+            (reason) =>
+              REPORT_REASON_OPTIONS.find((option) => option.key === reason)?.label ?? reason,
+          )
+          .join(", ")}
+      </td>
       <td className="p-3 capitalize">{row.status}</td>
       <td className="p-3">
-        <button type="button" className="brand-btn brand-btn-outline">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onToggle?.(row)}
+          className="brand-btn brand-btn-outline"
+        >
           {row.status === "visible" ? "Hide" : "Unhide"}
         </button>
       </td>
@@ -21,16 +45,43 @@ function ReportRow({ row }: { row: ReportedStory }) {
   );
 }
 
-export function AdminPage({ rows = REPORTED_STORIES }: { rows?: ReportedStory[] }) {
+export const SAMPLE_RECHECK_NOTE = "2 items waiting for a safety check.";
+
+export function AdminPage({
+  rows = REPORTED_STORIES,
+  onToggle,
+  onRecheck,
+  busy = false,
+  note = SAMPLE_RECHECK_NOTE,
+  message = "",
+}: {
+  rows?: ReportedStory[];
+  onToggle?: Toggle;
+  onRecheck?: () => void;
+  busy?: boolean;
+  note?: string;
+  message?: string;
+}) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="font-display text-4xl text-navy">Admin</h1>
+      <AiCheckStatus />
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button type="button" className="brand-btn brand-btn-navy">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onRecheck}
+          className="brand-btn brand-btn-navy"
+        >
           Recheck pending
         </button>
-        <p className="text-sm text-muted-foreground">2 items waiting for a safety check.</p>
+        {note && <p className="text-sm text-muted-foreground">{note}</p>}
       </div>
+      {message && (
+        <p role="alert" className="mt-4">
+          {message}
+        </p>
+      )}
       <div data-testid="admin-table-scroll" className="brand-card mt-6 overflow-x-auto">
         <table className="w-full min-w-[48rem] text-left text-sm">
           <caption className="sr-only">Reported stories</caption>
@@ -61,7 +112,7 @@ export function AdminPage({ rows = REPORTED_STORIES }: { rows?: ReportedStory[] 
           </thead>
           <tbody>
             {rows.map((row) => (
-              <ReportRow key={row.id} row={row} />
+              <ReportRow key={row.id} row={row} onToggle={onToggle} busy={busy} />
             ))}
           </tbody>
         </table>

@@ -12,9 +12,11 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { SiteHeader, headerModeFor } from "../components/site/SiteHeader";
+import { SiteHeader } from "../components/site/SiteHeader";
+import { AccountProvider } from "@/lib/auth-context";
 import { SiteFooter } from "../components/site/SiteFooter";
 import { NotFoundPage } from "../components/site/InfoPages";
+import { track } from "@/lib/analytics";
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
@@ -108,16 +110,22 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  useEffect(() => {
+    void track("$pageview", { path: pathname });
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader mode={headerModeFor(pathname)} />
-        <div className="flex-1">
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
+      <AccountProvider>
+        <div className="flex min-h-screen flex-col">
+          <SiteHeader />
+          <div className="flex-1">
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+          </div>
+          <SiteFooter />
         </div>
-        <SiteFooter />
-      </div>
+      </AccountProvider>
     </QueryClientProvider>
   );
 }

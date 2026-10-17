@@ -1,5 +1,118 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792190883516,
+      "tag": "0000_step41_backend_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792190905253,
+      "tag": "0001_step41_story_photos_storage_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792191564122,
+      "tag": "0002_step41_no_public_reads_exact_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792195593112,
+      "tag": "0003_step42_accounts_handles",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792219875013,
+      "tag": "0004_step43_subject_attempts_recheck_shared_ai_block",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792221587956,
+      "tag": "0005_step43_subject_attempts_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792225154022,
+      "tag": "0006_step43b_drop_deprecated_handle_check_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792225165694,
+      "tag": "0007_step43b_subject_attempts_user_time_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792227504499,
+      "tag": "0008_step44_story_attempts",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792228128381,
+      "tag": "0009_step44_stories_server_only_writes",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792237113194,
+      "tag": "0010_summary_runs",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792240941450,
+      "tag": "0011_subject_guesses",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792241269406,
+      "tag": "0012_subject_guesses_service_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792243498477,
+      "tag": "0013_featured_days_and_visible_summaries",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792246709627,
+      "tag": "0014_notifications_cascade",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792249524817,
+      "tag": "0015_step48_story_actions",
+      "breakpoints": true
+    }
+  ]
 }

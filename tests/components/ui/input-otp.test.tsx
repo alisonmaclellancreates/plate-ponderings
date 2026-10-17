@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { OTPInputContext } from "input-otp";
 import {
   InputOTP,
@@ -40,8 +40,8 @@ describe("InputOTP", () => {
     expect(screen.getByRole("separator").querySelector("svg")).not.toBeNull();
   });
 
-  it("renders the real input with merged class names", () => {
-    const { container } = render(
+  it("renders the real input with merged class names", async () => {
+    const { container, unmount } = render(
       <InputOTP maxLength={3} containerClassName="wrap-x" className="in-x">
         <InputOTPGroup>
           <InputOTPSlot index={0} />
@@ -50,5 +50,9 @@ describe("InputOTP", () => {
     );
     expect(container.querySelector(".wrap-x")).not.toBeNull();
     expect(container.querySelector("input")).toHaveClass("in-x", "disabled:cursor-not-allowed");
+    // input-otp schedules uncleared selection-sync timeouts at 0, 10 and 50ms on mount.
+    // Let them fire while the DOM still exists, then unmount inside the test.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 60)));
+    unmount();
   });
 });

@@ -42,6 +42,19 @@ describe("previews route", () => {
 });
 
 describe("previews plate links", () => {
+  it("links the featured sample pages and identifies home and archive as live", () => {
+    const C = R.component;
+    render(<C />);
+    const links = screen.getAllByRole("link");
+    expect(links.find((link) => link.getAttribute("href") === "/")?.textContent).toContain(
+      "Live data:",
+    );
+    expect(links.find((link) => link.getAttribute("href") === "/explore")?.textContent).toContain(
+      "Live data:",
+    );
+    expect(links.map((link) => link.getAttribute("href"))).toContain("/previews/explore");
+    expect(links.map((link) => link.getAttribute("href"))).toContain("/previews/homepage-featured");
+  });
   it("links every plate detail state", () => {
     const C = R.component;
     render(<C />);

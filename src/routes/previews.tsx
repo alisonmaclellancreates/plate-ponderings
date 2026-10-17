@@ -16,8 +16,18 @@ export const Route = createFileRoute("/previews")({
 
 /** Every static preview route. Add one entry per new preview page. */
 const PREVIEWS = [
-  { to: "/", label: "Homepage", note: "Hero, search, Plate of the Day, recently featured" },
-  { to: "/explore", label: "The Roadside Archive", note: "14 featured plates, newest first" },
+  { to: "/", label: "Homepage", note: "Live data: search, Plate of the Day, recently featured" },
+  { to: "/explore", label: "The Roadside Archive", note: "Live data: featured days, newest first" },
+  {
+    to: "/previews/explore",
+    label: "Archive, sample data",
+    note: "14 featured days, all progress states and Load More",
+  },
+  {
+    to: "/previews/homepage-featured",
+    label: "Homepage featured, sample data",
+    note: "Mystery, singular and plural fallback bands, four-card shelf",
+  },
   {
     to: "/home-no-match",
     label: "Homepage, no match",
@@ -33,21 +43,64 @@ const PREVIEWS = [
     label: "Plate and badges",
     note: "Plate in three sizes, every badge",
   },
-  { to: "/submissions", label: "Your Submissions", note: "Plates and stories, newest first" },
+  {
+    to: "/submissions",
+    label: "Your Submissions",
+    note: "Live data: your plates and stories, newest first",
+  },
+  {
+    to: "/previews/submissions",
+    label: "Your Submissions, sample data",
+    note: "Every plate and story status, some Updated, inert Dismiss",
+  },
   { to: "/profile", label: "Your Profile", note: "Handle, help text and preview card" },
   { to: "/sign-in-prompt", label: "Sign in prompt", note: "Add Your Story for PNW LV, signed out" },
   { to: "/sign-in", label: "Sign In", note: "Email and password" },
   { to: "/sign-up", label: "Create an Account", note: "Email and password, no handle" },
   { to: "/demo", label: "Try the Demo", note: "What the demo shows" },
   { to: "/demo-form", label: "Demo, Add a story", note: "Step 1 read-only, profile menu open" },
-  { to: "/settings", label: "Settings", note: "Blocked people and delete account" },
-  { to: "/settings/delete-confirm", label: "Delete account, confirm", note: "Keep or delete" },
+  { to: "/settings", label: "Settings", note: "Live data: your blocked people and delete account" },
+  {
+    to: "/previews/settings",
+    label: "Settings, sample data",
+    note: "Two blocked people, inert Unblock",
+  },
+  {
+    to: "/settings/delete-confirm",
+    label: "Delete account, confirm",
+    note: "Live: deletes your account",
+  },
+  {
+    to: "/previews/settings-delete-confirm",
+    label: "Delete account, confirm, sample",
+    note: "Keep or delete, inert",
+  },
   { to: "/story-menu", label: "Story menus", note: "Report, block, delete and both dialogs" },
-  { to: "/admin", label: "Admin", note: "Reported stories table" },
+  { to: "/admin", label: "Admin", note: "Live data: reported stories, admins only" },
+  {
+    to: "/previews/admin",
+    label: "Admin, sample data",
+    note: "Visible and hidden reports, recheck note, inert actions",
+  },
   { to: "/about", label: "About", note: "Why What the Plate? exists" },
   { to: "/privacy", label: "Privacy", note: "Storage, photos, AI, blocking, deleting" },
   { to: "/contact", label: "Contact", note: "Email link placeholder" },
   { to: "/not-found", label: "Not found", note: "Sasquatch and Back to Explore" },
+  {
+    to: "/previews/account",
+    label: "Account states",
+    note: "Handle field and save states, sign-in and sign-up errors, admin status",
+  },
+  {
+    to: "/previews/story-error",
+    label: "Add a story, error (live form)",
+    note: "Real form, inert: error notice, words kept",
+  },
+  {
+    to: "/previews/story-rate-limited",
+    label: "Add a story, paused (live form)",
+    note: "Real form, inert: Let's pause a moment, words kept",
+  },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */
@@ -114,7 +167,7 @@ function Previews() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="font-display text-4xl text-navy">Previews</h1>
-      <p className="mt-2 text-lg">Static page previews. Mock data only.</p>
+      <p className="mt-2 text-lg">Sample previews and live pages, labelled below.</p>
       <ul className="mt-8 space-y-3">
         {PREVIEWS.map((p) => (
           <li key={p.to}>

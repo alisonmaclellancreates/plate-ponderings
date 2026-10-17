@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => vi.fn(),
   Link: ({
     to,
     params,
@@ -24,38 +25,21 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
+vi.mock("@tanstack/react-start", () => ({
+  useServerFn: (fn: unknown) => fn,
+  createServerFn: () => {
+    const b = { middleware: () => b, inputValidator: () => b, handler: (fn: unknown) => fn };
+    return b;
+  },
+  createMiddleware: () => ({ server: () => ({}) }),
+}));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 
-import { DemoPage, SignInPage, SignInPromptPage, SignUpPage } from "@/components/site/Entry";
+import { DemoPage, SignInPage, SignUpPage } from "@/components/site/Entry";
 import { StoryStepOne } from "@/components/site/AddStory";
-import { SiteHeader, headerModeFor } from "@/components/site/SiteHeader";
+import { SiteHeader } from "@/components/site/SiteHeader";
 
 describe("entry screens", () => {
-  it("sign-in prompt offers three choices with captions and a way back", () => {
-    render(<SignInPromptPage />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Add Your Story");
-    expect(screen.getByRole("img", { name: "Oregon plate PNW LV" })).toBeInTheDocument();
-    expect(screen.getByText("Sign in to add your story")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Choose how you'd like to continue. After signing in, you'll return here to add your story.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/Your story will be added/)).toBeNull();
-    const signIn = screen.getByRole("link", { name: "Sign In" });
-    expect(signIn).toHaveAttribute("href", "/sign-in");
-    expect(signIn).toHaveAccessibleDescription("I already have an account");
-    expect(screen.getByRole("link", { name: "Create an Account" })).toHaveAccessibleDescription(
-      "I'm new here",
-    );
-    expect(screen.getByRole("link", { name: "Try the Demo" })).toHaveAccessibleDescription(
-      "Look around as a sample traveler",
-    );
-    expect(screen.getByRole("link", { name: "Back to this plate" })).toHaveAttribute(
-      "href",
-      "/plate/pnw-lv",
-    );
-  });
-
   it("sign in toggles password visibility and has no extras", () => {
     render(<SignInPage />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Sign In");
@@ -106,12 +90,6 @@ describe("entry screens", () => {
 });
 
 describe("header modes", () => {
-  it("maps preview paths to header modes", () => {
-    expect(headerModeFor("/sign-in")).toBe("signed-out");
-    expect(headerModeFor("/demo-form")).toBe("demo");
-    expect(headerModeFor("/")).toBe("member");
-  });
-
   it("signed out shows Sign in, Try the Demo, and moves the demo into the mobile menu", () => {
     render(<SiteHeader mode="signed-out" />);
     expect(screen.getAllByRole("link", { name: "Sign in" })).toHaveLength(2);

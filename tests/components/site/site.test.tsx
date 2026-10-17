@@ -51,7 +51,7 @@ describe("badges", () => {
         <ModerationBadge state="rejected" />
       </>,
     );
-    expect(screen.getByText("Owner weighed in")).toHaveAttribute("data-tone", "teal");
+    expect(screen.getByText("Owner claim")).toHaveAttribute("data-tone", "teal");
     expect(screen.getByText("Opinions differ")).toHaveAttribute("data-tone", "coral");
     expect(screen.getByText("My best guess")).toHaveAttribute("data-kind", "how");
     expect(screen.getByText("Couldn't approve")).toHaveAttribute("data-kind", "moderation");
@@ -60,10 +60,10 @@ describe("badges", () => {
 
 describe("SiteHeader", () => {
   it("links home, shows the handle, notification and toggles the mobile menu", () => {
-    render(<SiteHeader />);
+    render(<SiteHeader mode="member" />);
     expect(screen.getByRole("link", { name: "What the Plate? home" })).toHaveAttribute("href", "/");
     expect(screen.getAllByText("Traveler4821").length).toBeGreaterThan(0);
-    expect(screen.getAllByTestId("notification-dot").length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("notification-dot")).toBeNull();
     const button = screen.getByRole("button", { name: "Open menu" });
     fireEvent.click(button);
     const mobile = screen.getByRole("navigation", { name: "Mobile" });

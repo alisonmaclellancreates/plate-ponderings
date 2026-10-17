@@ -82,7 +82,7 @@ function ComponentsPreview() {
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            {(["owner", "knows", "asked", "guess"] as const).map((h) => (
+            {(["owner", "knows_owner", "secondhand", "guess"] as const).map((h) => (
               <HowIKnowBadge key={h} how={h} />
             ))}
           </div>

@@ -1,9 +1,8 @@
 /** Static preview data shared by every preview page. Replaced by Cloud data in a later step. */
-import { storyCount } from "@/lib/story-count";
 
 export type PlateStatus = "mystery" | "interpreted" | "owner";
 export type Consensus = "agree" | "mixed" | "differ";
-export type HowIKnow = "owner" | "knows" | "asked" | "guess";
+export type HowIKnow = "owner" | "knows_owner" | "secondhand" | "guess";
 export type Moderation = "published" | "pending" | "rejected";
 
 export interface Story {
@@ -79,7 +78,7 @@ export const PLATES: PlateRecord[] = [
         "Saw it parked outside a data centre in Burnaby. Felt like an inside joke.",
       ),
 
-      s("bc3", "rivercat", "2026-10-05", "Live to code.", "knows", 11),
+      s("bc3", "rivercat", "2026-10-05", "Live to code.", "knows_owner", 11),
       s(
         "bc4",
         "Traveler4821",
@@ -88,7 +87,14 @@ export const PLATES: PlateRecord[] = [
         "guess",
         2,
       ),
-      s("bc5", "teadragon", "2026-10-09", "The driver said it's about their bootcamp.", "asked", 9),
+      s(
+        "bc5",
+        "teadragon",
+        "2026-10-09",
+        "The driver said it's about their bootcamp.",
+        "secondhand",
+        9,
+      ),
     ],
     summaries: [
       {
@@ -133,13 +139,13 @@ export const PLATES: PlateRecord[] = [
         "My grandmother poured me my first cup when I was five. I've been hooked ever since.",
       ),
       s("ca2", "maplegirl", "2026-09-21", "A tea lover, obviously.", "guess", 5),
-      s("ca3", "rivercat", "2026-09-22", "Someone who really loves tea.", "knows", 8),
+      s("ca3", "rivercat", "2026-09-22", "Someone who really loves tea.", "knows_owner", 8),
       withPhoto(
         "ca4",
         "northshore",
         "2026-09-24",
         "Asked at a light: they just love tea.",
-        "asked",
+        "secondhand",
         7,
       ),
       s("ca5", "Traveler4821", "2026-09-26", "Afternoon tea enthusiast.", "guess", 3),
@@ -178,7 +184,7 @@ export const PLATES: PlateRecord[] = [
     summaries: [],
     stories: [
       s(`${slug}-1`, "rivercat", day, meaning, "guess", 4 + i),
-      s(`${slug}-2`, "northshore", day, meaning, "knows", 2 + i),
+      s(`${slug}-2`, "northshore", day, meaning, "knows_owner", 2 + i),
     ],
     ...(slug === "co-wander" ? { featuredStoryCount: 2 } : {}),
   })),
@@ -248,12 +254,8 @@ export function publishedStories(plate: PlateRecord): Story[] {
   return plate.stories.filter((story) => (story.moderation ?? "published") === "published");
 }
 
-/** Progress since a plate was featured, from published story counts only. */
-export function featuredProgress(featured: number, now: number): string {
-  if (now === 0) return "Still a mystery";
-  if (featured === 0) return `Was a mystery, now ${storyCount(now)}`;
-  return `Had ${storyCount(featured)} when featured, now ${now}`;
-}
+/** Single source of truth for featured progress, defined in featured.ts. */
+export { featuredProgress } from "./featured";
 
 export const TODAY = "2026-10-16";
 
@@ -403,3 +405,73 @@ export const PROFILE_SAMPLE_STORY: Story = {
   longer: "Saw this plate at a trailhead outside Bend.",
   hearts: 0,
 };
+
+/** Your Submissions sample preview: one row for every live row type, some marked Updated. */
+export const SUBMISSIONS_SAMPLE: Submission[] = [
+  {
+    id: "sample-plate-published",
+    jurisdiction: "Oregon",
+    text: "PNW LV",
+    kind: "plate",
+    date: "2026-10-16",
+    moderation: "published",
+    explanation: "This plate is live with 2 stories.",
+    plateState: "pnw-lv",
+    action: "view",
+    updated: true,
+  },
+  {
+    id: "sample-story-published",
+    jurisdiction: "California",
+    text: "TEATIME",
+    kind: "story",
+    date: "2026-10-15",
+    moderation: "published",
+    explanation: "Your story is live and has 1 heart.",
+    plateState: "owner",
+    action: "view",
+  },
+  {
+    id: "sample-plate-pending",
+    jurisdiction: "Washington",
+    text: "DEBUGGR",
+    kind: "plate",
+    date: "2026-10-14",
+    moderation: "pending",
+    explanation: "Waiting for its check. We'll let you know when it's ready.",
+    action: null,
+  },
+  {
+    id: "sample-story-pending",
+    jurisdiction: "Oregon",
+    text: "PNW LV",
+    kind: "story",
+    date: "2026-10-13",
+    moderation: "pending",
+    explanation: "Waiting for its check. We'll let you know when it's ready.",
+    plateState: "pnw-lv",
+    action: "view",
+  },
+  {
+    id: "sample-plate-rejected",
+    jurisdiction: "Nevada",
+    text: "XQZZ 9",
+    kind: "plate",
+    date: "2026-10-12",
+    moderation: "rejected",
+    explanation: "We couldn't add your plate.",
+    action: "dismiss",
+    updated: true,
+  },
+  {
+    id: "sample-story-rejected",
+    jurisdiction: "Utah",
+    text: "CANYONS",
+    kind: "story",
+    date: "2026-10-11",
+    moderation: "rejected",
+    explanation: "We couldn't add your story.",
+    action: "dismiss",
+    updated: true,
+  },
+];

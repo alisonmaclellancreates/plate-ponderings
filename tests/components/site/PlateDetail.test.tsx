@@ -1,12 +1,42 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PlateDetail, Stories, StoryCard, orderStories } from "@/components/site/PlateDetail";
+import { PlateDetail, Stories, StoryCard } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
+
+vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
+vi.mock("@/lib/mock-data", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/mock-data")>();
+  const base = original.PLATES.find((plate) => plate.slug === "ut-canyons");
+  if (!base) throw new Error("Missing Utah preview fixture");
+  return {
+    ...original,
+    PLATES: [
+      ...original.PLATES,
+      { ...base, slug: "test-nl", jurisdiction: "Newfoundland and Labrador", text: "ROW43XYZ" },
+      {
+        ...(original.PLATES.find((plate) => plate.summaries.length > 0) ?? base),
+        slug: "test-no-summary",
+        summaries: [],
+      },
+    ],
+  };
+});
 
 const strip = () => screen.getByRole("list", { name: "Plate status" });
 
 describe("PlateDetail", () => {
+  it.each([
+    ["ut-canyons", "Utah", "CANYONS"],
+    ["test-nl", "Newfoundland and Labrador", "ROW43XYZ"],
+  ])("uses the shared frame for preview %s", (state, jurisdiction, text) => {
+    render(<PlateDetail state={state} />);
+    const artwork = screen.getByRole("img", { name: `${jurisdiction} plate ${text}` });
+    const name = screen.getByText(jurisdiction, { selector: "p" });
+    expect(artwork.nextElementSibling).toBe(name);
+    expect(name.getAttribute("aria-hidden")).toBe("true");
+  });
+
   it("ut-canyons by slug renders the CANYONS plate as a mystery", () => {
     render(<PlateDetail state="ut-canyons" />);
     expect(screen.getByRole("heading", { level: 1, name: "Utah plate CANYONS" })).toBeTruthy();
@@ -53,7 +83,7 @@ describe("PlateDetail", () => {
     expect(screen.queryByText("The Story So Far")).toBeNull();
     expect(within(strip()).getByText("0 stories")).toBeTruthy();
     expect(within(strip()).getByText("Mystery")).toBeTruthy();
-    expect(within(strip()).getByText("No owner yet")).toBeTruthy();
+    expect(within(strip()).getByText("No owner claim yet")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Back to Explore" }).getAttribute("href")).toBe(
       "/explore",
     );
@@ -71,18 +101,18 @@ describe("PlateDetail", () => {
     expect(handles).toEqual(["maplegirl", "northshore", "rivercat", "Traveler4821", "teadragon"]);
     expect(screen.queryByText(/more stor/)).toBeNull();
     expect(screen.getAllByRole("img", { name: /Photo shared by/ })).toHaveLength(1);
-    expect(within(strip()).getByText("No owner yet")).toBeTruthy();
+    expect(within(strip()).getByText("No owner claim yet")).toBeTruthy();
   });
 
   it("owner: attributes ownership, owner first, no earlier control, shows more", async () => {
     render(<PlateDetail state="owner" />);
     expect(screen.getByText(/a contributor who says it's their plate explains/)).toBeTruthy();
     expect(screen.queryByText(/Earlier summaries/)).toBeNull();
-    expect(within(strip()).getByText("Owner: teadragon")).toBeTruthy();
+    expect(within(strip()).getByText("Says it's their plate: teadragon")).toBeTruthy();
     const cards = screen.getAllByRole("article");
     expect(cards).toHaveLength(5);
     expect(cards[0]?.getAttribute("data-owner")).toBe("true");
-    expect(within(cards[0]!).getByText("Owner weighed in")).toBeTruthy();
+    expect(within(cards[0]!).getByText("Owner claim")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Show 1 more story" }));
     expect(screen.getAllByRole("article")).toHaveLength(6);
   });
@@ -161,26 +191,6 @@ describe("Stories", () => {
   });
 });
 
-describe("orderStories", () => {
-  it("never sorts by hearts; ties broken by id", () => {
-    const mk = (id: string, date: string, hearts: number): Story => ({
-      id,
-      handle: id,
-      date,
-      meaning: id,
-      howIKnow: "guess",
-      hearts,
-    });
-    expect(
-      orderStories([
-        mk("b", "2026-01-01", 1),
-        mk("a", "2026-01-01", 99),
-        mk("c", "2025-01-01", 0),
-      ]).map((s) => s.id),
-    ).toEqual(["c", "a", "b"]);
-  });
-});
-
 it("reads a story with 1 heart as 1 heart", () => {
   render(
     <StoryCard
@@ -196,4 +206,10 @@ it("reads a story with 1 heart as 1 heart", () => {
   );
   expect(screen.getByText("heart").previousSibling?.textContent).toBe("1");
   expect(screen.queryByText("hearts")).toBeNull();
+});
+
+it("a plate with stories but no summary yet shows no Story So Far", () => {
+  render(<PlateDetail state="test-no-summary" />);
+  expect(screen.queryByRole("heading", { name: "The Story So Far" })).toBeNull();
+  expect(screen.queryByRole("heading", { name: "What do you think this plate means?" })).toBeNull();
 });

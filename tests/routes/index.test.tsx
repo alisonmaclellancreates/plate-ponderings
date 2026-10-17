@@ -3,6 +3,15 @@ import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 let search: { jurisdiction?: string; text?: string } = {};
+vi.mock("@tanstack/react-query", () => ({
+  useSuspenseQuery: () => ({ data: { today: "2026-10-17", pick: null, recent: [] } }),
+  queryOptions: (o: unknown) => o,
+  infiniteQueryOptions: (o: unknown) => o,
+}));
+vi.mock("@/lib/featured.functions", () => ({
+  getFeaturedHome: vi.fn(),
+  getFeaturedArchive: vi.fn(),
+}));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => ({ ...o, useSearch: () => search }),
 }));
@@ -19,6 +28,7 @@ type R = {
   validateSearch: (s: Record<string, unknown>) => Record<string, string | undefined>;
   head: () => { meta: Record<string, string>[] };
   component: () => ReactNode;
+  loader: (args: unknown) => unknown;
 };
 
 it("renders the default variant with matching titles", async () => {
@@ -28,6 +38,15 @@ it("renders the default variant with matching titles", async () => {
   const meta = r.head().meta;
   const title = meta.find((m) => "title" in m)?.["title"];
   expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
+});
+
+it("loads the matching homepage query", async () => {
+  const r = (await import("@/routes/index")).Route as unknown as R;
+  const ensureQueryData = vi.fn().mockResolvedValue("home");
+  expect(await r.loader({ context: { queryClient: { ensureQueryData } } })).toBe("home");
+  expect(ensureQueryData).toHaveBeenCalledWith(
+    expect.objectContaining({ queryKey: ["featured-home"] }),
+  );
 });
 
 it("passes validated search values into the homepage search", async () => {

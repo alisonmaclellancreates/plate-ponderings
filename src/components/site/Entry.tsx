@@ -1,7 +1,23 @@
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import { PlateHeader } from "@/components/site/AddStory";
+import { DEMO_SEES } from "@/lib/demo";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAccountAuth } from "@/lib/account-auth";
+import {
+  plateIdOrNull,
+  safeReturnPath,
+  storyReturnPath,
+  signupErrorMessage,
+  SIGN_IN_ERROR,
+  SIGN_UP_ERROR,
+} from "@/lib/account-rules";
+import { Navigate, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getPlate } from "@/lib/plates.functions";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
 
@@ -34,19 +50,27 @@ function EntryShell({
   );
 }
 
-function PasswordField({ hint }: { hint?: string }) {
+function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: string | undefined }) {
   const [shown, setShown] = useState(false);
+  const uid = useId();
+  const id = `password-${uid}`;
+  const hintId = `password-hint-${uid}`;
   return (
     <div>
-      <label htmlFor="password" className="mb-1 block font-semibold">
+      <label htmlFor={id} className="mb-1 block font-semibold">
         Password
       </label>
       <div className="relative">
         <input
-          id="password"
+          id={id}
+          name="password"
+          required
+          minLength={hint ? 8 : undefined}
           type={shown ? "text" : "password"}
           autoComplete={hint ? "new-password" : "current-password"}
-          aria-describedby={hint ? "password-hint" : undefined}
+          aria-describedby={
+            [hint ? hintId : "", describedBy ?? ""].filter(Boolean).join(" ") || undefined
+          }
           className={`${field} pr-12`}
         />
         <button
@@ -64,7 +88,7 @@ function PasswordField({ hint }: { hint?: string }) {
         </button>
       </div>
       {hint && (
-        <p id="password-hint" className="mt-1 text-sm text-muted-foreground">
+        <p id={hintId} className="mt-1 text-sm text-muted-foreground">
           {hint}
         </p>
       )}
@@ -72,31 +96,135 @@ function PasswordField({ hint }: { hint?: string }) {
   );
 }
 
-function EmailField() {
+function EmailField({ describedBy }: { describedBy?: string | undefined }) {
+  const uid = useId();
+  const id = `email-${uid}`;
   return (
     <div>
-      <label htmlFor="email" className="mb-1 block font-semibold">
+      <label htmlFor={id} className="mb-1 block font-semibold">
         Email
       </label>
-      <input id="email" type="email" autoComplete="email" className={field} />
+      <input
+        id={id}
+        name="email"
+        required
+        type="email"
+        autoComplete="email"
+        aria-describedby={describedBy}
+        className={field}
+      />
     </div>
+  );
+}
+
+/** Account error: coral text with a decorative warning icon, announced on appear. */
+function FormError({ id, children }: { id: string; children: ReactNode }) {
+  return (
+    <p id={id} role="alert" className="flex items-start gap-1.5 text-coral-cta">
+      <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+      {children}
+    </p>
   );
 }
 
 const link = "font-semibold text-teal underline underline-offset-4";
 
-export function SignInPage() {
+function useEntry(kind: "signed_in" | "signed_up", returnTo: string) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const auth = useAccountAuth();
+  const navigate = useNavigate();
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    const data = new FormData(e.currentTarget);
+    const email = String(data.get("email") ?? "");
+    const password = String(data.get("password") ?? "");
+    if (!email || !password) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result =
+        kind === "signed_up"
+          ? await supabase.auth.signUp({ email, password })
+          : await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) {
+        setError(kind === "signed_up" ? signupErrorMessage(result.error) : SIGN_IN_ERROR);
+        return;
+      }
+      if (!result.data.session) {
+        setError("Your account couldn't be signed in. Please try signing in.");
+        return;
+      }
+      await auth?.completeSignIn(kind);
+      await navigate({ to: safeReturnPath(returnTo) });
+    } catch {
+      setError(kind === "signed_up" ? SIGN_UP_ERROR : SIGN_IN_ERROR);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return { busy, error, submit };
+}
+type EntryFormProps = {
+  busy: boolean;
+  error: string;
+  submit: (e: React.FormEvent<HTMLFormElement>) => void;
+};
+
+/** Inert submit for previews: never calls the server. */
+const inertSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+};
+
+export function SignInForm({ busy, error, submit }: EntryFormProps) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
+  return (
+    <form className="space-y-4" onSubmit={submit}>
+      <EmailField describedBy={describedBy} />
+      <PasswordField describedBy={describedBy} />
+      {error && <FormError id={errorId}>{error}</FormError>}
+      <Button type="submit" disabled={busy} className="brand-btn brand-btn-navy w-full">
+        Sign In
+      </Button>
+    </form>
+  );
+}
+
+export function SignUpForm({ busy, error, submit }: EntryFormProps) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
+  return (
+    <form className="space-y-4" onSubmit={submit}>
+      <EmailField describedBy={describedBy} />
+      <PasswordField hint="Use at least 8 characters" describedBy={describedBy} />
+      {error && <FormError id={errorId}>{error}</FormError>}
+      <Button type="submit" disabled={busy} className="brand-btn brand-btn-coral w-full">
+        Create Account
+      </Button>
+    </form>
+  );
+}
+
+export function SignInPage({
+  returnTo = "/",
+  previewError,
+}: {
+  returnTo?: string;
+  previewError?: string;
+}) {
+  const { busy, error, submit } = useEntry("signed_in", returnTo);
+  const preview = previewError !== undefined;
   return (
     <EntryShell title="Sign In" subtitle="Welcome back!">
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-        <EmailField />
-        <PasswordField />
-        <button type="submit" className="brand-btn brand-btn-navy w-full">
-          Sign In
-        </button>
-      </form>
+      <SignInForm
+        busy={preview ? false : busy}
+        error={preview ? previewError : error}
+        submit={preview ? inertSubmit : submit}
+      />
       <p className="mt-5 text-center">
-        <Link to="/sign-up" className={link}>
+        <Link to="/sign-up" search={{ returnTo: safeReturnPath(returnTo) }} className={link}>
           Create an account
         </Link>
       </p>
@@ -104,30 +232,34 @@ export function SignInPage() {
   );
 }
 
-export function SignUpPage() {
+export function SignUpPage({
+  returnTo = "/",
+  previewError,
+}: {
+  returnTo?: string;
+  previewError?: string;
+}) {
+  const { busy, error, submit } = useEntry("signed_up", returnTo);
+  const preview = previewError !== undefined;
   return (
     <EntryShell title="Create an Account" subtitle="Join the community and add your story.">
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-        <EmailField />
-        <PasswordField hint="Use at least 8 characters" />
-        <button type="submit" className="brand-btn brand-btn-coral w-full">
-          Create Account
-        </button>
-      </form>
+      <SignUpForm
+        busy={preview ? false : busy}
+        error={preview ? previewError : error}
+        submit={preview ? inertSubmit : submit}
+      />
       <p className="mt-4 text-sm text-muted-foreground">
         We'll give you a handle to start. You can change it anytime in your profile.
       </p>
       <p className="mt-5 text-center">
         Already have an account?{" "}
-        <Link to="/sign-in" className={link}>
+        <Link to="/sign-in" search={{ returnTo: safeReturnPath(returnTo) }} className={link}>
           Sign in
         </Link>
       </p>
     </EntryShell>
   );
 }
-
-export const DEMO_SEES = ["Your submissions", "A story waiting for its check", "Your profile"];
 
 export function DemoPage() {
   return (
@@ -159,10 +291,53 @@ const CHOICES = [
   },
 ] as const;
 
-export function SignInPromptPage() {
+/**
+ * The sign-in prompt for one real plate. It looks the plate up by id (published only) and
+ * never falls back to another plate: a missing, malformed or unpublished id shows a way on instead.
+ */
+export function SignInPromptPage({ plateId }: { plateId?: string | undefined } = {}) {
+  const id = plateIdOrNull(plateId);
+  const lookup = useServerFn(getPlate);
+  const auth = useAccountAuth();
+  const { data, isPending } = useQuery({
+    queryKey: ["sign-in-prompt-plate", id],
+    queryFn: () => lookup({ data: { id: id as string } }),
+    enabled: id !== null,
+  });
+  const plate = id ? (data?.plate ?? null) : null;
+  if (plate && auth?.account)
+    return (
+      <Navigate to="/story/$step" params={{ step: "1" }} search={{ plate: plate.id }} replace />
+    );
+  if (id && isPending) return <main className="mx-auto max-w-4xl px-4 py-6 sm:py-10" />;
+  if (!plate)
+    return (
+      <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:py-10">
+        <h1 className="font-display text-3xl text-navy sm:text-4xl">Add Your Story</h1>
+        <section className="brand-card mx-auto max-w-lg p-6 sm:p-8">
+          <h2 className="font-display text-2xl text-navy">We couldn't find that plate.</h2>
+          <p className="mt-2">Look it up again, or spot it if it's new to the collection.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link to="/" hash="plate-search" className="brand-btn brand-btn-coral">
+              Look Up a Plate
+            </Link>
+            <Link to="/spot" className="brand-btn brand-btn-outline">
+              Spot a Plate
+            </Link>
+          </div>
+          <p className="mt-6 text-center">
+            <Link to="/explore" className={link}>
+              Explore
+            </Link>
+          </p>
+        </section>
+      </main>
+    );
+
+  const returnTo = storyReturnPath(plate.id);
   return (
     <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:py-10">
-      <PlateHeader />
+      <PlateHeader plate={plate} />
       <h1 className="font-display text-3xl text-navy sm:text-4xl">Add Your Story</h1>
       <section aria-labelledby="prompt-title" className="brand-card mx-auto max-w-lg p-6 sm:p-8">
         <h2 id="prompt-title" className="font-display text-2xl text-navy">
@@ -176,6 +351,7 @@ export function SignInPromptPage() {
             <li key={c.to}>
               <Link
                 to={c.to}
+                search={c.to === "/demo" ? {} : { returnTo }}
                 aria-describedby={`cap-${c.to.slice(1)}`}
                 className={`brand-btn ${c.cls} w-full`}
               >
@@ -191,7 +367,7 @@ export function SignInPromptPage() {
           ))}
         </ul>
         <p className="mt-6 text-center">
-          <Link to="/plate/$state" params={{ state: "pnw-lv" }} className={link}>
+          <Link to="/plate/$state" params={{ state: plate.id }} className={link}>
             Back to this plate
           </Link>
         </p>

@@ -3,7 +3,10 @@ import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
-  createFileRoute: () => (o: Record<string, unknown>) => o,
+  createFileRoute: () => (o: Record<string, unknown>) => ({
+    ...o,
+    useSearch: () => ({ returnTo: "/" }),
+  }),
 }));
 vi.mock("@/components/site/Entry", () => ({
   SignUpPage: () => <p>signup</p>,

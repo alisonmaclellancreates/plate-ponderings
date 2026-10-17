@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Homepage } from "@/components/site/Homepage";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { featuredHomeOptions } from "@/lib/featured-queries";
 
 const str = (v: unknown) => (typeof v === "string" && v.length <= 64 ? v : undefined);
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(featuredHomeOptions),
   validateSearch: (
     s: Record<string, unknown>,
   ): {
@@ -36,5 +39,6 @@ export const Route = createFileRoute("/")({
 
 function HomeRoute() {
   const prefill = Route.useSearch();
-  return <Homepage prefill={prefill} />;
+  const { data } = useSuspenseQuery(featuredHomeOptions);
+  return <Homepage prefill={prefill} live={data} />;
 }

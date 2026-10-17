@@ -23,7 +23,7 @@ async function loadStart() {
     createCsrfMiddleware,
   }));
   vi.doMock("@/lib/error-page", () => ({ renderErrorPage: () => ERROR_PAGE }));
-  vi.doMock("@/integrations/supabase/auth-attacher", () => ({ attachSupabaseAuth: attachMarker }));
+  vi.doMock("@/lib/session-attacher", () => ({ attachSession: attachMarker }));
   const mod = await import("@/start");
   const config = mod.startInstance as unknown as StartConfig;
   const errorMiddleware = config.requestMiddleware[0] as ServerMiddleware;
@@ -41,7 +41,7 @@ describe("start.ts", () => {
     errorSpy.mockRestore();
     vi.doUnmock("@tanstack/react-start");
     vi.doUnmock("@/lib/error-page");
-    vi.doUnmock("@/integrations/supabase/auth-attacher");
+    vi.doUnmock("@/lib/session-attacher");
     vi.resetModules();
   });
 

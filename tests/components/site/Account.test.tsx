@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -22,11 +22,36 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
+vi.mock("@/lib/account-auth", () => ({
+  useAccountAuth: () => ({ account: { handle: "Traveler1234", isDemo: false }, refresh: vi.fn() }),
+}));
+vi.mock("@tanstack/react-start", () => ({
+  useServerFn: (fn: unknown) => fn,
+  createMiddleware: () => ({ server: (fn: unknown) => fn }),
+  createServerFn: () => {
+    const builder: Record<string, unknown> = {};
+    builder["middleware"] = () => builder;
+    builder["inputValidator"] = () => builder;
+    builder["handler"] = (fn: unknown) => fn;
+    return builder;
+  },
+}));
+vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
+vi.mock("@/lib/accounts.functions", () => ({
+  checkHandle: async () => ({ status: "available" }),
+  saveHandle: vi.fn(),
+}));
 
 import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Account";
 import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
 
 describe("SubmissionsPage", () => {
+  it("leaves preview Dismiss inert without a handler", () => {
+    render(<SubmissionsPage />);
+    fireEvent.click(screen.getAllByRole("button", { name: "Dismiss" })[0] as HTMLElement);
+    expect(screen.getAllByTestId("submission")).toHaveLength(SUBMISSIONS.length);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
   it("lists rows newest first with one h1", () => {
     render(<SubmissionsPage rows={[...SUBMISSIONS].reverse()} />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
@@ -103,16 +128,16 @@ describe("ProfilePage", () => {
     render(<ProfilePage />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     const field = screen.getByLabelText("Handle");
-    expect(field).toHaveValue("Traveler4821");
-    expect(field).toHaveAccessibleDescription(`Available ${HANDLE_HELP}`);
+    expect(field).toHaveValue("Traveler1234");
+    expect(field).toHaveAccessibleDescription(HANDLE_HELP.trim());
     expect(screen.getByRole("button", { name: "Save Changes" })).toBeInTheDocument();
-    expect(screen.getByTestId("sample-story")).toHaveTextContent("Traveler4821");
+    expect(screen.getByTestId("sample-story")).toHaveTextContent("Traveler1234");
   });
 
   it("renders the shared story card for the sample story", () => {
     render(<ProfilePage />);
     const card = screen.getByTestId("sample-story");
-    expect(within(card).getByText("Traveler4821")).toBeInTheDocument();
+    expect(within(card).getByText("Traveler1234")).toBeInTheDocument();
     expect(within(card).getByText("Pacific Northwest love.")).toBeInTheDocument();
     expect(
       within(card).getByText("Saw this plate at a trailhead outside Bend."),

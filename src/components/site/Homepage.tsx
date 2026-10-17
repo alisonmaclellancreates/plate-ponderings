@@ -1,47 +1,20 @@
-import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { AlertCircle, Star } from "lucide-react";
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
 import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
 import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
+import { validateSpot, type SpotErrors } from "@/lib/spot";
+import { searchPlate } from "@/lib/plates.functions";
+import { track } from "@/lib/analytics";
+import { openFeatured, previewFeatured, type FeaturedDisplay } from "@/lib/featured";
+import type { FeaturedHome } from "@/lib/featured.functions";
 
 import { storyCount } from "@/lib/story-count";
-import {
-  PLATES,
-  plateStatus,
-  publishedStories,
-  featuredPlates,
-  TODAY,
-  type PlateRecord,
-} from "@/lib/mock-data";
-
-export const HEADLINES = [
-  "Every plate has a story.",
-  "Little plates. Big stories.",
-  "Spotted a plate? Let's solve it.",
-] as const;
-
-export const ROTATE_MS = 9000;
-
-/**
- * Desktop: soft rotation every 9s, held on the first headline for reduced motion.
- * Mobile: one random headline per visit, no rotation. Starts at 0 so SSR and hydration match.
- */
-export function useHeadlineIndex(): number {
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const mobile = window.matchMedia("(max-width: 1023px)").matches;
-    if (mobile) {
-      setIndex(Math.floor(Math.random() * HEADLINES.length));
-      return;
-    }
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = window.setInterval(() => setIndex((i) => (i + 1) % HEADLINES.length), ROTATE_MS);
-    return () => window.clearInterval(id);
-  }, []);
-  return index;
-}
+import { HEADLINES, useHeadlineIndex } from "@/lib/headlines";
+import { PLATES, featuredPlates, TODAY, type PlateRecord } from "@/lib/mock-data";
 
 function Headline() {
   const active = useHeadlineIndex();
@@ -66,61 +39,144 @@ export interface SearchValues {
   text?: string | undefined;
 }
 
-function SearchCard({ values }: { values: SearchValues }) {
+function SearchCard({
+  values,
+  onNoMatch,
+  onSearchError,
+}: {
+  values: SearchValues;
+  onNoMatch: (values: Required<SearchValues>) => void;
+  onSearchError: (message: string | null) => void;
+}) {
+  const [jurisdiction, setJurisdiction] = useState(values.jurisdiction ?? "");
+  const [text, setText] = useState(values.text ?? "");
+  const [errors, setErrors] = useState<SpotErrors>({});
+  const [busy, setBusy] = useState(false);
+  const search = useServerFn(searchPlate);
+  const navigate = useNavigate();
+  const textDescribedBy = ["plate-text-hint", errors.text && "plate-text-error"]
+    .filter(Boolean)
+    .join(" ");
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    const next = validateSpot({ jurisdiction, text });
+    setErrors(next);
+    if (next.jurisdiction || next.text) return;
+    setBusy(true);
+    onSearchError(null);
+    try {
+      const result = await search({ data: { jurisdiction, text } });
+      if (result.status === "error") {
+        await track("subject_searched", { found: false, jurisdiction });
+        onSearchError("We couldn't search right now. Please try again in a few moments.");
+        return;
+      }
+      await track("subject_searched", {
+        found: result.status === "found",
+        jurisdiction,
+      });
+      if (result.status === "found") {
+        await navigate({
+          to: "/plate/$state",
+          params: { state: result.plate.id },
+          search: { jurisdiction, text },
+        });
+      } else {
+        onNoMatch({ jurisdiction, text });
+      }
+    } catch {
+      onSearchError("We couldn't search right now. Please try again in a few moments.");
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <form
       id="plate-search"
       role="search"
       aria-label="Look up a plate"
-      onSubmit={(e) => e.preventDefault()}
+      noValidate
+      onSubmit={onSubmit}
       className="brand-card bg-cream p-5"
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">State or Province</span>
-          <select
-            name="jurisdiction"
-            defaultValue={values.jurisdiction ?? ""}
-            className="h-11 w-full rounded-lg border border-input bg-card px-3"
-          >
-            <option value="" disabled>
-              Select a state or province
-            </option>
-            {JURISDICTION_GROUPS.map((g) => (
-              <optgroup key={g.label} label={g.label}>
-                {g.names.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+        <div>
+          <label className="block">
+            <span className="mb-1 block text-sm font-semibold">State or Province</span>
+            <select
+              name="jurisdiction"
+              value={jurisdiction}
+              onChange={(e) => setJurisdiction(e.target.value)}
+              aria-invalid={errors.jurisdiction ? true : undefined}
+              aria-describedby={errors.jurisdiction ? "plate-jurisdiction-error" : undefined}
+              className="h-11 w-full rounded-lg border border-input bg-card px-3"
+            >
+              <option value="" disabled>
+                Select a state or province
+              </option>
+              {JURISDICTION_GROUPS.map((g) => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.names.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+          {errors.jurisdiction && (
+            <p
+              id="plate-jurisdiction-error"
+              role="alert"
+              className="mt-1 flex items-center gap-1 text-sm text-coral-cta"
+            >
+              <AlertCircle aria-hidden className="size-4 shrink-0" />
+              {errors.jurisdiction}
+            </p>
+          )}
+        </div>
         <div>
           <label className="block">
             <span className="mb-1 block text-sm font-semibold">Plate text</span>
             <input
               name="text"
-              defaultValue={values.text ?? ""}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
               placeholder="e.g. B7K2L9"
-              aria-describedby="plate-text-hint"
+              aria-invalid={errors.text ? true : undefined}
+              aria-describedby={textDescribedBy}
               className="h-11 w-full rounded-lg border border-input bg-card px-3 uppercase placeholder:normal-case"
             />
           </label>
           <span id="plate-text-hint" className="mt-1 block text-sm text-muted-foreground">
             Spaces and dashes are ignored
           </span>
+          {errors.text && (
+            <p
+              id="plate-text-error"
+              role="alert"
+              className="mt-1 flex items-center gap-1 text-sm text-coral-cta"
+            >
+              <AlertCircle aria-hidden className="size-4 shrink-0" />
+              {errors.text}
+            </p>
+          )}
         </div>
       </div>
-      <button type="submit" className="brand-btn brand-btn-navy mt-4 w-full sm:w-auto">
+      <button
+        type="submit"
+        disabled={busy}
+        className="brand-btn brand-btn-navy mt-4 w-full sm:w-auto"
+      >
         Search
       </button>
     </form>
   );
 }
 
-function NoMatchPanel() {
+function NoMatchPanel({ values }: { values: Required<SearchValues> }) {
   return (
     <section
       aria-labelledby="no-match-heading"
@@ -132,9 +188,13 @@ function NoMatchPanel() {
           No plate found. Yet!
         </h2>
         <p className="mt-1">We couldn't find this plate in the collection. Want to add it?</p>
-        <a href="/spot" className="brand-btn brand-btn-coral mt-3">
+        <Link
+          to="/spot"
+          search={{ jurisdiction: values.jurisdiction, text: values.text }}
+          className="brand-btn brand-btn-coral mt-3"
+        >
           Spot a Plate
-        </a>
+        </Link>
       </div>
     </section>
   );
@@ -142,7 +202,19 @@ function NoMatchPanel() {
 
 const INTRO = "Curious about a plate you saw? Look it up, or add a new mystery to the collection.";
 
-function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
+function Hero({
+  search,
+  noMatch,
+  onNoMatch,
+  searchError,
+  onSearchError,
+}: {
+  search: SearchValues;
+  noMatch: Required<SearchValues> | null;
+  onNoMatch: (values: Required<SearchValues>) => void;
+  searchError: string | null;
+  onSearchError: (message: string | null) => void;
+}) {
   return (
     <section aria-label="Welcome" className="grid">
       <img
@@ -159,8 +231,13 @@ function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
           <Headline />
           <p className="mt-3 max-w-md text-lg">{INTRO}</p>
           <div className="mt-6">
-            <SearchCard values={search} />
-            {noMatch && <NoMatchPanel />}
+            <SearchCard values={search} onNoMatch={onNoMatch} onSearchError={onSearchError} />
+            {searchError && (
+              <p role="alert" className="mt-4 text-sm font-semibold text-coral-cta">
+                {searchError}
+              </p>
+            )}
+            {noMatch && <NoMatchPanel values={noMatch} />}
           </div>
         </div>
       </div>
@@ -279,16 +356,25 @@ function HowItWorks() {
   );
 }
 
-export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
-  const status = plateStatus(plate);
-  const n = publishedStories(plate).length;
+export function PlateOfTheDay({
+  plate,
+  utcToday,
+  headingId = "potd-heading",
+}: {
+  plate: PlateRecord | FeaturedDisplay;
+  utcToday?: string | undefined;
+  headingId?: string;
+}) {
+  const display = "day" in plate ? plate : previewFeatured(plate);
+  const status = display.status;
+  const n = display.count;
   const copy =
     status === "mystery"
       ? `No stories yet. What do you think ${plate.text} means? Be the first to share your interpretation!`
       : `Only ${storyCount(n)} so far. What do you think ${plate.text} means? Add yours to the conversation!`;
   return (
     <section
-      aria-labelledby="potd-heading"
+      aria-labelledby={headingId}
       className="bg-cover bg-center py-12"
       style={{ backgroundImage: "url(/brand/plate-of-the-day-landscape-v2.webp)" }}
     >
@@ -296,7 +382,7 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
         <div className="rounded-2xl bg-cream p-6 shadow-sm md:p-8">
           <div className="flex items-center gap-2">
             <Star aria-hidden className="size-6 fill-gold text-gold" />
-            <h2 id="potd-heading" className="font-display text-4xl text-navy">
+            <h2 id={headingId} className="font-display text-4xl text-navy">
               Plate of the Day
             </h2>
           </div>
@@ -314,6 +400,7 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
               <Link
                 to="/plate/$state"
                 params={{ state: plate.slug }}
+                onClick={utcToday ? () => openFeatured(display, utcToday) : undefined}
                 className="brand-btn brand-btn-navy mt-4"
               >
                 View This Plate
@@ -326,10 +413,13 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
   );
 }
 
-function RecentlyFeatured() {
-  const recent = featuredPlates()
-    .filter((p) => p.plateOfTheDay !== TODAY)
-    .slice(0, 4);
+export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
+  const recent = live
+    ? live.recent
+    : featuredPlates()
+        .filter((p) => p.plateOfTheDay !== TODAY)
+        .slice(0, 4);
+  if (recent.length === 0) return null;
   return (
     <section aria-labelledby="recent-heading" className="mx-auto max-w-6xl px-4 py-12">
       <div className="flex flex-wrap items-end justify-between gap-2">
@@ -345,8 +435,8 @@ function RecentlyFeatured() {
       </div>
       <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {recent.map((p) => (
-          <li key={p.slug} className="min-w-0">
-            <FeaturedPlateCard plate={p} />
+          <li key={"day" in p ? p.day : p.plateOfTheDay} className="min-w-0">
+            <FeaturedPlateCard plate={p} utcToday={live?.today} />
           </li>
         ))}
       </ul>
@@ -359,23 +449,36 @@ export type HomepageVariant = "default" | "no-match" | "fallback";
 export function Homepage({
   variant = "default",
   prefill,
+  live,
 }: {
   variant?: HomepageVariant;
   prefill?: SearchValues;
+  live?: FeaturedHome | undefined;
 }) {
-  const featured = PLATES.find((p) =>
-    variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
+  const [noMatch, setNoMatch] = useState<Required<SearchValues> | null>(
+    variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : null,
   );
-  if (!featured) return null;
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const featured = live
+    ? live.pick
+    : PLATES.find((p) =>
+        variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
+      );
   const search =
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (
     <main>
-      <Hero search={search} noMatch={variant === "no-match"} />
+      <Hero
+        search={search}
+        noMatch={noMatch}
+        onNoMatch={setNoMatch}
+        searchError={searchError}
+        onSearchError={setSearchError}
+      />
       <ActionCards />
       <HowItWorks />
-      <PlateOfTheDay plate={featured} />
-      <RecentlyFeatured />
+      {featured && <PlateOfTheDay plate={featured} utcToday={live?.today} />}
+      <RecentlyFeatured live={live} />
       <p className="font-display px-4 pt-4 text-center text-4xl text-navy">
         Different roads. Different stories. What's yours?
       </p>

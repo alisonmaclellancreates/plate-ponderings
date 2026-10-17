@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { SPOT_OUTCOMES, SpotOutcomePage, type SpotOutcome } from "@/components/site/SpotPlate";
+import { SpotOutcomePage } from "@/components/site/SpotPlate";
+import { SPOT_OUTCOMES, type SpotOutcome } from "@/lib/spot";
 
 const isOutcome = (s: string): s is SpotOutcome => Object.hasOwn(SPOT_OUTCOMES, s);
 

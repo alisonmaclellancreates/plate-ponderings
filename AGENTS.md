@@ -11,12 +11,29 @@
 
 <!-- LOVABLE:END -->
 
-- Keep the home screen in `src/routes/index.tsx` and its visual rules in `src/styles.css`, preserving the TanStack routing foundation so future steps remain additive.
+- Home: `src/routes/index.tsx`; styles: `src/styles.css`. Sample galleries use loader-free `previews_.*` routes, isolating live reads.
+- Shared handle validation classifies deterministic input failures for both profile feedback and server refusals; AI rejection remains separate so visitors receive actionable input guidance without moderation reasons.
+- Handle availability returns a three-state status (null for demo); live fields and inert previews share status rendering, and debounced results are tied to their draft so stale answers cannot leak into new input.
 - Persistent data and sign-in live in Lovable Cloud (generated clients under `src/integrations/supabase`, schema only through migrations with RLS and GRANTs on every public table), so each step adds tables and policies instead of replacing the backend.
-- CI runs independent checks and coverage jobs with frozen Bun installs; replay migrations only when `supabase/migrations/` exists, because Drizzle records are not replayable Cloud migrations.
-- Keep generated routing and Cloud integration files out of lint and formatting, because Lovable rewrites them; keep non-generated source and tests covered by the existing rules.
-- Static preview pages read only from `src/lib/mock-data.ts` and share the header, footer, plate and badge components in `src/components/site/`, so later steps swap the data source without touching page layouts.
+- CI checks and coverage run independently with frozen Bun installs; replay only `supabase/migrations/` when present, because Drizzle records are not replayable Cloud migrations.
+- Exclude generated routing and Cloud files from lint/formatting because Lovable rewrites them; retain existing rules for all non-generated source and tests.
+- Static previews read only `src/lib/mock-data.ts` and reuse site components, keeping layouts independent of live data.
+- Report labels share a browser-safe module to prevent moderation drift.
 - Compose state-specific preview stories without mutating shared plate records, so catching-up examples cannot change other previews.
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
-- Featured archive and homepage share `FeaturedPlateCard`; feature dates and counts at selection live on mock plate records, while current counts filter published stories, so progress cannot drift between views.
+- Featured pages share RPC DTOs and cursor queries; previews adapt mocks. Queries contain read failures: home omits empty bands, archive retries inline, preserving pages.
 - `/plate/$state` accepts existing preview aliases and mock plate slugs through the same detail layout, preserving preview URLs while giving each archive card its own working destination.
+- Only `src/lib/analytics.ts` imports the PostHog SDK; one runtime event registry derives event types and drives both capture and before_send filtering, preventing event definitions from drifting; root route effects capture query-free page paths after hydration. Registry-scoped instances support test-only events without adding production events.
+- Map public PostHog connector values to `VITE_POSTHOG_KEY` and `VITE_POSTHOG_HOST` in Vite configuration, keeping application code independent of connector-specific names.
+- AI checks persist only terminal provider-denial or credit blocks (never transient errors) in service-only `ai_check_*` settings, per Lovable AI Gateway rules. One block pauses every AI check (handles, plates, rechecks, summaries); paused handle saves keep the old handle, new plates save pending, rechecks do nothing. Only an admin clears it via `/admin` **Resume AI checks**; the next user-initiated check retries.
+- Own-account operations live in authenticated server functions with server-only moderation; a root account provider owns auth lifecycle and cache teardown, keeping private identifiers out of page DTOs.
+- Keep account context types and the consumer hook in `src/lib/account-auth.ts`, separate from the component-only provider; stabilize refresh and declare effect dependencies so auth lifecycle remains lint-safe without rule suppression.
+- The member-profile menu is an independently testable component, including its signed-out refusal, so account boundaries can be verified without artificial context changes during a parent render.
+- Protected routes use the client-only `_authenticated` gate and `/auth` adapter. Shared bounded `checkSignedIn` clears only definite rejections and restores late success; plate actions read account context, avoiding duplicate checks.
+- Live and preview rate-limit outcomes share one renderer and the existing wait-message constant, so preview review cannot drift from the submitted flow.
+- Live spot outcomes retain the submitted identity separately from route prefill, so pending feedback and return-to-search links describe the actual request even after the form remounts.
+- PlateFrame owns the detail-only frame for static and real plate pages, so jurisdiction display stays identical without changing Plate artwork or other render locations.
+- Register project-owned `attachSession`, never generated `attachSupabaseAuth`: bounded `getSession()` preserves normal renewal without blocking public RPCs. Server authorization remains unchanged; never read tokens directly from storage.
+- Background AI uses `runAfterResponse` and request-scoped waitUntil; summary reads batch `get_visible_summary_versions` using `is_summary_public`, keeping read counts fixed. Guesses use Astra's streamed structured low-reasoning Responses.
+- Guesses use separate server-only insert-once storage and existence-only reads until published human stories unlock text, preventing story/summary contamination.
+- Hidden guesses retain the invitation despite old summaries; revealed guesses follow summaries before human stories at every width, preserving reading order.
