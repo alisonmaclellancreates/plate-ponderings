@@ -1,3 +1,9 @@
+# Reset rejected-delete repair
+
+- [ ] Apply approved function-only repair: explicit non-null key predicates on all ten reset-owned deletes, unchanged guards and grants.
+- [ ] Run delete-scope/access regression in a rollback without invoking reset; run lint.
+- [ ] Full reset verification remains blocked on separate permission to run the destructive reset.
+
 # PR #121: tests-only patch coverage
 
 - [x] Add tests for Entry demo success/refusal/network/session outcomes, five decoded inline photos and exact 1 MB boundary, reset lock/renewal/first-failure/readback/release/pagination/null-list branches, seed validation/count/date offsets.
