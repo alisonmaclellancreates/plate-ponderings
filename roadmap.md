@@ -74,7 +74,7 @@
 
 # Step 42: accounts, handles and session-aware header
 
-- [ ] Add safe server logging for AI denials/credit blocks; resolve requested unconditional retries against mandatory terminal-error handling.
+- [ ] Scope terminal blocks to handle moderation only; add admin-visible status, one-action manual recovery, safe logs and quoted gateway requirement in the report and AGENTS.md.
 - [ ] Revise plan: remove separate AI pause table, exclude demo handle Traveler4821 from generation, enable leaked-password protection, explain managed /auth adapter; save limit approved at five per 15 minutes.
 - [ ] Approve database changes for generated handles, validation and durable save rate limiting.
 - [ ] Enable email/password-only accounts without email confirmation; wire signup, signin, signout and safe return paths.
