@@ -452,4 +452,10 @@ describe("getPlateStories failed and empty lookups", () => {
     expect(result.ownerHandle).toBe("Traveler");
     expect(mocks.admin.from).not.toHaveBeenCalledWith("profiles");
   });
+  it("treats an empty stories read as a plate with no stories", async () => {
+    tables["stories"] = { data: null, error: null };
+    const result = (await call(getPlateStories, { plateId: "plate-1" })) as unknown as Out;
+    expect(result.stories).toEqual([]);
+    expect(result.ownerHandle).toBeNull();
+  });
 });

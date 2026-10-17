@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
+import { StrictMode, type ReactNode } from "react";
 
 const m = vi.hoisted(() => ({
   submit: vi.fn(),
@@ -277,9 +277,17 @@ describe("AddStoryFlow branches", () => {
     expect(m.getPlateStories).toHaveBeenCalledWith({ data: { plateId: "p1" } });
   });
 
-  it("tracks story_started only once across re-renders", () => {
-    const { rerender } = render(<AddStoryFlow plateId="p1" />);
-    rerender(<AddStoryFlow plateId="p1" />);
+  it("tracks story_started only once, even when effects run twice", () => {
+    const { rerender } = render(
+      <StrictMode>
+        <AddStoryFlow plateId="p1" />
+      </StrictMode>,
+    );
+    rerender(
+      <StrictMode>
+        <AddStoryFlow plateId="p1" />
+      </StrictMode>,
+    );
     expect(m.track).toHaveBeenCalledTimes(1);
   });
 
