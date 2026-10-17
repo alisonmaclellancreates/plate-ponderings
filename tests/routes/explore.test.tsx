@@ -1,13 +1,14 @@
 import { expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
+const m = vi.hoisted(() => ({ empty: false }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
 }));
 vi.mock("@/components/site/Explore", () => ({ Explore: () => <p>archive</p> }));
 vi.mock("@tanstack/react-query", () => ({
   useSuspenseInfiniteQuery: () => ({
-    data: { pages: [{ today: "2026-10-17", plates: [] }] },
+    data: { pages: m.empty ? [] : [{ today: "2026-10-17", plates: [] }] },
     hasNextPage: false,
     isFetchingNextPage: false,
     fetchNextPage: vi.fn(),
@@ -34,6 +35,14 @@ it("renders the archive with matching page and social metadata", () => {
   expect(meta.find((m) => m["property"] === "og:description")?.["content"]).toBe(
     meta.find((m) => m["name"] === "description")?.["content"],
   );
+});
+
+it("refuses malformed empty query state rather than inventing a date", () => {
+  m.empty = true;
+  try {
+    const C = (Route as unknown as { component: () => ReactNode }).component;
+    expect(() => render(<C />)).toThrow("couldn't load");
+  } finally { m.empty = false; }
 });
 
 it("loads the matching infinite archive query", async () => {

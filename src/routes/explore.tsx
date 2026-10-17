@@ -25,11 +25,13 @@ export const Route = createFileRoute("/explore")({
 function LiveExplore() {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useSuspenseInfiniteQuery(featuredArchiveOptions);
+  const [first] = data.pages;
+  if (!first) throw new Error("We couldn't load the featured plates right now.");
   return (
     <Explore
       live={{
         plates: data.pages.flatMap((page) => page.plates),
-        today: data.pages[0].today,
+        today: first.today,
         hasMore: hasNextPage,
         busy: isFetchingNextPage,
         loadMore: fetchNextPage,

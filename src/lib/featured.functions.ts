@@ -53,7 +53,7 @@ export const getFeaturedHome = createServerFn({ method: "GET" }).handler(
 );
 
 export const getFeaturedArchive = createServerFn({ method: "POST" })
-  .inputValidator((data: { before?: string }) => {
+  .inputValidator((data: { before?: string | undefined }) => {
     const before = data.before;
     if (
       before !== undefined &&
@@ -68,7 +68,7 @@ export const getFeaturedArchive = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<FeaturedPage> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin.rpc("get_featured_subject_days", {
-      _before: data.before,
+      ...(data.before === undefined ? {} : { _before: data.before }),
       _limit: 13,
     });
     if (error) throw new Error("We couldn't load the featured plates right now.");

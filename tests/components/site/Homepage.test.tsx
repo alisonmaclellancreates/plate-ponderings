@@ -308,11 +308,13 @@ describe("Homepage", () => {
       parent?.append(target);
     },
   );
-  it("renders no homepage when the featured collection is empty", async () => {
+  it("omits only the daily band when the preview collection is empty", async () => {
     const { PLATES } = await import("@/lib/mock-data");
     const saved = PLATES.splice(0);
     try {
-      expect(render(<Homepage />).container).toBeEmptyDOMElement();
+      render(<Homepage />);
+      expect(screen.queryByRole("region", { name: "Plate of the Day" })).toBeNull();
+      expect(screen.getByRole("search")).toBeTruthy();
     } finally {
       PLATES.push(...saved);
     }
