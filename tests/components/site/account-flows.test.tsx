@@ -168,7 +168,9 @@ it.each(["available", "taken", "unknown", null] as const)(
     fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Traveler7444" } });
     await waitFor(() => expect(m.check).toHaveBeenCalledWith({ data: { handle: "Traveler7444" } }));
     if (status === "taken") {
-      expect(await screen.findByRole("alert")).toHaveTextContent("That handle is taken. Choose another.");
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "That handle is taken. Choose another.",
+      );
     } else {
       expect(screen.queryByRole("alert")).toBeNull();
       expect(Boolean(screen.queryByText("Available"))).toBe(status === "available");
@@ -185,12 +187,18 @@ it("never shows the current own handle as taken, ignoring case", async () => {
 });
 it("ignores a stale taken response for earlier valid input and hides resolved results on edits", async () => {
   let resolve: ((value: { status: "taken" }) => void) | undefined;
-  m.check.mockReturnValueOnce(new Promise((r) => { resolve = r; }));
+  m.check.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
   render(<ProfilePage />);
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Traveler7444" } });
   await waitFor(() => expect(m.check).toHaveBeenCalledTimes(1));
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Fresh_Handle" } });
-  await act(async () => { resolve?.({ status: "taken" }); });
+  await act(async () => {
+    resolve?.({ status: "taken" });
+  });
   expect(screen.queryByRole("alert")).toBeNull();
   await screen.findByText("Available");
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Another_Handle" } });
