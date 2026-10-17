@@ -150,8 +150,8 @@ describe("Homepage", () => {
 
   async function submitSearch(user: ReturnType<typeof userEvent.setup>) {
     await user.selectOptions(screen.getByRole("combobox", { name: "State or Province" }), "Utah");
-    await user.type(screen.getByRole("textbox", { name: /Plate Text/i }), "DRAGON");
-    await user.click(screen.getByRole("button", { name: "Look Up Plate" }));
+    await user.type(screen.getByRole("textbox", { name: "Plate text" }), "DRAGON");
+    await user.click(screen.getByRole("button", { name: "Search" }));
   }
 
   it("navigates to the plate page when the search finds a match", async () => {
@@ -203,7 +203,7 @@ describe("Homepage", () => {
     media({});
     const user = userEvent.setup();
     render(<Homepage />);
-    await user.click(screen.getByRole("button", { name: "Look Up Plate" }));
+    await user.click(screen.getByRole("button", { name: "Search" }));
     expect(screen.getByText("Please select a state or province")).toBeInTheDocument();
     expect(searchMock.fn).not.toHaveBeenCalled();
   });
