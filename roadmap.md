@@ -232,3 +232,14 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Server rounds box to 4 dp and clamps to photo edges before save; edge-touching test
 - [x] Save/return/clear box; zoomed card + dialog; preview
 - [x] Dialog description is "Photo shared by {handle}" via DialogPrimitive.Description (no aria-describedby override); preview sample built from a box-free base so photoBox is never undefined. 6 dialog tests and 9 preview tests pass; changed-file lint clean; build OK.
+
+## Step 52b: accessibility review and automated checks
+- Axe tests (vitest-axe) across all listed pages and dialogs; dialogs checked against document.body (Radix portals); region rule on for full pages, per-test opt-out with comment otherwise
+- PhotoEditor: draggable box gets accessible name "Plate area", keyboard move/resize (ask first if layout change needed); PhotoEditor with suggested box added to axe tests
+- eslint-plugin-jsx-a11y recommended on our components; zero lint errors
+- Contrast table for every brand token pair; failures pushed last as their own commit after Alison approves (table may exceed 10-line report limit)
+- Skip link, focus to heading on route change, dialog focus trap/return tests
+- Menus close on Esc and outside click with focus return (profile, mobile header, story menu)
+- Report/Delete become real modal dialogs on existing dialog primitives
+- Unread dot beside Your Submissions in profile menu; headline respects reduced motion + aria-live polite
+- Progress issue #54: fix if used, else leave open and say so
