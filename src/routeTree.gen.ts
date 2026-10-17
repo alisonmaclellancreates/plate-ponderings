@@ -37,6 +37,7 @@ import { Route as PreviewsExploreRouteImport } from './routes/previews_.explore'
 import { Route as PreviewsHomepageFeaturedRouteImport } from './routes/previews_.homepage-featured'
 import { Route as PreviewsStoryErrorRouteImport } from './routes/previews_.story-error'
 import { Route as PreviewsStoryRateLimitedRouteImport } from './routes/previews_.story-rate-limited'
+import { Route as PreviewsSubmissionsRouteImport } from './routes/previews_.submissions'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
 import { Route as AuthenticatedSettingsDeleteConfirmRouteImport } from './routes/_authenticated/settings_.delete-confirm'
 import { Route as AuthenticatedSpotIndexRouteImport } from './routes/_authenticated/spot.index'
@@ -184,6 +185,11 @@ const PreviewsStoryRateLimitedRoute =
     path: '/previews/story-rate-limited',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PreviewsSubmissionsRoute = PreviewsSubmissionsRouteImport.update({
+  id: '/previews_/submissions',
+  path: '/previews/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
   id: '/spot/$outcome',
   path: '/spot/$outcome',
@@ -234,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
+  '/previews/submissions': typeof PreviewsSubmissionsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
+  '/previews/submissions': typeof PreviewsSubmissionsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
@@ -302,6 +310,7 @@ export interface FileRoutesById {
   '/previews_/homepage-featured': typeof PreviewsHomepageFeaturedRoute
   '/previews_/story-error': typeof PreviewsStoryErrorRoute
   '/previews_/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
+  '/previews_/submissions': typeof PreviewsSubmissionsRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
   '/_authenticated/settings_/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/_authenticated/story/$step': typeof AuthenticatedStoryStepRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/previews/homepage-featured'
     | '/previews/story-error'
     | '/previews/story-rate-limited'
+    | '/previews/submissions'
     | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/previews/homepage-featured'
     | '/previews/story-error'
     | '/previews/story-rate-limited'
+    | '/previews/submissions'
     | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/previews_/homepage-featured'
     | '/previews_/story-error'
     | '/previews_/story-rate-limited'
+    | '/previews_/submissions'
     | '/spot/$outcome'
     | '/_authenticated/settings_/delete-confirm'
     | '/_authenticated/story/$step'
@@ -435,6 +447,7 @@ export interface RootRouteChildren {
   PreviewsHomepageFeaturedRoute: typeof PreviewsHomepageFeaturedRoute
   PreviewsStoryErrorRoute: typeof PreviewsStoryErrorRoute
   PreviewsStoryRateLimitedRoute: typeof PreviewsStoryRateLimitedRoute
+  PreviewsSubmissionsRoute: typeof PreviewsSubmissionsRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
 }
 
@@ -636,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewsStoryRateLimitedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/previews_/submissions': {
+      id: '/previews_/submissions'
+      path: '/previews/submissions'
+      fullPath: '/previews/submissions'
+      preLoaderRoute: typeof PreviewsSubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spot/$outcome': {
       id: '/spot/$outcome'
       path: '/spot/$outcome'
@@ -716,6 +736,7 @@ const rootRouteChildren: RootRouteChildren = {
   PreviewsHomepageFeaturedRoute: PreviewsHomepageFeaturedRoute,
   PreviewsStoryErrorRoute: PreviewsStoryErrorRoute,
   PreviewsStoryRateLimitedRoute: PreviewsStoryRateLimitedRoute,
+  PreviewsSubmissionsRoute: PreviewsSubmissionsRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,
 }
 export const routeTree = rootRouteImport
