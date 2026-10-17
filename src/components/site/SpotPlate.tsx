@@ -625,8 +625,13 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
   const auth = useAccountAuth();
   const spot = useServerFn(spotPlate);
   const [stage, setStage] = useState<SpotStage>({ kind: "form" });
+  const [submittedValues, setSubmittedValues] = useState<{
+    jurisdiction: string;
+    text: string;
+  }>();
   const isDemo = Boolean(auth?.account?.isDemo);
   async function onSpot(next: { jurisdiction: string; text: string }) {
+    setSubmittedValues(next);
     setStage({ kind: "checking" });
     try {
       const result = await spot({ data: next });
@@ -634,12 +639,14 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
       const outcome =
         result.outcome === "already-spotted"
           ? "already_spotted"
-          : result.outcome === "new" ||
-              result.outcome === "exists" ||
-              result.outcome === "pending" ||
-              result.outcome === "rejected"
-            ? result.outcome
-            : "error";
+          : result.outcome === "rate-limited"
+            ? "rate_limited"
+            : result.outcome === "new" ||
+                result.outcome === "exists" ||
+                result.outcome === "pending" ||
+                result.outcome === "rejected"
+              ? result.outcome
+              : "error";
       await track("subject_spotted", { outcome });
     } catch {
       setStage({ kind: "result", result: { outcome: "error" } });
@@ -658,15 +665,10 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
       />
       <div className="mx-auto grid max-w-5xl gap-6 px-4 py-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-start">
         <div className="space-y-4">
-          <SpotForm values={values} isDemo={isDemo} onSpot={onSpot} />
+          <SpotForm values={submittedValues ?? values} isDemo={isDemo} onSpot={onSpot} />
           {stage.kind === "result" &&
             stage.result.outcome === "already-spotted" &&
-            values?.jurisdiction &&
-            values.text && (
-              <AlreadySpottedPanel
-                values={{ jurisdiction: values.jurisdiction, text: values.text }}
-              />
-            )}
+            submittedValues && <AlreadySpottedPanel values={submittedValues} />}
         </div>
         <WhatHappensNext />
       </div>

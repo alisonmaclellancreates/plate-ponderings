@@ -1,5 +1,10 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43: Copilot pending feedback and pause analytics
+
+- [x] Retain submitted plate values; behaviour tests verify search arrivals, direct /spot submissions and edits to prefilled values, including retained fields and Back to Search destinations.
+- [x] Allow and capture subject_spotted outcome rate_limited; capture and before_send tests pass. Full suite: 665 tests across 120 files, changed-file lint clean, automatic build OK. PR Codecov remains unconfirmed for this follow-up; latest previously read figure is 75.09%, not the local diagnostic coverage.
+
 # Step 43: PR #90 coverage correction
 
 - [x] Add real moderation, server error/race/recheck, route and UI edge tests; no production code or branches removed. Force-unavailable switch unset in sandbox and absent from default configuration.
