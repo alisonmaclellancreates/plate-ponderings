@@ -247,6 +247,25 @@ describe("getPlateStories", () => {
     expect(mocks.admin.auth.getUser).not.toHaveBeenCalled();
   });
 
+  it.each(["owner", "guess"])("blocking a lone %s story preserves public facts", async (source) => {
+    tables["stories"] = { data: [row("blocked-story", source, "a2", "2026-10-01")], error: null };
+    tables["profiles"] = { data: [{ id: "a2", handle: "PublicClaimant" }], error: null };
+    const publicResult = await call(getPlateStories, { plateId: "plate-1" });
+    mocks.getRequest.mockReturnValue({ headers: { get: () => "Bearer a.b.c" } });
+    mocks.admin.auth.getUser.mockResolvedValue({ data: { user: { id: "viewer" } }, error: null });
+    tables["blocks"] = { data: [{ blocked_id: "a2" }], error: null };
+    const blockedResult = await call(getPlateStories, { plateId: "plate-1" });
+    expect(publicResult["stories"]).toHaveLength(1);
+    expect(blockedResult["stories"]).toEqual([]);
+    expect(blockedResult["total"]).toBe(0);
+    expect(blockedResult["storyCount"]).toBe(1);
+    expect(blockedResult["hasOwnerStory"]).toBe(source === "owner");
+    expect(blockedResult["ownerHandle"]).toBe(source === "owner" ? "PublicClaimant" : null);
+    for (const key of ["storyCount", "hasOwnerStory", "ownerHandle"]) {
+      expect(blockedResult[key]).toEqual(publicResult[key]);
+    }
+  });
+
   it("signed in: own pending stories appear, blocked authors are hidden", async () => {
     mocks.getRequest.mockReturnValue({
       headers: { get: () => "Bearer a.b.c" },

@@ -7,15 +7,8 @@ import { CURRENT_USER, PLATES, publishedStories, type Story } from "@/lib/mock-d
 
 const PLATE = PLATES.find((p) => p.slug === "bc-lv2code")!;
 
-/** Report reasons in display order: stored key and shown label. */
-export const REPORT_REASON_OPTIONS = [
-  { key: "personal_info", label: "Personal information" },
-  { key: "harassment", label: "Hurtful or harassing" },
-  { key: "spam", label: "Spam" },
-  { key: "other", label: "Something else" },
-] as const;
-export const REPORT_REASONS = REPORT_REASON_OPTIONS.map((r) => r.label);
-export type ReportReasonKey = (typeof REPORT_REASON_OPTIONS)[number]["key"];
+import { REPORT_REASON_OPTIONS, type ReportReasonKey } from "@/lib/report-reasons";
+export { REPORT_REASON_OPTIONS, REPORT_REASONS, type ReportReasonKey } from "@/lib/report-reasons";
 
 type MenuHandlers = { onReport?: () => void; onBlock?: () => void; onDelete?: () => void };
 
