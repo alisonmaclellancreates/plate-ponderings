@@ -21,11 +21,16 @@ function Avatar({
   handle?: string;
 }) {
   return (
-    <span className="flex items-center gap-2">
-      <span className="relative inline-flex size-9 items-center justify-center rounded-full bg-cream text-navy">
+    <span className="flex min-w-0 items-center gap-2">
+      <span className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-cream text-navy">
         <UserRound aria-hidden className="size-5" />
       </span>
-      <span className={showHandle ? "font-semibold" : "sr-only"}>{handle}</span>
+      <span
+        className={showHandle ? "font-semibold" : "max-w-20 truncate font-semibold"}
+        title={handle}
+      >
+        {handle}
+      </span>
     </span>
   );
 }
@@ -142,7 +147,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
   const signedOut = mode === "signed-out";
   return (
     <header className="bg-navy text-cream" data-mode={mode}>
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-2">
+      <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 md:flex md:gap-6">
         <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
           <img
             src="/brand/what-the-plate-logo-v1.webp"
@@ -179,7 +184,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
             <MemberProfile showHandle />
           )}
         </div>
-        <div className="ml-auto flex items-center gap-3 md:hidden">
+        <div className="ml-auto flex min-w-0 items-center gap-2 md:hidden">
           {signedOut ? (
             <Link to="/sign-in" search={{ returnTo: "/" }} className={signIn}>
               Sign in
@@ -191,16 +196,17 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
           ) : (
             <MemberProfile showHandle={false} />
           )}
-          <button
+          <Button
+            variant="ghost"
             type="button"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-10 items-center justify-center rounded-lg"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg p-0 text-cream"
           >
             {open ? <X aria-hidden /> : <Menu aria-hidden />}
-          </button>
+          </Button>
         </div>
       </div>
       {open && (

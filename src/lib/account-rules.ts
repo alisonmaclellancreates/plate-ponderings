@@ -20,11 +20,14 @@ export const RATE_LIMIT_MESSAGE =
 export const DEMO_MESSAGE =
   "You're exploring the demo. You can look around, but adding plates and stories is turned off.";
 export function handleFormatValid(handle: string) {
-  return (
-    /^[A-Za-z0-9_]{3,20}$/.test(handle) &&
-    !RESERVED_HANDLES.includes(handle.toLowerCase()) &&
-    handle.toLowerCase() !== "traveler4821"
-  );
+  return handleValidationMessage(handle) === "";
+}
+export function handleValidationMessage(handle: string): string {
+  if (RESERVED_HANDLES.includes(handle.toLowerCase()) || handle.toLowerCase() === "traveler4821")
+    return "That handle is reserved. Choose another.";
+  if (/[^A-Za-z0-9_]/.test(handle)) return "Use letters, numbers, and underscores only.";
+  if (handle.length < 3 || handle.length > 20) return "Use 3 to 20 characters.";
+  return "";
 }
 export function safeReturnPath(value: unknown): string {
   const unsafe = (path: string) =>

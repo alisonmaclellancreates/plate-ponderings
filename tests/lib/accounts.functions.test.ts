@@ -143,7 +143,7 @@ describe("handle saves", () => {
     async (handle) => {
       expect(await call(saveHandle, handle)).toEqual({
         outcome: "rejected",
-        message: HANDLE_REJECTED,
+        message: "Use 3 to 20 characters.",
       });
       expect(mocks.admin.rpc).toHaveBeenCalledWith("consume_handle_save_attempt", {
         _user_id: "caller",
@@ -200,7 +200,12 @@ describe("handle saves", () => {
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
   it("rejects invalid, reserved or taken handles without AI", async () => {
-    expect((await call(saveHandle, "ADMIN"))["message"]).toBe(HANDLE_REJECTED);
+    expect((await call(saveHandle, "ADMIN"))["message"]).toBe(
+      "That handle is reserved. Choose another.",
+    );
+    expect((await call(saveHandle, "rowan!"))["message"]).toBe(
+      "Use letters, numbers, and underscores only.",
+    );
     taken.data = [{ id: "other" }];
     expect((await call(saveHandle))["message"]).toBe(HANDLE_REJECTED);
     taken.error = {};
