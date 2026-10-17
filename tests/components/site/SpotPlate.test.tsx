@@ -108,6 +108,21 @@ describe("Spot outcome previews", () => {
     );
   });
 
+  it("attributes the owner story in the existing-plate preview", async () => {
+    const { PLATES } = await import("@/lib/mock-data");
+    const plate = PLATES.find((record) => record.slug === "bc-lv2code");
+    const story = plate?.stories[0];
+    if (!story) throw new Error("Existing plate fixture missing");
+    const source = story.howIKnow;
+    try {
+      story.howIKnow = "owner";
+      render(<SpotOutcomePage outcome="exists" />);
+      expect(within(screen.getByRole("list", { name: "Plate status" })).getByText(`Owner: ${story.handle}`)).toBeInTheDocument();
+    } finally {
+      story.howIKnow = source;
+    }
+  });
+
   it("new shows B7K2L9 with coral and outline buttons", () => {
     render(<SpotOutcomePage outcome="new" />);
     expect(screen.getByText("B7K2L9")).toBeInTheDocument();
