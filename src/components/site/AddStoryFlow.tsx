@@ -200,7 +200,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     }
   };
 
-  const usePhoto = async (blob: Blob, adjusted: boolean) => {
+  const handleUsePhoto = async (blob: Blob, adjusted: boolean) => {
     if (!photoDraft || preview) return;
     setPhotoBusy(true);
     try {
@@ -393,7 +393,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
             bitmap={photoDraft.bitmap}
             initialBox={photoDraft.suggestion}
             showNoBoxMessage={photoDraft.noBoxMessage}
-            onUse={(blob, adjusted) => void usePhoto(blob, adjusted)}
+            onUse={(blob, adjusted) => void handleUsePhoto(blob, adjusted)}
             onRemove={() => {
               setPhotoDraft(null);
               if (!preview) void track("photo_skipped", {});
