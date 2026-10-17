@@ -21,6 +21,7 @@ vi.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: m.invalidate }),
 }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/components/site/PlateDetail", () => ({ StoryCard: () => null }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
 vi.mock("@/lib/story-actions.functions", () => ({
   toggleHeart: m.heart,

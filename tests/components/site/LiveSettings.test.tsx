@@ -19,6 +19,7 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => m.navigate,
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
 }));
+vi.mock("@/components/site/SpotPlate", () => ({ ScenicHeader: () => null }));
 vi.mock("@/lib/analytics", () => ({ track: m.track, reset: m.reset }));
 vi.mock("@/lib/story-actions.functions", () => ({
   getBlockedPeople: m.blocked,
