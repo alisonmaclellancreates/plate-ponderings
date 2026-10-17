@@ -17,6 +17,7 @@ Existing tables already have most rules: hearts PK (story,user) with a published
 ## Proposed migration (needs your approval)
 
 1. `reports.reporter_id` DROP NOT NULL, so account deletion can clear the reporter and keep the report. The tool flags DROP NOT NULL as destructive and asks before it runs.
+   Confirmed: `reporter_id` currently has no foreign key at all. Project rules forbid new keys to `auth.users`, so the migration adds `reports_reporter_id_fkey` referencing `profiles(id) ON DELETE SET NULL`. Deleting the auth user cascades to the profile, which then nulls the reporter and keeps the report. It is added NOT VALID, then validated in the same migration (there are no rows today).
 2. `reports_note_length` CHECK (note is null or char_length(note) <= 200), added NOT VALID, then validated against existing rows in the same migration (there are currently zero rows).
 3. `get_reported_stories()` security definer, service_role only. Returns story id, subject display, jurisdiction name, meaning, author handle, status, report count, reason keys and latest report time, newest first. Server reads stay fixed in count.
 
@@ -25,8 +26,10 @@ Nothing else: no demo triggers. The tombstone keeps `meaning` as '' instead of r
 ## Server functions (all authenticated; demo refused first, then DB policy refuses as a second layer)
 
 - `stories-actions.functions.ts`: `toggleHeart`, `reportStory`, `blockAuthor`, `unblockUser`, `deleteMyStory`, `getBlockedPeople`. Heart, report and block writes go through `context.supabase` (RLS as the user, using the existing non-demo policies). Delete uses the admin client after an ownership-checked conditional update (`id`, `author_id`, status in published/hidden). It then removes hearts and the photo, and calls `runAfterResponse(requestSummaryRefresh)`.
-- `getPlateStories` DTO gains `isOwn`, `hearted` and an opaque `authorKey` for Block. Raw author ids never reach the browser; Block resolves the author on the server from the story id.
-- `admin.functions.ts`: `getReportedStories`, `setStoryHidden({ id, hidden })` and `recheckAllPending`. Each verifies `has_role(admin)` through `context.supabase` before loading the admin client. The recheck extracts the existing per-user loop into a shared server helper that takes the owner id, then runs it for all non-demo owners with pending rows. It returns a changed count. The existing per-user recheck keeps its cooldown.
+- `getPlateStories` DTO gains `isOwn` and `hearted` only. `blockAuthor` takes the story id and resolves the author on the server; no author identifier reaches the browser.
+- `admin.functions.ts`: `getReportedStories`, `setStoryHidden({ id, hidden })` and `recheckAllPending`. Each verifies `has_role(admin)` through `context.supabase` before loading the admin client.
+  - `setStoryHidden` calls `runAfterResponse(requestSummaryRefresh(subjectId))` on both hide and unhide. Both directions are tested.
+  - `recheckAllPending` checks the shared AI pause before starting and returns early if paused. It processes at most 10 pending items per click across all non-demo owners (subjects first, then stories, oldest first) and stops on the first unavailable or block result. It returns `{ changed, remaining, stopped }`, where remaining is the count still pending after the run. The cap and the stop are both tested. It reuses the per-item check, publish and notify helpers extracted from the existing per-user recheck, which keeps its cooldown.
 - `account-delete.functions.ts`: `deleteAccount` runs the full sequence from the brief. It refreshes summaries for every affected subject, deletes the auth user and returns `{ deleted: true }`. Then the PostHog person is deleted with a server secret. A failure is logged, and deletion still succeeds.
 
 ## Pages
@@ -48,7 +51,7 @@ Registry additions: story_hearted, story_unhearted, story_reported [reason], use
 ## Tests and checks
 
 - Unit tests for every action, including demo refusal, tombstone fields, admin-only access, the account-deletion sequence and PostHog failure, the redirects, the analytics events and each sample page.
-- New `tests/db/story-actions.sql`: report note length, reporter-null retention, `get_reported_stories` grants, and versions hidden then restored by hide and unhide. Then rerun all of tests/db.
+- New `tests/db/story-actions.sql`: report note length, the reporter foreign key's SET NULL rule (deleting a profile keeps its reports with a null reporter), `get_reported_stories` grants, and versions hidden then restored by hide and unhide. Then rerun all of tests/db.
 - Locally: `vitest related` on the changed source plus the changed tests, and lint.
 - Redirects in the running preview: the admin redirect for a non-admin and the signed-out redirect, via Playwright, as the brief requires.
 
