@@ -189,3 +189,16 @@ describe("requestSummaryRefresh", () => {
     expect(await requestSummaryRefresh("plate-1")).toBe("failed");
   });
 });
+
+it("a saved AI guess cannot enter summary input or its human story count", async () => {
+  const prior = m.admin.from.getMockImplementation();
+  m.admin.from.mockImplementation((table: string) => {
+    if (table === "subject_guesses")
+      return chain({ data: { meaning: "AI-only sentinel", story: "not human" }, error: null });
+    return prior?.(table);
+  });
+  expect(await requestSummaryRefresh("plate-1")).toBe("saved");
+  expect(m.admin.from).not.toHaveBeenCalledWith("subject_guesses");
+  expect(JSON.stringify(m.generate.mock.calls)).not.toContain("AI-only sentinel");
+  expect(inserted?.["story_count"]).toBe(2);
+});

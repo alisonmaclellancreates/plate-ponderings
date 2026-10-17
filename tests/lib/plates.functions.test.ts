@@ -5,6 +5,8 @@ const mocks = vi.hoisted(() => ({
   check: vi.fn(),
   checkStory: vi.fn(),
   refresh: vi.fn(),
+  guess: vi.fn(),
+  fill: vi.fn(),
   readBlock: vi.fn(),
   persistBlock: vi.fn(),
 }));
@@ -30,6 +32,10 @@ vi.mock("@/integrations/supabase/auth-middleware", () => ({ requireSupabaseAuth:
 vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: mocks.admin }));
 vi.mock("@/lib/plate-moderation.server", () => ({ checkSubject: mocks.check }));
 vi.mock("@/lib/story-moderation.server", () => ({ checkStory: mocks.checkStory }));
+vi.mock("@/lib/plate-guesses.server", () => ({
+  requestPlateGuess: mocks.guess,
+  fillPlateGuesses: mocks.fill,
+}));
 vi.mock("@/lib/summary-refresh.server", () => ({ requestSummaryRefresh: mocks.refresh }));
 vi.mock("@/lib/ai-block.server", () => ({
   readAiBlock: mocks.readBlock,
@@ -103,6 +109,8 @@ beforeEach(() => {
   mocks.check.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
   mocks.checkStory.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
   mocks.refresh.mockResolvedValue(undefined);
+  mocks.guess.mockResolvedValue("saved");
+  mocks.fill.mockResolvedValue(undefined);
 });
 
 describe("searchPlate", () => {
@@ -593,4 +601,14 @@ describe("recheckPendingSubjects", () => {
       );
     });
   });
+});
+
+it("returns publication without waiting for guess generation", async () => {
+  mocks.guess.mockReturnValue(new Promise(() => {}));
+  expect((await call(spotPlate))["outcome"]).toBe("new");
+  expect(mocks.guess).toHaveBeenCalledWith("plate-1");
+});
+it("dispatches gap fill only after an eligible authenticated recheck", async () => {
+  await call(recheckPendingSubjects);
+  expect(mocks.fill).toHaveBeenCalledWith("caller", []);
 });

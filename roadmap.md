@@ -1,9 +1,12 @@
 # Step 45b: fictional plate guesses
 
-- [ ] Propose isolated server-only guess schema and implementation plan; wait for Alison's database approval.
+- [x] Alison approved the plan and subject_guesses table; applied migrations 0011 and 0012 (insert-only service grants).
+- [x] Complete the approved Step 45b build and local verification on the current branch.
 - [x] Revise the plan for explicit openai/gpt-6-astra using the summary's streamed structured low-reasoning shape, and at most 3 gap-fill guesses per recheck with a cap test and pause checks before each.
-- [ ] Build nonblocking publication generation, own-plate recheck gap fill, server-derived reveal, teaser/panel and no-property analytics; mocked behavioral tests.
-- [ ] Run lint, relevant/full tests and every tests/db file; verify new generation and reveal/hide at 1280px and 360px, workerd or published check; report only checks actually run.
+- [x] Build nonblocking publication generation, own-plate recheck gap fill, server-derived reveal, teaser/panel and no-property analytics; mocked behavioral tests.
+- [x] Run bun run lint (0 errors, 6 existing UI warnings), bun run test:coverage (913 tests / 137 files), tsgo and targeted Prettier checks; automatic build OK. All six tests/db files passed through the database tool, with zero fixtures left.
+- [x] Local browser: Rowan published RHYME45B, one real Astra guess saved; hidden RPCs omitted text, first human story revealed the guess, returning to zero published stories hid it despite a pending story. Screenshots inspected at 1280px and 360px, no overflow or page errors. Removed verification content and read back zero dependent rows.
+- [x] Verification boundary recorded: no workerd execution or published-site verification ran; gap fill and failure/pause paths used mocked tests, not live AI. Managed commit recorded on the existing branch.
 - [ ] Read PR Codecov patch figure after Alison opens the PR. Blocker: PR not open.
 
 # Rowan: summary prompt review

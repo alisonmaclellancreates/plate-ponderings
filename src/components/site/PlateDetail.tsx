@@ -10,6 +10,8 @@ import {
   MoreHorizontal,
   UserCircle2,
 } from "lucide-react";
+import { GuessTeaser, PlateGuessPanel } from "@/components/site/PlateGuessPanel";
+import { getPlateGuess } from "@/lib/plate-guesses.functions";
 import { PlateFrame } from "@/components/site/PlateFrame";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
@@ -182,7 +184,15 @@ function StorySoFar({
   );
 }
 
-function RealStorySoFar({ plateId, fallback }: { plateId: string; fallback: React.ReactNode }) {
+function RealStorySoFar({
+  plateId,
+  fallback,
+  hiddenGuess = false,
+}: {
+  plateId: string;
+  fallback: React.ReactNode;
+  hiddenGuess?: boolean;
+}) {
   const { data } = useQuery({
     queryKey: ["plate-summary", plateId],
     queryFn: () => getPlateSummary({ data: { plateId } }),
@@ -194,7 +204,7 @@ function RealStorySoFar({ plateId, fallback }: { plateId: string; fallback: Reac
     storyCount: v.storyCount,
     text: v.text,
   });
-  if (!data || (!data.current && !data.catchingUp)) return <>{fallback}</>;
+  if (hiddenGuess || !data || (!data.current && !data.catchingUp)) return <>{fallback}</>;
   return (
     <SummaryPanel
       current={data.current ? toPanel(data.current) : undefined}
@@ -235,10 +245,12 @@ function MysteryPrompt({
   signedIn,
   plateId,
   storyCount = 0,
+  hasGuess = false,
 }: {
   signedIn?: boolean;
   plateId?: string;
   storyCount?: number;
+  hasGuess?: boolean;
 } = {}) {
   return (
     <section aria-labelledby="first-story" className="space-y-6">
@@ -262,6 +274,7 @@ function MysteryPrompt({
             Add Your Story
           </button>
         )}
+        {hasGuess && <GuessTeaser />}
       </div>
       <div
         data-testid="roadside-sign"
@@ -523,6 +536,10 @@ export function RealPlateDetail({
     queryKey: ["plate-stories", plate.id],
     queryFn: () => getPlateStories({ data: { plateId: plate.id } }),
   });
+  const { data: guess } = useQuery({
+    queryKey: ["plate-guess", plate.id],
+    queryFn: () => getPlateGuess({ data: { plateId: plate.id } }),
+  });
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       {backToSearch ? (
@@ -548,14 +565,21 @@ export function RealPlateDetail({
         <div className="min-w-0">
           <RealStorySoFar
             plateId={plate.id}
+            hiddenGuess={guess?.status === "hidden"}
             fallback={
               <MysteryPrompt
                 signedIn={signedIn}
                 plateId={plate.id}
                 storyCount={storiesData?.storyCount ?? 0}
+                hasGuess={guess?.status === "hidden"}
               />
             }
           />
+          {guess?.status === "revealed" && (
+            <div className="mt-6">
+              <PlateGuessPanel plateId={plate.id} meaning={guess.meaning} story={guess.story} />
+            </div>
+          )}
         </div>
       </div>
       <RealStatusStrip plateId={plate.id} />

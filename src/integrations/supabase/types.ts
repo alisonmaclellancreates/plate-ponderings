@@ -355,6 +355,42 @@ export type Database = {
         }
         Relationships: []
       }
+      subject_guesses: {
+        Row: {
+          created_at: string
+          meaning: string
+          story: string
+          subject_id: string
+        }
+        Insert: {
+          created_at?: string
+          meaning: string
+          story: string
+          subject_id: string
+        }
+        Update: {
+          created_at?: string
+          meaning?: string
+          story?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_guesses_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: true
+            referencedRelation: "subject_status"
+            referencedColumns: ["subject_id"]
+          },
+          {
+            foreignKeyName: "subject_guesses_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: true
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subject_save_attempts: {
         Row: {
           attempted_at: string
