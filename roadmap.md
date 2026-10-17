@@ -1,3 +1,9 @@
+# Rowan: summary prompt review
+
+- [x] Preserve the brief’s score table, match Rowan’s score/text instruction verbatim, and add the attributed-ownership rule with instruction tests. No schema or existing-summary edits.
+- [x] Run summary-generation tests: 15 passed. Changed-file ESLint: clean.
+- [x] Generate one fresh ROW43XYZ summary through the normal flow as Alison’s selected Rowan account. Story submission published; version 5 read back through the database tool and plate UI, based on 5 stories, score 72 (Opinions differ), ownership attributed without evidence language. Existing summary rows untouched.
+
 # Step 44c: stale or stuck sessions
 
 - [x] Implement shared bounded user check, late account recovery, rejected-session cleanup and bounded project-owned attachment. No database changes; generated attacher unchanged.
@@ -157,3 +163,4 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [ ] Analytics: subject_searched, subject_spotted; tests, DB test rerun, live verification.
 - [ ] Test that Resume AI checks clears the block for every check, not only that one block stops the others.
 - [ ] Confirm homepage look-up card moves keyboard focus to the first search field; test exists from static pages (Homepage.test.tsx), report as such.
+- [x] Step 45: summary versions, visibility on server, after-response retry; addStory and recheck do not wait for the summary

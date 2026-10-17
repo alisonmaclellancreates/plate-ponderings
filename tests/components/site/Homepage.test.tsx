@@ -7,6 +7,7 @@ import type { PlateRecord } from "@/lib/mock-data";
 import type { ReactNode } from "react";
 
 const searchMock = vi.hoisted(() => ({ fn: vi.fn(), navigate: vi.fn() }));
+vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ params, children, ...props }: { params?: { state: string }; children: ReactNode }) => (
     <a {...props} href={params ? `/plate/${params.state}` : "/spot"}>

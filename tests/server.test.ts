@@ -53,6 +53,23 @@ describe("server.ts fetch", () => {
     vi.resetModules();
   });
 
+  it("gives background work the Worker's waitUntil from ctx, or from the request when ctx is absent", async () => {
+    const { runAfterResponse } = await import("@/lib/after-response.server");
+    const ok = new Response("ok");
+    const server = await loadServer(async () => {
+      const { runAfterResponse: inner } = await import("@/lib/after-response.server");
+      inner(Promise.resolve());
+      return ok;
+    });
+    void runAfterResponse;
+    const ctx = { waitUntil: vi.fn() };
+    await server.fetch(request(), {}, ctx);
+    expect(ctx.waitUntil).toHaveBeenCalledTimes(1);
+    const req = Object.assign(request(), { waitUntil: vi.fn() });
+    await server.fetch(req, {}, undefined);
+    expect(req.waitUntil).toHaveBeenCalledTimes(1);
+  });
+
   it("returns the inner 200 Response object as is and forwards request, env and ctx", async () => {
     const ok = new Response("hi", { status: 200 });
     const inner = vi.fn(() => ok);

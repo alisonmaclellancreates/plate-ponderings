@@ -465,6 +465,36 @@ export type Database = {
           },
         ]
       }
+      summary_runs: {
+        Row: {
+          last_started_at: string
+          subject_id: string
+        }
+        Insert: {
+          last_started_at: string
+          subject_id: string
+        }
+        Update: {
+          last_started_at?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "summary_runs_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: true
+            referencedRelation: "subject_status"
+            referencedColumns: ["subject_id"]
+          },
+          {
+            foreignKeyName: "summary_runs_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: true
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -540,6 +570,7 @@ export type Database = {
       }
     }
     Functions: {
+      claim_summary_run: { Args: { _subject_id: string }; Returns: boolean }
       consume_handle_save_attempt: {
         Args: { _user_id: string }
         Returns: boolean
