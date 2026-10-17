@@ -10,7 +10,7 @@ export const featuredHomeOptions = queryOptions({
     try {
       return await getFeaturedHome();
     } catch {
-      return { today: new Date().toISOString().slice(0, 10), pick: null, recent: [] };
+      return { today: "", pick: null, recent: [] };
     }
   },
 });

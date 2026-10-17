@@ -33,11 +33,12 @@ export type FeaturedPage = { today: string; plates: FeaturedDisplay[]; next: str
 export const getFeaturedHome = createServerFn({ method: "GET" }).handler(
   async (): Promise<FeaturedHome> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { effectiveToday } = await import("./effective-today.server");
+    const today = await effectiveToday(supabaseAdmin);
     const { data: pick, error: pickError } = await supabaseAdmin.rpc(
       "pick_featured_subject_for_today",
     );
     if (pickError) throw new Error("We couldn't load the featured plates right now.");
-    const today = pick?.[0]?.day ?? new Date().toISOString().slice(0, 10);
     const { data: rows, error } = await supabaseAdmin.rpc("get_featured_subject_days", {
       _limit: 5,
     });
@@ -67,12 +68,12 @@ export const getFeaturedArchive = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<FeaturedPage> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let today = new Date().toISOString().slice(0, 10);
+    const { effectiveToday } = await import("./effective-today.server");
+    const today = await effectiveToday(supabaseAdmin);
     if (data.before === undefined) {
       // First page picks today's plate so /explore shows it even if the homepage
       // was not visited yet. A pick failure never blocks the archive read.
-      const { data: pick } = await supabaseAdmin.rpc("pick_featured_subject_for_today");
-      today = pick?.[0]?.day ?? today;
+      await supabaseAdmin.rpc("pick_featured_subject_for_today");
     }
     const { data: rows, error } = await supabaseAdmin.rpc("get_featured_subject_days", {
       ...(data.before === undefined ? {} : { _before: data.before }),
