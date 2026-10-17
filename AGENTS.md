@@ -28,7 +28,8 @@
 - Own-account operations live in authenticated server functions with server-only moderation; a root account provider owns auth lifecycle and cache teardown, keeping private identifiers out of page DTOs.
 - Keep account context types and the consumer hook in `src/lib/account-auth.ts`, separate from the component-only provider; stabilize refresh and declare effect dependencies so auth lifecycle remains lint-safe without rule suppression.
 - The member-profile menu is an independently testable component, including its signed-out refusal, so account boundaries can be verified without artificial context changes during a parent render.
-- Protected account-required routes live under the client-only `_authenticated` gate with an `/auth` adapter to `/sign-in`; the missing-layout bootstrap validates `getUser()` before children run because SSR cannot read browser sessions.
+- Protected routes use the client-only `_authenticated` gate and `/auth` adapter. Shared bounded `checkSignedIn` clears only definite rejections and restores late success; plate actions read account context, avoiding duplicate checks.
 - Live and preview rate-limit outcomes share one renderer and the existing wait-message constant, so preview review cannot drift from the submitted flow.
 - Live spot outcomes retain the submitted identity separately from route prefill, so pending feedback and return-to-search links describe the actual request even after the form remounts.
 - PlateFrame owns the detail-only frame for static and real plate pages, so jurisdiction display stays identical without changing Plate artwork or other render locations.
+- Register project-owned `attachSession`, never generated `attachSupabaseAuth`: bounded `getSession()` preserves normal renewal without blocking public RPCs. Server authorization remains unchanged; never read tokens directly from storage.

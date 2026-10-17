@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -12,7 +12,7 @@ import {
 import { PlateFrame } from "@/components/site/PlateFrame";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
-import { supabase } from "@/integrations/supabase/client";
+import { useAccountAuth } from "@/lib/account-auth";
 import {
   CATCHING_UP_STORY,
   PLATES,
@@ -444,20 +444,11 @@ export function RealPlateDetail({
   plate: { id: string; jurisdiction: string; text: string };
   backToSearch?: { jurisdiction: string; text: string } | undefined;
 }) {
-  const [signedIn, setSignedIn] = useState(false);
+  const signedIn = Boolean(useAccountAuth()?.account);
   const { data: storiesData } = useQuery({
     queryKey: ["plate-stories", plate.id],
     queryFn: () => getPlateStories({ data: { plateId: plate.id } }),
   });
-  useEffect(() => {
-    let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active) setSignedIn(data.user !== null);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       {backToSearch ? (

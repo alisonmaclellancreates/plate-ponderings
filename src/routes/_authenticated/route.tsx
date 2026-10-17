@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { checkSignedIn } from "@/lib/session-check";
 import { safeReturnPath } from "@/lib/account-rules";
 
 // Missing-layout bootstrap for the first protected child routes. Keep this
@@ -7,9 +7,8 @@ import { safeReturnPath } from "@/lib/account-rules";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ location }) => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user)
-      throw redirect({ to: "/auth", search: { returnTo: safeReturnPath(location.href) } });
+    const user = await checkSignedIn();
+    if (!user) throw redirect({ to: "/auth", search: { returnTo: safeReturnPath(location.href) } });
   },
   component: Outlet,
 });
