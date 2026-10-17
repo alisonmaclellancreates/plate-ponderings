@@ -15,6 +15,7 @@ const m = vi.hoisted(() => ({
 vi.mock("@/lib/plate-guesses.functions", () => ({ getPlateGuess: () => Promise.resolve(m.guess) }));
 vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
 vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => vi.fn(),
   Link: ({
     to,
     params,
@@ -41,7 +42,15 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getUser: m.getUser } },
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => ({ account: m.account }) }));
+vi.mock("@/lib/story-actions.functions", () => ({
+  toggleHeart: vi.fn(),
+  reportStory: vi.fn(),
+  blockAuthor: vi.fn(),
+  deleteMyStory: vi.fn(),
+}));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
   useQuery: ({ queryFn, queryKey }: { queryFn: () => unknown; queryKey: string[] }) => {
     queryFn();
     return {
@@ -131,6 +140,33 @@ describe("RealPlateDetail", () => {
     expect(screen.getByText("Have another interpretation? Add your story.")).toBeTruthy();
     expect(screen.queryByText(/Every story starts somewhere/)).toBeNull();
   });
+
+  it.each([
+    [false, "Interpreted"],
+    [true, "Owner claim"],
+  ])(
+    "keeps public status and invitation when every story is blocked (owner: %s)",
+    (hasOwnerStory, status) => {
+      m.stories = {
+        stories: [],
+        pending: [],
+        total: 0,
+        storyCount: 1,
+        hasOwnerStory,
+        ownerHandle: hasOwnerStory ? "PublicClaimant" : null,
+      };
+      render(<RealPlateDetail plate={plate} />);
+      const strip = within(screen.getByRole("list", { name: "Plate status" }));
+      expect(strip.getByText("1 story")).toBeInTheDocument();
+      expect(strip.getByText(status)).toBeInTheDocument();
+      expect(strip.queryByText("Mystery")).toBeNull();
+      if (hasOwnerStory)
+        expect(strip.getByText("Says it's their plate: PublicClaimant")).toBeInTheDocument();
+      expect(screen.getByText("Have another interpretation? Add your story.")).toBeInTheDocument();
+      expect(screen.queryByText(/Every story starts somewhere/)).toBeNull();
+      expect(screen.queryByRole("article")).toBeNull();
+    },
+  );
 
   it("lists published stories with handle, meaning, source badge and hearts", () => {
     m.stories = {

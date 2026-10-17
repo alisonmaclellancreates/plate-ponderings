@@ -13,6 +13,7 @@ import {
 import { GuessTeaser, PlateGuessPanel } from "@/components/site/PlateGuessPanel";
 import { getPlateGuess } from "@/lib/plate-guesses.functions";
 import { PlateFrame } from "@/components/site/PlateFrame";
+import { HeartButton, StoryMenuActions } from "@/components/site/StoryActions";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
 import { useAccountAuth } from "@/lib/account-auth";
@@ -428,7 +429,7 @@ export function PlateDetail({ state }: { state: string }) {
   );
 }
 
-function RealStoryCard({ story }: { story: PlateStory }) {
+function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string }) {
   const owner = story.source === "owner";
   return (
     <article
@@ -437,24 +438,23 @@ function RealStoryCard({ story }: { story: PlateStory }) {
     >
       <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1">
-        <p className="text-sm">
-          <span className="font-semibold">{story.handle}</span>
-          {owner && (
-            <span className="ml-2 rounded-full bg-coral-pale px-2 py-0.5 text-xs font-semibold text-navy">
-              Owner claim
-            </span>
-          )}
-        </p>
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm">
+            <span className="font-semibold">{story.handle}</span>
+            {owner && (
+              <span className="ml-2 rounded-full bg-coral-pale px-2 py-0.5 text-xs font-semibold text-navy">
+                Owner claim
+              </span>
+            )}
+          </p>
+          <StoryMenuActions story={story} plateId={plateId} />
+        </div>
         <h3 className="mt-1 text-lg font-bold text-navy">{story.meaning}</h3>
         <div className="mt-2">
           <HowIKnowBadge how={story.source} />
         </div>
         {story.body && <p className="mt-2">{story.body}</p>}
-        <p className="mt-2 flex items-center gap-1 text-sm">
-          <Heart aria-hidden className="size-4 text-coral" />
-          <span>{story.hearts}</span>
-          <span className="sr-only">{story.hearts === 1 ? "heart" : "hearts"}</span>
-        </p>
+        <HeartButton story={story} plateId={plateId} />
       </div>
     </article>
   );
@@ -480,7 +480,7 @@ function RealStories({ plateId, signedIn }: { plateId: string; signedIn: boolean
       <ul className="space-y-4">
         {data.stories.slice(0, shown).map((s) => (
           <li key={s.id}>
-            <RealStoryCard story={s} />
+            <RealStoryCard story={s} plateId={plateId} />
           </li>
         ))}
       </ul>

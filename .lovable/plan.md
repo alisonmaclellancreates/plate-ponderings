@@ -1,38 +1,61 @@
-# Step 47: Your Submissions, made real
+# Step 48: story actions, admin, settings
 
-## Data shape (one database change proposed)
-- `subjects.created_by` and `stories.author_id` own the rows.
-- `notifications` (read own; update `read_at` only, refused for demo by policy) already receives rows from the recheck and spot flows.
-- No browser DELETE grant on subjects, stories or notifications. That absence is the database's refusal for dismiss; dismiss runs in an authenticated server function.
-- Proposed migration: `notifications.subject_id` and `notifications.story_id` foreign keys become `ON DELETE CASCADE` (drop and re-add the two constraints, same columns). Today they have no cascade, so a conditional row delete would fail while notifications still point at it. With cascade, the row delete itself removes its notifications, which is exactly "only when a row was deleted". Existing rows already satisfy the constraints; validated after apply.
+## Data shape and state transitions
 
-Row state machine (derived per record):
 ```text
-subject: pending -> published (count = published stories, View)
-                 -> rejected  (Dismiss)            ; pending: no action, no chevron
-story:   pending -> published (own hearts, View)   ; pending on published plate: View
-                 -> rejected  (Dismiss)            ; hidden/deleted: excluded
+story.status:  published --hide--> hidden --unhide--> published   (admin; published_at untouched)
+               published|hidden --delete--> deleted (tombstone; meaning '', body null, photo null, removed_at now)
+               pending|rejected --account delete--> row deleted
+removed_at:    set to now() on hide/delete, cleared on unhide
+               (is_summary_public already hides versions written from a hidden/deleted story
+                whose published_at <= generated_at and removed_at > started_at, so versions vanish
+                immediately and return on unhide; no SQL change needed)
 ```
-"Updated" = an unread notification whose story_id (stories) or subject_id with no story_id (subjects) matches the row.
 
-## Server functions (new `src/lib/submissions.functions.ts`, all `requireSupabaseAuth`)
-- `getSubmissions`: reads with the admin client, filtered by the verified `context.userId` (`created_by` / `author_id`), for every status, so published rows appear regardless of owner policies. Excludes hidden/deleted stories, merges newest first, attaches published story counts (subjects) and the story's own heart count (stories), unread flags. Returns only the planned fields: id, kind, display text, jurisdiction name, status, date, count, action, plate link, updated, plus `unreadCount`.
-- `markSubmissionsRead`: no-op for the demo role (checked server-side); otherwise updates the caller's unread notifications as the user, so RLS also refuses demo.
-- `getUnreadDot`: boolean, any unread notification for the caller.
-- `dismissSubmission({ kind, id })`: refuses demo first with the brief's demo message. Then one admin delete carrying every condition (`id`, owner = `context.userId`, `status = 'rejected'`) with `.select("id, photo_path")`. Only when a row comes back: remove its photo from storage (notifications go with the row by cascade). No match returns a not-found result and touches nothing else.
-- Recheck: when `recheckPendingSubjects` resolves on the client, invalidate the unread-dot query so a status change it creates shows the dot without a page change.
+Existing tables already have most rules: hearts PK (story,user) with a published-story insert policy, blocks PK plus no-self-block, reports unique (story, reporter), reason keys `personal_info | harassment | spam | other`. All carry non-demo policies.
 
-## UI
-- `/submissions` route: loader-free on the client (`useSuspenseQuery` under `_authenticated`), passes live rows into the existing `SubmissionsPage` layout unchanged; previews keep mock data. Dismiss removes the row optimistically and invalidates the query; demo sees the demo message.
-- After the list renders: fire `submissions_viewed { unread_count }`, then call `markSubmissionsRead` and invalidate the dot query (labels stay on this visit, clear next visit).
-- SiteHeader profile icon: small dot when `getUnreadDot` is true (signed in only).
-- Rename mock `knows`/`asked` untouched; copy strings come from the brief.
+## Proposed migration (needs your approval)
+
+1. `reports.reporter_id` DROP NOT NULL, so account deletion can clear the reporter and keep the report. The tool flags DROP NOT NULL as destructive and asks before it runs.
+   Confirmed: `reporter_id` currently has no foreign key at all. Project rules forbid new keys to `auth.users`, so the migration adds `reports_reporter_id_fkey` referencing `profiles(id) ON DELETE SET NULL`. Deleting the auth user cascades to the profile, which then nulls the reporter and keeps the report. It is added NOT VALID, then validated in the same migration (there are no rows today).
+2. `reports_note_length` CHECK (note is null or char_length(note) <= 200), added NOT VALID, then validated against existing rows in the same migration (there are currently zero rows).
+3. `get_reported_stories()` security definer, service_role only. Returns story id, subject display, jurisdiction name, meaning, author handle, status, report count, reason keys and latest report time, newest first. Server reads stay fixed in count.
+
+Nothing else: no demo triggers. The tombstone keeps `meaning` as '' instead of relaxing NOT NULL.
+
+## Server functions (all authenticated; demo refused first, then DB policy refuses as a second layer)
+
+- `stories-actions.functions.ts`: `toggleHeart`, `reportStory`, `blockAuthor`, `unblockUser`, `deleteMyStory`, `getBlockedPeople`. Heart, report and block writes go through `context.supabase` (RLS as the user, using the existing non-demo policies). Delete uses the admin client after an ownership-checked conditional update (`id`, `author_id`, status in published/hidden). It then removes hearts and the photo, and calls `runAfterResponse(requestSummaryRefresh)`.
+- `getPlateStories` DTO gains `isOwn` and `hearted` only. `blockAuthor` takes the story id and resolves the author on the server; no author identifier reaches the browser.
+- `admin.functions.ts`: `getReportedStories`, `setStoryHidden({ id, hidden })` and `recheckAllPending`. Each verifies `has_role(admin)` through `context.supabase` before loading the admin client.
+  - `setStoryHidden` calls `runAfterResponse(requestSummaryRefresh(subjectId))` on both hide and unhide. Both directions are tested.
+  - `recheckAllPending` checks the shared AI pause before starting and returns early if paused. It processes at most 10 pending items per click across all non-demo owners (subjects first, then stories, oldest first) and stops on the first unavailable or block result. It returns `{ changed, remaining, stopped }`, where remaining is the count still pending after the run. The cap and the stop are both tested. It reuses the per-item check, publish and notify helpers extracted from the existing per-user recheck, which keeps its cooldown.
+- `account-delete.functions.ts`: `deleteAccount` runs the full sequence from the brief. It refreshes summaries for every affected subject, deletes the auth user and returns `{ deleted: true }`. Then the PostHog person is deleted with a server secret. A failure is logged, and deletion still succeeds.
+
+## Pages
+
+- Story card (live): a heart button with count and pressed state; signed out it navigates to sign-in with a return path. The menu follows the brief's rules: none signed out; Delete only on own published stories; demo sees the menu and gets the demo message. It reuses the existing Report and Delete dialogs.
+- `/admin`: `beforeLoad` checks the admin role through an authenticated server read and redirects non-admins to `/`. The live table has Hide/Unhide and Recheck pending with its count message.
+- `/settings`: a live blocked list with Unblock. `/settings/delete-confirm` deletes, sends `account_deleted`, calls `reset`, signs out locally and navigates home.
+- `/privacy`: a PostHog third-party paragraph.
+- Sample twins: `/previews/story-menu`, `/previews/admin`, `/previews/settings`, `/previews/settings-delete-confirm`. All use real components, inert actions and mock rows covering every state. The `/previews` list marks the live pages as live.
 
 ## Analytics
-Register `submissions_viewed` with `unread_count: number` only; test it carries no never-send fields.
 
-## Tests (AI mocked, every branch)
-Server functions: published, pending and rejected rows all appear (subjects and stories), each row type and action, hidden/deleted excluded, subjects never carry hearts, only planned fields returned, updated mapping, demo mark-read no-op, non-demo mark-read, dismiss demo refused before any delete, dismiss no-match (no photo removal), dismiss success removing the photo. Components: each row renders right details/action, no chevron for pending subject, dot on/off, dot query invalidated after the recheck resolves, viewed event and mark-read order. A `tests/db` addition proves deleting a rejected story or subject cascades its notifications. Then run changed test files, lint, and every `tests/db` file.
+Registry additions: story_hearted, story_unhearted, story_reported [reason], user_blocked, user_unblocked, story_deleted, admin_action [action: hide | unhide | recheck], account_deleted. None of these carry text or handles.
 
-## Report
-Max 10 lines; Codecov after your PR.
+## Secrets
+
+`POSTHOG_PERSONAL_API_KEY` and `POSTHOG_PROJECT_ID` (server only). I'll request them with the secure form after approval. Until they're set, the PostHog delete logs "not configured" and the account deletion still succeeds.
+
+## Tests and checks
+
+- Unit tests for every action, including demo refusal, tombstone fields, admin-only access, the account-deletion sequence and PostHog failure, the redirects, the analytics events and each sample page.
+- New `tests/db/story-actions.sql`: report note length, the reporter foreign key's SET NULL rule (deleting a profile keeps its reports with a null reporter), `get_reported_stories` grants, and versions hidden then restored by hide and unhide. Then rerun all of tests/db.
+- Locally: `vitest related` on the changed source plus the changed tests, and lint.
+- Redirects in the running preview: the admin redirect for a non-admin and the signed-out redirect, via Playwright, as the brief requires.
+
+## Technical notes
+
+- Redirects only in `beforeLoad`; server functions return values. `src/start.ts` is untouched.
+- Hidden/deleted stories are already excluded from public story reads by status.

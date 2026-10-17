@@ -33,8 +33,11 @@ import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenti
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 import { Route as PreviewsAccountRouteImport } from './routes/previews_.account'
+import { Route as PreviewsAdminRouteImport } from './routes/previews_.admin'
 import { Route as PreviewsExploreRouteImport } from './routes/previews_.explore'
 import { Route as PreviewsHomepageFeaturedRouteImport } from './routes/previews_.homepage-featured'
+import { Route as PreviewsSettingsRouteImport } from './routes/previews_.settings'
+import { Route as PreviewsSettingsDeleteConfirmRouteImport } from './routes/previews_.settings-delete-confirm'
 import { Route as PreviewsStoryErrorRouteImport } from './routes/previews_.story-error'
 import { Route as PreviewsStoryRateLimitedRouteImport } from './routes/previews_.story-rate-limited'
 import { Route as PreviewsSubmissionsRouteImport } from './routes/previews_.submissions'
@@ -163,6 +166,11 @@ const PreviewsAccountRoute = PreviewsAccountRouteImport.update({
   path: '/previews/account',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreviewsAdminRoute = PreviewsAdminRouteImport.update({
+  id: '/previews_/admin',
+  path: '/previews/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreviewsExploreRoute = PreviewsExploreRouteImport.update({
   id: '/previews_/explore',
   path: '/previews/explore',
@@ -172,6 +180,17 @@ const PreviewsHomepageFeaturedRoute =
   PreviewsHomepageFeaturedRouteImport.update({
     id: '/previews_/homepage-featured',
     path: '/previews/homepage-featured',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PreviewsSettingsRoute = PreviewsSettingsRouteImport.update({
+  id: '/previews_/settings',
+  path: '/previews/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewsSettingsDeleteConfirmRoute =
+  PreviewsSettingsDeleteConfirmRouteImport.update({
+    id: '/previews_/settings-delete-confirm',
+    path: '/previews/settings-delete-confirm',
     getParentRoute: () => rootRouteImport,
   } as any)
 const PreviewsStoryErrorRoute = PreviewsStoryErrorRouteImport.update({
@@ -236,8 +255,11 @@ export interface FileRoutesByFullPath {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews/account': typeof PreviewsAccountRoute
+  '/previews/admin': typeof PreviewsAdminRoute
   '/previews/explore': typeof PreviewsExploreRoute
   '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
+  '/previews/settings': typeof PreviewsSettingsRoute
+  '/previews/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/previews/submissions': typeof PreviewsSubmissionsRoute
@@ -270,8 +292,11 @@ export interface FileRoutesByTo {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews/account': typeof PreviewsAccountRoute
+  '/previews/admin': typeof PreviewsAdminRoute
   '/previews/explore': typeof PreviewsExploreRoute
   '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
+  '/previews/settings': typeof PreviewsSettingsRoute
+  '/previews/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/previews/submissions': typeof PreviewsSubmissionsRoute
@@ -306,8 +331,11 @@ export interface FileRoutesById {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews_/account': typeof PreviewsAccountRoute
+  '/previews_/admin': typeof PreviewsAdminRoute
   '/previews_/explore': typeof PreviewsExploreRoute
   '/previews_/homepage-featured': typeof PreviewsHomepageFeaturedRoute
+  '/previews_/settings': typeof PreviewsSettingsRoute
+  '/previews_/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
   '/previews_/story-error': typeof PreviewsStoryErrorRoute
   '/previews_/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/previews_/submissions': typeof PreviewsSubmissionsRoute
@@ -342,8 +370,11 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews/account'
+    | '/previews/admin'
     | '/previews/explore'
     | '/previews/homepage-featured'
+    | '/previews/settings'
+    | '/previews/settings-delete-confirm'
     | '/previews/story-error'
     | '/previews/story-rate-limited'
     | '/previews/submissions'
@@ -376,8 +407,11 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews/account'
+    | '/previews/admin'
     | '/previews/explore'
     | '/previews/homepage-featured'
+    | '/previews/settings'
+    | '/previews/settings-delete-confirm'
     | '/previews/story-error'
     | '/previews/story-rate-limited'
     | '/previews/submissions'
@@ -411,8 +445,11 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews_/account'
+    | '/previews_/admin'
     | '/previews_/explore'
     | '/previews_/homepage-featured'
+    | '/previews_/settings'
+    | '/previews_/settings-delete-confirm'
     | '/previews_/story-error'
     | '/previews_/story-rate-limited'
     | '/previews_/submissions'
@@ -443,8 +480,11 @@ export interface RootRouteChildren {
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
   PreviewsAccountRoute: typeof PreviewsAccountRoute
+  PreviewsAdminRoute: typeof PreviewsAdminRoute
   PreviewsExploreRoute: typeof PreviewsExploreRoute
   PreviewsHomepageFeaturedRoute: typeof PreviewsHomepageFeaturedRoute
+  PreviewsSettingsRoute: typeof PreviewsSettingsRoute
+  PreviewsSettingsDeleteConfirmRoute: typeof PreviewsSettingsDeleteConfirmRoute
   PreviewsStoryErrorRoute: typeof PreviewsStoryErrorRoute
   PreviewsStoryRateLimitedRoute: typeof PreviewsStoryRateLimitedRoute
   PreviewsSubmissionsRoute: typeof PreviewsSubmissionsRoute
@@ -621,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewsAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/previews_/admin': {
+      id: '/previews_/admin'
+      path: '/previews/admin'
+      fullPath: '/previews/admin'
+      preLoaderRoute: typeof PreviewsAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/previews_/explore': {
       id: '/previews_/explore'
       path: '/previews/explore'
@@ -633,6 +680,20 @@ declare module '@tanstack/react-router' {
       path: '/previews/homepage-featured'
       fullPath: '/previews/homepage-featured'
       preLoaderRoute: typeof PreviewsHomepageFeaturedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/previews_/settings': {
+      id: '/previews_/settings'
+      path: '/previews/settings'
+      fullPath: '/previews/settings'
+      preLoaderRoute: typeof PreviewsSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/previews_/settings-delete-confirm': {
+      id: '/previews_/settings-delete-confirm'
+      path: '/previews/settings-delete-confirm'
+      fullPath: '/previews/settings-delete-confirm'
+      preLoaderRoute: typeof PreviewsSettingsDeleteConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/previews_/story-error': {
@@ -732,8 +793,11 @@ const rootRouteChildren: RootRouteChildren = {
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
   PreviewsAccountRoute: PreviewsAccountRoute,
+  PreviewsAdminRoute: PreviewsAdminRoute,
   PreviewsExploreRoute: PreviewsExploreRoute,
   PreviewsHomepageFeaturedRoute: PreviewsHomepageFeaturedRoute,
+  PreviewsSettingsRoute: PreviewsSettingsRoute,
+  PreviewsSettingsDeleteConfirmRoute: PreviewsSettingsDeleteConfirmRoute,
   PreviewsStoryErrorRoute: PreviewsStoryErrorRoute,
   PreviewsStoryRateLimitedRoute: PreviewsStoryRateLimitedRoute,
   PreviewsSubmissionsRoute: PreviewsSubmissionsRoute,

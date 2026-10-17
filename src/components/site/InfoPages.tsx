@@ -54,6 +54,11 @@ export function PrivacyPage() {
           published stories to write The Story So Far. It's shown your photo once, to find the
           plate, and it never sees your email address.
         </PrivacySection>
+        <PrivacySection title="Analytics">
+          We use PostHog to understand how the site is used. It receives which pages were viewed and
+          which actions were taken, tied to an account id. It never receives story text or contact
+          details. Deleting your account deletes that data too.
+        </PrivacySection>
         <PrivacySection title="Blocking">{BLOCKING_EXPLANATION}</PrivacySection>
         <PrivacySection title="Deleting your published stories and your account">
           You can delete any of your published stories. {DELETE_ACCOUNT_WARNING}

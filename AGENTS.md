@@ -18,6 +18,7 @@
 - CI checks and coverage run independently with frozen Bun installs; replay only `supabase/migrations/` when present, because Drizzle records are not replayable Cloud migrations.
 - Exclude generated routing and Cloud files from lint/formatting because Lovable rewrites them; retain existing rules for all non-generated source and tests.
 - Static previews read only `src/lib/mock-data.ts` and reuse site components, keeping layouts independent of live data.
+- Report labels share a browser-safe module to prevent moderation drift.
 - Compose state-specific preview stories without mutating shared plate records, so catching-up examples cannot change other previews.
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
 - Featured pages share RPC DTOs and cursor queries; previews adapt mocks. Queries contain read failures: home omits empty bands, archive retries inline, preserving pages.

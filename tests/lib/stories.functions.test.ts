@@ -247,6 +247,25 @@ describe("getPlateStories", () => {
     expect(mocks.admin.auth.getUser).not.toHaveBeenCalled();
   });
 
+  it.each(["owner", "guess"])("blocking a lone %s story preserves public facts", async (source) => {
+    tables["stories"] = { data: [row("blocked-story", source, "a2", "2026-10-01")], error: null };
+    tables["profiles"] = { data: [{ id: "a2", handle: "PublicClaimant" }], error: null };
+    const publicResult = await call(getPlateStories, { plateId: "plate-1" });
+    mocks.getRequest.mockReturnValue({ headers: { get: () => "Bearer a.b.c" } });
+    mocks.admin.auth.getUser.mockResolvedValue({ data: { user: { id: "viewer" } }, error: null });
+    tables["blocks"] = { data: [{ blocked_id: "a2" }], error: null };
+    const blockedResult = await call(getPlateStories, { plateId: "plate-1" });
+    expect(publicResult["stories"]).toHaveLength(1);
+    expect(blockedResult["stories"]).toEqual([]);
+    expect(blockedResult["total"]).toBe(0);
+    expect(blockedResult["storyCount"]).toBe(1);
+    expect(blockedResult["hasOwnerStory"]).toBe(source === "owner");
+    expect(blockedResult["ownerHandle"]).toBe(source === "owner" ? "PublicClaimant" : null);
+    for (const key of ["storyCount", "hasOwnerStory", "ownerHandle"]) {
+      expect(blockedResult[key]).toEqual(publicResult[key]);
+    }
+  });
+
   it("signed in: own pending stories appear, blocked authors are hidden", async () => {
     mocks.getRequest.mockReturnValue({
       headers: { get: () => "Bearer a.b.c" },
@@ -372,7 +391,7 @@ describe("getPlateStories failed and empty lookups", () => {
     mocks.admin.auth.getUser.mockResolvedValue({ data: { user: { id: "viewer" } }, error: null });
   };
   type Out = {
-    stories: { id: string; handle: string; hearts: number }[];
+    stories: { id: string; handle: string; hearts: number; isOwn?: boolean; hearted?: boolean }[];
     pending: unknown[];
     ownerHandle: string | null;
   };
@@ -446,6 +465,8 @@ describe("getPlateStories failed and empty lookups", () => {
         handle: "Traveler",
         hearts: 0,
         publishedAt: "",
+        isOwn: false,
+        hearted: false,
       },
     ]);
     expect(result.pending).toEqual([]);
@@ -464,6 +485,29 @@ describe("getPlateStories failed and empty lookups", () => {
     expect(result.stories.map((s) => [s.id, s.handle])).toEqual([["s1", "Traveler"]]);
     expect(result.ownerHandle).toBe("Traveler");
     expect(mocks.admin.from).not.toHaveBeenCalledWith("profiles");
+  });
+  it("marks the viewer's own stories and the ones they hearted", async () => {
+    signedIn();
+    tables["stories"] = {
+      data: [
+        {
+          id: "s1",
+          meaning: "M",
+          source: "guess",
+          body: null,
+          author_id: "viewer",
+          published_at: "x",
+        },
+        { id: "s2", meaning: "N", source: "guess", body: null, author_id: "a2", published_at: "y" },
+      ],
+      error: null,
+    };
+    tables["hearts"] = { data: [{ story_id: "s2" }], error: null };
+    const result = (await call(getPlateStories, { plateId: "plate-1" })) as unknown as Out;
+    expect(result.stories.map((s) => [s.id, s.isOwn, s.hearted])).toEqual([
+      ["s1", true, false],
+      ["s2", false, true],
+    ]);
   });
   it("treats an empty stories read as a plate with no stories", async () => {
     tables["stories"] = { data: null, error: null };

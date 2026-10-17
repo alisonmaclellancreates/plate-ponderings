@@ -105,6 +105,10 @@ export type PlateStory = {
   handle: string;
   hearts: number;
   publishedAt: string;
+  /** The verified viewer wrote this story. */
+  isOwn: boolean;
+  /** The verified viewer has hearted this story. */
+  hearted: boolean;
 };
 
 export type PlateStoriesResult = {
@@ -175,26 +179,29 @@ export const getPlateStories = createServerFn({ method: "POST" })
       .order("published_at", { ascending: true });
     if (error) return null;
 
-    const visible = ((rows ?? []) as StoryRow[]).filter(
+    // Public facts are independent of the viewer's personal block list.
+    const published = (rows ?? []) as StoryRow[];
+    const publicOwnerStories = published.filter((r) => r.source === "owner");
+    const visible = published.filter(
       (r) => r.author_id === null || !blockedIds.includes(r.author_id),
     );
 
     let pendingRows: StoryRow[] = [];
     if (viewerId) {
-      const { data: mine } = await supabaseAdmin
+      const { data: ownPending } = await supabaseAdmin
         .from("stories")
         .select("id,meaning,source,body,author_id,published_at")
         .eq("subject_id", plate.id)
         .eq("status", "pending")
         .eq("author_id", viewerId)
         .order("created_at", { ascending: true });
-      pendingRows = (mine ?? []) as StoryRow[];
+      pendingRows = (ownPending ?? []) as StoryRow[];
     }
 
     // Handles come from profiles in a separate lookup; stories has no FK to it.
     const authorIds = [
       ...new Set(
-        [...visible, ...pendingRows]
+        [...visible, ...publicOwnerStories, ...pendingRows]
           .map((r) => r.author_id)
           .filter((id): id is string => id !== null),
       ),
@@ -212,6 +219,18 @@ export const getPlateStories = createServerFn({ method: "POST" })
       _subject_id: plate.id,
     });
     const hearts = new Map((heartRows ?? []).map((h) => [h.story_id, Number(h.hearts)]));
+    let mine = new Set<string>();
+    if (viewerId && visible.length > 0) {
+      const { data: given } = await supabaseAdmin
+        .from("hearts")
+        .select("story_id")
+        .eq("user_id", viewerId)
+        .in(
+          "story_id",
+          visible.map((r) => r.id),
+        );
+      mine = new Set((given ?? []).map((h) => h.story_id));
+    }
 
     const toStory = (r: StoryRow): PlateStory => ({
       id: r.id,
@@ -221,6 +240,8 @@ export const getPlateStories = createServerFn({ method: "POST" })
       handle: (r.author_id && handles.get(r.author_id)) || "Traveler",
       hearts: hearts.get(r.id) ?? 0,
       publishedAt: r.published_at ?? "",
+      isOwn: viewerId !== null && r.author_id === viewerId,
+      hearted: mine.has(r.id),
     });
 
     const ownerStories = visible.filter((r) => r.source === "owner");
@@ -231,11 +252,12 @@ export const getPlateStories = createServerFn({ method: "POST" })
       stories: ordered,
       total: ordered.length,
       pending: pendingRows.map(toStory),
-      storyCount: ordered.length,
+      storyCount: published.length,
       ownerHandle:
-        ownerStories.length > 0
-          ? (ownerStories[0]?.author_id && handles.get(ownerStories[0].author_id)) || "Traveler"
+        publicOwnerStories.length > 0
+          ? (publicOwnerStories[0]?.author_id && handles.get(publicOwnerStories[0].author_id)) ||
+            "Traveler"
           : null,
-      hasOwnerStory: ownerStories.length > 0,
+      hasOwnerStory: publicOwnerStories.length > 0,
     };
   });
