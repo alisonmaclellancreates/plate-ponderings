@@ -1,5 +1,6 @@
 import { Plate } from "@/components/site/Plate";
 import { REPORTED_STORIES, type ReportedStory } from "@/lib/mock-data";
+import { REPORT_REASON_OPTIONS } from "@/lib/report-reasons";
 import { AiCheckStatus } from "./AiCheckStatus";
 
 type Toggle = ((row: ReportedStory) => void) | undefined;
@@ -21,7 +22,11 @@ function ReportRow({
       <td className="p-3 font-semibold">{row.handle}</td>
       <td className="p-3">{row.meaning}</td>
       <td className="p-3 text-center">{row.reports}</td>
-      <td className="p-3">{row.reasons.join(", ")}</td>
+      <td className="p-3">
+        {row.reasons
+          .map((reason) => REPORT_REASON_OPTIONS.find((option) => option.key === reason)?.label ?? reason)
+          .join(", ")}
+      </td>
       <td className="p-3 capitalize">{row.status}</td>
       <td className="p-3">
         <button

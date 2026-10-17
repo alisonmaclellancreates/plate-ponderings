@@ -141,6 +141,25 @@ describe("RealPlateDetail", () => {
     expect(screen.queryByText(/Every story starts somewhere/)).toBeNull();
   });
 
+  it.each([
+    [false, "Interpreted"],
+    [true, "Owner claim"],
+  ])("keeps public status and invitation when every story is blocked (owner: %s)", (hasOwnerStory, status) => {
+    m.stories = {
+      stories: [], pending: [], total: 0, storyCount: 1,
+      hasOwnerStory, ownerHandle: hasOwnerStory ? "PublicClaimant" : null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    const strip = within(screen.getByRole("list", { name: "Plate status" }));
+    expect(strip.getByText("1 story")).toBeInTheDocument();
+    expect(strip.getByText(status)).toBeInTheDocument();
+    expect(strip.queryByText("Mystery")).toBeNull();
+    if (hasOwnerStory) expect(strip.getByText("Says it's their plate: PublicClaimant")).toBeInTheDocument();
+    expect(screen.getByText("Have another interpretation? Add your story.")).toBeInTheDocument();
+    expect(screen.queryByText(/Every story starts somewhere/)).toBeNull();
+    expect(screen.queryByRole("article")).toBeNull();
+  });
+
   it("lists published stories with handle, meaning, source badge and hearts", () => {
     m.stories = {
       stories: [

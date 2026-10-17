@@ -19,6 +19,20 @@ describe("AdminPage", () => {
     expect(within(scroll).getByRole("table", { name: "Reported stories" })).toBeTruthy();
   });
 
+  it.each([
+    ["personal_info", "Personal information"],
+    ["harassment", "Hurtful or harassing"],
+    ["spam", "Spam"],
+    ["other", "Something else"],
+  ])("shows the report dialog label for %s", (reason, label) => {
+    const sample = REPORTED_STORIES[0];
+    if (!sample) throw new Error("Missing reported story fixture");
+    render(<AdminPage rows={[{ ...sample, reasons: [reason] }]} />);
+    const table = within(screen.getByRole("table", { name: "Reported stories" }));
+    expect(table.getByRole("cell", { name: label })).toBeInTheDocument();
+    expect(table.queryByRole("cell", { name: reason, exact: true })).toBeNull();
+  });
+
   it("lists every reported story with its status action", () => {
     render(<AdminPage />);
     const table = within(screen.getByRole("table", { name: "Reported stories" }));

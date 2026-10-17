@@ -179,7 +179,10 @@ export const getPlateStories = createServerFn({ method: "POST" })
       .order("published_at", { ascending: true });
     if (error) return null;
 
-    const visible = ((rows ?? []) as StoryRow[]).filter(
+    // Public facts are independent of the viewer's personal block list.
+    const published = (rows ?? []) as StoryRow[];
+    const publicOwnerStories = published.filter((r) => r.source === "owner");
+    const visible = published.filter(
       (r) => r.author_id === null || !blockedIds.includes(r.author_id),
     );
 
@@ -198,7 +201,7 @@ export const getPlateStories = createServerFn({ method: "POST" })
     // Handles come from profiles in a separate lookup; stories has no FK to it.
     const authorIds = [
       ...new Set(
-        [...visible, ...pendingRows]
+        [...visible, ...publicOwnerStories, ...pendingRows]
           .map((r) => r.author_id)
           .filter((id): id is string => id !== null),
       ),
@@ -249,11 +252,11 @@ export const getPlateStories = createServerFn({ method: "POST" })
       stories: ordered,
       total: ordered.length,
       pending: pendingRows.map(toStory),
-      storyCount: ordered.length,
+      storyCount: published.length,
       ownerHandle:
-        ownerStories.length > 0
-          ? (ownerStories[0]?.author_id && handles.get(ownerStories[0].author_id)) || "Traveler"
+        publicOwnerStories.length > 0
+          ? (publicOwnerStories[0]?.author_id && handles.get(publicOwnerStories[0].author_id)) || "Traveler"
           : null,
-      hasOwnerStory: ownerStories.length > 0,
+      hasOwnerStory: publicOwnerStories.length > 0,
     };
   });
