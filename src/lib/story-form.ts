@@ -1,15 +1,7 @@
 import type { HowIKnow } from "@/lib/mock-data";
 
 export type StoryStep =
-  | "1"
-  | "1-owner-exists"
-  | "2"
-  | "2-adjust"
-  | "2-review"
-  | "3"
-  | "done"
-  | "checking"
-  | "rejected";
+  "1" | "1-owner-exists" | "2" | "2-adjust" | "2-review" | "3" | "done" | "checking" | "rejected";
 
 export const STORY_STEPS: Record<StoryStep, string> = {
   "1": "Your story",
