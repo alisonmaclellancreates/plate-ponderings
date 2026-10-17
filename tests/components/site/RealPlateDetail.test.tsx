@@ -37,7 +37,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 vi.mock("@tanstack/react-query", () => ({
   useQuery: () => ({ data: m.stories }),
 }));
-vi.mock("@/lib/stories.functions", () => ({ getPlateStories: vi.fn() }));
+vi.mock("@/lib/stories.functions", () => ({ getPlateStories: vi.fn(), STORY_PAGE_SIZE: 5 }));
 
 import { RealPlateDetail } from "@/components/site/PlateDetail";
 
