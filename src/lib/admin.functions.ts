@@ -122,7 +122,7 @@ export const recheckAllPending = createServerFn({ method: "POST" })
       .order("created_at", { ascending: true });
     const stories = await supabaseAdmin
       .from("stories")
-      .select("id,subject_id,meaning,body,author_id,subjects!stories_subject_id_fkey(identity_b)")
+      .select("id,subject_id,meaning,body,author_id,photo_path,subjects!stories_subject_id_fkey(identity_b)")
       .eq("status", "pending")
       .order("created_at", { ascending: true });
     if (subjects.error || stories.error) return { outcome: "error" };

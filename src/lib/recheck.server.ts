@@ -10,6 +10,7 @@ export type PendingStory = {
   meaning: string;
   body: string | null;
   plateText: string;
+  photo_path: string | null;
 };
 
 /**
