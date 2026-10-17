@@ -467,6 +467,7 @@ describe("getPlateStories failed and empty lookups", () => {
         publishedAt: "",
         isOwn: false,
         hearted: false,
+        photo: null,
       },
     ]);
     expect(result.pending).toEqual([]);
