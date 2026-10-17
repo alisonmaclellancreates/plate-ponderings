@@ -77,6 +77,16 @@ it.each([
     (text: string) => text.replace(/2\. \*\*RoadTripRaven\*\*[^\n]+/, "Removed story"),
     "Approved seed content counts do not match.",
   ],
+  [
+    "summary count",
+    (text: string) => text.replace("1. Oct 13, 9:12 am · 1 story · score 10", "Removed summary"),
+    "Approved seed content counts do not match.",
+  ],
+  [
+    "photo count",
+    (text: string) => text.replace("3 hearts · photo", "3 hearts"),
+    "Approved seed content counts do not match.",
+  ],
 ])("rejects malformed seed %s", async (_label, mutate, error) => {
   vi.resetModules();
   vi.doMock("../../docs/seed.md?raw", () => ({ default: mutate(seedText) }));
