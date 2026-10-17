@@ -11,15 +11,16 @@
 
 ## Checks actually run
 
-- Full suite: **507 tests passed across 114 files**.
+- Full suite after pre-merge cleanup: **509 tests passed across 114 files**, including subscription stability and in-flight read cancellation on unmount.
 - Coverage: **99.22% statements, 97.26% branches, 99.02% functions, 99.68% lines**. The existing 95% gate is unchanged and passes.
 - Analytics test rerun after the test-only TypeScript correction: **11 tests passed**.
-- Lint: **0 errors, 8 warnings**. Six are existing component-export warnings; two concern the new account provider's export and effect cleanup.
+- Lint after pre-merge cleanup: **0 errors, 0 warnings in maintained files**; repository-wide **0 errors, 6 existing UI component-export warnings**. Context types and the consumer hook now live in `src/lib/account-auth.ts`; the provider exports only its component, stabilizes refresh, declares effect dependencies, and captures the generation ref for cleanup without disabling any rule.
 - Automatic preview build: **build OK** after the final test correction.
 - Step 41 summary visibility: **all seven assertions plus the signed-out case passed**, including deleted-before-ever-published inside the version window. The privileged database tool executed the same fixture/assertion sequence because both shell database connections denied access to summaries. Fixtures were removed.
 - New rollback-only account database tests passed: generated-profile trigger, four-digit format, demo-number exclusion, unique generated handles, reserved/invalid rejection, case-insensitive collision refusal, denied browser profile writes, five accepted attempts, sixth refusal without recording, expiration after 15 minutes, demo refusal without recording, and closed attempt-table grants. Fixtures rolled back. These tests do not exercise simultaneous database transactions.
 - Live desktop flow: signed-out `/profile` redirected to `/sign-in?returnTo=/profile`; signup returned to profile with Traveler2220; signout and signin returned to profile; ADMIN was rejected; a real streamed AI check approved SullyTest42; reload read the changed handle back. Signout replaced navigation and protected refresh returned to signin. No page errors were observed in these flow scripts.
 - Live admin flow using an isolated verification account: test block showed `Blocked: credit_block`; **Resume handle checks** changed it to `Ready`; the verified admin menu showed Admin. Only this test block was cleared. Verification account, profile, roles and attempts were cleaned.
+- Pre-merge desktop-account cleanup readback: matched the original desktop fixture email and confirmed **0 auth users**, **0 SullyTest42 profiles**, and **0 handle-save attempts in the entire attempt table**. The desktop verification account was already deleted; no deletion was necessary in this follow-up. Signed-out `/profile` still redirects to signin with its return path and no browser page errors.
 
 ## Final database state, read from the catalog
 
