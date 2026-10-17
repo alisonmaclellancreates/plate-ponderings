@@ -55,6 +55,15 @@ describe("summary prompt", () => {
     }
   });
 
+  it("carries the brief's score table and the score-matches-text rule", () => {
+    expect(SUMMARY_INSTRUCTIONS).toContain(
+      "Score table: 0 to 33 Largely agree. 34 to 66 Mixed views. 67 to 100 Opinions differ.",
+    );
+    expect(SUMMARY_INSTRUCTIONS).toContain(
+      "Choose the score that matches what your text says. If the text describes differing interpretations, the score must not fall in Largely agree; if the stories agree, don't describe them as differing.",
+    );
+  });
+
   it("puts only meaning, source label and optional text inside a marked block", () => {
     const block = buildStoriesBlock(STORIES);
     expect(block.startsWith("<stories>\n")).toBe(true);
