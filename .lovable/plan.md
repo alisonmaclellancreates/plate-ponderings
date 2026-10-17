@@ -40,7 +40,7 @@ Migration 1 — `stories` access:
 
 ## Analytics
 
-`story_started` and `story_submitted` (properties: source key, `has_more_text`, outcome ∈ published/pending/rejected) added to the event registry; never meaning or story text. Tests cover capture and the never-send list.
+`story_started` and `story_submitted` (properties: source key, `has_more_text`, outcome ∈ published/pending/rejected/rate_limited/error — the last two matching `subject_spotted`, so a pause or failure is recorded as what it is) added to the event registry; never meaning or story text. Tests cover capture, both extra outcomes, and the never-send list.
 
 ## Tests
 
