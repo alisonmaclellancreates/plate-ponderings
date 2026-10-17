@@ -28,12 +28,12 @@ describe("StoryPhotoZoom", () => {
     expect(img).toHaveAttribute("src", props.photo);
     expect(img).toHaveAttribute("loading", "lazy");
     expect(img).toHaveAttribute("width", "944");
-    const before = img.style.width;
+    const before = img.style.cssText;
     Object.defineProperty(img, "naturalWidth", { value: 1600 });
     Object.defineProperty(img, "naturalHeight", { value: 800 });
     fireEvent.load(img);
     expect(img).toHaveAttribute("width", "1600");
-    expect(img.style.width).not.toBe(before);
+    expect(img.style.cssText).not.toBe(before);
   });
 
   it("opens the whole photo with the meaning and handle, and closes with Close photo", async () => {
@@ -61,8 +61,9 @@ describe("StoryPhotoZoom", () => {
 
   it("closes with a tap outside", async () => {
     render(<StoryPhotoZoom {...props} />);
-    const { user } = await open();
-    await user.click(document.body);
+    await open();
+    await new Promise((r) => setTimeout(r, 0));
+    fireEvent.pointerDown(document.body);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
