@@ -55,6 +55,18 @@ export function safeReturnPath(value: unknown): string {
     return "/";
   }
 }
+const PLATE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A well-formed plate id, or null. Anything else never reaches a lookup or a return path. */
+export function plateIdOrNull(value: unknown): string | null {
+  return typeof value === "string" && PLATE_ID.test(value) ? value.toLowerCase() : null;
+}
+
+/** Where sign-in returns a visitor who wanted to add a story to this plate. */
+export function storyReturnPath(plateId: string): string {
+  return safeReturnPath(`/story/1?plate=${encodeURIComponent(plateId)}`);
+}
+
 export const SIGN_IN_ERROR =
   "We couldn't sign you in. Check your email and password and try again.";
 export const SIGN_UP_ERROR = "Your account couldn't be created. You can try again or sign in.";
