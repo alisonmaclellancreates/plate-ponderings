@@ -58,7 +58,9 @@ function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: str
           minLength={hint ? 8 : undefined}
           type={shown ? "text" : "password"}
           autoComplete={hint ? "new-password" : "current-password"}
-          aria-describedby={[hint ? hintId : "", describedBy ?? ""].filter(Boolean).join(" ") || undefined}
+          aria-describedby={
+            [hint ? hintId : "", describedBy ?? ""].filter(Boolean).join(" ") || undefined
+          }
           className={`${field} pr-12`}
         />
         <button

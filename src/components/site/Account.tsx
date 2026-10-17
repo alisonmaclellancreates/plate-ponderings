@@ -145,11 +145,7 @@ export function HandleField({
   const validationError =
     !isDemo && !available && !handleFormatValid(draft) ? handleValidationMessage(draft) : "";
   const error = serverError || validationError;
-  const describedBy = [
-    available || isDemo ? statusId : "",
-    error ? messageId : "",
-    helpId,
-  ]
+  const describedBy = [available || isDemo ? statusId : "", error ? messageId : "", helpId]
     .filter(Boolean)
     .join(" ");
   return (
