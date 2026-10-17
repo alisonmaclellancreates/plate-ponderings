@@ -268,10 +268,17 @@ describe("RealPlateDetail", () => {
       <RealPlateDetail
         plate={plate}
         backToSearch={{ jurisdiction: "Washington", text: "B7K 2L9" }}
+        from="submissions"
       />,
     );
     const back = screen.getByRole("link", { name: "Back to Search" });
     expect(back.getAttribute("href")).toBe("/?jurisdiction=Washington&text=B7K+2L9");
+  });
+
+  it("returns to Your Submissions when its marker is present", () => {
+    render(<RealPlateDetail plate={plate} from="submissions" />);
+    expect(screen.getByRole("link", { name: "Back to Your Submissions" })).toHaveAttribute("href", "/submissions");
+    expect(screen.queryByRole("link", { name: "Back to Explore" })).toBeNull();
   });
 
   it("falls back to Explore without search values", () => {

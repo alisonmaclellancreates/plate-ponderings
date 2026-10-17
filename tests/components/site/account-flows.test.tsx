@@ -16,6 +16,7 @@ const m = vi.hoisted(() => ({
   resume: vi.fn(),
   track: vi.fn(),
   dotQuery: vi.fn(),
+  location: { href: "/", pathname: "/" },
 }));
 vi.mock("@/lib/account-auth", () => ({
   useAccountAuth: () => ({
@@ -27,8 +28,10 @@ vi.mock("@/lib/account-auth", () => ({
   }),
 }));
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
-    <a href={to}>{children}</a>
+  useRouterState: ({ select }: { select: (state: { location: typeof m.location }) => unknown }) =>
+    select({ location: m.location }),
+  Link: ({ to, children, onClick }: { to: string; children: React.ReactNode; onClick?: () => void }) => (
+    <a href={to} onClick={onClick}>{children}</a>
   ),
   useNavigate: () => m.navigate,
 }));
@@ -64,6 +67,8 @@ beforeEach(() => {
   m.dotQuery.mockReturnValue({ data: undefined });
   vi.clearAllMocks();
   m.signedOut = false;
+  m.location = { href: "/", pathname: "/" };
+  m.out.mockResolvedValue(undefined);
   m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
   m.signIn.mockResolvedValue({ data: { session: {} }, error: null });
   m.signUp.mockResolvedValue({ data: { session: {} }, error: null });
@@ -225,6 +230,9 @@ it("member menus show only authorized admin actions and handle signout errors", 
   expect(screen.queryByRole("link", { name: "Admin" })).toBeNull();
   m.out.mockRejectedValue(new Error());
   fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+  expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
+  await waitFor(() => expect(m.out).toHaveBeenCalledTimes(1));
+  fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
   await screen.findByRole("alert");
   v.unmount();
   m.account.isAdmin = true;
