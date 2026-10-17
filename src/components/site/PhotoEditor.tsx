@@ -32,7 +32,7 @@ export type PhotoEditorProps = {
   /** Show the "no box found" message (also used when detection was skipped). */
   showNoBoxMessage: boolean;
   /** Confirmed processed photo; `adjusted` is true when the box was changed. */
-  onUse: (blob: Blob, adjusted: boolean) => void;
+  onUse: (blob: Blob, adjusted: boolean, box: Box) => void;
   onRemove: () => void;
   /** Open the replacement file picker without changing the current editor. */
   onChooseAnother: () => void;
@@ -159,7 +159,7 @@ export function PhotoEditor({
     try {
       const canvas = renderBlurredPhoto(bitmap, currentBox);
       const blob = await canvasToJpegBlob(canvas);
-      onUse(blob, !sameBox(currentBox, initialBox));
+      onUse(blob, !sameBox(currentBox, initialBox), currentBox);
     } finally {
       setProcessing(false);
     }
