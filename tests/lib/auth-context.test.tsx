@@ -348,3 +348,15 @@ it("keeps the verified account when the background pending recheck fails", async
   expect(screen.queryByText("loading")).toBeNull();
   expect(m.out).not.toHaveBeenCalled();
 });
+it("finishes initial loading when the verified account read fails", async () => {
+  m.get.mockRejectedValue(new Error("account unavailable"));
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await screen.findByText("signed out");
+  expect(screen.queryByText("loading")).toBeNull();
+  expect(m.identify).not.toHaveBeenCalled();
+  expect(m.out).not.toHaveBeenCalled();
+});
