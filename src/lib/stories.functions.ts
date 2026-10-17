@@ -53,9 +53,12 @@ export const addStory = createServerFn({ method: "POST" })
     });
     if (roleError) return { outcome: "error" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // A photo path is only ever the caller's own folder; anything else is refused.
-    if (data.photoPath && !data.photoPath.startsWith(`${context.userId}/`))
-      return { outcome: "error" };
+    // A photo path is exactly the caller's folder plus one uuid.jpg; anything
+    // else (dot segments, other folders, other names) is refused.
+    const photoPathPattern = new RegExp(
+      `^${context.userId}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.jpg$`,
+    );
+    if (data.photoPath && !photoPathPattern.test(data.photoPath)) return { outcome: "error" };
     // Every outcome that saves no story removes the uploaded photo.
     const deletePhoto = async (): Promise<void> => {
       if (!data.photoPath) return;
