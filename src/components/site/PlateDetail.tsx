@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Heart,
@@ -11,6 +12,7 @@ import {
 import { PlateFrame } from "@/components/site/PlateFrame";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
+import { supabase } from "@/integrations/supabase/client";
 import {
   CATCHING_UP_STORY,
   PLATES,
@@ -18,10 +20,16 @@ import {
   plateStatus,
   publishedStories,
   type PlateRecord,
+  type PlateStatus,
   type Story,
   type Summary,
 } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
+import {
+  getPlateStories,
+  STORY_PAGE_SIZE,
+  type PlateStory,
+} from "@/lib/stories.functions";
 import {
   PAGE_SIZE,
   PLATE_DETAIL_STATES,
@@ -125,7 +133,13 @@ function StorySoFar({
   );
 }
 
-function MysteryPrompt() {
+function MysteryPrompt({
+  signedIn,
+  plateId,
+}: {
+  signedIn?: boolean;
+  plateId?: string;
+} = {}) {
   return (
     <section aria-labelledby="first-story" className="space-y-6">
       <div className="rounded-2xl border border-border bg-cream p-6 text-center">
@@ -133,9 +147,20 @@ function MysteryPrompt() {
           What do you think this plate means?
         </h2>
         <p className="mt-2 text-lg">Every story starts somewhere. Be the first to share yours!</p>
-        <button type="button" className="brand-btn brand-btn-coral mt-4">
-          Add Your Story
-        </button>
+        {signedIn && plateId ? (
+          <Link
+            to="/story/$step"
+            params={{ step: "1" }}
+            search={{ plate: plateId }}
+            className="brand-btn brand-btn-coral mt-4 inline-block"
+          >
+            Add Your Story
+          </Link>
+        ) : (
+          <button type="button" className="brand-btn brand-btn-coral mt-4">
+            Add Your Story
+          </button>
+        )}
       </div>
       <div
         data-testid="roadside-sign"
