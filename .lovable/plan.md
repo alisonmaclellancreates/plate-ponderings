@@ -12,7 +12,7 @@ plate publishes -> return published outcome immediately
 
 own-account recheck, existing 3-minute interval
     -> pending plates publish -> background guess generation
-    -> own published plates missing guesses -> background gap fill
+    -> own published plates missing guesses -> background gap fill, at most 3 attempts
 
 guess + 0 published human stories  -> existence only, teaser
 guess + 1+ published human stories -> meaning and fictional story
@@ -48,8 +48,8 @@ Application writes use insert only. The primary key preserves the first saved gu
 
 - Add server-only generation and persistence helpers, plus a public plate-guess read function. Keep shared search/spot plate DTOs unchanged.
 - Dispatch generation through existing `runAfterResponse` immediately after successful spot publication and pending-plate publication. Do not await it or let a guess failure change publication's outcome.
-- Extend authenticated recheck to select only the caller's own published plates without guesses, under the existing demo refusal, shared AI pause and three-minute interval. Preserve the current meaning of its moderation count. Process gap filling in bounded/sequential background work, checking the shared pause before each call.
-- Use the default gateway text model through streamed structured output, following existing server-only AI helpers without changing existing AI calls. The jurisdiction and plate text go in an escaped, clearly marked untrusted-data block with explicit instructions to ignore instructions inside it.
+- Extend authenticated recheck to select only the caller's own published plates without guesses, under the existing demo refusal, shared AI pause and three-minute interval. Preserve the current meaning of its moderation count. Cap gap filling at 3 generation attempts per run, processed sequentially in background work with a shared-pause check before each. Failed attempts count toward the cap; remaining gaps wait for later rechecks. This cap is for gap fill, not the immediate generation triggered by a newly published plate.
+- Use explicitly selected `openai/gpt-6-astra`, not a configurable gateway default, through the same streamed, structured, low-reasoning Responses call shape as the summary step: `streamText`, strict `Output.object`, `maxRetries: 0`, `forceReasoning: true`, `reasoningEffort: "low"`, `reasoningSummary: "auto"`, `store: false`, and encrypted reasoning inclusion. Follow existing server-only AI helpers without changing existing AI calls. The jurisdiction and plate text go in an escaped, clearly marked untrusted-data block with explicit instructions to ignore instructions inside it.
 - Enforce the uploaded fictional voice and content restrictions: What the Plate? itself, kind/playful/family-friendly, letters and numbers only, no vehicle/person/history claims, “One playful possibility…” framing. Meaning at most 80 characters; fictional story at most three sentences. Replace em dashes before final validation and saving. A failed or unusable response saves nothing. `GUESS_FORCE_UNAVAILABLE` is server-only and off by default. Terminal gateway blocks reuse the shared pause; no immediate retry of failed calls.
 - Public read verifies the plate is published and counts published human stories globally, not the viewer-filtered count. Return a discriminated result: absent, hidden existence, or revealed meaning/story. Before reveal, query/project existence only and never return text. Fail closed on read errors. Keep guess text out of page metadata.
 
@@ -64,6 +64,7 @@ Application writes use insert only. The primary key preserves the first saved gu
 ## Tests and verification
 
 - Mock AI in tests: publication resolves while guess generation remains pending; paused/failed/unusable calls save nothing; existing guesses skip AI; duplicate insertion preserves the first result; recheck only fills the caller's plates and respects demo/pause/interval rules.
+- Add a concrete cap test: with at least 4 eligible gaps, exactly 3 generation attempts run and the fourth remains for a later recheck. Test that failures still consume an attempt and a pause appearing between attempts prevents the next call. Assert the explicit Astra model and streamed structured low-reasoning call options.
 - Assert concrete limits: 80-character meaning accepted, 81 refused; three sentences accepted, four refused; em dashes replaced. Assert the untrusted-data and fictional prompt restrictions.
 - Prove hidden server responses contain no meaning/story; pending/rejected stories do not reveal; one published story reveals; returning to zero hides again without deleting the guess. Include fail-closed and blocked-author cases.
 - Prove summary input contains only published human stories even with a saved subject guess. Test unchanged counts and human owner-first order, plus no-property analytics capture/filtering.

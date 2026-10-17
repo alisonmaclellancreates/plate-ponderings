@@ -33,4 +33,4 @@
 - Live spot outcomes retain the submitted identity separately from route prefill, so pending feedback and return-to-search links describe the actual request even after the form remounts.
 - PlateFrame owns the detail-only frame for static and real plate pages, so jurisdiction display stays identical without changing Plate artwork or other render locations.
 - Register project-owned `attachSession`, never generated `attachSupabaseAuth`: bounded `getSession()` preserves normal renewal without blocking public RPCs. Server authorization remains unchanged; never read tokens directly from storage.
-- AI work that callers must not wait for (summary runs) goes through `runAfterResponse`, which uses the Worker's waitUntil captured per request in `src/server.ts`; summary reads use the admin client and must filter every version through `is_summary_public`.
+- Background AI uses `runAfterResponse` and request-scoped waitUntil; admin summary reads filter every version through `is_summary_public`. Plate guesses explicitly use `openai/gpt-6-astra` with the summary's streamed structured low-reasoning Responses shape, keeping model behavior stable.
