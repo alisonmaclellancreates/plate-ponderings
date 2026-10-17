@@ -228,7 +228,7 @@ export const getPlateStories = createServerFn({ method: "POST" })
     const ordered = [...ownerStories, ...rest].map(toStory);
 
     return {
-      stories: ordered.slice(data.offset, data.offset + STORY_PAGE_SIZE),
+      stories: ordered,
       total: ordered.length,
       pending: pendingRows.map(toStory),
       storyCount: ordered.length,
