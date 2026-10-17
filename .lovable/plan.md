@@ -24,9 +24,14 @@ Both detail pages will retain their current appearance and behaviour, with one a
 
 ## Browser verification
 
-Check both preview and real detail paths at **1280px and 360px**, with **Newfoundland and Labrador and Utah**: eight page/viewport cases. Inspect screenshots and measured text wrapping, frame width and page overflow. Confirm the long name remains complete below the plate and the short-name line is always present. Inspect the accessibility tree to ensure the new line contributes no second jurisdiction announcement.
+Use only existing data for these **four browser checks**, each at **1280px and 360px**:
 
-Utah already exists in preview data; Newfoundland and Labrador does not. Prefer existing published real records where available. For missing cases, use browser-test-only fixtures through the existing page paths, without inserting records or changing application data. Report fixture-based checks explicitly, never as live database verification; if an actual live case remains unavailable, identify it as unverified.
+- **Real page, long name:** Rowan's published Newfoundland and Labrador test plate **ROW43XYZ**, with **ROW43XA to ROW43XD** available as alternatives. Resolve its existing detail URL through the normal lookup flow.
+- **Preview page, short name:** the existing Utah plate at **`/plate/ut-canyons`**.
+
+Inspect screenshots and measured text wrapping, frame width and page overflow. Confirm the long name remains complete below the plate and the short-name line is always present. Inspect the accessibility tree to ensure the new line contributes no second jurisdiction announcement.
+
+**No fixture mechanism in the app, test-only parameters or routes, or injected browser data.** The other combinations, **preview with a long name** and **real with a short name**, are covered by the PlateFrame unit tests using the real Plate component and the consumer tests above. Report them as **unit-tested, not browser-checked**. If an existing real plate cannot be reached, report the blocker rather than substituting fixture data.
 
 ## Completion and reporting
 
