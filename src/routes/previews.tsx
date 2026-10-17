@@ -53,6 +53,16 @@ const PREVIEWS = [
     label: "Account states",
     note: "Handle field and save states, sign-in and sign-up errors, admin status",
   },
+  {
+    to: "/previews/story-error",
+    label: "Add a story, error (live form)",
+    note: "Real form, inert: error notice, words kept",
+  },
+  {
+    to: "/previews/story-rate-limited",
+    label: "Add a story, paused (live form)",
+    note: "Real form, inert: Let's pause a moment, words kept",
+  },
 ] as const;
 
 /** Plate detail preview states, served by the /plate/$state route. */
@@ -113,12 +123,6 @@ const STORY_PREVIEWS = [
   { step: "done", label: "Add a story, submitted", note: "Outcome" },
   { step: "checking", label: "Add a story, being checked", note: "Outcome" },
   { step: "rejected", label: "Add a story, not added", note: "Step 1 with words kept" },
-  { step: "error", label: "Add a story, error", note: "Something went wrong, words kept" },
-  {
-    step: "rate-limited",
-    label: "Add a story, paused",
-    note: "Let's pause a moment, words kept",
-  },
 ] as const;
 
 function Previews() {

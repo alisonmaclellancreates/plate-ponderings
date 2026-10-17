@@ -7,7 +7,14 @@ import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
 import { getPlate } from "@/lib/plates.functions";
 import { addStory, getPlateStories, type HowKey } from "@/lib/stories.functions";
-import { HOW_OPTIONS, MEANING_MAX, MORE_MAX } from "@/lib/story-form";
+import {
+  HOW_OPTIONS,
+  MEANING_MAX,
+  MORE_MAX,
+  STORY_RATE_LIMIT_HEADING,
+  STORY_SUBMIT_ERROR_HEADING,
+  STORY_SUBMIT_ERROR_MESSAGE,
+} from "@/lib/story-form";
 import { useAccountAuth } from "@/lib/account-auth";
 import { track } from "@/lib/analytics";
 
@@ -82,24 +89,39 @@ function Shell({
   );
 }
 
+/**
+ * Inert preview input: seeds the plate, draft and notice, and makes the flow
+ * read-only against the backend. No queries run, submit does nothing, and no
+ * analytics events are sent. When absent, behaviour is unchanged.
+ */
+export type AddStoryPreview = {
+  plate: { id: string; jurisdiction: string; text: string };
+  draft: { how: HowKey; meaning: string; more: string };
+  notice: { heading: string | null; message: string };
+};
+
 /** The real three-step story flow for a published plate. */
-export function AddStoryFlow({ plateId }: { plateId: string }) {
+export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: AddStoryPreview }) {
   const [step, setStep] = useState<FlowStep>("1");
-  const [how, setHow] = useState<HowKey>("owner");
-  const [meaning, setMeaning] = useState("");
-  const [more, setMore] = useState("");
+  const [how, setHow] = useState<HowKey>(preview?.draft.how ?? "owner");
+  const [meaning, setMeaning] = useState(preview?.draft.meaning ?? "");
+  const [more, setMore] = useState(preview?.draft.more ?? "");
   const [rejected, setRejected] = useState(false);
-  const [pause, setPause] = useState<{ heading: string | null; message: string } | null>(null);
+  const [pause, setPause] = useState<{ heading: string | null; message: string } | null>(
+    preview?.notice ?? null,
+  );
   const [submitting, setSubmitting] = useState(false);
   const started = useRef(false);
 
   const { data: plateData } = useQuery({
     queryKey: ["plate", plateId],
     queryFn: () => getPlate({ data: { id: plateId } }),
+    enabled: !preview,
   });
   const { data: storiesData } = useQuery({
     queryKey: ["plate-stories", plateId],
     queryFn: () => getPlateStories({ data: { plateId } }),
+    enabled: !preview,
   });
   const auth = useAccountAuth();
   const demo = Boolean(auth?.account?.isDemo);
@@ -108,15 +130,16 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
   useEffect(() => {
     if (!started.current) {
       started.current = true;
-      void track("story_started", {});
+      if (!preview) void track("story_started", {});
     }
-  }, []);
+  }, [preview]);
 
-  const plate = plateData?.plate;
+  const plate = preview?.plate ?? plateData?.plate;
   if (!plate) return null;
-  const ownerExists = storiesData?.hasOwnerStory ?? false;
+  const ownerExists = preview ? false : (storiesData?.hasOwnerStory ?? false);
 
   const onSubmit = async () => {
+    if (preview) return;
     setSubmitting(true);
     setRejected(false);
     setPause(null);
@@ -141,16 +164,15 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
         setRejected(true);
         setStep("1");
       } else if (result.outcome === "rate-limited") {
-        setPause({ heading: "Let's pause a moment.", message: result.message });
+        setPause({ heading: STORY_RATE_LIMIT_HEADING, message: result.message });
         setStep("1");
       } else if (result.outcome === "demo") {
         setPause({ heading: null, message: result.message });
         setStep("1");
       } else {
         setPause({
-          heading: "Hmm... something went wrong.",
-          message:
-            "We couldn't submit your story right now. Your words are still here. Please try again.",
+          heading: STORY_SUBMIT_ERROR_HEADING,
+          message: STORY_SUBMIT_ERROR_MESSAGE,
         });
         setStep("1");
       }
@@ -161,9 +183,8 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
         outcome: "error",
       });
       setPause({
-        heading: "Hmm... something went wrong.",
-        message:
-          "We couldn't submit your story right now. Your words are still here. Please try again.",
+        heading: STORY_SUBMIT_ERROR_HEADING,
+        message: STORY_SUBMIT_ERROR_MESSAGE,
       });
       setStep("1");
     } finally {

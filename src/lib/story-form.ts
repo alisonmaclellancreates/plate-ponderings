@@ -1,17 +1,7 @@
 import type { HowIKnow } from "@/lib/mock-data";
 
 export type StoryStep =
-  | "1"
-  | "1-owner-exists"
-  | "2"
-  | "2-adjust"
-  | "2-review"
-  | "3"
-  | "done"
-  | "checking"
-  | "rejected"
-  | "error"
-  | "rate-limited";
+  "1" | "1-owner-exists" | "2" | "2-adjust" | "2-review" | "3" | "done" | "checking" | "rejected";
 
 export const STORY_STEPS: Record<StoryStep, string> = {
   "1": "Your story",
@@ -23,12 +13,16 @@ export const STORY_STEPS: Record<StoryStep, string> = {
   done: "Story submitted",
   checking: "Being checked",
   rejected: "Couldn't add this story",
-  error: "Something went wrong",
-  "rate-limited": "Paused for a while",
 };
 
 export const MEANING_MAX = 80;
 export const MORE_MAX = 500;
+
+/** Shared story-submit notices, so the live flow and its previews cannot drift. */
+export const STORY_SUBMIT_ERROR_HEADING = "Hmm... something went wrong.";
+export const STORY_SUBMIT_ERROR_MESSAGE =
+  "We couldn't submit your story right now. Your words are still here. Please try again.";
+export const STORY_RATE_LIMIT_HEADING = "Let's pause a moment.";
 
 export const HOW_OPTIONS: { value: HowIKnow; label: string; image: string }[] = [
   { value: "owner", label: "It's my plate", image: "/brand/how-i-know-owner-v1.webp" },
