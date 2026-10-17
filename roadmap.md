@@ -1,5 +1,7 @@
 # Step 44: real stories — add, check, show on plate page
 
+Status: implemented and verified locally. 735 tests pass, typecheck clean, lint clean (6 pre-existing UI warnings), coverage 99.03/97.26/98.14/99.4, build OK. Codecov PR figure pending: Alison opens the PR. No further schema changes without Alison's approval.
+
 - [ ] Plan approved, incorporating Alison's four changes: server-only story writes (no browser insert policy or grant; DB test that a signed-in user cannot insert), source keys renamed to knows_owner and secondhand everywhere with a test that each key is accepted, getPlateStories identity from verified session only (test that one person can't read another's pending stories), and a 5-per-15-minute story rate limit matching plates. Addition: story_submitted outcomes also include rate_limited and error, matching subject_spotted, with tests for both.
 - [ ] Propose stories migration (RLS, story_save_attempts, consume function) and wait for Alison's approval before applying.
 - [ ] Build story moderation, addStory, getPlateStories, recheck extension, wired three-step flow, real plate page stories, analytics events, tests; rerun tests/db; lint; report PR Codecov.
