@@ -290,6 +290,7 @@ function MysteryPrompt({
 
 export function StoryCard({ story }: { story: Story }) {
   const owner = story.howIKnow === "owner";
+  const zoom = Boolean(story.photo && story.photoBox);
   return (
     <article
       data-owner={owner || undefined}
