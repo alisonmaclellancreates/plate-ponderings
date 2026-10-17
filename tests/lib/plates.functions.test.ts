@@ -460,6 +460,17 @@ describe("recheckPendingSubjects", () => {
       subjects: { identity_b: "PNW LV" },
     };
     function withStories(stories: unknown[], storyError: unknown = null) {
+      tables["subjects"] = {
+        data: [
+          {
+            id: "subj-9",
+            identity_a: "US-WA",
+            identity_b: "PNW LV",
+            jurisdictions: { name: "Washington" },
+          },
+        ],
+        error: null,
+      };
       const notifications: unknown[] = [];
       const updates = vi.fn(() => chain({ data: null, error: null }));
       mocks.admin.from.mockImplementation((table: string) => {
@@ -481,9 +492,10 @@ describe("recheckPendingSubjects", () => {
 
     it("publishes an approved story, notifies, and asks for a fresh summary", async () => {
       const { notifications } = withStories([storyRow]);
-      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
       expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "", "PNW LV");
       expect(notifications).toEqual([
+        { user_id: "caller", kind: "subject_published", subject_id: "subj-9" },
         {
           user_id: "caller",
           kind: "story_published",
@@ -497,8 +509,9 @@ describe("recheckPendingSubjects", () => {
     it("rejects a failed story and notifies without a summary request", async () => {
       const { notifications } = withStories([storyRow]);
       mocks.checkStory.mockResolvedValue({ outcome: "rejected", block: null });
-      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
       expect(notifications).toEqual([
+        { user_id: "caller", kind: "subject_published", subject_id: "subj-9" },
         {
           user_id: "caller",
           kind: "story_rejected",
@@ -511,15 +524,19 @@ describe("recheckPendingSubjects", () => {
 
     it("stops on unavailable and on a block", async () => {
       withStories([storyRow, { ...storyRow, id: "story-2" }]);
-      mocks.checkStory.mockResolvedValue({ outcome: "unavailable", block: "credit_block", runId: "r" });
-      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+      mocks.checkStory.mockResolvedValue({
+        outcome: "unavailable",
+        block: "credit_block",
+        runId: "r",
+      });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
       expect(mocks.checkStory).toHaveBeenCalledTimes(1);
       expect(mocks.persistBlock).toHaveBeenCalledWith(mocks.admin, "credit_block", "r");
     });
 
     it("skips a failed pending-story read", async () => {
       withStories(null as unknown as unknown[], { message: "offline" });
-      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
       expect(mocks.checkStory).not.toHaveBeenCalled();
     });
   });

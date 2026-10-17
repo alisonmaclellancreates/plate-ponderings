@@ -64,6 +64,13 @@
       "when": 1792227504499,
       "tag": "0008_step44_story_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792228128381,
+      "tag": "0009_step44_stories_server_only_writes",
+      "breakpoints": true
     }
   ]
 }

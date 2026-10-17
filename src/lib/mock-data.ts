@@ -88,7 +88,14 @@ export const PLATES: PlateRecord[] = [
         "guess",
         2,
       ),
-      s("bc5", "teadragon", "2026-10-09", "The driver said it's about their bootcamp.", "secondhand", 9),
+      s(
+        "bc5",
+        "teadragon",
+        "2026-10-09",
+        "The driver said it's about their bootcamp.",
+        "secondhand",
+        9,
+      ),
     ],
     summaries: [
       {

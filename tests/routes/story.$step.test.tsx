@@ -6,6 +6,7 @@ vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => ({
     ...o,
     useLoaderData: () => ({ step: "done" }),
+    useSearch: () => ({}),
   }),
   notFound: () => new Error("not found"),
 }));

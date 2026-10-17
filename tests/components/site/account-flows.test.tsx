@@ -31,7 +31,17 @@ vi.mock("@tanstack/react-router", () => ({
   ),
   useNavigate: () => m.navigate,
 }));
-vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@tanstack/react-start", () => ({
+  useServerFn: (fn: unknown) => fn,
+  createMiddleware: () => ({ server: (fn: unknown) => fn }),
+  createServerFn: () => {
+    const builder: Record<string, unknown> = {};
+    builder["middleware"] = () => builder;
+    builder["inputValidator"] = () => builder;
+    builder["handler"] = (fn: unknown) => fn;
+    return builder;
+  },
+}));
 vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { signUp: m.signUp, signInWithPassword: m.signIn } },

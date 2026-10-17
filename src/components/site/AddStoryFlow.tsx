@@ -166,11 +166,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
         sign="Add Your Story"
         heading="Story submitted!"
         actions={
-          <Link
-            to="/plate/$state"
-            params={{ state: plateId }}
-            className="brand-btn brand-btn-navy"
-          >
+          <Link to="/plate/$state" params={{ state: plateId }} className="brand-btn brand-btn-navy">
             View This Plate
           </Link>
         }
@@ -252,9 +248,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
             <dd>{howLabel}</dd>
           </div>
           <div>
-            <dt className="text-sm font-semibold text-muted-foreground">
-              What you think it means
-            </dt>
+            <dt className="text-sm font-semibold text-muted-foreground">What you think it means</dt>
             <dd>{meaning}</dd>
           </div>
           {more.trim() && (

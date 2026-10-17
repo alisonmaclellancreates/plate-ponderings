@@ -59,7 +59,14 @@ function story(id: string, over: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   m.getUser.mockResolvedValue({ data: { user: null } });
-  m.stories = { stories: [], pending: [], storyCount: 0, hasOwnerStory: false, ownerHandle: null };
+  m.stories = {
+    stories: [],
+    pending: [],
+    total: 0,
+    storyCount: 0,
+    hasOwnerStory: false,
+    ownerHandle: null,
+  };
 });
 
 describe("RealPlateDetail", () => {
@@ -118,7 +125,14 @@ describe("RealPlateDetail", () => {
   it("pages five stories at a time with Show more", async () => {
     const user = userEvent.setup();
     const stories = Array.from({ length: 7 }, (_, i) => story(String(i + 1)));
-    m.stories = { stories, pending: [], storyCount: 7, hasOwnerStory: false, ownerHandle: null };
+    m.stories = {
+      stories,
+      pending: [],
+      total: 7,
+      storyCount: 7,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
     render(<RealPlateDetail plate={plate} />);
     expect(screen.getAllByRole("article")).toHaveLength(5);
     await user.click(screen.getByRole("button", { name: /Show 2 more stories/ }));
@@ -138,19 +152,20 @@ describe("RealPlateDetail", () => {
     expect(screen.getByText(/Only you can see this for now/)).toBeInTheDocument();
   });
 
-  it("offers Add Your Story only to signed-in visitors", async () => {
+  it("offers Add Your Story as a link only to signed-in visitors", async () => {
     const { unmount } = render(<RealPlateDetail plate={plate} />);
     await waitFor(() => expect(m.getUser).toHaveBeenCalled());
     expect(screen.queryByRole("link", { name: "Add Your Story" })).toBeNull();
     unmount();
     m.getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
     render(<RealPlateDetail plate={plate} />);
-    await waitFor(() =>
-      expect(screen.getByRole("link", { name: "Add Your Story" })).toHaveAttribute(
-        "href",
-        "/story/1?plate=p1",
-      ),
-    );
+    await waitFor(() => {
+      const links = screen.getAllByRole("link", { name: "Add Your Story" });
+      expect(links.length).toBeGreaterThan(0);
+      for (const link of links) {
+        expect(link).toHaveAttribute("href", "/story/1?plate=p1");
+      }
+    });
   });
 
   it("links Back to Search with the searched values when arriving from search", () => {

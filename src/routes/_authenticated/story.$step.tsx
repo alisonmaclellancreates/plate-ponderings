@@ -7,7 +7,7 @@ const isStep = (s: string): s is StoryStep => Object.hasOwn(STORY_STEPS, s);
 
 export const Route = createFileRoute("/_authenticated/story/$step")({
   validateSearch: (search: Record<string, unknown>): { plate?: string } =>
-    typeof search.plate === "string" && search.plate ? { plate: search.plate } : {},
+    typeof search["plate"] === "string" && search["plate"] ? { plate: search["plate"] } : {},
   loader: ({ params }) => {
     if (!isStep(params.step)) throw notFound();
     return { step: params.step };

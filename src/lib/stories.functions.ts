@@ -234,7 +234,7 @@ export const getPlateStories = createServerFn({ method: "POST" })
       storyCount: ordered.length,
       ownerHandle:
         ownerStories.length > 0
-          ? (ownerStories[0].author_id && handles.get(ownerStories[0].author_id)) || "Traveler"
+          ? (ownerStories[0]?.author_id && handles.get(ownerStories[0].author_id)) || "Traveler"
           : null,
       hasOwnerStory: ownerStories.length > 0,
     };

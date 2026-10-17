@@ -25,11 +25,7 @@ import {
   type Summary,
 } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
-import {
-  getPlateStories,
-  STORY_PAGE_SIZE,
-  type PlateStory,
-} from "@/lib/stories.functions";
+import { getPlateStories, STORY_PAGE_SIZE, type PlateStory } from "@/lib/stories.functions";
 import {
   PAGE_SIZE,
   PLATE_DETAIL_STATES,
@@ -398,11 +394,7 @@ function RealStatusStrip({ plateId }: { plateId: string }) {
     queryFn: () => getPlateStories({ data: { plateId } }),
   });
   const count = data?.storyCount ?? 0;
-  const status: PlateStatus = data?.hasOwnerStory
-    ? "owner"
-    : count > 0
-      ? "interpreted"
-      : "mystery";
+  const status: PlateStatus = data?.hasOwnerStory ? "owner" : count > 0 ? "interpreted" : "mystery";
   return (
     <ul
       aria-label="Plate status"
