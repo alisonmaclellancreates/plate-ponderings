@@ -244,27 +244,33 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
         }
         rechecked++;
         if (result.outcome === "approved") {
-          await supabaseAdmin
+          const updated = await supabaseAdmin
             .from("subjects")
             .update({ status: "published", published_at: new Date().toISOString() })
             .eq("id", subject.id)
-            .eq("status", "pending");
-          await supabaseAdmin.from("notifications").insert({
-            user_id: context.userId,
-            kind: "subject_published",
-            subject_id: subject.id,
-          });
+            .eq("status", "pending")
+            .select("id");
+          if (updated.data && updated.data.length > 0) {
+            await supabaseAdmin.from("notifications").insert({
+              user_id: context.userId,
+              kind: "subject_published",
+              subject_id: subject.id,
+            });
+          }
         } else {
-          await supabaseAdmin
+          const updated = await supabaseAdmin
             .from("subjects")
             .update({ status: "rejected" })
             .eq("id", subject.id)
-            .eq("status", "pending");
-          await supabaseAdmin.from("notifications").insert({
-            user_id: context.userId,
-            kind: "subject_rejected",
-            subject_id: subject.id,
-          });
+            .eq("status", "pending")
+            .select("id");
+          if (updated.data && updated.data.length > 0) {
+            await supabaseAdmin.from("notifications").insert({
+              user_id: context.userId,
+              kind: "subject_rejected",
+              subject_id: subject.id,
+            });
+          }
         }
       }
     }
@@ -285,30 +291,36 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
         if (result.outcome === "unavailable") break;
         rechecked++;
         if (result.outcome === "approved") {
-          await supabaseAdmin
+          const updated = await supabaseAdmin
             .from("stories")
             .update({ status: "published", published_at: new Date().toISOString() })
             .eq("id", story.id)
-            .eq("status", "pending");
-          await supabaseAdmin.from("notifications").insert({
-            user_id: context.userId,
-            kind: "story_published",
-            subject_id: story.subject_id,
-            story_id: story.id,
-          });
-          await requestSummaryRefresh(story.subject_id);
+            .eq("status", "pending")
+            .select("id");
+          if (updated.data && updated.data.length > 0) {
+            await supabaseAdmin.from("notifications").insert({
+              user_id: context.userId,
+              kind: "story_published",
+              subject_id: story.subject_id,
+              story_id: story.id,
+            });
+            await requestSummaryRefresh(story.subject_id);
+          }
         } else {
-          await supabaseAdmin
+          const updated = await supabaseAdmin
             .from("stories")
             .update({ status: "rejected" })
             .eq("id", story.id)
-            .eq("status", "pending");
-          await supabaseAdmin.from("notifications").insert({
-            user_id: context.userId,
-            kind: "story_rejected",
-            subject_id: story.subject_id,
-            story_id: story.id,
-          });
+            .eq("status", "pending")
+            .select("id");
+          if (updated.data && updated.data.length > 0) {
+            await supabaseAdmin.from("notifications").insert({
+              user_id: context.userId,
+              kind: "story_rejected",
+              subject_id: story.subject_id,
+              story_id: story.id,
+            });
+          }
         }
       }
     }

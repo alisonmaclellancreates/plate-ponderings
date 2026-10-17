@@ -86,11 +86,10 @@ beforeEach(() => {
   mocks.admin.from.mockImplementation((table: string) => {
     const c = chain(tables[table] ?? { data: null, error: null });
     if (table === "subjects" || table === "profiles") {
-      const insertOrUpdate = vi.fn(() =>
+      c["insert"] = vi.fn(() =>
         chain(table === "subjects" ? insertResult : { data: null, error: null }),
       );
-      c["insert"] = insertOrUpdate;
-      c["update"] = insertOrUpdate;
+      c["update"] = vi.fn(() => chain({ data: [{ id: "row-1" }], error: null }));
     }
     return c;
   });
@@ -353,7 +352,7 @@ describe("recheckPendingSubjects", () => {
   it.each([null, "provider_access_denied"])(
     "stops on unavailable with block %s after completed work",
     async (block) => {
-      const updates = vi.fn(() => chain({ data: null, error: null }));
+      const updates = vi.fn(() => chain({ data: [{ id: "subj-1" }], error: null }));
       const notifications = vi.fn(() => chain({ data: null, error: null }));
       mocks.admin.from.mockImplementation((table: string) => {
         const c = chain(
@@ -414,7 +413,8 @@ describe("recheckPendingSubjects", () => {
           ? { data: [pendingRow], error: null }
           : (tables[table] ?? { data: null, error: null }),
       );
-      if (table === "subjects") c["update"] = vi.fn(() => chain({ data: null, error: null }));
+      if (table === "subjects")
+        c["update"] = vi.fn(() => chain({ data: [{ id: "subj-1" }], error: null }));
       if (table === "profiles") c["update"] = vi.fn(() => chain({ data: null, error: null }));
       if (table === "notifications")
         c["insert"] = vi.fn((row: unknown) => {
@@ -472,14 +472,15 @@ describe("recheckPendingSubjects", () => {
         error: null,
       };
       const notifications: unknown[] = [];
-      const updates = vi.fn(() => chain({ data: null, error: null }));
+      const updates = vi.fn(() => chain({ data: [{ id: "row-1" }], error: null }));
       mocks.admin.from.mockImplementation((table: string) => {
         const c = chain(
           table === "stories"
             ? { data: stories, error: storyError }
             : (tables[table] ?? { data: null, error: null }),
         );
-        if (table === "stories" || table === "profiles") c["update"] = updates;
+        if (table === "stories" || table === "profiles" || table === "subjects")
+          c["update"] = updates;
         if (table === "notifications")
           c["insert"] = vi.fn((row: unknown) => {
             notifications.push(row);
@@ -555,6 +556,14 @@ describe("recheckPendingSubjects", () => {
       expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
       expect(mocks.checkStory).not.toHaveBeenCalled();
       expect(mocks.admin.from).not.toHaveBeenCalledWith("stories");
+    });
+
+    it("notifies and refreshes only when the guarded update matched a row", async () => {
+      const { notifications, updates } = withStories([storyRow]);
+      updates.mockImplementation(() => chain({ data: [], error: null }));
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(notifications).toEqual([]);
+      expect(mocks.refresh).not.toHaveBeenCalled();
     });
   });
 });
