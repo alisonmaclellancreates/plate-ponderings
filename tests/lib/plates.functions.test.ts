@@ -565,5 +565,25 @@ describe("recheckPendingSubjects", () => {
       expect(notifications).toEqual([]);
       expect(mocks.refresh).not.toHaveBeenCalled();
     });
+    it("rejected plates and stories notify nobody when the guarded update matched no row", async () => {
+      const { notifications, updates } = withStories([storyRow]);
+      updates.mockImplementation(() => chain({ data: [], error: null }));
+      mocks.check.mockResolvedValue({ outcome: "rejected", block: null });
+      mocks.checkStory.mockResolvedValue({ outcome: "rejected", block: null });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(notifications).toEqual([]);
+      expect(mocks.refresh).not.toHaveBeenCalled();
+    });
+
+    it("checks a story with an empty plate text when its plate join is missing", async () => {
+      withStories([{ ...storyRow, body: "Seen near Seattle.", subjects: null }]);
+      tables["subjects"] = { data: [], error: null };
+      await call(recheckPendingSubjects, {});
+      expect(mocks.checkStory).toHaveBeenCalledWith(
+        "Pacific Northwest love.",
+        "Seen near Seattle.",
+        "",
+      );
+    });
   });
 });

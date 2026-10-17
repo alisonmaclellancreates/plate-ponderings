@@ -13,6 +13,11 @@ vi.mock("@/lib/mock-data", async (importOriginal) => {
     PLATES: [
       ...original.PLATES,
       { ...base, slug: "test-nl", jurisdiction: "Newfoundland and Labrador", text: "ROW43XYZ" },
+      {
+        ...(original.PLATES.find((plate) => plate.summaries.length > 0) ?? base),
+        slug: "test-no-summary",
+        summaries: [],
+      },
     ],
   };
 });
@@ -200,4 +205,10 @@ it("reads a story with 1 heart as 1 heart", () => {
   );
   expect(screen.getByText("heart").previousSibling?.textContent).toBe("1");
   expect(screen.queryByText("hearts")).toBeNull();
+});
+
+it("a plate with stories but no summary yet shows no Story So Far", () => {
+  render(<PlateDetail state="test-no-summary" />);
+  expect(screen.queryByRole("heading", { name: "The Story So Far" })).toBeNull();
+  expect(screen.queryByRole("heading", { name: "What do you think this plate means?" })).toBeNull();
 });

@@ -133,9 +133,8 @@ type StoryRow = {
  * stories and their block list applied.
  */
 export const getPlateStories = createServerFn({ method: "POST" })
-  .inputValidator((data: { plateId: string; offset?: number }) => ({
+  .inputValidator((data: { plateId: string }) => ({
     plateId: typeof data.plateId === "string" ? data.plateId : "",
-    offset: typeof data.offset === "number" && data.offset > 0 ? Math.floor(data.offset) : 0,
   }))
   .handler(async ({ data }): Promise<PlateStoriesResult | null> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
