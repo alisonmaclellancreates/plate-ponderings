@@ -187,3 +187,70 @@ describe("Spot artwork and headings", () => {
     }
   });
 });
+
+const live = vi.hoisted(() => ({ spot: vi.fn(), account: { account: null as unknown } }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: () => live.spot }));
+vi.mock("@/lib/plates.functions", () => ({ spotPlate: vi.fn() }));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => live.account }));
+vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
+
+import { SpotLivePage } from "@/components/site/SpotPlate";
+
+async function fillAndSpot(user: ReturnType<typeof userEvent.setup>) {
+  await user.selectOptions(screen.getByRole("combobox", { name: "State or Province" }), "Utah");
+  await user.type(screen.getByRole("textbox", { name: /plate text/i }), "DRAGON");
+  await user.click(screen.getByRole("button", { name: "Check This Plate" }));
+}
+
+describe("Spot a Plate live flow", () => {
+  it("shows the checking state, then the new-plate outcome", async () => {
+    live.spot.mockResolvedValue({
+      outcome: "new",
+      plate: { id: "p1", jurisdiction: "Utah", text: "DRAGON" },
+    });
+    const user = userEvent.setup();
+    render(<SpotLivePage />);
+    await fillAndSpot(user);
+    expect(live.spot).toHaveBeenCalledWith({ data: { jurisdiction: "Utah", text: "DRAGON" } });
+    expect(await screen.findByText("A new mystery joins the collection!")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Add the First Story" }).getAttribute("href")).toBe(
+      "/plate/p1",
+    );
+  });
+
+  it("keeps the values and shows the already-spotted panel inline", async () => {
+    live.spot.mockResolvedValue({ outcome: "already-spotted" });
+    const user = userEvent.setup();
+    render(<SpotLivePage values={{ jurisdiction: "Utah", text: "DRAGON" }} />);
+    await user.click(screen.getByRole("button", { name: "Check This Plate" }));
+    expect(await screen.findByText("Someone spotted this one already!")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "State or Province" })).toHaveValue("Utah");
+  });
+
+  it("shows the pending, rejected and error outcomes", async () => {
+    const user = userEvent.setup();
+    for (const [outcome, heading] of [
+      ["pending", "Your mystery is waiting in the wings!"],
+      ["rejected", "We couldn't add this plate."],
+      ["error", "Hmm... something went wrong."],
+    ] as const) {
+      live.spot.mockResolvedValue({ outcome });
+      const v = render(<SpotLivePage />);
+      await fillAndSpot(user);
+      expect(await screen.findByText(heading)).toBeInTheDocument();
+      v.unmount();
+    }
+    live.spot.mockRejectedValue(new Error("down"));
+    render(<SpotLivePage />);
+    await fillAndSpot(user);
+    expect(await screen.findByText("Hmm... something went wrong.")).toBeInTheDocument();
+  });
+
+  it("disables the form for the demo account", () => {
+    live.account.account = { isDemo: true };
+    render(<SpotLivePage />);
+    expect(screen.getByRole("button", { name: "Check This Plate" })).toBeDisabled();
+    expect(screen.getByText(/exploring the demo/i)).toBeInTheDocument();
+    live.account.account = null;
+  });
+});
