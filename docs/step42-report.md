@@ -24,12 +24,12 @@
 
 ## Final database state, read from the catalog
 
-| Table | anon | authenticated | service role |
-|---|---|---|---|
-| profiles | none | SELECT | SELECT, INSERT, UPDATE, DELETE |
-| user_roles | none | SELECT | SELECT, INSERT, UPDATE, DELETE |
-| handle_save_attempts | none | none | SELECT, INSERT, UPDATE, DELETE |
-| app_settings | none | none | SELECT, INSERT, UPDATE, DELETE |
+| Table                | anon | authenticated | service role                   |
+| -------------------- | ---- | ------------- | ------------------------------ |
+| profiles             | none | SELECT        | SELECT, INSERT, UPDATE, DELETE |
+| user_roles           | none | SELECT        | SELECT, INSERT, UPDATE, DELETE |
+| handle_save_attempts | none | none          | SELECT, INSERT, UPDATE, DELETE |
+| app_settings         | none | none          | SELECT, INSERT, UPDATE, DELETE |
 
 Relevant policies remain exactly `profiles: read own` (SELECT, authenticated, `auth.uid() = id`) and `user_roles: read own` (SELECT, authenticated, `auth.uid() = user_id`). There are no policies on app_settings or handle_save_attempts. Existing policies on other tables were not changed.
 
