@@ -204,51 +204,75 @@ it("does not submit profile changes without an account", () => {
 });
 it("ignores duplicate profile saves while the first is pending", async () => {
   let resolve: ((value: { outcome: string; message: string }) => void) | undefined;
-  m.save.mockReturnValueOnce(new Promise((r) => { resolve = r; }));
+  m.save.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
   render(<ProfilePage />);
   const form = screen.getByLabelText("Handle").closest("form") as HTMLFormElement;
   fireEvent.submit(form);
   fireEvent.submit(form);
   expect(m.save).toHaveBeenCalledTimes(1);
-  await act(async () => { resolve?.({ outcome: "unavailable", message: "Try again soon." }); });
+  await act(async () => {
+    resolve?.({ outcome: "unavailable", message: "Try again soon." });
+  });
   expect(m.refresh).not.toHaveBeenCalled();
   expect(m.track).not.toHaveBeenCalled();
   expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
 });
 it("ignores a stale availability response after the draft becomes invalid", async () => {
   let resolve: ((value: { available: boolean }) => void) | undefined;
-  m.check.mockReturnValueOnce(new Promise((r) => { resolve = r; }));
+  m.check.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
   render(<ProfilePage />);
   await waitFor(() => expect(m.check).toHaveBeenCalledTimes(1));
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "a-" } });
-  await act(async () => { resolve?.({ available: true }); });
+  await act(async () => {
+    resolve?.({ available: true });
+  });
   expect(screen.queryByText("Available")).toBeNull();
   expect(m.check).toHaveBeenCalledTimes(1);
   expect(m.save).not.toHaveBeenCalled();
 });
-it.each(["signin", "signup"])("ignores duplicate %s submissions until the first completes", async (kind) => {
-  const submit = kind === "signin" ? m.signIn : m.signUp;
-  let resolve: ((value: { data: { session: object }; error: null }) => void) | undefined;
-  submit.mockReturnValueOnce(new Promise((r) => { resolve = r; }));
-  render(kind === "signin" ? <SignInPage /> : <SignUpPage />);
-  fillEntry();
-  fireEvent.submit(screen.getByLabelText("Email").closest("form") as HTMLFormElement);
-  expect(submit).toHaveBeenCalledTimes(1);
-  await act(async () => { resolve?.({ data: { session: {} }, error: null }); });
-  expect(m.complete).toHaveBeenCalledTimes(1);
-  expect(m.navigate).toHaveBeenCalledTimes(1);
-});
-it.each(["Email", "Password"])("does not authenticate when the %s field is excluded from submitted form data", (label) => {
-  render(<SignInPage />);
-  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "fixture@example.com" } });
-  fireEvent.change(screen.getByLabelText("Password"), { target: { value: "test-password" } });
-  const input = screen.getByLabelText(label) as HTMLInputElement;
-  input.disabled = true;
-  fireEvent.submit(input.closest("form") as HTMLFormElement);
-  expect(m.signIn).not.toHaveBeenCalled();
-  expect(m.complete).not.toHaveBeenCalled();
-  expect(m.navigate).not.toHaveBeenCalled();
-});
+it.each(["signin", "signup"])(
+  "ignores duplicate %s submissions until the first completes",
+  async (kind) => {
+    const submit = kind === "signin" ? m.signIn : m.signUp;
+    let resolve: ((value: { data: { session: object }; error: null }) => void) | undefined;
+    submit.mockReturnValueOnce(
+      new Promise((r) => {
+        resolve = r;
+      }),
+    );
+    render(kind === "signin" ? <SignInPage /> : <SignUpPage />);
+    fillEntry();
+    fireEvent.submit(screen.getByLabelText("Email").closest("form") as HTMLFormElement);
+    expect(submit).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolve?.({ data: { session: {} }, error: null });
+    });
+    expect(m.complete).toHaveBeenCalledTimes(1);
+    expect(m.navigate).toHaveBeenCalledTimes(1);
+  },
+);
+it.each(["Email", "Password"])(
+  "does not authenticate when the %s field is excluded from submitted form data",
+  (label) => {
+    render(<SignInPage />);
+    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "fixture@example.com" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "test-password" } });
+    const input = screen.getByLabelText(label) as HTMLInputElement;
+    input.disabled = true;
+    fireEvent.submit(input.closest("form") as HTMLFormElement);
+    expect(m.signIn).not.toHaveBeenCalled();
+    expect(m.complete).not.toHaveBeenCalled();
+    expect(m.navigate).not.toHaveBeenCalled();
+  },
+);
 it("a signed-out member profile exposes no account menu or sign-out action", () => {
   m.signedOut = true;
   const view = render(<MemberProfile showHandle />);
