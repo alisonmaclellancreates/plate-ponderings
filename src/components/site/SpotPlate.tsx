@@ -128,7 +128,7 @@ export function SpotForm({
   errors?: SpotErrors | undefined;
   busy?: boolean;
   isDemo?: boolean;
-  onSpot?: ((values: Required<SpotValues>) => void) | undefined;
+  onSpot?: ((values: { jurisdiction: string; text: string }) => void) | undefined;
 }) {
   const [errors, setErrors] = useState<SpotErrors>(initialErrors);
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
