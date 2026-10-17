@@ -29,7 +29,7 @@ it("builds the literal scenario, histories and Pacific times relative to the dem
     "MUDFLAP",
     "WANDR4",
   ]);
-  const subjectIds = new Set(seed.subjects.map((subject) => subject.id));
+  const subjectIds = new Set<string | null>(seed.subjects.map((subject) => subject.id));
   for (const rows of [seed.stories, seed.summaries, seed.featured_days, seed.notifications])
     for (const row of rows) expect(subjectIds.has(row.subject_id)).toBe(true);
   expect(seed.subjects.filter((p) => p.status === "published")).toHaveLength(15);

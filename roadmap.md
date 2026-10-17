@@ -5,7 +5,7 @@
 - [x] Final related run: 227 tests across 12 changed test files passed. Lint: zero errors, six existing warnings. No local coverage, build, typecheck, browser, reset or real AI; no production changes.
 - [ ] Confirm post-sync PR Codecov reaches 100%; latest actual PR report is 99.20844% at head 5629a44e, predating the guard removal. Manual push is prohibited; managed Git sync owns pushing.
 - [x] Read matching CI artifact for exact partial branches: reset lines 130/154 and seed-data line 172. Alison approved removing the three unreachable guards; invariant assertions cover required plates, references, uploaded paths and assigned accounts.
-- [ ] Run related tests and lint for the final guard removal and invariant assertions.
+- [x] Run related tests and lint for the final guard removal and invariant assertions: 101 tests across 10 related files passed; lint has zero errors and six existing warnings. CI remains authoritative for coverage.
 
 # Step 51: demo, seed reset and removal of scaffolding
 
