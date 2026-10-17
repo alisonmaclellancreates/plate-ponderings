@@ -65,14 +65,19 @@ import {
 import { DEMO_MESSAGE } from "@/lib/account-rules";
 
 const j = { name: "Washington" };
-const subject = (id: string, status: string, at: string) => ({
+const subject = (id: string, status: "published" | "pending" | "rejected", at: string) => ({
   id,
   identity_b: id.toLowerCase(),
   status,
   created_at: at,
   jurisdictions: j,
 });
-const story = (id: string, status: string, at: string, plateStatus = "published") => ({
+const story = (
+  id: string,
+  status: "published" | "pending" | "rejected",
+  at: string,
+  plateStatus = "published",
+) => ({
   id,
   subject_id: `P-${id}`,
   status,
