@@ -1,3 +1,10 @@
+# Step 44c: stale or stuck sessions
+
+- [ ] Implement shared bounded user check, late account recovery, rejected-session cleanup and bounded project-owned attachment. No database changes.
+- [ ] Add behavioral tests and run full coverage suite and `bun run lint`.
+- [ ] Repeat seven browser saved-state search scenarios, case by case.
+- [ ] Confirm 100% PR Codecov patch coverage. Blocker: Alison opens the PR; local coverage is diagnostic only.
+
 # Step 44: real stories — add, check, show on plate page
 
 Status: implemented and verified locally. 735 tests pass, typecheck clean, lint clean (6 pre-existing UI warnings), coverage 99.03/97.26/98.14/99.4, build OK. Codecov PR figure pending: Alison opens the PR. No further schema changes without Alison's approval.
