@@ -541,6 +541,39 @@ describe("getPlateStories failed and empty lookups", () => {
     expect(result.pending).toEqual([]);
     expect(result.ownerHandle).toBe("Traveler");
   });
+  it("signs a published story's photo with a short-lived link", async () => {
+    tables["stories"] = {
+      data: [
+        {
+          id: "s1",
+          meaning: "M",
+          source: "guess",
+          body: null,
+          author_id: "a1",
+          published_at: "x",
+          photo_path: "a1/uuid.jpg",
+        },
+      ],
+      error: null,
+    };
+    const createSignedUrls = vi.fn().mockResolvedValue({
+      data: [{ signedUrl: "https://signed.example/photo.jpg" }],
+      error: null,
+    });
+    mocks.admin.storage.from.mockReturnValue({
+      remove: mocks.remove,
+      download: mocks.download,
+      createSignedUrls,
+    });
+    const result = (await call(getPlateStories, { plateId: "plate-1" })) as unknown as {
+      stories: { id: string; photo: string | null }[];
+    };
+    expect(result.stories).toEqual([
+      expect.objectContaining({ id: "s1", photo: "https://signed.example/photo.jpg" }),
+    ]);
+    expect(mocks.admin.storage.from).toHaveBeenCalledWith("story-photos");
+    expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
+  });
   it("keeps stories whose author is gone, shown as Traveler, even with blocks", async () => {
     signedIn();
     tables["blocks"] = { data: [{ blocked_id: "a2" }], error: null };
