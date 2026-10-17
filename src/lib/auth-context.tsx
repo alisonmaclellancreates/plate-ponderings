@@ -34,7 +34,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       await identify(data.user.id);
       if (!own.isDemo && Date.now() - lastRecheckCall >= RECHECK_GAP_MS) {
         lastRecheckCall = Date.now();
-        void recheckPending().catch(() => {});
+        void recheckPendingSubjects().catch(() => {});
       }
     } finally {
       if (current === generation.current) setLoading(false);
