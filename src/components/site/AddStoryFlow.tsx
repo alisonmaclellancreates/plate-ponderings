@@ -6,9 +6,9 @@ import { Info } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
 import { getPlate } from "@/lib/plates.functions";
-import { getDemoSetting } from "@/lib/accounts.functions";
 import { addStory, getPlateStories, type HowKey } from "@/lib/stories.functions";
 import { HOW_OPTIONS, MEANING_MAX, MORE_MAX } from "@/lib/story-form";
+import { useAccountAuth } from "@/lib/account-auth";
 import { track } from "@/lib/analytics";
 
 const DEMO_FORM_MESSAGE = "Adding stories is turned off in the demo.";
@@ -101,10 +101,8 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
     queryKey: ["plate-stories", plateId],
     queryFn: () => getPlateStories({ data: { plateId } }),
   });
-  const { data: demo } = useQuery({
-    queryKey: ["demo-setting"],
-    queryFn: () => getDemoSetting(),
-  });
+  const auth = useAccountAuth();
+  const demo = Boolean(auth?.account?.isDemo);
   const submitStory = useServerFn(addStory);
 
   useEffect(() => {
