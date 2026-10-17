@@ -112,7 +112,7 @@ describe("Spot outcome previews", () => {
     const { PLATES } = await import("@/lib/mock-data");
     const plate = PLATES.find((record) => record.slug === "bc-lv2code");
     const story = plate?.stories[0];
-    if (!story) throw new Error("Existing plate fixture missing");
+    if (!plate || !story) throw new Error("Existing plate fixture missing");
     const find = vi.spyOn(PLATES, "find").mockReturnValue({
       ...plate,
       stories: plate.stories.map((entry, index) => index === 0 ? { ...entry, howIKnow: "owner" } : entry),
