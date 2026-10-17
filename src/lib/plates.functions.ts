@@ -246,7 +246,7 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
         { ...subject, name: joined?.name ?? subject.identity_a },
         context.userId,
       );
-      if (outcome === "unavailable") {
+      if (outcome === "unavailable" || outcome === "blocked") {
         halted = true;
         break;
       }
@@ -267,7 +267,7 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
         { ...story, plateText: joined?.identity_b ?? "" },
         context.userId,
       );
-      if (outcome === "unavailable") break;
+      if (outcome === "unavailable" || outcome === "blocked") break;
       rechecked++;
     }
     runAfterResponse(fillPlateGuesses(context.userId, newlyPublished));

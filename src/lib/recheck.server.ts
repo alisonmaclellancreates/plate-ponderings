@@ -12,8 +12,12 @@ export type PendingStory = {
   plateText: string;
 };
 
-/** "unavailable" means stop: the AI could not answer or a block was persisted. */
-export type RecheckOutcome = "published" | "rejected" | "unavailable";
+/**
+ * "unavailable" and "blocked" mean stop: the AI could not answer, or a block was
+ * persisted through the shared pause. "unchanged" means the guarded update found
+ * no pending row (someone else got there first), so nothing changed.
+ */
+export type RecheckOutcome = "published" | "rejected" | "unchanged" | "unavailable" | "blocked";
 
 /**
  * Checks one pending plate and applies the result for its owner. Shared by the
@@ -27,7 +31,10 @@ export async function recheckSubject(
   const { checkSubject } = await import("./plate-moderation.server");
   const { persistAiBlock } = await import("./ai-block.server");
   const result = await checkSubject(subject.name, subject.identity_b);
-  if (result.block) await persistAiBlock(admin, result.block, result.runId);
+  if (result.block) {
+    await persistAiBlock(admin, result.block, result.runId);
+    return "blocked";
+  }
   if (result.outcome === "unavailable") return "unavailable";
   const approved = result.outcome === "approved";
   const updated = await admin
@@ -40,7 +47,8 @@ export async function recheckSubject(
     .eq("id", subject.id)
     .eq("status", "pending")
     .select("id");
-  if (updated.data && updated.data.length > 0) {
+  if (!updated.data || updated.data.length === 0) return "unchanged";
+  {
     if (approved) {
       const { requestPlateGuess } = await import("./plate-guesses.server");
       const { runAfterResponse } = await import("./after-response.server");
@@ -65,7 +73,10 @@ export async function recheckStory(
   const { checkStory } = await import("./story-moderation.server");
   const { persistAiBlock } = await import("./ai-block.server");
   const result = await checkStory(story.meaning, story.body ?? "", story.plateText);
-  if (result.block) await persistAiBlock(admin, result.block, result.runId);
+  if (result.block) {
+    await persistAiBlock(admin, result.block, result.runId);
+    return "blocked";
+  }
   if (result.outcome === "unavailable") return "unavailable";
   const approved = result.outcome === "approved";
   const updated = await admin
@@ -78,7 +89,8 @@ export async function recheckStory(
     .eq("id", story.id)
     .eq("status", "pending")
     .select("id");
-  if (updated.data && updated.data.length > 0) {
+  if (!updated.data || updated.data.length === 0) return "unchanged";
+  {
     if (ownerId)
       await admin.from("notifications").insert({
         user_id: ownerId,

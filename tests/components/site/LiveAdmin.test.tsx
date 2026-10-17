@@ -18,13 +18,8 @@ vi.mock("@/lib/admin.functions", () => ({
 }));
 vi.mock("@/components/site/AiCheckStatus", () => ({ AiCheckStatus: () => null }));
 
-import {
-  ADMIN_ERROR,
-  ADMIN_REPORTS_KEY,
-  LiveAdmin,
-  RECHECK_PAUSED,
-  recheckNote,
-} from "@/components/site/LiveAdmin";
+import { LiveAdmin } from "@/components/site/LiveAdmin";
+import { ADMIN_ERROR, ADMIN_REPORTS_KEY, RECHECK_PAUSED, recheckNote } from "@/lib/admin-copy";
 
 const row = (id: string, status: "visible" | "hidden") => ({
   id,

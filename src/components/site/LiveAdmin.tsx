@@ -5,15 +5,7 @@ import { AdminPage } from "@/components/site/Admin";
 import { getReportedStories, recheckAllPending, setStoryHidden } from "@/lib/admin.functions";
 import type { ReportedStory } from "@/lib/mock-data";
 import { track } from "@/lib/analytics";
-
-export const ADMIN_REPORTS_KEY = ["admin-reports"] as const;
-export const ADMIN_ERROR = "Something went wrong. Please try again.";
-export const RECHECK_PAUSED = "AI checks are paused. Resume them before rechecking.";
-
-export function recheckNote(changed: number, remaining: number, stopped: boolean): string {
-  const base = `${changed} changed. ${remaining} still waiting for a safety check.`;
-  return stopped ? `${base} The check stopped early. Try again soon.` : base;
-}
+import { ADMIN_ERROR, ADMIN_REPORTS_KEY, RECHECK_PAUSED, recheckNote } from "@/lib/admin-copy";
 
 /** Admin with live reported stories; every action is verified as admin on the server. */
 export function LiveAdmin() {
