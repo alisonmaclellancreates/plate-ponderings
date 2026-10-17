@@ -9,6 +9,11 @@ const m = vi.hoisted(() => ({
   getPlateStories: vi.fn(),
   track: vi.fn(),
   navigate: vi.fn(),
+  detect: vi.fn(),
+  upload: vi.fn(),
+  decode: vi.fn(),
+  renderBlurred: vi.fn(),
+  toJpeg: vi.fn(),
   auth: { account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean } },
   plate: { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } } as unknown,
   stories: { hasOwnerStory: false } as unknown,
@@ -57,6 +62,15 @@ vi.mock("@/lib/stories.functions", () => ({
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => m.auth }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
+vi.mock("@/lib/photos.functions", () => ({
+  detectPlateBox: m.detect,
+  uploadStoryPhoto: m.upload,
+}));
+vi.mock("@/lib/photo-canvas", () => ({
+  decodePhoto: m.decode,
+  renderBlurredPhoto: m.renderBlurred,
+  canvasToJpegBlob: m.toJpeg,
+}));
 
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
 import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
