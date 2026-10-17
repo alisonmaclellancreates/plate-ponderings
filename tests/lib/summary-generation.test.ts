@@ -60,7 +60,13 @@ describe("summary prompt", () => {
       "Score table: 0 to 33 Largely agree. 34 to 66 Mixed views. 67 to 100 Opinions differ.",
     );
     expect(SUMMARY_INSTRUCTIONS).toContain(
-      "Choose the score that matches what your text says. If the text describes differing interpretations, the score must not fall in Largely agree; if the stories agree, don't describe them as differing.",
+      "Choose the score that matches what your text says. If the text describes differing interpretations, the score must not fall in Largely agree; if the stories agree, don’t describe them as differing.",
+    );
+  });
+
+  it("requires ownership claims to remain attributed, never evidence or established fact", () => {
+    expect(SUMMARY_INSTRUCTIONS).toContain(
+      "A contributor who says it’s their plate may be given more weight, but their claim is never established fact. Never call it a firsthand account, the owner’s account, proof or evidence, and never say it outweighs or settles the other stories. Describe what that contributor says, attributed, for example: ‘A contributor who says it’s their plate explains... That contributor offers little detail about the choice.’",
     );
   });
 

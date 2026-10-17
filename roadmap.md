@@ -1,3 +1,9 @@
+# Rowan: summary prompt review
+
+- [x] Preserve the brief’s score table, match Rowan’s score/text instruction verbatim, and add the attributed-ownership rule with instruction tests. No schema or existing-summary edits.
+- [ ] Run summary-generation tests and changed-file lint.
+- [ ] Generate one fresh ROW43XYZ summary through the normal flow and report its saved text and score.
+
 # Step 44c: stale or stuck sessions
 
 - [x] Implement shared bounded user check, late account recovery, rejected-session cleanup and bounded project-owned attachment. No database changes; generated attacher unchanged.
