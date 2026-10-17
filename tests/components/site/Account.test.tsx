@@ -28,6 +28,13 @@ vi.mock("@/lib/account-auth", () => ({
 vi.mock("@tanstack/react-start", () => ({
   useServerFn: (fn: unknown) => fn,
   createMiddleware: () => ({ server: (fn: unknown) => fn }),
+  createServerFn: () => {
+    const builder: Record<string, unknown> = {};
+    builder["middleware"] = () => builder;
+    builder["inputValidator"] = () => builder;
+    builder["handler"] = (fn: unknown) => fn;
+    return builder;
+  },
 }));
 vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
 vi.mock("@/lib/accounts.functions", () => ({
