@@ -1,5 +1,21 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43: Copilot pending feedback and pause analytics
+
+- [x] Retain submitted plate values; behaviour tests verify search arrivals, direct /spot submissions and edits to prefilled values, including retained fields and Back to Search destinations.
+- [x] Allow and capture subject_spotted outcome rate_limited; capture and before_send tests pass. Full suite: 665 tests across 120 files, changed-file lint clean, automatic build OK. PR Codecov remains unconfirmed for this follow-up; latest previously read figure is 75.09%, not the local diagnostic coverage.
+
+# Step 43: PR #90 coverage correction
+
+- [x] Add real moderation, server error/race/recheck, route and UI edge tests; no production code or branches removed. Force-unavailable switch unset in sandbox and absent from default configuration.
+- [x] Run the full CI-equivalent coverage suite: 662 tests across 120 files pass; all seven requested files have zero missing statements or branches locally. Changed-file lint clean; automatic build OK.
+- [ ] Read PR #90 Codecov after CI. Latest actual report read through Alison's GitHub connection is 75.09434% with 66 missing lines on the previous PR head; the new tests have not synced to that head yet. Await automatic sync and CI, never substitute the local diagnostic result.
+
+# Step 43: Rowan rate-limit correction
+
+- [x] Separate pause outcome using the unchanged wait message; live and preview outcome tests pass. All new executable lines covered locally; 581 tests pass.
+- [x] Check the outcome at 1280px and 360px: clean wrapping, no horizontal overflow or browser errors, Go Back returns home. Changed-file lint clean; preview build OK. Jurisdiction display deferred.
+
 - [x] Diagnose lint, ignore generated files, and format remaining files.
 - [x] Run lint and coverage; inspect automatic build/typecheck signals.
 - [x] Add parallel CI jobs, Codecov configuration, and README badge.
@@ -95,3 +111,14 @@
 - [x] 507 tests pass; coverage 99.22/97.26/99.02/99.68 meets 95% gate; lint 0 errors/8 warnings; build OK; summary visibility and account DB tests pass; live admin reset verified; verification fixtures cleaned.
 - [ ] Alison checks hosted HIBP and password minimum in More → Users → Auth settings. Blocker: supported independent hosted-setting readback unavailable.
 - [ ] Confirm all five new events in PostHog. Blocker: event delivery not independently inspected; filtering is tested.
+
+# Step 43: look-up and Spot a Plate on the real backend
+
+- [ ] Plan approved, including the proposed migration (subject_save_attempts, profiles.last_recheck_at, handle_check_* renamed to ai_check_*).
+- [ ] Search and /plate/$id read with the admin client inside server functions, returning only needed fields, never created_by.
+- [ ] Simultaneous-spot unique-key conflict re-reads the key and returns exists/already-spotted/pending, never error; tested.
+- [ ] Shared AI pause: app_settings fields renamed to ai_check_*; handle check, subject check and recheck all read/write it; blocked behavior per change list; /admin panel and account previews updated to "AI check status" copy; AGENTS.md recovery instructions updated.
+- [ ] Search wiring, /plate/$id route, Spot a Plate outcomes, recheck trigger, 42b message constants and single-main previews fix.
+- [ ] Analytics: subject_searched, subject_spotted; tests, DB test rerun, live verification.
+- [ ] Test that Resume AI checks clears the block for every check, not only that one block stops the others.
+- [ ] Confirm homepage look-up card moves keyboard focus to the first search field; test exists from static pages (Homepage.test.tsx), report as such.

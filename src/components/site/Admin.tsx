@@ -1,6 +1,6 @@
 import { Plate } from "@/components/site/Plate";
 import { REPORTED_STORIES, type ReportedStory } from "@/lib/mock-data";
-import { HandleCheckStatus } from "./HandleCheckStatus";
+import { AiCheckStatus } from "./AiCheckStatus";
 
 function ReportRow({ row }: { row: ReportedStory }) {
   return (
@@ -26,7 +26,7 @@ export function AdminPage({ rows = REPORTED_STORIES }: { rows?: ReportedStory[] 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="font-display text-4xl text-navy">Admin</h1>
-      <HandleCheckStatus />
+      <AiCheckStatus />
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <button type="button" className="brand-btn brand-btn-navy">
           Recheck pending

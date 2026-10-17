@@ -32,20 +32,21 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => m.navigate,
 }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { signUp: m.signUp, signInWithPassword: m.signIn } },
 }));
 vi.mock("@/lib/accounts.functions", () => ({
   checkHandle: m.check,
   saveHandle: m.save,
-  getHandleCheckStatus: m.status,
-  resumeHandleChecks: m.resume,
+  getAiCheckStatus: m.status,
+  resumeAiChecks: m.resume,
 }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
 import { SignInPage, SignUpPage } from "@/components/site/Entry";
 import { ProfilePage } from "@/components/site/Account";
 import { MemberProfile, SiteHeader } from "@/components/site/SiteHeader";
-import { HandleCheckStatus } from "@/components/site/HandleCheckStatus";
+import { AiCheckStatus } from "@/components/site/AiCheckStatus";
 beforeEach(() => {
   vi.clearAllMocks();
   m.signedOut = false;
@@ -219,57 +220,59 @@ it("member menus show only authorized admin actions and handle signout errors", 
 });
 it("admin sees the blocked design and success only after a confirmed resume", async () => {
   m.account.isAdmin = true;
-  render(<HandleCheckStatus />);
+  render(<AiCheckStatus />);
   await screen.findByTestId("blocked-icon");
   expect(screen.getByText("Blocked")).toBeInTheDocument();
   expect(
-    screen.getByText("Handle checks are paused. People can keep their current handles."),
+    screen.getByText(
+      "AI checks are paused. Nothing is published without a check. People keep their current handles.",
+    ),
   ).toBeInTheDocument();
-  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
+  expect(screen.queryByText("AI checks resumed.")).toBeNull();
   m.status.mockResolvedValue({ allowed: true, category: null });
-  fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
-  await screen.findByText("Handle checks resumed.");
+  fireEvent.click(screen.getByRole("button", { name: "Resume AI checks" }));
+  await screen.findByText("AI checks resumed.");
   expect(screen.getByText("Ready")).toBeInTheDocument();
-  expect(screen.queryByRole("button", { name: "Resume handle checks" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Resume AI checks" })).toBeNull();
   expect(m.resume).toHaveBeenCalledTimes(1);
 });
 it("a confirmed resume that still reads blocked shows no success", async () => {
   m.account.isAdmin = true;
-  render(<HandleCheckStatus />);
+  render(<AiCheckStatus />);
   await screen.findByTestId("blocked-icon");
-  fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
+  fireEvent.click(screen.getByRole("button", { name: "Resume AI checks" }));
   await screen.findByTestId("blocked-icon");
-  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
+  expect(screen.queryByText("AI checks resumed.")).toBeNull();
   expect(m.resume).toHaveBeenCalledTimes(1);
 });
 it("admin reset failures and status errors keep the blocked state", async () => {
   m.account.isAdmin = true;
   m.resume.mockResolvedValue({ resumed: false });
-  const v = render(<HandleCheckStatus />);
+  const v = render(<AiCheckStatus />);
   await screen.findByTestId("blocked-icon");
-  fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
+  fireEvent.click(screen.getByRole("button", { name: "Resume AI checks" }));
   await screen.findByRole("alert");
   expect(screen.getByTestId("blocked-icon")).toBeInTheDocument();
-  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
+  expect(screen.queryByText("AI checks resumed.")).toBeNull();
   v.unmount();
   m.resume.mockRejectedValue(new Error());
-  const v2 = render(<HandleCheckStatus />);
+  const v2 = render(<AiCheckStatus />);
   await screen.findByTestId("blocked-icon");
-  fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
+  fireEvent.click(screen.getByRole("button", { name: "Resume AI checks" }));
   await screen.findByRole("alert");
   expect(screen.getByTestId("blocked-icon")).toBeInTheDocument();
   v2.unmount();
   m.status.mockRejectedValue(new Error());
-  render(<HandleCheckStatus />);
+  render(<AiCheckStatus />);
   await screen.findByRole("alert");
 });
 it("non-admin and demo cannot inspect operational status", () => {
-  const v = render(<HandleCheckStatus />);
+  const v = render(<AiCheckStatus />);
   expect(m.status).not.toHaveBeenCalled();
   v.unmount();
   m.account.isAdmin = true;
   m.account.isDemo = true;
-  render(<HandleCheckStatus />);
+  render(<AiCheckStatus />);
   expect(m.status).not.toHaveBeenCalled();
 });
 it("does not submit profile changes without an account", () => {

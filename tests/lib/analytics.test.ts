@@ -21,6 +21,21 @@ afterEach(() => {
 });
 
 describe("analytics", () => {
+  it("allows rate_limited and preserves each planned spot outcome through capture and before_send", async () => {
+    const analytics = await import("@/lib/analytics");
+    expect(analytics.SUBJECT_SPOTTED_OUTCOMES).toContain("rate_limited");
+    for (const outcome of analytics.SUBJECT_SPOTTED_OUTCOMES) {
+      await analytics.track("subject_spotted", { outcome });
+      expect(sdk.capture).toHaveBeenLastCalledWith("subject_spotted", { outcome });
+      const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+      expect(
+        beforeSend({
+          event: "subject_spotted",
+          properties: { outcome, text: "private plate text", jurisdiction: "Utah" },
+        }),
+      ).toEqual({ event: "subject_spotted", properties: { outcome } });
+    }
+  });
   it("account events carry no email, handle, password or moderation output", async () => {
     const analytics = await import("@/lib/analytics");
     for (const event of [

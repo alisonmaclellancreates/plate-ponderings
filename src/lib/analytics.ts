@@ -9,12 +9,29 @@ export const EVENTS = {
   signed_out: [],
   handle_changed: [],
   handle_rejected: [],
+  subject_searched: ["found", "jurisdiction"],
+  subject_spotted: ["outcome"],
 } as const;
 
 type EventRegistry = Readonly<Record<string, readonly string[]>>;
+export const SUBJECT_SPOTTED_OUTCOMES = [
+  "new",
+  "exists",
+  "pending",
+  "already_spotted",
+  "rejected",
+  "rate_limited",
+  "error",
+] as const;
 type EventProperties<R extends EventRegistry> = {
   [E in keyof R]: {
-    [P in R[E][number]]: P extends "path" ? string : string | number | boolean;
+    [P in R[E][number]]: E extends "subject_spotted"
+      ? P extends "outcome"
+        ? (typeof SUBJECT_SPOTTED_OUTCOMES)[number]
+        : string | number | boolean
+      : P extends "path"
+        ? string
+        : string | number | boolean;
   };
 };
 export type AnalyticsEvents = EventProperties<typeof EVENTS>;

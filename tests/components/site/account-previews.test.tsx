@@ -30,7 +30,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 import { HandleField } from "@/components/site/Account";
 import { SignInPage, SignUpPage } from "@/components/site/Entry";
-import { HandleCheckStatusPanel } from "@/components/site/HandleCheckStatus";
+import { AiCheckStatusPanel } from "@/components/site/AiCheckStatus";
 import { HANDLE_REJECTED, HANDLE_TAKEN } from "@/lib/account-rules";
 import { Route as AccountPreviewsRoute } from "@/routes/previews_.account";
 
@@ -111,23 +111,25 @@ it("handle field previews are inert without handlers", () => {
 });
 
 it("status panel previews show Ready without Resume and the Blocked design", () => {
-  const v = render(<HandleCheckStatusPanel status={{ allowed: true, category: null }} />);
+  const v = render(<AiCheckStatusPanel status={{ allowed: true, category: null }} />);
   expect(screen.getByText("Ready")).toBeInTheDocument();
-  expect(screen.queryByRole("button", { name: "Resume handle checks" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Resume AI checks" })).toBeNull();
   v.unmount();
   render(
-    <HandleCheckStatusPanel
+    <AiCheckStatusPanel
       status={{ allowed: true, category: "credit_block", blockedAt: "2026-10-17T01:00:00.000Z" }}
     />,
   );
   expect(screen.getByTestId("blocked-icon")).toBeInTheDocument();
   expect(screen.getByText("Blocked")).toBeInTheDocument();
   expect(
-    screen.getByText("Handle checks are paused. People can keep their current handles."),
+    screen.getByText(
+      "AI checks are paused. Nothing is published without a check. People keep their current handles.",
+    ),
   ).toBeInTheDocument();
   expect(screen.getByText(/^Paused since /)).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
-  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Resume AI checks" }));
+  expect(screen.queryByText("AI checks resumed.")).toBeNull();
 });
 
 it("entry errors are coral, iconed, and linked to their fields", () => {
@@ -170,8 +172,8 @@ it("the previews page renders every account state section", () => {
     "Handle field, wrong length",
     "Handle save, rejected by the check",
     "Handle save, changes saved",
-    "Handle check status, Ready",
-    "Handle check status, Blocked",
+    "AI check status, Ready",
+    "AI check status, Blocked",
   ]) {
     expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
   }
