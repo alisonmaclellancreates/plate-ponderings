@@ -26,7 +26,7 @@ export const Route = createFileRoute("/previews_/story-photo")({
 
 const SAMPLE_BOX: Box = STORY_PHOTO_BOX;
 
-const SAMPLE_STORY: Story = {
+const SAMPLE_STORY_BASE: Story = {
   id: "sample-photo",
   handle: "Traveler4821",
   date: "2026-10-01",
@@ -34,14 +34,14 @@ const SAMPLE_STORY: Story = {
   howIKnow: "guess",
   hearts: 2,
   photo: STORY_PHOTO_PLACEHOLDER,
-  photoBox: STORY_PHOTO_BOX,
 };
 
+const SAMPLE_STORY: Story = { ...SAMPLE_STORY_BASE, photoBox: STORY_PHOTO_BOX };
+
 const OLDER_STORY: Story = {
-  ...SAMPLE_STORY,
+  ...SAMPLE_STORY_BASE,
   id: "sample-older",
   meaning: "They might be counting road trips",
-  photoBox: undefined,
 };
 
 type State = "box" | "no-box" | "review";
