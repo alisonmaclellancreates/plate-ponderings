@@ -1,3 +1,8 @@
+# PR #113 photo patch coverage
+
+- [ ] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths without behaviour changes.
+- [ ] Run requested related tests and lint; inspect PR Codecov after managed sync. Local coverage is diagnostic only.
+
 # Photo editor exits
 
 - [x] Replacement picker and adjustment skip implemented; cleanup, same-file reselection, cancellation, no-upload skip and box validation pass 45 changed tests. Preview updated. Lint zero errors/six existing warnings; automatic build OK. Desktop and 360×640 sample editor verified: exits visible, buttons/handles at least 44px, drawing enables Next and changes instruction, skip closes editor. Real file selection and cleanup are mocked tests, not live AI.
