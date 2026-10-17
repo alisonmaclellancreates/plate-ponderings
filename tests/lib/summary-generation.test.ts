@@ -161,8 +161,8 @@ describe("generateSummary", () => {
   it("reads the block type from error.type, error.code, or an unreadable body", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     for (const body of [
-      JSON.stringify({ error: { type: "payment_required" } }),
-      JSON.stringify({ error: { code: "payment_required" } }),
+      JSON.stringify({ error: { type: "credit_limit_reached" } }),
+      JSON.stringify({ error: { code: "provider_access_denied" } }),
     ]) {
       vi.stubGlobal(
         "fetch",
