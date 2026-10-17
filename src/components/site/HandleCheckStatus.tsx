@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { TriangleAlert } from "lucide-react";
 import { getHandleCheckStatus, resumeHandleChecks } from "@/lib/accounts.functions";
@@ -26,9 +26,10 @@ export function HandleCheckStatusPanel({
   onResume?: () => void;
 }) {
   const blocked = Boolean(status?.category);
+  const headingId = useId();
   return (
-    <section aria-labelledby="handle-check-status" className="mt-6 border-y border-border py-5">
-      <h2 id="handle-check-status" className="font-display text-2xl text-navy">
+    <section aria-labelledby={headingId} className="mt-6 border-y border-border py-5">
+      <h2 id={headingId} className="font-display text-2xl text-navy">
         Handle check status
       </h2>
       {!status ? (
@@ -43,7 +44,9 @@ export function HandleCheckStatusPanel({
           </p>
           <p className="mt-1">Handle checks are paused. People can keep their current handles.</p>
           {status?.blockedAt && (
-            <p className="mt-1 text-sm">{new Date(status.blockedAt).toLocaleString()}</p>
+            <p className="mt-1 text-sm">
+              Paused since {new Date(status.blockedAt).toLocaleString()}
+            </p>
           )}
           <Button disabled={busy} className="brand-btn brand-btn-navy mt-3" onClick={onResume}>
             Resume handle checks

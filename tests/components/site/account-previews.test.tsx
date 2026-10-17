@@ -55,12 +55,50 @@ it("handle field previews show each rule-based message and the available badge",
   expect(screen.getByText("Changes saved.")).toBeInTheDocument();
 });
 
-it("handle field is full width with feedback on its own line at narrow widths", () => {
+it("handle field is full width with feedback directly beneath it", () => {
   render(<HandleField draft="admin" />);
-  const layout = screen.getByLabelText("Handle").parentElement as HTMLElement;
-  expect(layout.className).toContain("grid-cols-1");
-  expect(layout.className).toContain("sm:grid-cols-[minmax(0,1fr)_auto]");
-  expect(screen.getByLabelText("Handle").className).toContain("w-full");
+  const input = screen.getByLabelText("Handle");
+  expect(input.className).toContain("w-full");
+  const alert = screen.getByRole("alert");
+  expect(alert).toHaveTextContent("That handle is reserved. Choose another.");
+  expect(input.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(input.getAttribute("aria-describedby")).toContain(alert.id);
+});
+
+it("two handle fields on one page keep their own names and descriptions", () => {
+  render(
+    <>
+      <HandleField draft="admin" />
+      <HandleField draft="rowan!" />
+    </>,
+  );
+  const inputs = screen.getAllByLabelText("Handle");
+  expect(inputs).toHaveLength(2);
+  expect(inputs[0]!.id).not.toBe(inputs[1]!.id);
+  const first = inputs[0]!.getAttribute("aria-describedby")!.split(" ");
+  const second = inputs[1]!.getAttribute("aria-describedby")!.split(" ");
+  for (const id of first) expect(second).not.toContain(id);
+  const described = (el: HTMLElement) =>
+    el
+      .getAttribute("aria-describedby")!
+      .split(" ")
+      .map((id) => document.getElementById(id)?.textContent ?? "")
+      .join(" ");
+  expect(described(inputs[0]!)).toContain("reserved");
+  expect(described(inputs[0]!)).not.toContain("letters, numbers, and underscores only");
+  expect(described(inputs[1]!)).toContain("Use letters, numbers, and underscores only.");
+});
+
+it("account errors use coral text with a decorative icon; success stays calm", () => {
+  const v = render(<HandleField draft="Rowan_Design" message={HANDLE_TAKEN} />);
+  const alert = screen.getByRole("alert");
+  expect(alert.className).toContain("text-coral-cta");
+  expect(alert.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  v.rerender(<HandleField draft="Rowan_Design" message="Changes saved." />);
+  expect(screen.queryByRole("alert")).toBeNull();
+  const status = screen.getByRole("status");
+  expect(status).toHaveTextContent("Changes saved.");
+  expect(status.className).not.toContain("text-coral-cta");
 });
 
 it("handle field previews are inert without handlers", () => {
@@ -87,8 +125,37 @@ it("status panel previews show Ready without Resume and the Blocked design", () 
   expect(
     screen.getByText("Handle checks are paused. People can keep their current handles."),
   ).toBeInTheDocument();
+  expect(screen.getByText(/^Paused since /)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
   expect(screen.queryByText("Handle checks resumed.")).toBeNull();
+});
+
+it("entry errors are coral, iconed, and linked to their fields", () => {
+  render(
+    <SignInPage previewError="We couldn't sign you in. Check your email and password and try again." />,
+  );
+  const alert = screen.getByRole("alert");
+  expect(alert.className).toContain("text-coral-cta");
+  expect(alert.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  for (const label of ["Email", "Password"]) {
+    expect(screen.getByLabelText(label).getAttribute("aria-describedby")).toContain(alert.id);
+  }
+});
+
+it("two entry forms on one page keep their own field ids", () => {
+  render(
+    <>
+      <SignUpPage previewError="Please choose a stronger password with at least 8 characters." />
+      <SignUpPage previewError="This password has appeared in a data breach. Please choose a different password." />
+    </>,
+  );
+  const emails = screen.getAllByLabelText("Email");
+  const passwords = screen.getAllByLabelText("Password");
+  expect(emails[0]!.id).not.toBe(emails[1]!.id);
+  expect(passwords[0]!.id).not.toBe(passwords[1]!.id);
+  expect(emails[0]!.getAttribute("aria-describedby")).not.toBe(
+    emails[1]!.getAttribute("aria-describedby"),
+  );
 });
 
 it("the previews page renders every account state section", () => {
@@ -109,7 +176,7 @@ it("the previews page renders every account state section", () => {
     expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
   }
   expect(screen.getByRole("heading", { name: "Sign in, wrong password" })).toBeInTheDocument();
-  expect(screen.getAllByRole("alert").length).toBe(4);
+  expect(screen.getAllByRole("alert").length).toBe(9);
   expect(m.signIn).not.toHaveBeenCalled();
   expect(m.signUp).not.toHaveBeenCalled();
 });

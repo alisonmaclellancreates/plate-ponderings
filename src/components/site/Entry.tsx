@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import { PlateHeader } from "@/components/site/AddStory";
 import { DEMO_SEES } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
@@ -40,22 +40,27 @@ function EntryShell({
   );
 }
 
-function PasswordField({ hint }: { hint?: string }) {
+function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: string | undefined }) {
   const [shown, setShown] = useState(false);
+  const uid = useId();
+  const id = `password-${uid}`;
+  const hintId = `password-hint-${uid}`;
   return (
     <div>
-      <label htmlFor="password" className="mb-1 block font-semibold">
+      <label htmlFor={id} className="mb-1 block font-semibold">
         Password
       </label>
       <div className="relative">
         <input
-          id="password"
+          id={id}
           name="password"
           required
           minLength={hint ? 8 : undefined}
           type={shown ? "text" : "password"}
           autoComplete={hint ? "new-password" : "current-password"}
-          aria-describedby={hint ? "password-hint" : undefined}
+          aria-describedby={
+            [hint ? hintId : "", describedBy ?? ""].filter(Boolean).join(" ") || undefined
+          }
           className={`${field} pr-12`}
         />
         <button
@@ -73,7 +78,7 @@ function PasswordField({ hint }: { hint?: string }) {
         </button>
       </div>
       {hint && (
-        <p id="password-hint" className="mt-1 text-sm text-muted-foreground">
+        <p id={hintId} className="mt-1 text-sm text-muted-foreground">
           {hint}
         </p>
       )}
@@ -81,14 +86,34 @@ function PasswordField({ hint }: { hint?: string }) {
   );
 }
 
-function EmailField() {
+function EmailField({ describedBy }: { describedBy?: string | undefined }) {
+  const uid = useId();
+  const id = `email-${uid}`;
   return (
     <div>
-      <label htmlFor="email" className="mb-1 block font-semibold">
+      <label htmlFor={id} className="mb-1 block font-semibold">
         Email
       </label>
-      <input id="email" name="email" required type="email" autoComplete="email" className={field} />
+      <input
+        id={id}
+        name="email"
+        required
+        type="email"
+        autoComplete="email"
+        aria-describedby={describedBy}
+        className={field}
+      />
     </div>
+  );
+}
+
+/** Account error: coral text with a decorative warning icon, announced on appear. */
+function FormError({ id, children }: { id: string; children: ReactNode }) {
+  return (
+    <p id={id} role="alert" className="flex items-start gap-1.5 text-coral-cta">
+      <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+      {children}
+    </p>
   );
 }
 
@@ -151,11 +176,13 @@ const inertSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 };
 
 export function SignInForm({ busy, error, submit }: EntryFormProps) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <form className="space-y-4" onSubmit={submit}>
-      <EmailField />
-      <PasswordField />
-      {error && <p role="alert">{error}</p>}
+      <EmailField describedBy={describedBy} />
+      <PasswordField describedBy={describedBy} />
+      {error && <FormError id={errorId}>{error}</FormError>}
       <Button type="submit" disabled={busy} className="brand-btn brand-btn-navy w-full">
         Sign In
       </Button>
@@ -164,11 +191,13 @@ export function SignInForm({ busy, error, submit }: EntryFormProps) {
 }
 
 export function SignUpForm({ busy, error, submit }: EntryFormProps) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <form className="space-y-4" onSubmit={submit}>
-      <EmailField />
-      <PasswordField hint="Use at least 8 characters" />
-      {error && <p role="alert">{error}</p>}
+      <EmailField describedBy={describedBy} />
+      <PasswordField hint="Use at least 8 characters" describedBy={describedBy} />
+      {error && <FormError id={errorId}>{error}</FormError>}
       <Button type="submit" disabled={busy} className="brand-btn brand-btn-coral w-full">
         Create Account
       </Button>

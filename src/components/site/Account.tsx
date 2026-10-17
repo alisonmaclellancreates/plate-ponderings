@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, ChevronRight, UserCircle2 } from "lucide-react";
+import { CheckCircle2, TriangleAlert, ChevronRight, UserCircle2 } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ModerationBadge } from "@/components/site/Badges";
 import { ScenicHeader } from "@/components/site/SpotPlate";
 import { StoryCard } from "@/components/site/PlateDetail";
 import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
 import { formatDay } from "@/lib/format-day";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAccountAuth } from "@/lib/account-auth";
 import { checkHandle, saveHandle } from "@/lib/accounts.functions";
@@ -135,6 +135,19 @@ export function HandleField({
   onDraftChange?: (value: string) => void;
   onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
 }) {
+  const uid = useId();
+  const inputId = `handle-${uid}`;
+  const statusId = `handle-status-${uid}`;
+  const helpId = `handle-help-${uid}`;
+  const messageId = `handle-message-${uid}`;
+  const success = message === "Changes saved." ? message : "";
+  const serverError = message && !success ? message : "";
+  const validationError =
+    !isDemo && !available && !handleFormatValid(draft) ? handleValidationMessage(draft) : "";
+  const error = serverError || validationError;
+  const describedBy = [available || isDemo ? statusId : "", error ? messageId : "", helpId]
+    .filter(Boolean)
+    .join(" ");
   return (
     <form
       className="min-w-0 flex-1 space-y-2"
@@ -143,35 +156,36 @@ export function HandleField({
         onSubmit?.(e);
       }}
     >
-      <label htmlFor="handle" className="block font-semibold text-navy">
+      <label htmlFor={inputId} className="block font-semibold text-navy">
         Handle
       </label>
-      <div className="grid min-w-0 grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <input
-          id="handle"
-          name="handle"
-          value={draft}
-          onChange={(e) => onDraftChange?.(e.target.value)}
-          disabled={busy || isDemo}
-          aria-describedby={
-            available || isDemo || !handleFormatValid(draft)
-              ? "handle-status handle-help"
-              : "handle-help"
-          }
-          className="w-full min-w-0 rounded-md border border-border bg-card px-3 py-2"
-        />
-        {available ? (
-          <span id="handle-status" className="brand-badge w-fit" data-tone="green">
-            <CheckCircle2 aria-hidden className="size-4 shrink-0" />
-            Available
-          </span>
-        ) : (
-          <span id="handle-status" className="min-w-0 text-sm text-muted-foreground sm:max-w-48">
-            {isDemo ? DEMO_MESSAGE : handleFormatValid(draft) ? "" : handleValidationMessage(draft)}
-          </span>
-        )}
-      </div>
-      <p id="handle-help" className="text-sm text-muted-foreground">
+      <input
+        id={inputId}
+        name="handle"
+        value={draft}
+        onChange={(e) => onDraftChange?.(e.target.value)}
+        disabled={busy || isDemo}
+        aria-describedby={describedBy}
+        className="w-full min-w-0 rounded-md border border-border bg-card px-3 py-2"
+      />
+      {available && (
+        <span id={statusId} className="brand-badge w-fit" data-tone="green">
+          <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+          Available
+        </span>
+      )}
+      {isDemo && (
+        <p id={statusId} className="text-sm text-muted-foreground">
+          {DEMO_MESSAGE}
+        </p>
+      )}
+      {error && (
+        <p id={messageId} role="alert" className="flex items-start gap-1.5 text-coral-cta">
+          <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {error}
+        </p>
+      )}
+      <p id={helpId} className="text-sm text-muted-foreground">
         {HANDLE_HELP}
       </p>
       <div className="pt-2">
@@ -179,7 +193,7 @@ export function HandleField({
           Save Changes
         </Button>
       </div>
-      {message && <p role="status">{message}</p>}
+      {success && <p role="status">{success}</p>}
     </form>
   );
 }
