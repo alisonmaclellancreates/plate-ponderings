@@ -4,7 +4,7 @@ import { SignInPage, SignUpPage } from "@/components/site/Entry";
 import { HandleCheckStatusPanel } from "@/components/site/HandleCheckStatus";
 import { HANDLE_REJECTED, HANDLE_TAKEN } from "@/lib/account-rules";
 
-export const Route = createFileRoute("/previews/account")({
+export const Route = createFileRoute("/previews_/account")({
   head: () => ({
     meta: [
       { title: "Account previews | What the Plate?" },
