@@ -5,6 +5,10 @@ import { CURRENT_USER } from "@/lib/mock-data";
 import type { HeaderMode } from "@/lib/header-mode";
 import { useAccountAuth } from "@/lib/account-auth";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getUnreadDot } from "@/lib/submissions.functions";
+import { UNREAD_DOT_KEY } from "@/lib/submissions-queries";
 
 // Explore, Spot a Plate and About are built in later steps; plain anchors until then.
 const NAV = [
@@ -16,14 +20,24 @@ const NAV = [
 function Avatar({
   showHandle,
   handle = CURRENT_USER.handle,
+  dot = false,
 }: {
   showHandle: boolean;
   handle?: string;
+  dot?: boolean;
 }) {
   return (
     <span className="flex min-w-0 items-center gap-2">
       <span className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-cream text-navy">
         <UserRound aria-hidden className="size-5" />
+        {dot && (
+          <span
+            data-testid="unread-dot"
+            className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-cream bg-coral-cta"
+          >
+            <span className="sr-only">New updates</span>
+          </span>
+        )}
       </span>
       <span
         className={showHandle ? "font-semibold" : "max-w-20 truncate font-semibold"}
@@ -84,6 +98,13 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
   const auth = useAccountAuth();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const fetchDot = useServerFn(getUnreadDot);
+  const signedIn = Boolean(auth?.account);
+  const dot = useQuery({
+    queryKey: UNREAD_DOT_KEY,
+    queryFn: () => fetchDot(),
+    enabled: signedIn,
+  });
   if (!auth?.account) return null;
   return (
     <div className="relative">
@@ -94,7 +115,7 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <Avatar showHandle={showHandle} handle={auth.account.handle} />
+        <Avatar showHandle={showHandle} handle={auth.account.handle} dot={dot.data?.unread === true} />
       </Button>
       {open && (
         <ul

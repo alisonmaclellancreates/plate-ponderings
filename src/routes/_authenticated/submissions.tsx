@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SubmissionsPage } from "@/components/site/Account";
+import { LiveSubmissions } from "@/components/site/LiveSubmissions";
 
 const TITLE = "Your Submissions | What the Plate?";
 const DESCRIPTION = "The plates you've spotted and the stories you've shared.";
@@ -15,5 +15,5 @@ export const Route = createFileRoute("/_authenticated/submissions")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <SubmissionsPage />,
+  component: () => <LiveSubmissions />,
 });
