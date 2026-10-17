@@ -2,9 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
-const demo = vi.hoisted(() => ({ begin: vi.fn(), setSession: vi.fn(), refresh: vi.fn(), navigate: vi.fn(), track: vi.fn() }));
+const demo = vi.hoisted(() => ({
+  begin: vi.fn(),
+  setSession: vi.fn(),
+  refresh: vi.fn(),
+  navigate: vi.fn(),
+  track: vi.fn(),
+}));
 vi.mock("@/lib/demo-login.functions", () => ({ startDemo: demo.begin }));
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { setSession: demo.setSession } } }));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { auth: { setSession: demo.setSession } },
+}));
 vi.mock("@/lib/analytics", () => ({ track: demo.track }));
 vi.mock("@tanstack/react-router", () => ({
   useRouterState: () => "/",
@@ -44,7 +52,10 @@ import { DemoPage, SignInPage, SignUpPage } from "@/components/site/Entry";
 
 beforeEach(() => {
   vi.resetAllMocks();
-  demo.begin.mockResolvedValue({ access_token: "fixture-access", refresh_token: "fixture-refresh" });
+  demo.begin.mockResolvedValue({
+    access_token: "fixture-access",
+    refresh_token: "fixture-refresh",
+  });
   demo.setSession.mockResolvedValue({ error: null });
 });
 
@@ -89,29 +100,47 @@ describe("entry screens", () => {
 
   it("starts the demo, installs the session and leaves the entry screen for home", async () => {
     let finish: ((value: { access_token: string; refresh_token: string }) => void) | undefined;
-    demo.begin.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
-    demo.navigate.mockImplementation(async () => { screen.getByRole("main").textContent = "Demo home"; });
+    demo.begin.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    demo.navigate.mockImplementation(async () => {
+      screen.getByRole("main").textContent = "Demo home";
+    });
     render(<DemoPage />);
     fireEvent.click(screen.getByRole("button", { name: "Start the Demo" }));
     expect(screen.getByRole("button", { name: "Starting the Demo…" })).toBeDisabled();
     finish?.({ access_token: "fixture-access", refresh_token: "fixture-refresh" });
     await waitFor(() => expect(screen.getByRole("main")).toHaveTextContent("Demo home"));
-    expect(demo.setSession).toHaveBeenCalledWith({ access_token: "fixture-access", refresh_token: "fixture-refresh" });
+    expect(demo.setSession).toHaveBeenCalledWith({
+      access_token: "fixture-access",
+      refresh_token: "fixture-refresh",
+    });
     expect(demo.refresh).toHaveBeenCalledOnce();
     expect(demo.track).toHaveBeenCalledWith("demo_started", {});
     expect(demo.navigate).toHaveBeenCalledWith({ to: "/" });
   });
 
-  it.each(["mode off", "server refusal", "network failure", "session refusal"])("shows a retryable visible result for %s", async (failure) => {
-    if (failure === "session refusal") demo.setSession.mockResolvedValue({ error: new Error("Session rejected") });
-    else demo.begin.mockRejectedValue(failure === "network failure" ? new TypeError("Failed to fetch") : new Error(failure));
-    render(<DemoPage />);
-    fireEvent.click(screen.getByRole("button", { name: "Start the Demo" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("The demo is not available right now. Please try again soon.");
-    expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
-    expect(demo.refresh).not.toHaveBeenCalled();
-    expect(demo.track).not.toHaveBeenCalled();
-    expect(demo.navigate).not.toHaveBeenCalled();
-    if (failure !== "session refusal") expect(demo.setSession).not.toHaveBeenCalled();
-  });
+  it.each(["mode off", "server refusal", "network failure", "session refusal"])(
+    "shows a retryable visible result for %s",
+    async (failure) => {
+      if (failure === "session refusal")
+        demo.setSession.mockResolvedValue({ error: new Error("Session rejected") });
+      else
+        demo.begin.mockRejectedValue(
+          failure === "network failure" ? new TypeError("Failed to fetch") : new Error(failure),
+        );
+      render(<DemoPage />);
+      fireEvent.click(screen.getByRole("button", { name: "Start the Demo" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "The demo is not available right now. Please try again soon.",
+      );
+      expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
+      expect(demo.refresh).not.toHaveBeenCalled();
+      expect(demo.track).not.toHaveBeenCalled();
+      expect(demo.navigate).not.toHaveBeenCalled();
+      if (failure !== "session refusal") expect(demo.setSession).not.toHaveBeenCalled();
+    },
+  );
 });
