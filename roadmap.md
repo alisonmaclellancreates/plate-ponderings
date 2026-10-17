@@ -1,7 +1,7 @@
 # PR #113 Copilot follow-ups
 
 - [x] Stage exact 0017 SQL in docs/proposed-migrations (managed migration directory cannot be written without applying); add index-existence assertion. 0016 untouched.
-- [ ] Apply approved 0017 using the staged SQL unchanged, confirm numbering, and run the rollback-only database test.
+- [x] Applied approved statement as drizzle/migrations/0017_step49_photo_detect_attempts_index.sql (managed file adds trailing newline only). Database test passed, btree (user_id, attempted_at) verified, zero test attempts left.
 - [x] Stop local coverage runs going forward; only the PR Codecov figure is authoritative, per Alison's 19:27 UTC instruction.
 - [x] Release confirmed-photo preview URLs on removal/replacement, no-save submission and unmount; test each lifecycle. Review/back keeps the active URL alive.
 - [x] Requested related tests: 66 passed across 7 files. Local AddStoryFlow coverage 100% in all metrics. Lint zero errors/six existing warnings. Build OK. Replied to both Copilot comments.

@@ -10,9 +10,9 @@ CREATE INDEX IF NOT EXISTS photo_detect_attempts_user_time ON public.photo_detec
 
 ## Approval boundary
 
-The exact SQL is staged at `docs/proposed-migrations/0017_step49_photo_detect_attempts_index.sql`. The managed migration directory is read-only; the migration tool creates the numbered file and applies its SQL together. Neither action has run. Approval is required before creating/applying 0017.
+Alison approved at 19:27 UTC. The migration tool applied the exact proposed statement as `drizzle/migrations/0017_step49_photo_detect_attempts_index.sql`; the managed file adds only a trailing newline. Database readback confirms btree `(user_id, attempted_at)`.
 
-After approval, submit the staged SQL unchanged through the migration tool with name `step49_photo_detect_attempts_index`, confirm the resulting migration is 0017, then run `tests/db/photo-detect-attempts.sql` with its new index-existence assertion. Its rollback-only fixtures must leave no data behind.
+`tests/db/photo-detect-attempts.sql` passed through the privileged database tool, including the new index-existence assertion. Readback confirms zero remaining test attempts. No further local coverage runs, per Alison's instruction.
 
 ## Already completed
 
