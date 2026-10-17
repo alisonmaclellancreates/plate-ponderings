@@ -47,9 +47,11 @@ export interface SearchValues {
 function SearchCard({
   values,
   onNoMatch,
+  onSearchError,
 }: {
   values: SearchValues;
   onNoMatch: (values: Required<SearchValues>) => void;
+  onSearchError: (message: string | null) => void;
 }) {
   const [jurisdiction, setJurisdiction] = useState(values.jurisdiction ?? "");
   const [text, setText] = useState(values.text ?? "");
@@ -205,10 +207,14 @@ function Hero({
   search,
   noMatch,
   onNoMatch,
+  searchError,
+  onSearchError,
 }: {
   search: SearchValues;
   noMatch: Required<SearchValues> | null;
   onNoMatch: (values: Required<SearchValues>) => void;
+  searchError: string | null;
+  onSearchError: (message: string | null) => void;
 }) {
   return (
     <section aria-label="Welcome" className="grid">
@@ -226,7 +232,12 @@ function Hero({
           <Headline />
           <p className="mt-3 max-w-md text-lg">{INTRO}</p>
           <div className="mt-6">
-            <SearchCard values={search} onNoMatch={onNoMatch} />
+            <SearchCard values={search} onNoMatch={onNoMatch} onSearchError={onSearchError} />
+            {searchError && (
+              <p role="alert" className="mt-4 text-sm font-semibold text-coral-cta">
+                {searchError}
+              </p>
+            )}
             {noMatch && <NoMatchPanel values={noMatch} />}
           </div>
         </div>
