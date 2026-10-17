@@ -18,6 +18,7 @@ No change to `stories`: `photo_path` already exists.
 - `src/lib/photo-detect.server.ts`: sends a downscaled copy (longest side about 1024 px, EXIF rotation applied, produced in the browser from the same decoded image the canvas uses) to the Lovable AI gateway with a vision-capable model, asking only for the plate box as fractions of width/height, or "none". Same gateway/block handling as `checkStory`; the shared AI pause applies. Image bytes live only in the request body; nothing is written to storage or logs.
 - `detectPlateBox` server function: `requireSupabaseAuth`, refuses demo, validates input (data URL, JPEG/PNG/WebP, size cap), checks the shared AI pause, consumes a detect attempt (shared rate-limit copy), returns `{ box: {x,y,w,h} | null }` or `unavailable`.
 - **Detection is a shortcut, never a gate.** When `detectPlateBox` returns `unavailable`, is rate-limited, or the shared AI pause is on, the editor goes straight to the draw-a-box path with the brief's "no box found" message ("We couldn't find the plate in this photo. Draw a box around it to keep it clear."), exactly as when the AI returns "none". The photo flow never blocks on detection.
+- **Safe before the migration lands.** If `consume_photo_detect_attempt` errors for any reason, including the function not existing yet on a database without this migration, `detectPlateBox` returns `unavailable` and the editor takes the same draw-a-box path. No hard failure. Tested.
 - `uploadStoryPhoto` server function: `requireSupabaseAuth`, refuses demo. Receives the processed JPEG, verifies it is a JPEG, under a size cap, and at most 1600 px on its longest side (decoded and measured server-side), then stores it in the caller's own folder (`{userId}/{uuid}.jpg`) with the admin client. Returns the stored path.
 - `addStory` accepts optional `photoPath`, checks the path is in the caller's own folder, and **deletes the uploaded photo for every outcome that saves no story**: rejected, rate-limited, validation, error, demo. Pending and published keep it.
 - `getPlateStories` returns a short-lived signed URL per published `photo_path` (server-side, ~15 min expiry). Step 48 block-filtering unchanged.
@@ -44,7 +45,7 @@ I will report whether adding the processed photo to the existing story check is 
 ## Tests
 
 - `photo-blur.ts`: box maths including a rotated (EXIF) image, clamp, min size, drag-draw, export size cap (mock canvas).
-- `detectPlateBox`: input validation, demo refusal, rate limit, AI pause, box-or-none mapping (AI mocked).
+- `detectPlateBox`: input validation, demo refusal, rate limit, AI pause, box-or-none mapping (AI mocked), and `consume_photo_detect_attempt` erroring (including not existing) returning `unavailable`.
 - `uploadStoryPhoto`: JPEG/type/size/dimension checks, own-folder path, demo refusal.
 - `addStory`: photoPath ownership check; photo deleted on rejected, rate-limited, validation, error and demo outcomes.
 - `getPlateStories`: signed URL only for published stories with photos.
