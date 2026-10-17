@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
@@ -27,7 +27,7 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
-import { SpotOutcomePage, SpotPage } from "@/components/site/SpotPlate";
+import { SpotForm, SpotOutcomePage, SpotPage } from "@/components/site/SpotPlate";
 import {
   JURISDICTION_ERROR,
   SPOT_OUTCOMES,
@@ -40,6 +40,24 @@ const buttons = () =>
   [...document.querySelectorAll("main a, main button")].map((b) => b.textContent);
 
 describe("Spot a Plate form", () => {
+  it.each([{ busy: true }, { isDemo: true }])("refuses submitted forms when %j", (props) => {
+    const onSpot = vi.fn();
+    render(
+      <SpotForm {...props} values={{ jurisdiction: "Utah", text: "DRAGON" }} onSpot={onSpot} />,
+    );
+    fireEvent.submit(screen.getByRole("form", { name: "Tell us the plate" }));
+    expect(onSpot).not.toHaveBeenCalled();
+  });
+  it("validates missing form controls as empty instead of submitting", () => {
+    const onSpot = vi.fn();
+    render(<SpotForm onSpot={onSpot} />);
+    screen.getByLabelText("State or Province").removeAttribute("name");
+    screen.getByLabelText("Plate text").removeAttribute("name");
+    fireEvent.submit(screen.getByRole("form", { name: "Tell us the plate" }));
+    expect(screen.getByText(JURISDICTION_ERROR)).toBeInTheDocument();
+    expect(screen.getByText(TEXT_EMPTY_ERROR)).toBeInTheDocument();
+    expect(onSpot).not.toHaveBeenCalled();
+  });
   it("shows the sign, labelled fields, coral button and next steps", () => {
     render(<SpotPage />);
     expect(screen.getByTestId("sign").textContent).toContain("Spot a Plate");
@@ -88,6 +106,29 @@ describe("Spot outcome previews", () => {
       "href",
       "/spot",
     );
+  });
+
+  it("attributes the owner story in the existing-plate preview", async () => {
+    const { PLATES } = await import("@/lib/mock-data");
+    const plate = PLATES.find((record) => record.slug === "bc-lv2code");
+    const story = plate?.stories[0];
+    if (!plate || !story) throw new Error("Existing plate fixture missing");
+    const find = vi.spyOn(PLATES, "find").mockReturnValue({
+      ...plate,
+      stories: plate.stories.map((entry, index) =>
+        index === 0 ? { ...entry, howIKnow: "owner" } : entry,
+      ),
+    });
+    try {
+      render(<SpotOutcomePage outcome="exists" />);
+      expect(
+        within(screen.getByRole("list", { name: "Plate status" })).getByText(
+          `Owner: ${story.handle}`,
+        ),
+      ).toBeInTheDocument();
+    } finally {
+      find.mockRestore();
+    }
   });
 
   it("new shows B7K2L9 with coral and outline buttons", () => {
@@ -208,6 +249,39 @@ async function fillAndSpot(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("Spot a Plate live flow", () => {
+  it("announces checking until the request resolves", async () => {
+    let finish: ((result: { outcome: "pending" }) => void) | undefined;
+    live.spot.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    render(<SpotLivePage values={{ jurisdiction: "Utah", text: "DRAGON" }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Check This Plate" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Just a moment while we look.");
+    expect(screen.queryByRole("button", { name: "Check This Plate" })).not.toBeInTheDocument();
+    await act(async () => {
+      finish?.({ outcome: "pending" });
+    });
+    expect(screen.getByRole("link", { name: "Go to Your Submissions" })).toBeInTheDocument();
+  });
+  it("uses the returned real plate id for an existing plate", async () => {
+    live.spot.mockResolvedValueOnce({
+      outcome: "exists",
+      plate: { id: "real-plate", jurisdiction: "Utah", text: "DRAGON" },
+    });
+    render(<SpotLivePage />);
+    await fillAndSpot(userEvent.setup());
+    expect(screen.getByRole("link", { name: "View This Plate" })).toHaveAttribute(
+      "href",
+      "/plate/real-plate",
+    );
+    expect(screen.getByText("DRAGON")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Spot Another Plate" })).toHaveAttribute(
+      "href",
+      "/spot",
+    );
+  });
   it("turns a rate-limited response into a pause, not a failed check", async () => {
     live.spot.mockResolvedValue({
       outcome: "rate-limited",

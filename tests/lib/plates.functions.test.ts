@@ -101,6 +101,23 @@ beforeEach(() => {
 });
 
 describe("searchPlate", () => {
+  it("normalizes non-string input before validation", async () => {
+    expect(await call(searchPlate, { jurisdiction: 42, text: null })).toEqual({
+      status: "no-match",
+    });
+    expect(mocks.admin.from).not.toHaveBeenCalled();
+  });
+  it("distinguishes a jurisdiction database failure from a missing plate", async () => {
+    tables["jurisdictions"] = { data: null, error: { message: "offline" } };
+    expect(await call(searchPlate)).toEqual({ status: "error" });
+  });
+  it("uses the jurisdiction code when the optional join is absent", async () => {
+    tables["subjects"] = { data: { ...PUBLISHED.data, jurisdictions: null }, error: null };
+    expect(await call(searchPlate)).toEqual({
+      status: "found",
+      plate: { id: "plate-1", jurisdiction: "US-WA", text: "B7K2L9" },
+    });
+  });
   it("returns only the fields the page needs, never created_by", async () => {
     tables["subjects"] = PUBLISHED;
     const result = await call(searchPlate);
@@ -126,6 +143,14 @@ describe("searchPlate", () => {
 });
 
 describe("getPlate", () => {
+  it("sanitizes non-string ids and falls back to the jurisdiction code", async () => {
+    const query = chain({ data: { ...PUBLISHED.data, jurisdictions: null }, error: null });
+    mocks.admin.from.mockReturnValue(query);
+    expect(await call(getPlate, { id: 42 })).toEqual({
+      plate: { id: "plate-1", jurisdiction: "US-WA", text: "B7K2L9" },
+    });
+    expect(query["eq"]).toHaveBeenCalledWith("id", "");
+  });
   it("returns a published plate or null", async () => {
     tables["subjects"] = PUBLISHED;
     expect(await call(getPlate, { id: "plate-1" })).toEqual({
@@ -139,6 +164,82 @@ describe("getPlate", () => {
 });
 
 describe("spotPlate", () => {
+  it("refuses failed role checks and invalid input before database access", async () => {
+    context.supabase.rpc.mockResolvedValueOnce({ data: false, error: { message: "offline" } });
+    expect(await call(spotPlate)).toEqual({ outcome: "error" });
+    expect(await call(spotPlate, { jurisdiction: null, text: 42 })).toEqual({
+      outcome: "validation",
+    });
+    expect(mocks.admin.from).not.toHaveBeenCalled();
+  });
+  it.each([null, { message: "offline" }])(
+    "refuses a failed jurisdiction lookup (%j)",
+    async (error) => {
+      tables["jurisdictions"] = { data: null, error };
+      expect(await call(spotPlate)).toEqual({ outcome: "error" });
+      expect(mocks.admin.rpc).not.toHaveBeenCalled();
+    },
+  );
+  it("refuses a failed existing-plate lookup without consuming an attempt", async () => {
+    tables["subjects"] = { data: null, error: { message: "offline" } };
+    expect(await call(spotPlate)).toEqual({ outcome: "error" });
+    expect(mocks.admin.rpc).not.toHaveBeenCalled();
+  });
+  it("falls back to the jurisdiction code on an existing published plate", async () => {
+    tables["subjects"] = { data: { ...PUBLISHED.data, jurisdictions: null }, error: null };
+    expect(await call(spotPlate)).toEqual({
+      outcome: "exists",
+      plate: { id: "plate-1", jurisdiction: "US-WA", text: "B7K2L9" },
+    });
+  });
+  it("stops before AI or insertion when the attempt or block read fails", async () => {
+    mocks.admin.rpc.mockResolvedValueOnce({ data: null, error: { message: "offline" } });
+    expect(await call(spotPlate)).toEqual({ outcome: "error" });
+    mocks.readBlock.mockResolvedValue(null);
+    expect(await call(spotPlate)).toEqual({ outcome: "error" });
+    expect(mocks.check).not.toHaveBeenCalled();
+  });
+  it.each(["approved", "unavailable"])(
+    "reports a non-unique insert failure after %s",
+    async (outcome) => {
+      mocks.check.mockResolvedValue({ outcome, block: null });
+      insertResult = { data: null, error: { code: "XX000" } };
+      expect(await call(spotPlate)).toEqual({ outcome: "error" });
+    },
+  );
+  describe.each(["approved", "unavailable"])("unique conflict after %s", (outcome) => {
+    it.each([
+      [PUBLISHED, "exists"],
+      [
+        { data: { ...PUBLISHED.data, status: "pending", created_by: "caller" }, error: null },
+        "pending",
+      ],
+      [
+        { data: { ...PUBLISHED.data, status: "pending", created_by: "other" }, error: null },
+        "already-spotted",
+      ],
+      [{ data: null, error: null }, "error"],
+      [{ data: null, error: { message: "offline" } }, "error"],
+    ])("returns the re-read outcome %s → %s", async (reread, expected) => {
+      mocks.check.mockResolvedValue({ outcome, block: null });
+      let reads = 0;
+      const insert = vi.fn(() => chain({ data: null, error: { code: "23505" } }));
+      mocks.admin.from.mockImplementation((table: string) => {
+        if (table !== "subjects") return chain(tables[table] ?? { data: null, error: null });
+        const query = chain({ data: null, error: null });
+        query["maybeSingle"] = vi.fn(async () =>
+          ++reads === 1 ? { data: null, error: null } : reread,
+        );
+        query["insert"] = insert;
+        return query;
+      });
+      const result = await call(spotPlate);
+      expect(result["outcome"]).toBe(expected);
+      expect(reads).toBe(2);
+      expect(insert).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(result)).not.toContain("created_by");
+    });
+  });
   it("refuses the demo account before any write", async () => {
     context.supabase.rpc.mockResolvedValue({ data: true, error: null });
     expect((await call(spotPlate))["outcome"]).toBe("demo");
@@ -216,6 +317,72 @@ describe("recheckPendingSubjects", () => {
     identity_b: "B7K2L9",
     jurisdictions: { name: "Washington" },
   };
+  it("does nothing when the role or profile read fails", async () => {
+    context.supabase.rpc.mockResolvedValueOnce({ data: false, error: { message: "offline" } });
+    expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+    context.supabase.from.mockReturnValue(chain({ data: null, error: { message: "offline" } }));
+    expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+    expect(mocks.admin.from).not.toHaveBeenCalled();
+  });
+  it("does nothing when the AI block read fails", async () => {
+    mocks.readBlock.mockResolvedValue(null);
+    expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+    expect(mocks.admin.from).not.toHaveBeenCalled();
+    expect(mocks.check).not.toHaveBeenCalled();
+  });
+  it("does not check when the throttle timestamp cannot be saved", async () => {
+    mocks.admin.from.mockReturnValue(chain({ data: null, error: { message: "offline" } }));
+    expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+    expect(mocks.admin.from).toHaveBeenCalledTimes(1);
+    expect(mocks.check).not.toHaveBeenCalled();
+  });
+  it.each([
+    { data: [], error: null },
+    { data: null, error: { message: "offline" } },
+  ])("skips an empty or failed pending read (%j)", async (result) => {
+    tables["subjects"] = result;
+    expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+    expect(mocks.check).not.toHaveBeenCalled();
+  });
+  it.each([null, "provider_access_denied"])(
+    "stops on unavailable with block %s after completed work",
+    async (block) => {
+      const updates = vi.fn(() => chain({ data: null, error: null }));
+      const notifications = vi.fn(() => chain({ data: null, error: null }));
+      mocks.admin.from.mockImplementation((table: string) => {
+        const c = chain(
+          table === "subjects"
+            ? {
+                data: [
+                  { ...pendingRow, jurisdictions: null },
+                  { ...pendingRow, id: "subj-2" },
+                  { ...pendingRow, id: "subj-3" },
+                ],
+                error: null,
+              }
+            : { data: null, error: null },
+        );
+        if (table === "subjects") c["update"] = updates;
+        if (table === "notifications") c["insert"] = notifications;
+        return c;
+      });
+      mocks.check
+        .mockResolvedValueOnce({ outcome: "approved", block: null })
+        .mockResolvedValueOnce({ outcome: "unavailable", block, runId: "r" });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(mocks.check).toHaveBeenCalledTimes(2);
+      expect(mocks.check).toHaveBeenNthCalledWith(1, "US-WA", "B7K2L9");
+      expect(updates).toHaveBeenCalledTimes(1);
+      expect(notifications).toHaveBeenCalledTimes(1);
+      expect(notifications).toHaveBeenCalledWith({
+        user_id: "caller",
+        kind: "subject_published",
+        subject_id: "subj-1",
+      });
+      if (block) expect(mocks.persistBlock).toHaveBeenCalledWith(mocks.admin, block, "r");
+      else expect(mocks.persistBlock).not.toHaveBeenCalled();
+    },
+  );
   it("does nothing for the demo account", async () => {
     context.supabase.rpc.mockResolvedValue({ data: true, error: null });
     expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });

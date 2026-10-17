@@ -1,5 +1,5 @@
 import { expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { QueryClient } from "@tanstack/react-query";
 import { createMemoryHistory, createRouter } from "@tanstack/react-router";
 import type { ComponentType, ReactNode } from "react";
@@ -57,4 +57,27 @@ it("renders the account previews gallery with its heading", async () => {
   render(<Page />);
   expect(await screen.findByRole("heading", { name: "Account previews" })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "AI check status, Blocked" })).toBeInTheDocument();
+});
+
+it("refuses preview form submissions without making authentication calls", async () => {
+  const router = routerAt("/previews/account");
+  await router.load();
+  const route = router.routesById["/previews_/account"];
+  const Page = route.options.component as ComponentType;
+  render(<Page />);
+  for (const title of [
+    "Sign in, wrong password",
+    "Sign up, email already has an account",
+    "Sign up, weak password",
+    "Sign up, breached password",
+  ]) {
+    const section = screen.getByRole("region", { name: title });
+    const button = within(section).getByRole("button", { name: /Sign In|Create Account/ });
+    const form = button.closest("form");
+    if (!form) throw new Error("Preview form missing");
+    expect(fireEvent.submit(form)).toBe(false);
+  }
+  const { supabase } = await import("@/integrations/supabase/client");
+  expect(supabase.auth.signUp).not.toHaveBeenCalled();
+  expect(supabase.auth.signInWithPassword).not.toHaveBeenCalled();
 });
