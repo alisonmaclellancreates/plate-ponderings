@@ -22,3 +22,6 @@ BEGIN
   INSERT INTO public.photo_detect_attempts (user_id, attempted_at) VALUES (_user_id, clock_timestamp());
   RETURN true;
 END $function$;
+
+REVOKE ALL ON FUNCTION public.consume_photo_detect_attempt(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.consume_photo_detect_attempt(uuid) TO service_role;
