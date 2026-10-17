@@ -13,6 +13,7 @@ export const EVENTS = {
   subject_spotted: ["outcome"],
   story_started: [],
   story_submitted: ["source", "has_more_text", "outcome"],
+  summary_history_opened: ["versions_shown"],
 } as const;
 
 type EventRegistry = Readonly<Record<string, readonly string[]>>;
