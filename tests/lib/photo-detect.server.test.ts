@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 
 const m = vi.hoisted(() => ({
   streamText: vi.fn(),
