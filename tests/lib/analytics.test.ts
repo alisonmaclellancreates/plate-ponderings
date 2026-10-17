@@ -21,6 +21,15 @@ afterEach(() => {
 });
 
 describe("analytics", () => {
+  it("account events carry no email, handle, password or moderation output", async () => {
+    const analytics = await import("@/lib/analytics");
+    for (const event of ["signed_up", "signed_in", "signed_out", "handle_changed", "handle_rejected"] as const) {
+      await analytics.track(event, { email: "private", handle: "private", password: "private", moderation: "private" });
+      expect(sdk.capture).toHaveBeenLastCalledWith(event, {});
+      const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+      expect(beforeSend({ event, properties: { distinct_id: "id", is_demo: false, email: "private", handle: "private", password: "private", moderation: "private" } })).toEqual({ event, properties: { distinct_id: "id", is_demo: false } });
+    }
+  });
   it("silently does nothing without a key", async () => {
     vi.stubEnv("VITE_POSTHOG_KEY", "");
     const analytics = await import("@/lib/analytics");
