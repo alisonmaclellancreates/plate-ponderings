@@ -241,6 +241,7 @@ vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => live.account }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 
 import { SpotLivePage } from "@/components/site/SpotPlate";
+import { track } from "@/lib/analytics";
 
 async function fillAndSpot(user: ReturnType<typeof userEvent.setup>) {
   await user.selectOptions(screen.getByRole("combobox", { name: "State or Province" }), "Utah");
@@ -293,6 +294,7 @@ describe("Spot a Plate live flow", () => {
     expect(screen.getByRole("link", { name: "Go Back" })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("link", { name: "Try Again" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("sasquatch")).not.toBeInTheDocument();
+    expect(track).toHaveBeenLastCalledWith("subject_spotted", { outcome: "rate_limited" });
   });
   it("shows the checking state, then the new-plate outcome", async () => {
     live.spot.mockResolvedValue({
@@ -309,13 +311,48 @@ describe("Spot a Plate live flow", () => {
     );
   });
 
-  it("keeps the values and shows the already-spotted panel inline", async () => {
+  it("keeps search-prefilled values and shows the already-spotted panel inline", async () => {
     live.spot.mockResolvedValue({ outcome: "already-spotted" });
     const user = userEvent.setup();
     render(<SpotLivePage values={{ jurisdiction: "Utah", text: "DRAGON" }} />);
     await user.click(screen.getByRole("button", { name: "Check This Plate" }));
     expect(await screen.findByText("Someone spotted this one already!")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "State or Province" })).toHaveValue("Utah");
+    expect(screen.getByRole("textbox", { name: /plate text/i })).toHaveValue("DRAGON");
+    expect(screen.getByRole("link", { name: "Back to Search" })).toHaveAttribute(
+      "href",
+      "/?jurisdiction=Utah&text=DRAGON",
+    );
+    expect(track).toHaveBeenLastCalledWith("subject_spotted", { outcome: "already_spotted" });
+  });
+
+  it("shows already-spotted feedback after opening /spot directly", async () => {
+    live.spot.mockResolvedValue({ outcome: "already-spotted" });
+    render(<SpotLivePage />);
+    await fillAndSpot(userEvent.setup());
+    expect(await screen.findByText("Someone spotted this one already!")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "State or Province" })).toHaveValue("Utah");
+    expect(screen.getByRole("textbox", { name: /plate text/i })).toHaveValue("DRAGON");
+    expect(screen.getByRole("link", { name: "Back to Search" })).toHaveAttribute(
+      "href",
+      "/?jurisdiction=Utah&text=DRAGON",
+    );
+  });
+
+  it("uses submitted edits rather than the original search address values", async () => {
+    live.spot.mockResolvedValue({ outcome: "already-spotted" });
+    const user = userEvent.setup();
+    render(<SpotLivePage values={{ jurisdiction: "Oregon", text: "ORIGINAL" }} />);
+    await user.clear(screen.getByRole("textbox", { name: /plate text/i }));
+    await fillAndSpot(user);
+    expect(await screen.findByText("Someone spotted this one already!")).toBeInTheDocument();
+    expect(live.spot).toHaveBeenLastCalledWith({ data: { jurisdiction: "Utah", text: "DRAGON" } });
+    expect(screen.getByRole("combobox", { name: "State or Province" })).toHaveValue("Utah");
+    expect(screen.getByRole("textbox", { name: /plate text/i })).toHaveValue("DRAGON");
+    expect(screen.getByRole("link", { name: "Back to Search" })).toHaveAttribute(
+      "href",
+      "/?jurisdiction=Utah&text=DRAGON",
+    );
   });
 
   it("shows the pending, rejected and error outcomes", async () => {

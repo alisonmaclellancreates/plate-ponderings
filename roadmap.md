@@ -1,5 +1,10 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43: Copilot pending feedback and pause analytics
+
+- [ ] Retain submitted plate values and verify already-spotted feedback for search arrivals and direct /spot submissions, including edits to prefilled values.
+- [ ] Allow and capture subject_spotted outcome rate_limited; run behaviour tests and changed-file lint.
+
 # Step 43: PR #90 coverage correction
 
 - [x] Add real moderation, server error/race/recheck, route and UI edge tests; no production code or branches removed. Force-unavailable switch unset in sandbox and absent from default configuration.
