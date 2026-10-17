@@ -186,6 +186,15 @@ it("admin sees the blocked design and success only after a confirmed resume", as
   expect(screen.queryByRole("button", { name: "Resume handle checks" })).toBeNull();
   expect(m.resume).toHaveBeenCalledTimes(1);
 });
+it("a confirmed resume that still reads blocked shows no success", async () => {
+  m.account.isAdmin = true;
+  render(<HandleCheckStatus />);
+  await screen.findByTestId("blocked-icon");
+  fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
+  await screen.findByTestId("blocked-icon");
+  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
+  expect(m.resume).toHaveBeenCalledTimes(1);
+});
 it("admin reset failures and status errors keep the blocked state", async () => {
   m.account.isAdmin = true;
   m.resume.mockResolvedValue({ resumed: false });
