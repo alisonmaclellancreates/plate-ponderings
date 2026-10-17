@@ -20,8 +20,8 @@ export const MORE_MAX = 500;
 
 export const HOW_OPTIONS: { value: HowIKnow; label: string; image: string }[] = [
   { value: "owner", label: "It's my plate", image: "/brand/how-i-know-owner-v1.webp" },
-  { value: "knows", label: "I know the owner", image: "/brand/how-i-know-knows-owner-v1.webp" },
-  { value: "asked", label: "I asked the driver", image: "/brand/how-i-know-asked-driver-v1.webp" },
+  { value: "knows_owner", label: "I know the owner", image: "/brand/how-i-know-knows-owner-v1.webp" },
+  { value: "secondhand", label: "I asked the driver", image: "/brand/how-i-know-asked-driver-v1.webp" },
   { value: "guess", label: "My best guess", image: "/brand/how-i-know-guess-v1.webp" },
 ];
 

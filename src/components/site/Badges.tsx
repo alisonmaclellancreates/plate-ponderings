@@ -44,8 +44,8 @@ const CONSENSUS: Record<Consensus, BadgeSpec> = {
 
 const HOW: Record<HowIKnow, BadgeSpec> = {
   owner: { label: "It's my plate", icon: Key, tone: "how-owner" },
-  knows: { label: "I know the owner", icon: Users, tone: "how-knows" },
-  asked: { label: "I asked the driver", icon: Car, tone: "how-asked" },
+  knows_owner: { label: "I know the owner", icon: Users, tone: "how-knows" },
+  secondhand: { label: "I asked the driver", icon: Car, tone: "how-asked" },
   guess: { label: "My best guess", icon: Lightbulb, tone: "how-guess" },
 };
 
