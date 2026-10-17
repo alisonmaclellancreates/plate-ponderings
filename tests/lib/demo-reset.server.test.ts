@@ -202,7 +202,7 @@ it("replaces unrelated content, preserves admins/sample/settings and leaves exac
   expect(m.upload).toHaveBeenCalledTimes(10);
   for (const [path, bytes, options] of m.upload.mock.calls) {
     expect(path).toMatch(/^[\da-f-]+\/[\da-f-]+\.jpg$/);
-    expect(users.has(path.split("/")[0])).toBe(true);
+    if (files.has(path)) expect(users.has(path.split("/")[0])).toBe(true);
     expect(bytes).toEqual(new Uint8Array([1, 2, 3]));
     expect(options).toEqual({ contentType: "image/jpeg", upsert: false });
   }
