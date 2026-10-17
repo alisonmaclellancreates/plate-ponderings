@@ -274,6 +274,21 @@ export const getPlateStories = createServerFn({ method: "POST" })
       mine = new Set((given ?? []).map((h) => h.story_id));
     }
 
+    // Photos are private: published photos reach the page only through
+    // short-lived signed links made here, never through a public URL.
+    const photoPaths = [...new Set(published.map((r) => r.photo_path).filter((p): p is string => Boolean(p)))];
+    const photos = new Map<string, string>();
+    if (photoPaths.length > 0) {
+      const { STORY_PHOTO_BUCKET } = await import("./submissions.functions");
+      const { data: signed } = await supabaseAdmin.storage
+        .from(STORY_PHOTO_BUCKET)
+        .createSignedUrls(photoPaths, 900);
+      for (let i = 0; i < photoPaths.length; i++) {
+        const url = signed?.[i]?.signedUrl;
+        if (url) photos.set(photoPaths[i]!, url);
+      }
+    }
+
     const toStory = (r: StoryRow): PlateStory => ({
       id: r.id,
       meaning: r.meaning,
@@ -282,6 +297,7 @@ export const getPlateStories = createServerFn({ method: "POST" })
       handle: (r.author_id && handles.get(r.author_id)) || "Traveler",
       hearts: hearts.get(r.id) ?? 0,
       publishedAt: r.published_at ?? "",
+      photo: (r.photo_path && photos.get(r.photo_path)) || null,
       isOwn: viewerId !== null && r.author_id === viewerId,
       hearted: mine.has(r.id),
     });

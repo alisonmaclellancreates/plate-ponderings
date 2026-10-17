@@ -25,6 +25,8 @@ export const EVENTS = {
   story_deleted: [],
   admin_action: ["action"],
   account_deleted: [],
+  photo_added: ["box_found", "box_adjusted"],
+  photo_skipped: [],
 } as const;
 
 type EventRegistry = Readonly<Record<string, readonly string[]>>;
