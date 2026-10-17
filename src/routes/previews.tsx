@@ -113,6 +113,12 @@ const STORY_PREVIEWS = [
   { step: "done", label: "Add a story, submitted", note: "Outcome" },
   { step: "checking", label: "Add a story, being checked", note: "Outcome" },
   { step: "rejected", label: "Add a story, not added", note: "Step 1 with words kept" },
+  { step: "error", label: "Add a story, error", note: "Something went wrong, words kept" },
+  {
+    step: "rate-limited",
+    label: "Add a story, paused",
+    note: "Let's pause a moment, words kept",
+  },
 ] as const;
 
 function Previews() {

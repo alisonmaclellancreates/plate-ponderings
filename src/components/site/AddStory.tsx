@@ -6,6 +6,7 @@ import { Outcome } from "@/components/site/SpotPlate";
 import { DemoBanner } from "@/components/site/DemoBanner";
 import { PLATES, STORY_PHOTO_PLACEHOLDER, type HowIKnow } from "@/lib/mock-data";
 import { HOW_OPTIONS, MEANING_MAX, MORE_MAX, SAMPLE_STORY, type StoryStep } from "@/lib/story-form";
+import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 
 const outline = "brand-btn brand-btn-outline";
 const coral = "brand-btn brand-btn-coral";
