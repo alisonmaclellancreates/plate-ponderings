@@ -69,11 +69,12 @@
 - [x] Verify tests, coverage gate, lint, and preview event requests: 438 tests pass, coverage gate holds, lint 0 errors, build OK; decoded page views for / and /explore contain no query strings, both ingest requests return 200, no browser errors.
 - [ ] Alison confirms page views arrive in PostHog.
 - [x] Require an explicit analytics host with no default when connector region is absent; all analytics statements, branches, functions and lines are 100% locally. Full suite: 442 tests / 107 files pass; coverage gate holds; lint 0 errors / 6 existing warnings; build OK.
-- [ ] Verify Codecov patch coverage after CI. Blocked: unauthenticated Codecov and GitHub check APIs return 404 for this repository; an accessible CI/Codecov result is needed.
+- [x] Verify Codecov patch coverage after CI. Alison confirmed 100% patch coverage for Step 41b.
 - [x] Consolidate event definitions into one runtime registry; test-only second event passes capture and before_send with only listed properties and identifiers. All 439 tests / 107 files pass; coverage gate holds (99.35% statements, 98.31% branches, 99.44% functions, 99.74% lines); lint 0 errors / 6 existing warnings; build OK; real query-free page views accepted with HTTP 200.
 
 # Step 42: accounts, handles and session-aware header
 
+- [ ] Revise plan: remove separate AI pause table, exclude demo handle Traveler4821 from generation, enable leaked-password protection, explain managed /auth adapter; save limit approved at five per 15 minutes.
 - [ ] Approve database changes for generated handles, validation and durable save rate limiting.
 - [ ] Enable email/password-only accounts without email confirmation; wire signup, signin, signout and safe return paths.
 - [ ] Wire own profile and handle availability/moderated saves, with demo refusal and role-driven header.
