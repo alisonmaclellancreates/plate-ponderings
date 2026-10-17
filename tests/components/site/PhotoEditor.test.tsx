@@ -79,7 +79,7 @@ describe("PhotoEditor", () => {
     expect(screen.getByTestId("processed-photo")).toHaveAttribute("src", "blob:processed");
     await user.click(screen.getByRole("button", { name: "Use This Photo" }));
     await waitFor(() => expect(onUse).toHaveBeenCalled());
-    const [blob, adjusted] = onUse.mock.calls[0];
+    const [blob, adjusted] = onUse.mock.calls[0]!;
     expect(blob).toBeInstanceOf(Blob);
     expect(adjusted).toBe(false);
     expect(m.renderBlurred).toHaveBeenCalledWith(BITMAP, BOX);

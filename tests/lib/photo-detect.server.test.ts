@@ -14,7 +14,7 @@ vi.mock("@ai-sdk/openai", () => ({
 }));
 vi.mock("@/lib/ai/run-id.server", () => ({
   createLovableAiGatewayRunIdFetch: () => ({
-    fetch: (input: unknown, init: unknown) => fetch(input as RequestInfo, init),
+    fetch: (input: unknown, init: unknown) => fetch(input as RequestInfo, init as RequestInit),
     getRunId: () => "run-1",
   }),
 }));

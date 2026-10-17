@@ -150,7 +150,7 @@ describe("uploadStoryPhoto", () => {
       outcome: "ok",
       path: expect.stringMatching(/^caller-uuid\/.+\.jpg$/),
     });
-    const [path, bytes, opts] = mocks.upload.mock.calls[0];
+    const [path, bytes, opts] = mocks.upload.mock.calls[0]!;
     expect(path).toMatch(/^caller-uuid\//);
     expect(bytes).toBeInstanceOf(Uint8Array);
     expect(opts).toEqual({ contentType: "image/jpeg" });
