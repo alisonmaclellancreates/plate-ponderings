@@ -297,8 +297,13 @@ function AdjustEditor() {
         <div
           data-testid="plate-box"
           tabIndex={0}
-          role="application"
-          aria-label="Plate area. Drag to move, drag a corner to resize, or use the arrow keys."
+          role="slider"
+          aria-label="Plate area"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={25}
+          aria-valuetext="25 percent wide"
+          title="Drag to move, drag a corner to resize, or use the arrow keys."
           className="absolute left-[37%] top-[46%] h-[12%] w-[25%] cursor-move touch-none border-2 border-cream bg-cream/10 shadow-[0_0_0_2px_var(--navy)]"
         >
           <span className={`${handle} -left-1.5 -top-1.5`} />

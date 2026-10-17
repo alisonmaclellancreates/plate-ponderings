@@ -267,7 +267,7 @@
     border: 2px solid var(--coral-cta);
   }
   .brand-btn-outline-coral:hover:not(:disabled) {
-    background: var(--coral-pale);
+    background: var(--cream);
   }
 
   @media (prefers-reduced-motion: no-preference) {

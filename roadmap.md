@@ -232,3 +232,19 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Server rounds box to 4 dp and clamps to photo edges before save; edge-touching test
 - [x] Save/return/clear box; zoomed card + dialog; preview
 - [x] Dialog description is "Photo shared by {handle}" via DialogPrimitive.Description (no aria-describedby override); preview sample built from a box-free base so photoBox is never undefined. 6 dialog tests and 9 preview tests pass; changed-file lint clean; build OK.
+
+## Step 52b: accessibility review and automated checks
+- [x] Add keyboard-visible drop-area focus and cream rings on navy header controls; tests cover picker keyboard reachability and all navy controls in signed-out/demo/member headers. Related: 153 tests/14 files; lint zero errors/six existing warnings; automatic build OK.
+- [ ] Focus-ring follow-up: confirm post-sync Codecov. Latest PR #117 report at 21:45:42 UTC is 100%, but remote head 96d5df6 predates this follow-up; managed sync/CI owns the next result.
+- [x] PR #117: add dismissal/listener lifecycle, controlled-dialog callbacks, route focus, Alt-resize and open-menu unread tests; remove the unreachable dismissal adapter true arm. Related run: 303 tests across 31 files; lint zero errors/six existing warnings; no local coverage.
+- [x] PR #117 preceding branch-test follow-up: Codecov updated at 21:45:42 UTC to all modified and coverable lines covered (100%). Exact private line view unavailable, but PR report confirms the gate.
+- [ ] PR #117: real Radix close tests confirm More options.focus() is called, but final focus lands on body in the test environment; isolated controlled-dialog tests retain More options focus. Behavior unchanged; actual deferred focus restoration needs separate investigation before claiming end-to-end focus return.
+- Axe tests (vitest-axe) across all listed pages and dialogs; dialogs checked against document.body (Radix portals); region rule on for full pages, per-test opt-out with comment otherwise
+- PhotoEditor: draggable box gets accessible name "Plate area", keyboard move/resize (ask first if layout change needed); PhotoEditor with suggested box added to axe tests
+- eslint-plugin-jsx-a11y recommended on our components; zero lint errors
+- Contrast table for every brand token pair; failures pushed last as their own commit after Alison approves (table may exceed 10-line report limit)
+- Skip link, focus to heading on route change, dialog focus trap/return tests
+- Menus close on Esc and outside click with focus return (profile, mobile header, story menu)
+- Report/Delete become real modal dialogs on existing dialog primitives
+- Unread dot beside Your Submissions in profile menu; rotating headline announces changes with aria-live="polite" (reduced motion unchanged)
+- Progress issue #54: fix if used, else leave open and say so

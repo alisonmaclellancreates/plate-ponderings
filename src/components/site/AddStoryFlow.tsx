@@ -409,7 +409,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
           <>
             <label
               htmlFor="story-photo"
-              className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-teal bg-card px-4 py-10 text-center"
+              className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-teal bg-card px-4 py-10 text-center has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-navy has-[:focus-visible]:ring-offset-2"
             >
               <Camera aria-hidden className="size-10 text-teal" />
               <span className="font-semibold">Choose a photo or drag and drop</span>

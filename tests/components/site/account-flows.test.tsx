@@ -34,12 +34,15 @@ vi.mock("@tanstack/react-router", () => ({
     to,
     children,
     onClick,
+    ...rest
   }: {
     to: string;
     children: React.ReactNode;
     onClick?: () => void;
+    className?: string;
+    "aria-label"?: string;
   }) => (
-    <a href={to} onClick={onClick}>
+    <a href={to} onClick={onClick} {...rest}>
       {children}
     </a>
   ),
@@ -73,6 +76,24 @@ import { SignInPage, SignUpPage } from "@/components/site/Entry";
 import { ProfilePage } from "@/components/site/Account";
 import { MemberProfile, SiteHeader } from "@/components/site/SiteHeader";
 import { AiCheckStatus } from "@/components/site/AiCheckStatus";
+
+it.each(["signed-out", "demo", undefined] as const)(
+  "uses cream keyboard rings for every navy-header control in %s mode",
+  (mode) => {
+    render(mode === undefined ? <SiteHeader /> : <SiteHeader mode={mode} />);
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    const header = screen.getByRole("banner");
+    const controls = Array.from(header.querySelectorAll("a, button")).filter(
+      (control) => !control.closest("ul"),
+    );
+    expect(controls.length).toBeGreaterThan(8);
+    for (const control of controls) {
+      expect(control).toHaveClass("focus-visible:ring-2", "focus-visible:ring-cream");
+      expect(control).not.toHaveClass("focus-visible:ring-ring", "focus-visible:ring-navy");
+    }
+  },
+);
+
 beforeEach(() => {
   m.dotQuery.mockReturnValue({ data: undefined });
   vi.clearAllMocks();
@@ -452,6 +473,8 @@ it.each([
   m.dotQuery.mockReturnValue({ data: { unread } });
   render(<MemberProfile showHandle />);
   expect(screen.queryAllByTestId("unread-dot")).toHaveLength(count);
+  fireEvent.click(screen.getByRole("button", { name: "Traveler1234 menu" }));
+  expect(screen.queryAllByTestId("menu-unread-dot")).toHaveLength(count);
   expect(m.dotQuery).toHaveBeenCalledWith(
     expect.objectContaining({ queryKey: ["unread-dot"], enabled: true }),
   );
