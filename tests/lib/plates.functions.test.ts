@@ -539,5 +539,22 @@ describe("recheckPendingSubjects", () => {
       expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
       expect(mocks.checkStory).not.toHaveBeenCalled();
     });
+
+    it("rechecks a pending story when there are no pending plates", async () => {
+      withStories([storyRow]);
+      tables["subjects"] = { data: [], error: null };
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(mocks.check).not.toHaveBeenCalled();
+      expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "", "PNW LV");
+      expect(mocks.refresh).toHaveBeenCalledWith("subj-9");
+    });
+
+    it("skips the story loop when the plate loop stops on unavailable", async () => {
+      withStories([storyRow]);
+      mocks.check.mockResolvedValue({ outcome: "unavailable", block: "credit_block", runId: "r" });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+      expect(mocks.checkStory).not.toHaveBeenCalled();
+      expect(mocks.admin.from).not.toHaveBeenCalledWith("stories");
+    });
   });
 });
