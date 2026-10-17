@@ -1,61 +1,49 @@
-# Step 48: story actions, admin, settings
+# Step 49: story photos with browser-side blur
 
-## Data shape and state transitions
+Add the optional photo to the story flow: choose, AI box detection, adjust, canvas blur, JPEG export, private upload. The original is never stored, logged, or uploaded.
 
-```text
-story.status:  published --hide--> hidden --unhide--> published   (admin; published_at untouched)
-               published|hidden --delete--> deleted (tombstone; meaning '', body null, photo null, removed_at now)
-               pending|rejected --account delete--> row deleted
-removed_at:    set to now() on hide/delete, cleared on unhide
-               (is_summary_public already hides versions written from a hidden/deleted story
-                whose published_at <= generated_at and removed_at > started_at, so versions vanish
-                immediately and return on unhide; no SQL change needed)
-```
+## Database (needs approval)
 
-Existing tables already have most rules: hearts PK (story,user) with a published-story insert policy, blocks PK plus no-self-block, reports unique (story, reporter), reason keys `personal_info | harassment | spam | other`. All carry non-demo policies.
+1. **Bucket `story-photos`** (private, via the storage tool, not SQL). Migration adds RLS on `storage.objects`: authenticated users may INSERT only into their own folder (`(storage.foldername(name))[1] = auth.uid()::text`), nothing else. Reads go through short-lived signed URLs made server-side; deletes (rejected story, account deletion) use the admin client server-side. No anon access.
+2. **Rate limit for detection**: new service-only table `photo_detect_attempts` (id, user_id, attempted_at) plus `consume_photo_detect_attempt(_user_id)` security-definer function, mirroring `story_save_attempts`. No browser grants or policies. Step 41 database tests get a matching `tests/db/photo-attempts.sql` (begin/rollback, set local role).
 
-## Proposed migration (needs your approval)
+No change to `stories`: `photo_path` already exists.
 
-1. `reports.reporter_id` DROP NOT NULL, so account deletion can clear the reporter and keep the report. The tool flags DROP NOT NULL as destructive and asks before it runs.
-   Confirmed: `reporter_id` currently has no foreign key at all. Project rules forbid new keys to `auth.users`, so the migration adds `reports_reporter_id_fkey` referencing `profiles(id) ON DELETE SET NULL`. Deleting the auth user cascades to the profile, which then nulls the reporter and keeps the report. It is added NOT VALID, then validated in the same migration (there are no rows today).
-2. `reports_note_length` CHECK (note is null or char_length(note) <= 200), added NOT VALID, then validated against existing rows in the same migration (there are currently zero rows).
-3. `get_reported_stories()` security definer, service_role only. Returns story id, subject display, jurisdiction name, meaning, author handle, status, report count, reason keys and latest report time, newest first. Server reads stay fixed in count.
+## Server
 
-Nothing else: no demo triggers. The tombstone keeps `meaning` as '' instead of relaxing NOT NULL.
+- `src/lib/photo-detect.server.ts`: sends the image to the Lovable AI gateway (vision-capable model) asking only for the plate box as fractions of width/height, or "none". Same gateway/block handling as `checkStory`; the shared AI pause applies. The image bytes live only in the request body; nothing is written to storage or logs.
+- `detectPlateBox` server function: `requireSupabaseAuth`, refuses demo, validates input (data URL, JPEG/PNG/WebP only, size cap), consumes a detect attempt (rate limit copy as the other limits), checks the shared AI pause first, returns `{ box: {x,y,w,h} | null }` or `unavailable`.
+- `addStory` accepts optional `photoPath`. Server validates the path is inside the caller's own folder before storing it on the story. A rejected story deletes the uploaded photo (admin client). Pending/published keep it.
+- `getPlateStories` returns a short-lived signed URL per published `photo_path` (generated server-side, ~15 min expiry). Block-filtering rules from step 48 unchanged.
 
-## Server functions (all authenticated; demo refused first, then DB policy refuses as a second layer)
+## Client
 
-- `stories-actions.functions.ts`: `toggleHeart`, `reportStory`, `blockAuthor`, `unblockUser`, `deleteMyStory`, `getBlockedPeople`. Heart, report and block writes go through `context.supabase` (RLS as the user, using the existing non-demo policies). Delete uses the admin client after an ownership-checked conditional update (`id`, `author_id`, status in published/hidden). It then removes hearts and the photo, and calls `runAfterResponse(requestSummaryRefresh)`.
-- `getPlateStories` DTO gains `isOwn` and `hearted` only. `blockAuthor` takes the story id and resolves the author on the server; no author identifier reaches the browser.
-- `admin.functions.ts`: `getReportedStories`, `setStoryHidden({ id, hidden })` and `recheckAllPending`. Each verifies `has_role(admin)` through `context.supabase` before loading the admin client.
-  - `setStoryHidden` calls `runAfterResponse(requestSummaryRefresh(subjectId))` on both hide and unhide. Both directions are tested.
-  - `recheckAllPending` checks the shared AI pause before starting and returns early if paused. It processes at most 10 pending items per click across all non-demo owners (subjects first, then stories, oldest first) and stops on the first unavailable or block result. It returns `{ changed, remaining, stopped }`, where remaining is the count still pending after the run. The cap and the stop are both tested. It reuses the per-item check, publish and notify helpers extracted from the existing per-user recheck, which keeps its cooldown.
-- `account-delete.functions.ts`: `deleteAccount` runs the full sequence from the brief. It refreshes summaries for every affected subject, deletes the auth user and returns `{ deleted: true }`. Then the PostHog person is deleted with a server secret. A failure is logged, and deletion still succeeds.
-
-## Pages
-
-- Story card (live): a heart button with count and pressed state; signed out it navigates to sign-in with a return path. The menu follows the brief's rules: none signed out; Delete only on own published stories; demo sees the menu and gets the demo message. It reuses the existing Report and Delete dialogs.
-- `/admin`: `beforeLoad` checks the admin role through an authenticated server read and redirects non-admins to `/`. The live table has Hide/Unhide and Recheck pending with its count message.
-- `/settings`: a live blocked list with Unblock. `/settings/delete-confirm` deletes, sends `account_deleted`, calls `reset`, signs out locally and navigates home.
-- `/privacy`: a PostHog third-party paragraph.
-- Sample twins: `/previews/story-menu`, `/previews/admin`, `/previews/settings`, `/previews/settings-delete-confirm`. All use real components, inert actions and mock rows covering every state. The `/previews` list marks the live pages as live.
+- `src/lib/photo-blur.ts` (pure, unit-tested): box fraction maths (clamp, min size, draw-from-drag), and `renderBlurredPhoto(image, box)` drawing to canvas: heavy blur outside the box (stacked downscale draw, no CSS overlay), sharp box, export as JPEG with longest side <= 1600 px.
+- `src/components/site/PhotoEditor.tsx`: the existing editor shell (dialog on desktop, full-screen on mobile) made real. Pointer-based drag to move, corner handles to resize, drag-on-empty to draw when no box was found. Reset restores the AI suggestion; Try again re-runs detection. Review shows the actual processed canvas image with the brief's review sentence (no ticks). Any box change after review rebuilds the preview and requires confirming again.
+- `AddStoryFlow` step 2 becomes the real photo step: file input (JPEG/PNG/WebP), unreadable file shows the brief's message with a continue-without path, "Continue without a photo" stays. On "Use This Photo": export the canvas, upload the JPEG to `story-photos/{userId}/{uuid}.jpg` via the browser client (own-folder INSERT policy), then submit with `photoPath`. Step 3 shows the processed image.
+- Stop rule honored: if the adjustable box or canvas blur proves unreliable, I stop and report rather than fall back to storing the original or a CSS-only blur.
 
 ## Analytics
 
-Registry additions: story_hearted, story_unhearted, story_reported [reason], user_blocked, user_unblocked, story_deleted, admin_action [action: hide | unhide | recheck], account_deleted. None of these carry text or handles.
+`photo_added` (properties: `box_found`, `box_adjusted`) on confirmed use; `photo_skipped` on continue-without and remove. Registered in the event registry; nothing on the never-send list (no image data, no coordinates).
 
-## Secrets
+## Previews
 
-`POSTHOG_PERSONAL_API_KEY` and `POSTHOG_PROJECT_ID` (server only). I'll request them with the secure form after approval. Until they're set, the PostHog delete logs "not configured" and the account deletion still succeeds.
+`/previews/story-photo` (unnested `previews_.story-photo.tsx` pattern): the real editor with a sample image covering choose, adjust-with-box, adjust-no-box, and review states; inert actions, no database. `/previews` list updated (story flow marked live where applicable, sample page listed). Step 51 deletes these.
 
-## Tests and checks
+## Tests
 
-- Unit tests for every action, including demo refusal, tombstone fields, admin-only access, the account-deletion sequence and PostHog failure, the redirects, the analytics events and each sample page.
-- New `tests/db/story-actions.sql`: report note length, the reporter foreign key's SET NULL rule (deleting a profile keeps its reports with a null reporter), `get_reported_stories` grants, and versions hidden then restored by hide and unhide. Then rerun all of tests/db.
-- Locally: `vitest related` on the changed source plus the changed tests, and lint.
-- Redirects in the running preview: the admin redirect for a non-admin and the signed-out redirect, via Playwright, as the brief requires.
+- `photo-blur.ts`: box maths (clamp, min size, drag-draw), export size cap (mock canvas).
+- `detectPlateBox`: input validation, demo refusal, rate limit, AI pause, box-or-none mapping (AI mocked).
+- `addStory`: photoPath ownership check, rejected story deletes the photo.
+- `getPlateStories`: signed URL present only for published stories with photos.
+- Flow/editor component tests: unreadable file path, no-box draw path, review re-confirm after box change, analytics events.
+- `tests/db/photo-attempts.sql` plus rerun of all `tests/db` files.
 
-## Technical notes
+Run: `bunx vitest related` on changed files, lint, prettier. CI stays authoritative.
 
-- Redirects only in `beforeLoad`; server functions return values. `src/start.ts` is untouched.
-- Hidden/deleted stories are already excluded from public story reads by status.
+## Assumptions
+
+- Bucket name `story-photos` (step 48's account deletion already assumes it).
+- Detection uses the same gateway with a vision-capable model; exact model chosen at build time.
+- One photo per story, replaced only by resubmission (no edit flow in this step).
