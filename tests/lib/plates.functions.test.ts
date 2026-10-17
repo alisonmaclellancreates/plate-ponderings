@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   admin: { from: vi.fn(), rpc: vi.fn() },
   check: vi.fn(),
+  checkStory: vi.fn(),
+  refresh: vi.fn(),
   readBlock: vi.fn(),
   persistBlock: vi.fn(),
 }));
@@ -100,6 +102,8 @@ beforeEach(() => {
   mocks.readBlock.mockResolvedValue({ category: null, blockedAt: null });
   mocks.persistBlock.mockResolvedValue(undefined);
   mocks.check.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
+  mocks.checkStory.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
+  mocks.refresh.mockResolvedValue(undefined);
 });
 
 describe("searchPlate", () => {
