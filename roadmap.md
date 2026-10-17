@@ -1,3 +1,10 @@
+# Step 48c: header menu exits and submissions returns
+
+- [x] Close member/mobile menus on every selection and router location change; tests cover each item, both profile instances, search-only changes and real memory-history back/forward.
+- [x] Carry and validate from=submissions; tests cover submissions, unknown marker, search priority and Explore fallback. Other inbound plate links unchanged.
+- [x] Related run passed 192 tests across 23 files, listing all four changed source files and nine changed/new tests. bun run lint: zero errors, six pre-existing UI warnings, none in changed files. No local coverage/build/typecheck/browser/AI, database changes or branch changes.
+- [ ] Current PR Codecov figure unavailable: GitHub returned no open pull requests. Await Alison's PR and CI; managed Git sync owns commits.
+
 # PR #113 Copilot follow-ups
 
 - [x] Stage exact 0017 SQL in docs/proposed-migrations (managed migration directory cannot be written without applying); add index-existence assertion. 0016 untouched.

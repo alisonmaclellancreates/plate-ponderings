@@ -537,9 +537,11 @@ function RealStatusStrip({ plateId }: { plateId: string }) {
 export function RealPlateDetail({
   plate,
   backToSearch,
+  from,
 }: {
   plate: { id: string; jurisdiction: string; text: string };
   backToSearch?: { jurisdiction: string; text: string } | undefined;
+  from?: "submissions" | undefined;
 }) {
   const signedIn = Boolean(useAccountAuth()?.account);
   const { data: storiesData } = useQuery({
@@ -560,6 +562,14 @@ export function RealPlateDetail({
         >
           <ArrowLeft aria-hidden className="size-4" />
           Back to Search
+        </Link>
+      ) : from === "submissions" ? (
+        <Link
+          to="/submissions"
+          className="inline-flex items-center gap-1 font-semibold text-navy underline-offset-4 hover:underline"
+        >
+          <ArrowLeft aria-hidden className="size-4" />
+          Back to Your Submissions
         </Link>
       ) : (
         <a

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { AuthWeakPasswordError } from "@supabase/supabase-js";
 const m = vi.hoisted(() => ({
@@ -16,6 +16,7 @@ const m = vi.hoisted(() => ({
   resume: vi.fn(),
   track: vi.fn(),
   dotQuery: vi.fn(),
+  location: { href: "/", pathname: "/" },
 }));
 vi.mock("@/lib/account-auth", () => ({
   useAccountAuth: () => ({
@@ -27,8 +28,20 @@ vi.mock("@/lib/account-auth", () => ({
   }),
 }));
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
-    <a href={to}>{children}</a>
+  useRouterState: ({ select }: { select: (state: { location: typeof m.location }) => unknown }) =>
+    select({ location: m.location }),
+  Link: ({
+    to,
+    children,
+    onClick,
+  }: {
+    to: string;
+    children: React.ReactNode;
+    onClick?: () => void;
+  }) => (
+    <a href={to} onClick={onClick}>
+      {children}
+    </a>
   ),
   useNavigate: () => m.navigate,
 }));
@@ -64,6 +77,8 @@ beforeEach(() => {
   m.dotQuery.mockReturnValue({ data: undefined });
   vi.clearAllMocks();
   m.signedOut = false;
+  m.location = { href: "/", pathname: "/" };
+  m.out.mockResolvedValue(undefined);
   m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
   m.signIn.mockResolvedValue({ data: { session: {} }, error: null });
   m.signUp.mockResolvedValue({ data: { session: {} }, error: null });
@@ -219,18 +234,72 @@ it("ignores a stale taken response for earlier valid input and hides resolved re
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Another_Handle" } });
   expect(screen.queryByText("Available")).toBeNull();
 });
-it("member menus show only authorized admin actions and handle signout errors", async () => {
+it("member menus show only authorized admin actions and keep the menu open with the signout error", async () => {
   const v = render(<SiteHeader />);
   fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
   expect(screen.queryByRole("link", { name: "Admin" })).toBeNull();
-  m.out.mockRejectedValue(new Error());
+  m.out.mockRejectedValueOnce(new Error());
   fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
   await screen.findByRole("alert");
+  expect(screen.getByRole("alert")).toHaveTextContent("We couldn't sign you out. Try again.");
+  expect(screen.getByRole("list", { name: "Profile" })).toBeInTheDocument();
+  expect(m.out).toHaveBeenCalledTimes(1);
   v.unmount();
   m.account.isAdmin = true;
   render(<SiteHeader />);
   fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
   expect(screen.getByRole("link", { name: "Admin" })).toBeInTheDocument();
+});
+it.each(["Your Submissions", "Your Profile", "Admin"])(
+  "closes the profile immediately when %s is chosen, even on the current page",
+  (label) => {
+    m.account.isAdmin = true;
+    render(<MemberProfile showHandle />);
+    const toggle = screen.getByRole("button", { name: "Traveler1234 menu" });
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole("link", { name: label }));
+    expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+  },
+);
+it("a successful sign-out leaves the menu open until the route change closes it", async () => {
+  m.out.mockResolvedValueOnce(undefined);
+  const view = render(<MemberProfile showHandle={false} />);
+  fireEvent.click(screen.getByRole("button", { name: "Traveler1234 menu" }));
+  fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+  await waitFor(() => expect(m.out).toHaveBeenCalledTimes(1));
+  expect(screen.getByRole("list", { name: "Profile" })).toBeInTheDocument();
+  m.location = { href: "/profile", pathname: "/profile" };
+  view.rerender(<MemberProfile showHandle={false} />);
+  expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
+});
+it.each(["Explore", "Spot a Plate", "About", "Try the Demo"])(
+  "closes the mobile menu immediately when %s is chosen",
+  (label) => {
+    render(<SiteHeader mode="signed-out" />);
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    fireEvent.click(
+      within(screen.getByRole("navigation", { name: "Mobile" })).getByRole("link", { name: label }),
+    );
+    expect(screen.queryByRole("navigation", { name: "Mobile" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  },
+);
+it("closes both profile instances and the mobile menu on location changes, including back/forward and search-only changes", () => {
+  const view = render(<SiteHeader />);
+  for (const href of ["/profile", "/", "/profile", "/profile?tab=1"]) {
+    for (const toggle of screen.getAllByRole("button", { name: "Traveler1234 menu" }))
+      fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(screen.getAllByRole("list", { name: "Profile" })).toHaveLength(2);
+    m.location = { href, pathname: href.split("?")[0] ?? href };
+    view.rerender(<SiteHeader />);
+    expect(screen.queryAllByRole("list", { name: "Profile" })).toHaveLength(0);
+    expect(screen.queryByRole("navigation", { name: "Mobile" })).toBeNull();
+  }
 });
 it("admin sees the blocked design and success only after a confirmed resume", async () => {
   m.account.isAdmin = true;

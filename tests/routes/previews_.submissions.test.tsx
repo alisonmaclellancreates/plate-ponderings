@@ -18,9 +18,15 @@ vi.mock("@/lib/submissions.functions", () => ({
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: (id: string) => (options: Record<string, unknown>) => ({ ...options, id }),
-  Link: ({ params, children }: { params: { state: string }; children: ReactNode }) => (
-    <a href={`/plate/${params.state}`}>{children}</a>
-  ),
+  Link: ({
+    params,
+    search,
+    children,
+  }: {
+    params: { state: string };
+    search: Record<string, string>;
+    children: ReactNode;
+  }) => <a href={`/plate/${params.state}?${new URLSearchParams(search)}`}>{children}</a>,
 }));
 import { Route } from "@/routes/previews_.submissions";
 
@@ -55,7 +61,7 @@ it("shows every row type with Updated labels, and Dismiss changes nothing", asyn
   if (!pendingStory) throw new Error("Missing pending story row");
   expect(
     within(pendingStory).getAllByRole("link", { name: "View Plate" })[0]?.getAttribute("href"),
-  ).toBe("/plate/pnw-lv");
+  ).toBe("/plate/pnw-lv?from=submissions");
   expect(screen.getAllByText("Updated")).toHaveLength(3);
   const dismiss = screen.getAllByRole("button", { name: "Dismiss" });
   expect(dismiss).toHaveLength(4); // mobile and desktop copies of two rows
