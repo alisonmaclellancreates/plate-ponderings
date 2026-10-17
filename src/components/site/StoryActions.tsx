@@ -91,7 +91,7 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
   const [message, setMessage] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const moreRef = useRef<HTMLButtonElement | null>(null);
-  useMenuDismiss(open === "menu", (v) => setOpen(v ? "menu" : null), containerRef);
+  useMenuDismiss(open === "menu", () => setOpen(null), containerRef);
   if (!auth?.account) return null;
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["plate-stories", plateId] });
