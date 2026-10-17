@@ -20,6 +20,7 @@ export type Database = {
           ai_check_blocked_at: string | null
           ai_check_run_id: string | null
           demo_mode: boolean
+          demo_today: string | null
           id: boolean
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           ai_check_blocked_at?: string | null
           ai_check_run_id?: string | null
           demo_mode?: boolean
+          demo_today?: string | null
           id?: boolean
         }
         Update: {
@@ -34,6 +36,7 @@ export type Database = {
           ai_check_blocked_at?: string | null
           ai_check_run_id?: string | null
           demo_mode?: boolean
+          demo_today?: string | null
           id?: boolean
         }
         Relationships: []
@@ -53,6 +56,24 @@ export type Database = {
           blocked_id?: string
           blocker_id?: string
           created_at?: string
+        }
+        Relationships: []
+      }
+      demo_reset_lease: {
+        Row: {
+          expires_at: string
+          id: boolean
+          token: string
+        }
+        Insert: {
+          expires_at: string
+          id?: boolean
+          token: string
+        }
+        Update: {
+          expires_at?: string
+          id?: boolean
+          token?: string
         }
         Relationships: []
       }
@@ -634,6 +655,7 @@ export type Database = {
       }
     }
     Functions: {
+      claim_demo_reset: { Args: { _token: string }; Returns: boolean }
       claim_summary_run: { Args: { _subject_id: string }; Returns: boolean }
       consume_handle_save_attempt: {
         Args: { _user_id: string }
@@ -655,6 +677,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      effective_today: { Args: never; Returns: string }
       get_featured_subject_days: {
         Args: { _before?: string; _limit?: number }
         Returns: {
@@ -709,6 +732,15 @@ export type Database = {
           stories_at_pick: number
           subject_id: string
         }[]
+      }
+      release_demo_reset: { Args: { _token: string }; Returns: undefined }
+      renew_demo_reset: {
+        Args: { _day: string; _token: string }
+        Returns: boolean
+      }
+      replace_demo_seed_content: {
+        Args: { _day: string; _seed: Json; _token: string }
+        Returns: undefined
       }
       story_heart_counts: {
         Args: { _subject_id: string }
