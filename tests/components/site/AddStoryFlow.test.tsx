@@ -163,7 +163,9 @@ describe("AddStoryFlow", () => {
         "We couldn't submit your story right now. Your words are still here. Please try again.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue("A fine meaning");
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+      "Pacific Northwest love.",
+    );
     expect(m.track).toHaveBeenCalledWith(
       "story_submitted",
       expect.objectContaining({ outcome: "error" }),
