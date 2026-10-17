@@ -55,6 +55,12 @@ export function safeReturnPath(value: unknown): string {
     return "/";
   }
 }
+export const SIGN_IN_ERROR =
+  "We couldn't sign you in. Check your email and password and try again.";
+export const SIGN_UP_ERROR = "Your account couldn't be created. You can try again or sign in.";
+export const WEAK_PASSWORD_ERROR = "Please choose a stronger password with at least 8 characters.";
+export const BREACHED_PASSWORD_ERROR =
+  "This password has appeared in a data breach. Please choose a different password.";
 export function signupErrorMessage(error: {
   code?: string | undefined;
   message?: string | undefined;
@@ -64,11 +70,9 @@ export function signupErrorMessage(error: {
     error.code === "weak_password" ||
     (error.code === "validation_failed" && /password/i.test(error.message ?? ""))
   ) {
-    return error.reasons?.includes("pwned")
-      ? "This password has appeared in a data breach. Please choose a different password."
-      : "Please choose a stronger password with at least 8 characters.";
+    return error.reasons?.includes("pwned") ? BREACHED_PASSWORD_ERROR : WEAK_PASSWORD_ERROR;
   }
-  return "Your account couldn't be created. You can try again or sign in.";
+  return SIGN_UP_ERROR;
 }
 export type HandleBlockCategory = "provider_access_denied" | "credit_block";
 export function handleBlockCategory(status: number, type?: string): HandleBlockCategory | null {
