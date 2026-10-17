@@ -1,6 +1,7 @@
 # Step 45b: fictional plate guesses
 
 - [ ] Propose isolated server-only guess schema and implementation plan; wait for Alison's database approval.
+- [x] Revise the plan for explicit openai/gpt-6-astra using the summary's streamed structured low-reasoning shape, and at most 3 gap-fill guesses per recheck with a cap test and pause checks before each.
 - [ ] Build nonblocking publication generation, own-plate recheck gap fill, server-derived reveal, teaser/panel and no-property analytics; mocked behavioral tests.
 - [ ] Run lint, relevant/full tests and every tests/db file; verify new generation and reveal/hide at 1280px and 360px, workerd or published check; report only checks actually run.
 - [ ] Read PR Codecov patch figure after Alison opens the PR. Blocker: PR not open.
