@@ -74,10 +74,12 @@
 
 # Step 42: accounts, handles and session-aware header
 
-- [ ] Scope terminal blocks to handle moderation only; add admin-visible status, one-action manual recovery, safe logs and quoted gateway requirement in the report and AGENTS.md.
-- [ ] Revise plan: remove separate AI pause table, exclude demo handle Traveler4821 from generation, enable leaked-password protection, explain managed /auth adapter; save limit approved at five per 15 minutes.
-- [ ] Approve database changes for generated handles, validation and durable save rate limiting.
-- [ ] Enable email/password-only accounts without email confirmation; wire signup, signin, signout and safe return paths.
-- [ ] Wire own profile and handle availability/moderated saves, with demo refusal and role-driven header.
-- [ ] Add privacy-limited account and handle analytics events with tests.
-- [ ] Run coverage, lint, database tests and live account/redirect/handle flows; report actual outcomes.
+- [x] Scope terminal blocks to handle moderation only; verified admin status/manual reset; safe logs and gateway quotes documented in docs/step42-report.md and AGENTS.md.
+- [x] Approved plan revised; separate pause table removed; Traveler4821 excluded; five saves per 15 minutes enforced.
+- [x] Approved database changes applied; validated constraints, privileges and rollback-only account tests checked.
+- [x] Email/password signup, signin, signout and safe return paths verified in the running app.
+- [x] Real profile, availability, moderated save/readback, demo refusal and session/role-driven header implemented and tested.
+- [x] Privacy-limited account/handle analytics registry and filtering tests pass.
+- [x] 507 tests pass; coverage 99.22/97.26/99.02/99.68 meets 95% gate; lint 0 errors/8 warnings; build OK; summary visibility and account DB tests pass; live admin reset verified; verification fixtures cleaned.
+- [ ] Alison checks hosted HIBP and password minimum in More → Users → Auth settings. Blocker: supported independent hosted-setting readback unavailable.
+- [ ] Confirm all five new events in PostHog. Blocker: event delivery not independently inspected; filtering is tested.
