@@ -12,23 +12,24 @@ A story moves `pending → published | rejected`, exactly like a plate:
 
 Derived, never stored: plate status (Mystery / Interpreted / Owner weighed in), owner line, owner-first ordering.
 
+## Source key rename (this step, per the brief)
+
+The static pages use `knows` and `asked`; rename to `knows_owner` and `secondhand` everywhere: form options, mock data, previews, tests. On-screen labels don't change. Add a test that each of the four keys (`owner`, `knows_owner`, `secondhand`, `guess`) submits a value the database accepts.
+
 ## Database (proposed here, applied only after your approval)
 
 Migration 1 — `stories` access:
 
-- RLS policies on `stories`: SELECT published stories for everyone is NOT granted to the browser; instead pages read through server functions with the admin client (same pattern as plates). Browser policies: author reads own pending/rejected (already exists); author inserts own non-demo story (`author_id = auth.uid()`, not demo); no browser UPDATE/DELETE.
-- GRANTs stay minimal: `authenticated` gets INSERT + the existing own-row SELECT; no `anon` grants. Service role keeps ALL.
+- No browser insert on stories. Stories are written only by the `addStory` server function (admin client), as step 41 set up — a browser insert would let anyone write `status = 'published'` directly and skip the check, validation and rate limit. Keep the existing "author reads own pending/rejected" SELECT policy; no INSERT/UPDATE/DELETE policies, no INSERT grant to `authenticated`, no `anon` grants. Service role keeps ALL.
 - New `story_save_attempts` table + `consume_story_save_attempt(uuid)` SECURITY DEFINER function, mirroring `subject_save_attempts` exactly: no browser grants, RLS on with no policies, execute revoked from public/anon/authenticated, granted to service_role only, advisory lock, `clock_timestamp()`, pinned search path. Index on `(user_id, attempted_at)`.
 - `notifications.kind` already accepts text; `story_published` / `story_rejected` need no schema change.
-
-Migration 2 (only if needed after inspection): nothing else anticipated.
 
 ## Server code
 
 - `src/lib/story-moderation.server.ts` — `checkStory(meaning, more, plateText)` in the style of `checkSubject`: untrusted-data block, structured pass/fail, 402/403 block categories persisted to the shared `ai_check_*` settings, `STORY_CHECK_FORCE_UNAVAILABLE` test switch.
 - `src/lib/stories.functions.ts`:
-  - `addStory` (auth required): demo refusal with brief message; field validation per brief (meaning 3–80, source key one of the four, more ≤500); plate must be published; rate limit via `consume_story_save_attempt`; shared AI block read; check → published/pending/rejected outcomes; on publish, call `requestSummaryRefresh(subjectId)` — a clearly named stub in `src/lib/summary-refresh.server.ts` with a test that it is called (step 45 fills it in).
-  - `getPlateStories` (public read via admin client): published stories for a published plate, owner story first then oldest first by `published_at`, five at a time with offset paging; returns only display fields (id, meaning, source key, body, author handle, heart count via `story_heart_counts`, published_at). Applies the caller's block list when signed in: stories by blocked authors are left out (filter built now; controls arrive in step 48). Also returns the caller's own pending stories for the private panel, and the derived status strip data (published count, owner handle or "No owner yet").
+  - `addStory` (auth required): demo refusal with brief message; field validation per brief (meaning 3–80, source key one of the four renamed keys, more ≤500); plate must be published; rate limit 5 submissions per person per 15 minutes via `consume_story_save_attempt`, matching plates; shared AI block read; check → published/pending/rejected outcomes; on publish, call `requestSummaryRefresh(subjectId)` — a clearly named stub in `src/lib/summary-refresh.server.ts` with a test that it is called (step 45 fills it in).
+  - `getPlateStories`: the visitor's identity comes only from their verified session on the server, never from a parameter. Signed out: published stories only, no pending panel, no block filter. Signed in: also their own pending stories (private panel) and their block list applied. Published stories for a published plate, owner story first then oldest first by `published_at`, five at a time with offset paging; returns only display fields (id, meaning, source key, body, author handle, heart count via `story_heart_counts`, published_at), plus derived status strip data (published count, owner handle or "No owner yet"). Test that one person can't get another's pending stories.
 - Extend `recheckPendingSubjects` to also recheck the person's pending stories: same block/interval gates, `checkStory` per story, publish/reject + notification, summary refresh request on publish.
 
 ## Pages (existing previews stay the design)
@@ -44,9 +45,9 @@ Migration 2 (only if needed after inspection): nothing else anticipated.
 ## Tests
 
 - `tests/lib/story-moderation.test.ts` mirroring the plate-moderation suite (untrusted-data block, outcomes, block categories, force switch).
-- `tests/lib/stories.functions.test.ts`: validation, each check outcome, demo refusal, rate limit, summary-refresh call on publish, ordering (owner first, then oldest), second owner claim renders as a normal story, blocked-author filter, private pending panel contents, paging.
+- `tests/lib/stories.functions.test.ts`: validation, each check outcome, demo refusal, rate limit, summary-refresh call on publish, ordering (owner first, then oldest), second owner claim renders as a normal story, blocked-author filter, private pending panel contents, paging, session-only identity (no cross-user pending reads).
 - Recheck extension tests: pending story publishes/rejects with notifications, stops on unavailable and on block.
-- `tests/db/story-attempts.sql` mirroring subject-attempts; rerun every file in `tests/db`.
+- `tests/db/story-attempts.sql` mirroring subject-attempts, plus a test that a signed-in user cannot insert into `stories`; rerun every file in `tests/db`.
 - Component tests for the wired flow and real plate page.
 
 ## Verification and ground rules
