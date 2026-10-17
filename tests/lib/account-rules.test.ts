@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   handleFormatValid,
+  handleValidationMessage,
   RESERVED_HANDLES,
   safeReturnPath,
   signupErrorMessage,
@@ -8,6 +9,14 @@ import {
 } from "@/lib/account-rules";
 
 describe("handle rules", () => {
+  it("classifies reserved handles separately from invalid characters and length", () => {
+    expect(handleValidationMessage("admin")).toBe("That handle is reserved. Choose another.");
+    expect(handleValidationMessage("ADMIN")).toBe("That handle is reserved. Choose another.");
+    expect(handleValidationMessage("rowan!")).toBe("Use letters, numbers, and underscores only.");
+    expect(handleValidationMessage("ab")).toBe("Use 3 to 20 characters.");
+    expect(handleValidationMessage("a".repeat(21))).toBe("Use 3 to 20 characters.");
+    expect(handleValidationMessage("Rowan_42")).toBe("");
+  });
   it("allows 3 through 20 ASCII letters, numbers and underscores", () => {
     expect(handleFormatValid("a_9")).toBe(true);
     expect(handleFormatValid("a".repeat(20))).toBe(true);
