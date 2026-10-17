@@ -323,6 +323,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
                   value={o.value}
                   checked={selected}
                   onChange={() => setHow(o.value)}
+                  disabled={demo}
                   className="sr-only"
                 />
                 <img src={o.image} alt="" className="h-20 w-auto sm:h-24" />
@@ -350,6 +351,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
           required
           maxLength={MEANING_MAX}
           value={meaning}
+          disabled={demo}
           onChange={(e) => setMeaning(e.target.value)}
           placeholder="A short, clear meaning for this plate"
           aria-describedby="story-meaning-count"
@@ -368,6 +370,7 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
           rows={4}
           maxLength={MORE_MAX}
           value={more}
+          disabled={demo}
           onChange={(e) => setMore(e.target.value)}
           aria-describedby="story-more-hint story-more-count"
           className="w-full rounded-lg border border-input bg-card px-3 py-2"
