@@ -1,3 +1,9 @@
+# Step 48c: header menu exits and submissions returns
+
+- [ ] Close member/mobile menus on every selection and router location change; test each item and navigation.
+- [ ] Carry and validate from=submissions; test submissions, unknown marker, search priority and Explore fallback.
+- [ ] Run related tests for every changed source/test file and bun run lint; read current PR Codecov after managed sync if available. No local coverage/build/typecheck/browser/AI, database changes or branch changes.
+
 # PR #113 Copilot follow-ups
 
 - [x] Stage exact 0017 SQL in docs/proposed-migrations (managed migration directory cannot be written without applying); add index-existence assertion. 0016 untouched.
