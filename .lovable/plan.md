@@ -61,6 +61,7 @@ No existing rows are affected; no constraints added to existing tables. Version 
 
 - The retry from the public read is **started without waiting**. `getPlateSummary` computes the catching-up flag, returns immediately, and hands the run to the Worker's `ctx.waitUntil`, which keeps the request alive on Lovable's servers until the run settles even after the response is sent.
 - `src/server.ts` already receives `ctx` per request. It stores it in a request-scoped AsyncLocalStorage; a helper `runAfterResponse(promise)` calls `ctx.waitUntil(promise)` when present, and otherwise (dev server, tests) lets the promise run with its rejection caught and logged. Errors never reach the page.
+- `addStory` and the pending-story recheck currently await `requestSummaryRefresh`. Both switch to `runAfterResponse(requestSummaryRefresh(id))`, so a story's outcome returns at once and stories never wait for the summary.
 - How I'll check it isn't cut off: a unit test that the helper passes the run to `waitUntil` and that `getPlateSummary` resolves before a pending run finishes; then a run of the built Worker under local workerd (`wrangler dev` on the build output) where a catching-up plate view returns at once and a new version row appears afterwards. If I can't run workerd locally I'll say so and verify on the published site instead, by viewing a catching-up plate and confirming the new version row in the database.
 - `getPlateSummary(subjectId)` public server function. It reads with the admin client, which bypasses row level security, so it filters every version through `is_summary_public` itself (one rpc per version, or a security-definer list function if preferred later). Confirmed in the database: `service_role` has execute on `is_summary_public`. It returns visible versions (text, score, story_count, generated_at) and the catching-up flag. No ids of authors, no hidden data.
 
@@ -70,7 +71,7 @@ Real summary panel replaces mock data in `RealPlateDetail`, keeping the static p
 
 ## Tests
 
-Prompt building and output validation (malformed then retry, malformed twice, em dash replacement); catching-up conditions (all three plus none); zero-history case; panel rendering; analytics event and never-send filtering; refresh skip/claim/pause paths. Server visibility test: a version influenced by a hidden story is never returned by `getPlateSummary`, and it is returned again once the story is unhidden. Rerun `tests/db/summary-visibility.sql` plus a new `tests/db/summary-runs.sql` (claim, second claim refused, grants closed).
+Prompt building and output validation (malformed then retry, malformed twice, em dash replacement); catching-up conditions (all three plus none); zero-history case; panel rendering; analytics event and never-send filtering; refresh skip/claim/pause paths. `addStory` test: it resolves with its outcome while the summary run is still pending. Server visibility test: a version influenced by a hidden story is never returned by `getPlateSummary`, and it is returned again once the story is unhidden. Rerun `tests/db/summary-visibility.sql` plus a new `tests/db/summary-runs.sql` (claim, second claim refused, grants closed).
 
 ## Done-when checks
 
