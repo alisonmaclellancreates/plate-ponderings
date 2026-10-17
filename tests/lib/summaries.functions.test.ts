@@ -15,10 +15,8 @@ vi.mock("@tanstack/react-start", () => ({
         validate = fn;
         return builder;
       },
-      handler:
-        (fn: (args: { data: unknown }) => unknown) =>
-        (args: { data: unknown }) =>
-          fn({ data: validate(args.data) }),
+      handler: (fn: (args: { data: unknown }) => unknown) => (args: { data: unknown }) =>
+        fn({ data: validate(args.data) }),
     };
     return builder;
   },

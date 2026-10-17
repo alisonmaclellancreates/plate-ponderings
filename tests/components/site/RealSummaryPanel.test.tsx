@@ -19,7 +19,19 @@ vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => ({ account: null })
 vi.mock("@tanstack/react-query", () => ({
   useQuery: ({ queryKey, queryFn }: { queryKey: string[]; queryFn: () => unknown }) => {
     queryFn();
-    return { data: queryKey[0] === "plate-summary" ? m.summary : { stories: [], total: 0, pending: [], storyCount: 2, ownerHandle: null, hasOwnerStory: false } };
+    return {
+      data:
+        queryKey[0] === "plate-summary"
+          ? m.summary
+          : {
+              stories: [],
+              total: 0,
+              pending: [],
+              storyCount: 2,
+              ownerHandle: null,
+              hasOwnerStory: false,
+            },
+    };
   },
 }));
 vi.mock("@/lib/stories.functions", () => ({ getPlateStories: vi.fn(), STORY_PAGE_SIZE: 5 }));
@@ -65,7 +77,9 @@ describe("real summary panel", () => {
     const p = within(panel());
     expect(p.getByText("Summary text 9")).toBeTruthy();
     expect(p.getByText("Largely agree")).toBeTruthy();
-    expect(p.getByText(/AI-generated summary · Based on 4 stories · Updated Oct 9, 2026/)).toBeTruthy();
+    expect(
+      p.getByText(/AI-generated summary · Based on 4 stories · Updated Oct 9, 2026/),
+    ).toBeTruthy();
     expect(p.queryByRole("button", { name: /Earlier summaries/ })).toBeNull();
     expect(p.queryByRole("status")).toBeNull();
   });
@@ -99,11 +113,9 @@ describe("real summary panel", () => {
     expect(m.track).toHaveBeenCalledWith("summary_history_opened", { versions_shown: 3 });
     const list = document.getElementById("earlier-summaries")!;
     const items = within(list);
-    expect(items.getAllByRole("listitem").map((li) => li.textContent?.match(/Oct \d+/)?.[0])).toEqual([
-      "Oct 8",
-      "Oct 7",
-      "Oct 6",
-    ]);
+    expect(
+      items.getAllByRole("listitem").map((li) => li.textContent?.match(/Oct \d+/)?.[0]),
+    ).toEqual(["Oct 8", "Oct 7", "Oct 6"]);
     expect(items.getByText("Opinions differ")).toBeTruthy();
     expect(screen.queryByText("Summary text 8")).toBeNull();
     await user.click(items.getAllByRole("button", { name: "Read summary" })[0]!);

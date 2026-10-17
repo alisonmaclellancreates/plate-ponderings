@@ -14,9 +14,7 @@ describe("consensusFor", () => {
 
 describe("replaceEmDashes", () => {
   it("replaces every em dash and its spacing", () => {
-    expect(replaceEmDashes("One view \u2014 another\u2014third")).toBe(
-      "One view, another, third",
-    );
+    expect(replaceEmDashes("One view \u2014 another\u2014third")).toBe("One view, another, third");
     expect(replaceEmDashes("No dashes here - just a hyphen.")).toBe(
       "No dashes here - just a hyphen.",
     );

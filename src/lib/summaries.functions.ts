@@ -45,10 +45,9 @@ export const getPlateSummary = createServerFn({ method: "POST" })
 
     const checks = await Promise.all(
       (versions ?? []).map(async (v) => {
-        const { data: isPublic, error: checkError } = await supabaseAdmin.rpc(
-          "is_summary_public",
-          { _summary_id: v.id },
-        );
+        const { data: isPublic, error: checkError } = await supabaseAdmin.rpc("is_summary_public", {
+          _summary_id: v.id,
+        });
         return !checkError && isPublic === true;
       }),
     );

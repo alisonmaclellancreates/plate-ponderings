@@ -157,9 +157,7 @@ function SummaryPanel({
         </p>
       )}
       {current && <p className="mt-3 text-lg">{current.text}</p>}
-      {current && earlier.length > 0 && (
-        <EarlierSummaries earlier={earlier} open={historyOpen} />
-      )}
+      {current && earlier.length > 0 && <EarlierSummaries earlier={earlier} open={historyOpen} />}
     </section>
   );
 }

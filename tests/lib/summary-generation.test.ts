@@ -95,7 +95,9 @@ describe("generateSummary", () => {
   });
 
   it("replaces em dashes before returning", async () => {
-    m.streamText.mockReturnValue(output({ text: "One view \u2014 another.", disagreement_score: 50 }));
+    m.streamText.mockReturnValue(
+      output({ text: "One view \u2014 another.", disagreement_score: 50 }),
+    );
     const result = await generateSummary(STORIES);
     expect(result).toEqual({
       outcome: "generated",
