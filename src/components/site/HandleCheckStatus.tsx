@@ -26,9 +26,10 @@ export function HandleCheckStatusPanel({
   onResume?: () => void;
 }) {
   const blocked = Boolean(status?.category);
+  const headingId = useId();
   return (
-    <section aria-labelledby="handle-check-status" className="mt-6 border-y border-border py-5">
-      <h2 id="handle-check-status" className="font-display text-2xl text-navy">
+    <section aria-labelledby={headingId} className="mt-6 border-y border-border py-5">
+      <h2 id={headingId} className="font-display text-2xl text-navy">
         Handle check status
       </h2>
       {!status ? (
