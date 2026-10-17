@@ -296,10 +296,18 @@ export function DemoPage() {
           <li key={s}>{s}</li>
         ))}
       </ul>
-      <Button className="brand-btn brand-btn-navy mt-6 w-full" disabled={busy} onClick={() => void enterDemo()}>
+      <Button
+        className="brand-btn brand-btn-navy mt-6 w-full"
+        disabled={busy}
+        onClick={() => void enterDemo()}
+      >
         {busy ? "Starting the Demo…" : "Start the Demo"}
       </Button>
-      {error && <p role="alert" className="mt-3 text-coral-cta">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-3 text-coral-cta">
+          {error}
+        </p>
+      )}
     </EntryShell>
   );
 }

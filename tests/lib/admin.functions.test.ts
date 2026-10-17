@@ -32,7 +32,11 @@ import {
 
 const admin = (yes: boolean | null, error: unknown = null) =>
   f.db.rpc.mockImplementation((fn: string, args?: { _role: string }) =>
-    Promise.resolve(fn === "has_role" ? { data: args?._role === "demo" ? false : yes, error } : { data: [], error: null }),
+    Promise.resolve(
+      fn === "has_role"
+        ? { data: args?._role === "demo" ? false : yes, error }
+        : { data: [], error: null },
+    ),
   );
 
 beforeEach(() => {
@@ -52,12 +56,17 @@ describe("admin access is decided by has_role on the caller's client", () => {
     expect(await getAdminAccess()).toEqual({ admin: false });
   });
   it("refuses dual admin/demo identities and failed demo checks before mutations", async () => {
-    for (const result of [{ data: true, error: null }, { data: null, error: new Error("roles unavailable") }]) {
+    for (const result of [
+      { data: true, error: null },
+      { data: null, error: new Error("roles unavailable") },
+    ]) {
       f.db.rpc.mockImplementation((_fn: string, args: { _role: string }) =>
         Promise.resolve(args._role === "demo" ? result : { data: true, error: null }),
       );
       expect(await getAdminAccess()).toEqual({ admin: false });
-      expect(await setStoryHidden({ data: { storyId: "s", hidden: true } })).toEqual({ outcome: "forbidden" });
+      expect(await setStoryHidden({ data: { storyId: "s", hidden: true } })).toEqual({
+        outcome: "forbidden",
+      });
       expect(await recheckAllPending()).toEqual({ outcome: "forbidden" });
       expect(f.db.calls).toEqual([]);
     }
@@ -132,7 +141,9 @@ describe("getReportedStories", () => {
   it("throws on a read error", async () => {
     f.db.rpc.mockImplementation((fn: string, args?: { _role: string }) =>
       Promise.resolve(
-        fn === "has_role" ? { data: args?._role === "demo" ? false : true, error: null } : { data: null, error: { message: "x" } },
+        fn === "has_role"
+          ? { data: args?._role === "demo" ? false : true, error: null }
+          : { data: null, error: { message: "x" } },
       ),
     );
     await expect(getReportedStories()).rejects.toThrow("We couldn't load reported stories.");

@@ -31,24 +31,66 @@ export function DemoAdminControls() {
       setConfirmation("");
     }
   }
-  return <section className="mt-6" aria-label="Demo data">
-    <div className="flex flex-wrap gap-3">
-      <Button variant="outline" disabled={busy} onClick={() => setStage(1)}>Reset seed data</Button>
-      <Button variant="outline" disabled={busy} onClick={() => void run(false)}>Fill missing guesses</Button>
-    </div>
-    {message && <p role="status" className="mt-3">{message}</p>}
-    <Dialog.Root open={stage !== 0} onOpenChange={(open) => { if (!open && !busy) { setStage(0); setConfirmation(""); } }}>
-      <Dialog.Portal><Dialog.Overlay className="fixed inset-0 z-40 bg-navy/60" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-6 text-navy shadow-lg">
-          <Dialog.Title className="font-display text-2xl">Reset seed data?</Dialog.Title>
-          <Dialog.Description className="mt-3">This replaces all contributor content and non-admin accounts with the demo scenario. Your admin and sample accounts are kept.</Dialog.Description>
-          {stage === 2 && <label className="mt-4 block">Type RESET to confirm<input className="mt-2 h-11 w-full rounded-md border border-input bg-card px-3" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} disabled={busy} /></label>}
-          <div className="mt-6 flex gap-3">
-            <Dialog.Close asChild><Button variant="outline" disabled={busy}>Cancel</Button></Dialog.Close>
-            {stage === 1 ? <Button onClick={() => setStage(2)}>Continue</Button> : <Button disabled={busy || confirmation !== "RESET"} onClick={() => void run(true)}>Reset seed data</Button>}
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  </section>;
+  return (
+    <section className="mt-6" aria-label="Demo data">
+      <div className="flex flex-wrap gap-3">
+        <Button variant="outline" disabled={busy} onClick={() => setStage(1)}>
+          Reset seed data
+        </Button>
+        <Button variant="outline" disabled={busy} onClick={() => void run(false)}>
+          Fill missing guesses
+        </Button>
+      </div>
+      {message && (
+        <p role="status" className="mt-3">
+          {message}
+        </p>
+      )}
+      <Dialog.Root
+        open={stage !== 0}
+        onOpenChange={(open) => {
+          if (!open && !busy) {
+            setStage(0);
+            setConfirmation("");
+          }
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-40 bg-navy/60" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-6 text-navy shadow-lg">
+            <Dialog.Title className="font-display text-2xl">Reset seed data?</Dialog.Title>
+            <Dialog.Description className="mt-3">
+              This replaces all contributor content and non-admin accounts with the demo scenario.
+              Your admin and sample accounts are kept.
+            </Dialog.Description>
+            {stage === 2 && (
+              <label className="mt-4 block">
+                Type RESET to confirm
+                <input
+                  className="mt-2 h-11 w-full rounded-md border border-input bg-card px-3"
+                  value={confirmation}
+                  onChange={(event) => setConfirmation(event.target.value)}
+                  disabled={busy}
+                />
+              </label>
+            )}
+            <div className="mt-6 flex gap-3">
+              <Dialog.Close asChild>
+                <Button variant="outline" disabled={busy}>
+                  Cancel
+                </Button>
+              </Dialog.Close>
+              {stage === 1 ? (
+                <Button onClick={() => setStage(2)}>Continue</Button>
+              ) : (
+                <Button disabled={busy || confirmation !== "RESET"} onClick={() => void run(true)}>
+                  Reset seed data
+                </Button>
+              )}
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </section>
+  );
 }
