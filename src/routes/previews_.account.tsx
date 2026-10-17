@@ -1,8 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HandleField } from "@/components/site/Account";
-import { SignInPage, SignUpPage } from "@/components/site/Entry";
-import { HandleCheckStatusPanel } from "@/components/site/HandleCheckStatus";
-import { HANDLE_REJECTED } from "@/lib/account-rules";
+import { SignInForm, SignUpForm } from "@/components/site/Entry";
+import { AiCheckStatusPanel } from "@/components/site/AiCheckStatus";
+import {
+  HANDLE_REJECTED,
+  SIGN_IN_ERROR,
+  SIGN_UP_ERROR,
+  WEAK_PASSWORD_ERROR,
+  BREACHED_PASSWORD_ERROR,
+} from "@/lib/account-rules";
 
 export const Route = createFileRoute("/previews_/account")({
   head: () => ({
@@ -29,7 +35,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <section aria-label={title} className="brand-card p-6">
       <h2 className="font-display text-2xl text-navy">{title}</h2>
       <div className="mt-4">{children}</div>
-    </section>
+    </Section>
   );
 }
 
@@ -49,6 +55,10 @@ const HANDLE_STATES = [
   },
 ] as const;
 
+const inertSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+};
+
 function AccountPreviews() {
   return (
     <main className="mx-auto max-w-3xl space-y-8 px-4 py-12">
@@ -63,11 +73,11 @@ function AccountPreviews() {
           <HandleField {...state.props} />
         </Section>
       ))}
-      <Section title="Handle check status, Ready">
-        <HandleCheckStatusPanel status={{ allowed: true, category: null }} />
+      <Section title="AI check status, Ready">
+        <AiCheckStatusPanel status={{ allowed: true, category: null }} />
       </Section>
-      <Section title="Handle check status, Blocked">
-        <HandleCheckStatusPanel
+      <Section title="AI check status, Blocked">
+        <AiCheckStatusPanel
           status={{
             allowed: true,
             category: "credit_block",
@@ -75,22 +85,18 @@ function AccountPreviews() {
           }}
         />
       </Section>
-      <div className="space-y-2">
-        <h2 className="font-display text-2xl text-navy">Sign in, wrong password</h2>
-        <SignInPage previewError="We couldn't sign you in. Check your email and password and try again." />
-      </div>
-      <div className="space-y-2">
-        <h2 className="font-display text-2xl text-navy">Sign up, email already has an account</h2>
-        <SignUpPage previewError="Your account couldn't be created. You can try again or sign in." />
-      </div>
-      <div className="space-y-2">
-        <h2 className="font-display text-2xl text-navy">Sign up, weak password</h2>
-        <SignUpPage previewError="Please choose a stronger password with at least 8 characters." />
-      </div>
-      <div className="space-y-2">
-        <h2 className="font-display text-2xl text-navy">Sign up, breached password</h2>
-        <SignUpPage previewError="This password has appeared in a data breach. Please choose a different password." />
-      </div>
+      <Section title="Sign in, wrong password">
+        <SignInForm busy={false} error={SIGN_IN_ERROR} submit={inertSubmit} />
+      </Section>
+      <Section title="Sign up, email already has an account">
+        <SignUpForm busy={false} error={SIGN_UP_ERROR} submit={inertSubmit} />
+      </Section>
+      <Section title="Sign up, weak password">
+        <SignUpForm busy={false} error={WEAK_PASSWORD_ERROR} submit={inertSubmit} />
+      </Section>
+      <Section title="Sign up, breached password">
+        <SignUpForm busy={false} error={BREACHED_PASSWORD_ERROR} submit={inertSubmit} />
+      </Section>
     </main>
   );
 }
