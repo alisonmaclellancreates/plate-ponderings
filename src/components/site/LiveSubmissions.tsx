@@ -37,7 +37,10 @@ export function LiveSubmissions() {
     setMessage("");
     try {
       const result = await dismiss({ data: { kind: row.kind, id: row.id } });
-      if (result.outcome === "demo") setMessage(result.message ?? "");
+      if (result.outcome === "demo") {
+        setMessage(result.message ?? "");
+        void track("demo_write_refused", { action: "dismiss_submission" });
+      }
       else setGone((g) => [...g, row.id]);
     } catch {
       setMessage(DISMISS_ERROR);

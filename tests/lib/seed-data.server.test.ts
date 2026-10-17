@@ -18,7 +18,7 @@ it("builds the literal scenario, histories and Pacific times relative to the dem
   expect(seed.featured_days).toHaveLength(5);
   expect(seed.notifications).toHaveLength(2);
   expect(
-    seed.notifications.every((n) => n.read_at === null && n.user_id === accounts.Traveler4821),
+    seed.notifications.every((n) => n.read_at === null && n.user_id === accounts["Traveler4821"]),
   ).toBe(true);
   expect(seed.reports).toHaveLength(1);
   const rainy = seed.stories[0];

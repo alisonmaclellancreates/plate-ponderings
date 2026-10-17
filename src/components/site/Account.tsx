@@ -272,6 +272,7 @@ export function ProfilePage() {
         await auth.refresh();
         await track("handle_changed", {});
       } else if (result.outcome === "rejected") await track("handle_rejected", {});
+      else if (result.outcome === "demo") await track("demo_write_refused", { action: "save_handle" });
     } catch {
       setMessage(HANDLE_UNAVAILABLE);
     } finally {

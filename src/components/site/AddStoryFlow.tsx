@@ -205,6 +205,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     // Detection is a shortcut, never a gate: any failure means draw the box.
     try {
       const result = await detectBox({ data: { image: toDetectDataUrl(bitmap) } });
+      if (result.outcome === "demo") void track("demo_write_refused", { action: "detect_photo" });
       draft = {
         bitmap,
         imageUrl,
@@ -243,6 +244,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     try {
       const uploaded = await uploadPhoto({ data: { jpeg: await blobToDataUrl(blob) } });
       if (uploaded.outcome !== "ok") {
+        if (uploaded.outcome === "demo") void track("demo_write_refused", { action: "upload_photo" });
         setPause({ heading: STORY_SUBMIT_ERROR_HEADING, message: STORY_SUBMIT_ERROR_MESSAGE });
         setPhotoDraft(null);
         return;
@@ -308,6 +310,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         setPause({ heading: STORY_RATE_LIMIT_HEADING, message: result.message });
         setStep("1");
       } else if (result.outcome === "demo") {
+        void track("demo_write_refused", { action: "submit_story" });
         setPause({ heading: null, message: result.message });
         setStep("1");
       } else {

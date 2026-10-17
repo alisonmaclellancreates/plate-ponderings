@@ -638,6 +638,7 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
     try {
       const result = await spot({ data: next });
       setStage({ kind: "result", result });
+      if (result.outcome === "demo") await track("demo_write_refused", { action: "spot_plate" });
       const outcome =
         result.outcome === "already-spotted"
           ? "already_spotted"
