@@ -74,8 +74,8 @@
 
 # Step 42: accounts, handles and session-aware header
 
-- [ ] Classify weak-password errors by reasons, test real error shapes, and verify breached-password feedback live.
-- [ ] Set and verify a test handle-check block; leave Resume to Alison.
+- [x] Classify weak-password errors by reasons; actual AuthWeakPasswordError tests pass. Live signup returns 422 with pwned and displays the unchanged breached-password message. 541 tests pass; account-rules coverage 100%, touched-file lint clean, build OK.
+- [x] Set and read back credit_block at 2026-10-17 06:12:55 UTC with test run marker; leave Resume to Alison. Preview and published share this setting.
 
 - [x] Rowan review: 278px handle input at 360px with feedback below; actionable validation, truncated mobile header with full accessible name. 536 tests pass; maintained lint 0 errors/0 warnings, six existing UI warnings; build OK.
 - [x] Grant Traveler3374 admin access and verify Handle check status: real account menu opens Admin, status reads Ready; handle remains Traveler3374 after save and reload.
