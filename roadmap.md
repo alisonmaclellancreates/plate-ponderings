@@ -74,6 +74,8 @@
 
 # Step 42: accounts, handles and session-aware header
 
+- [ ] Patch coverage: add behaviour tests for server refusal/error paths and all eight reported files; reach 100% locally without removing viable branches.
+- [ ] Patch coverage: read the PR Codecov percentage after CI; report external access or pending-CI blockers explicitly.
 - [x] Pre-merge: separate the account hook, resolve the provider effect dependency without suppression; maintained files have 0 errors/0 warnings, repository-wide 0 errors/6 existing UI warnings. All 509 tests pass; build OK; protected profile redirect verified.
 - [x] Pre-merge: original desktop fixture auth user and SullyTest42 profile are absent; the handle-save attempts table is empty. Already deleted, no additional deletion needed.
 - [x] Scope terminal blocks to handle moderation only; verified admin status/manual reset; safe logs and gateway quotes documented in docs/step42-report.md and AGENTS.md.
