@@ -14,6 +14,7 @@ vi.mock("@/lib/account-auth", () => ({
   }),
 }));
 vi.mock("@tanstack/react-router", () => ({
+  useRouterState: () => "/",
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
   useNavigate: () => vi.fn(),
 }));

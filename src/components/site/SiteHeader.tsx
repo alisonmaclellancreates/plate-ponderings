@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
 import type { HeaderMode } from "@/lib/header-mode";
@@ -97,6 +97,10 @@ const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text
 export function MemberProfile({ showHandle }: { showHandle: boolean }) {
   const auth = useAccountAuth();
   const [open, setOpen] = useState(false);
+  const location = useRouterState({ select: (state) => state.location });
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
   const [error, setError] = useState("");
   const fetchDot = useServerFn(getUnreadDot);
   const signedIn = Boolean(auth?.account);
@@ -127,18 +131,30 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
           className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
         >
           <li>
-            <Link to="/submissions" className="block px-4 py-2 hover:bg-cream">
+            <Link
+              to="/submissions"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 hover:bg-cream"
+            >
               Your Submissions
             </Link>
           </li>
           <li>
-            <Link to="/profile" className="block px-4 py-2 hover:bg-cream">
+            <Link
+              to="/profile"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 hover:bg-cream"
+            >
               Your Profile
             </Link>
           </li>
           {auth.account.isAdmin && (
             <li>
-              <Link to="/admin" className="block px-4 py-2 hover:bg-cream">
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 hover:bg-cream"
+              >
                 Admin
               </Link>
             </li>
@@ -147,9 +163,10 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
             <Button
               variant="ghost"
               className="w-full justify-start px-4 text-navy"
-              onClick={() =>
-                void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."))
-              }
+              onClick={() => {
+                setOpen(false);
+                void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."));
+              }}
             >
               Sign out
             </Button>
@@ -169,6 +186,10 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
   const mode = previewMode ?? (auth?.account ? "member" : "signed-out");
   const demoEnabled = previewMode !== undefined || auth?.demoEnabled;
   const [open, setOpen] = useState(false);
+  const location = useRouterState({ select: (state) => state.location });
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
   const signedOut = mode === "signed-out";
   return (
     <header className="bg-navy text-cream" data-mode={mode}>
@@ -241,12 +262,21 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
           className="border-t border-cream/20 px-4 pb-4 md:hidden"
         >
           {NAV.map((item) => (
-            <a key={item.href} href={item.href} className="site-nav-link block py-3">
+            <Link
+              key={item.href}
+              to={item.href}
+              onClick={() => setOpen(false)}
+              className="site-nav-link block py-3"
+            >
               {item.label}
-            </a>
+            </Link>
           ))}
           {signedOut && demoEnabled && (
-            <Link to="/demo" className={`${tryDemo} mt-2 inline-block`}>
+            <Link
+              to="/demo"
+              onClick={() => setOpen(false)}
+              className={`${tryDemo} mt-2 inline-block`}
+            >
               Try the Demo
             </Link>
           )}
