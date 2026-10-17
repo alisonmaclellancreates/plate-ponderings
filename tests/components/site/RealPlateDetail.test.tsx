@@ -5,11 +5,13 @@ import type { ReactNode } from "react";
 
 const m = vi.hoisted(() => ({
   getUser: vi.fn(),
+  guess: { status: "absent" } as Record<string, unknown>,
   account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean },
   getPlateStories: vi.fn(),
   stories: null as unknown,
 }));
 
+vi.mock("@/lib/plate-guesses.functions", () => ({ getPlateGuess: () => Promise.resolve(m.guess) }));
 vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -39,9 +41,9 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => ({ account: m.account }) }));
 vi.mock("@tanstack/react-query", () => ({
-  useQuery: ({ queryFn }: { queryFn: () => unknown }) => {
+  useQuery: ({ queryFn, queryKey }: { queryFn: () => unknown; queryKey: string[] }) => {
     queryFn();
-    return { data: m.stories };
+    return { data: queryKey[0] === "plate-guess" ? m.guess : m.stories };
   },
 }));
 vi.mock("@/lib/stories.functions", () => ({
@@ -70,6 +72,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   m.getUser.mockResolvedValue({ data: { user: null } });
   m.account = null;
+  m.guess = { status: "absent" };
   m.stories = {
     stories: [],
     pending: [],
@@ -234,9 +237,45 @@ describe("RealPlateDetail", () => {
     for (const link of screen.getAllByRole("link", { name: "Add Your Story" }))
       expect(link).toHaveAttribute("href", "/story/1?plate=p1");
     m.account = null;
+    m.guess = { status: "absent" };
     view.rerender(<RealPlateDetail plate={plate} />);
     for (const link of screen.getAllByRole("link", { name: "Add Your Story" }))
       expect(link).toHaveAttribute("href", "/sign-in-prompt?plate=p1");
     expect(m.getUser).not.toHaveBeenCalled();
   });
+});
+
+it("hidden guesses do not alter counts and pending human stories do not unlock them", () => {
+  m.guess = { status: "hidden" };
+  m.stories = { ...(m.stories as object), pending: [story("pending")] };
+  render(<RealPlateDetail plate={plate} />);
+  expect(
+    within(screen.getByRole("list", { name: "Plate status" })).getByText("0 stories"),
+  ).toBeTruthy();
+  expect(screen.queryByRole("region", { name: "What the Plate?'s guess" })).toBeNull();
+});
+it("revealed guesses do not become human stories or change owner-first order", () => {
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  );
+  m.guess = { status: "revealed", meaning: "Imagined meaning", story: "Imagined fiction." };
+  m.stories = {
+    stories: [story("owner", { source: "owner" }), story("guess")],
+    pending: [],
+    total: 2,
+    storyCount: 2,
+    hasOwnerStory: true,
+    ownerHandle: "owner",
+  };
+  render(<RealPlateDetail plate={plate} />);
+  expect(screen.getAllByRole("article")).toHaveLength(2);
+  expect(screen.getAllByRole("article")[0]).toHaveAttribute("data-owner", "true");
+  expect(
+    within(screen.getByRole("list", { name: "Plate status" })).getByText("2 stories"),
+  ).toBeTruthy();
+  vi.unstubAllGlobals();
 });

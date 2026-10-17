@@ -316,3 +316,16 @@ describe("analytics", () => {
     });
   });
 });
+
+it("ai_guess_revealed strips every supplied guess property in both paths", async () => {
+  const a = await import("@/lib/analytics");
+  await a.track("ai_guess_revealed", {});
+  expect(sdk.capture).toHaveBeenLastCalledWith("ai_guess_revealed", {});
+  const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+  expect(
+    beforeSend({
+      event: "ai_guess_revealed",
+      properties: { meaning: "secret", story: "fiction", plateId: "private" },
+    }),
+  ).toEqual({ event: "ai_guess_revealed", properties: {} });
+});

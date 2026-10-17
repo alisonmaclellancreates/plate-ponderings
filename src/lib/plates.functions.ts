@@ -186,6 +186,9 @@ export const spotPlate = createServerFn({ method: "POST" })
       }
       return { outcome: "error" };
     }
+    const { requestPlateGuess } = await import("./plate-guesses.server");
+    const { runAfterResponse } = await import("./after-response.server");
+    runAfterResponse(requestPlateGuess(inserted.data.id));
     return {
       outcome: "new",
       plate: {
@@ -230,6 +233,9 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
       .select("id,identity_a,identity_b,jurisdictions!subjects_identity_a_fkey(name)")
       .eq("created_by", context.userId)
       .eq("status", "pending");
+    const newlyPublished: string[] = [];
+    const { requestPlateGuess, fillPlateGuesses } = await import("./plate-guesses.server");
+    const { runAfterResponse } = await import("./after-response.server");
     let rechecked = 0;
     let halted = false;
     if (!pending.error && pending.data && pending.data.length > 0) {
@@ -251,6 +257,8 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
             .eq("status", "pending")
             .select("id");
           if (updated.data && updated.data.length > 0) {
+            newlyPublished.push(subject.id);
+            runAfterResponse(requestPlateGuess(subject.id));
             await supabaseAdmin.from("notifications").insert({
               user_id: context.userId,
               kind: "subject_published",
@@ -325,5 +333,6 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
         }
       }
     }
+    runAfterResponse(fillPlateGuesses(context.userId, newlyPublished));
     return { rechecked };
   });

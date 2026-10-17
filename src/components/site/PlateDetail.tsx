@@ -10,6 +10,8 @@ import {
   MoreHorizontal,
   UserCircle2,
 } from "lucide-react";
+import { GuessTeaser, PlateGuessPanel } from "@/components/site/PlateGuessPanel";
+import { getPlateGuess } from "@/lib/plate-guesses.functions";
 import { PlateFrame } from "@/components/site/PlateFrame";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
@@ -235,10 +237,12 @@ function MysteryPrompt({
   signedIn,
   plateId,
   storyCount = 0,
+  hasGuess = false,
 }: {
   signedIn?: boolean;
   plateId?: string;
   storyCount?: number;
+  hasGuess?: boolean;
 } = {}) {
   return (
     <section aria-labelledby="first-story" className="space-y-6">
@@ -262,6 +266,7 @@ function MysteryPrompt({
             Add Your Story
           </button>
         )}
+        {hasGuess && <GuessTeaser />}
       </div>
       <div
         data-testid="roadside-sign"
@@ -523,6 +528,10 @@ export function RealPlateDetail({
     queryKey: ["plate-stories", plate.id],
     queryFn: () => getPlateStories({ data: { plateId: plate.id } }),
   });
+  const { data: guess } = useQuery({
+    queryKey: ["plate-guess", plate.id],
+    queryFn: () => getPlateGuess({ data: { plateId: plate.id } }),
+  });
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       {backToSearch ? (
@@ -553,9 +562,15 @@ export function RealPlateDetail({
                 signedIn={signedIn}
                 plateId={plate.id}
                 storyCount={storiesData?.storyCount ?? 0}
+                hasGuess={guess?.status === "hidden"}
               />
             }
           />
+          {guess?.status === "revealed" && (
+            <div className="mt-6">
+              <PlateGuessPanel plateId={plate.id} meaning={guess.meaning} story={guess.story} />
+            </div>
+          )}
         </div>
       </div>
       <RealStatusStrip plateId={plate.id} />
