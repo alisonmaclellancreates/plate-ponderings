@@ -58,12 +58,13 @@ export function safeReturnPath(value: unknown): string {
 export function signupErrorMessage(error: {
   code?: string | undefined;
   message?: string | undefined;
+  reasons?: readonly string[] | undefined;
 }) {
   if (
     error.code === "weak_password" ||
     (error.code === "validation_failed" && /password/i.test(error.message ?? ""))
   ) {
-    return /breach|leak|pwned/i.test(error.message ?? "")
+    return error.reasons?.includes("pwned")
       ? "This password has appeared in a data breach. Please choose a different password."
       : "Please choose a stronger password with at least 8 characters.";
   }
