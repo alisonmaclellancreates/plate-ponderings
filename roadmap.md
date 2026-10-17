@@ -2,8 +2,8 @@
 
 # Step 43: Rowan rate-limit correction
 
-- [ ] Separate pause outcome using the unchanged wait message; outcome tests and 100% local patch coverage.
-- [ ] Check the outcome at 1280px and 360px; lint clean in changed files. Jurisdiction display deferred.
+- [x] Separate pause outcome using the unchanged wait message; live and preview outcome tests pass. All new executable lines covered locally; 581 tests pass.
+- [x] Check the outcome at 1280px and 360px: clean wrapping, no horizontal overflow or browser errors, Go Back returns home. Changed-file lint clean; preview build OK. Jurisdiction display deferred.
 
 - [x] Diagnose lint, ignore generated files, and format remaining files.
 - [x] Run lint and coverage; inspect automatic build/typecheck signals.
