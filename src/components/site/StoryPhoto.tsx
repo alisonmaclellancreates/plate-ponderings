@@ -52,7 +52,6 @@ export function StoryPhotoZoom({ photo, box, handle, meaning }: StoryPhotoProps)
       <DialogPortal>
         <DialogOverlay />
         <DialogPrimitive.Content
-          aria-describedby={undefined}
           className="fixed inset-x-0 top-0 z-50 flex max-h-dvh flex-col gap-3 overflow-y-auto bg-background p-4 sm:inset-x-auto sm:left-1/2 sm:top-1/2 sm:max-h-[90dvh] sm:w-auto sm:max-w-[min(90vw,1600px)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:p-6"
         >
           <div className="flex items-start justify-between gap-4">
@@ -60,7 +59,9 @@ export function StoryPhotoZoom({ photo, box, handle, meaning }: StoryPhotoProps)
               <DialogPrimitive.Title className="text-lg font-bold text-navy">
                 {meaning}
               </DialogPrimitive.Title>
-              <p className="text-sm text-muted-foreground">Photo shared by {handle}</p>
+              <DialogPrimitive.Description className="text-sm text-muted-foreground">
+                Photo shared by {handle}
+              </DialogPrimitive.Description>
             </div>
             <DialogPrimitive.Close className="brand-btn brand-btn-outline min-h-11 shrink-0">
               Close photo
