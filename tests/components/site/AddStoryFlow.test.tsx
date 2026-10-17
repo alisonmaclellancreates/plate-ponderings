@@ -284,6 +284,7 @@ describe("AddStoryFlow", () => {
     m.detect.mockResolvedValue({ outcome: "unavailable" });
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
     await user.click(screen.getByRole("button", { name: "Next" }));
     const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
     await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
@@ -300,6 +301,7 @@ describe("AddStoryFlow", () => {
     m.decode.mockRejectedValue(new Error("bad file"));
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
     await user.click(screen.getByRole("button", { name: "Next" }));
     const file = new File(["nope"], "photo.jpg", { type: "image/jpeg" });
     await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
