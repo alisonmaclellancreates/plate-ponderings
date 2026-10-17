@@ -186,3 +186,6 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [ ] Test that Resume AI checks clears the block for every check, not only that one block stops the others.
 - [ ] Confirm homepage look-up card moves keyboard focus to the first search field; test exists from static pages (Homepage.test.tsx), report as such.
 - [x] Step 45: summary versions, visibility on server, after-response retry; addStory and recheck do not wait for the summary
+
+## Step 47 (planning)
+- [ ] Your Submissions live list, Updated labels, header dot, dismiss, submissions_viewed (plan revised: admin reads by userId, dot refresh after recheck, conditional dismiss delete)
