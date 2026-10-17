@@ -205,7 +205,16 @@ export function SpotForm({
           <FieldError id="spot-text-error" message={errors.text} />
         </div>
       </div>
-      <button type="submit" className="brand-btn brand-btn-coral mt-5 w-full sm:w-auto">
+      {isDemo && (
+        <p role="status" className="mt-4 text-sm text-muted-foreground">
+          {DEMO_MESSAGE}
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={busy || isDemo}
+        className="brand-btn brand-btn-coral mt-5 w-full sm:w-auto"
+      >
         Check This Plate
       </button>
     </form>
