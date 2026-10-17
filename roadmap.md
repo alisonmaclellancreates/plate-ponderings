@@ -1,3 +1,9 @@
+# Step 46: real daily pick, featured shelf and archive
+
+- [ ] Resolve any brief/static-page conflict and analytics ambiguity, then present one plan including database changes for Alison's approval.
+- [ ] After approval, build atomic UTC selection, live featured pages, batch visible-summary reads and privacy-scoped analytics.
+- [ ] Add branch-complete tests; run changed test files and lint only, plus rollback-only database tests for schema changes. CI is authoritative for coverage/types/build; no live/browser/AI checks.
+
 # Step 45b: fictional plate guesses
 
 - [x] Alison approved the plan and subject_guesses table; applied migrations 0011 and 0012 (insert-only service grants).
