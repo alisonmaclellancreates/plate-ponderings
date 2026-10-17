@@ -257,4 +257,28 @@ describe("recheckAllPending", () => {
     });
     expect(f.subject).toHaveBeenCalledTimes(2);
   });
+  it("stops on the first block", async () => {
+    f.db.queue("subjects", {
+      data: [subjectRow("p1", "a"), subjectRow("p2", "a"), subjectRow("p3", "a")],
+      error: null,
+    });
+    f.subject.mockResolvedValueOnce("published").mockResolvedValueOnce("blocked");
+    expect(await recheckAllPending()).toEqual({
+      outcome: "done",
+      changed: 1,
+      remaining: 2,
+      stopped: true,
+    });
+    expect(f.subject).toHaveBeenCalledTimes(2);
+  });
+  it("counts only rows whose guarded update returned a row", async () => {
+    f.db.queue("subjects", { data: [subjectRow("p1", "a"), subjectRow("p2", "a")], error: null });
+    f.subject.mockResolvedValueOnce("unchanged").mockResolvedValueOnce("rejected");
+    expect(await recheckAllPending()).toEqual({
+      outcome: "done",
+      changed: 1,
+      remaining: 0,
+      stopped: false,
+    });
+  });
 });

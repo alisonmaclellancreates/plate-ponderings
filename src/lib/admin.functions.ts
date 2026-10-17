@@ -132,6 +132,7 @@ export const recheckAllPending = createServerFn({ method: "POST" })
     ];
     const { recheckSubject, recheckStory } = await import("./recheck.server");
     let changed = 0;
+    let settled = 0;
     let stopped = false;
     for (const item of queue.slice(0, RECHECK_CAP)) {
       const outcome =
@@ -159,7 +160,8 @@ export const recheckAllPending = createServerFn({ method: "POST" })
         stopped = true;
         break;
       }
+      settled++;
       if (outcome === "published" || outcome === "rejected") changed++;
     }
-    return { outcome: "done", changed, remaining: queue.length - changed, stopped };
+    return { outcome: "done", changed, remaining: queue.length - settled, stopped };
   });

@@ -25,7 +25,10 @@ const errors = vi.spyOn(console, "error").mockImplementation(() => {});
 beforeEach(() => {
   f.db.reset();
   f.tombstone.mockReset().mockResolvedValue(["p1"]);
-  f.db.storage.list.mockResolvedValue({ data: [{ name: "a.jpg" }], error: null });
+  f.db.storage.list
+    .mockReset()
+    .mockResolvedValueOnce({ data: [{ name: "a.jpg" }], error: null })
+    .mockResolvedValue({ data: [], error: null });
   f.db.storage.remove.mockResolvedValue({ error: null });
   f.db.deleteUser.mockResolvedValue({ error: null });
   f.db.rpc.mockResolvedValue({ data: false, error: null });
@@ -74,6 +77,20 @@ describe("deleteAccountData", () => {
     expect(f.db.ops("blocks")[0]).toContainEqual(["or", ["blocker_id.eq.me,blocked_id.eq.me"]]);
     expect(f.db.ops("profiles")[0]).toContainEqual(["eq", ["id", "me"]]);
     expect(f.db.deleteUser).toHaveBeenCalledWith("me");
+  });
+  it("pages through the photo folder until it is empty", async () => {
+    const page = (n: number, from: number) =>
+      Array.from({ length: n }, (_, i) => ({ name: `p${from + i}.jpg` }));
+    f.db.storage.list
+      .mockReset()
+      .mockResolvedValueOnce({ data: page(1000, 0), error: null })
+      .mockResolvedValueOnce({ data: page(2, 1000), error: null })
+      .mockResolvedValue({ data: [], error: null });
+    await deleteAccountData(admin, "me");
+    expect(f.db.storage.list).toHaveBeenCalledTimes(3);
+    expect(f.db.storage.remove).toHaveBeenCalledTimes(2);
+    expect(f.db.storage.remove.mock.calls[0]?.[0]).toHaveLength(1000);
+    expect(f.db.storage.remove.mock.calls[1]?.[0]).toEqual(["me/p1000.jpg", "me/p1001.jpg"]);
   });
   it("skips photo removal when the folder is empty or unreadable as empty", async () => {
     f.db.storage.list.mockResolvedValue({ data: [], error: null });

@@ -60,12 +60,18 @@ describe("recheckSubject", () => {
     f.db.reset();
     f.checkSubject.mockResolvedValue({ outcome: "approved" });
     f.db.queue("subjects", { data: null, error: null });
-    expect(await recheckSubject(admin, subject, "owner")).toBe("published");
+    expect(await recheckSubject(admin, subject, "owner")).toBe("unchanged");
     expect(f.db.ops("notifications")).toEqual([]);
   });
-  it("persists a block and stops on unavailable", async () => {
-    f.checkSubject.mockResolvedValue({ outcome: "unavailable", block: "credit", runId: "r" });
+  it("stops on unavailable without a block", async () => {
+    f.checkSubject.mockResolvedValue({ outcome: "unavailable" });
     expect(await recheckSubject(admin, subject, "owner")).toBe("unavailable");
+    expect(f.persist).not.toHaveBeenCalled();
+    expect(f.db.ops("subjects")).toEqual([]);
+  });
+  it("persists a block through the shared pause and stops, even with an approval", async () => {
+    f.checkSubject.mockResolvedValue({ outcome: "approved", block: "credit", runId: "r" });
+    expect(await recheckSubject(admin, subject, "owner")).toBe("blocked");
     expect(f.persist).toHaveBeenCalledWith(admin, "credit", "r");
     expect(f.db.ops("subjects")).toEqual([]);
   });
@@ -104,7 +110,7 @@ describe("recheckStory", () => {
   });
   it("persists a block and stops on unavailable", async () => {
     f.checkStory.mockResolvedValue({ outcome: "unavailable", block: "denied", runId: "r" });
-    expect(await recheckStory(admin, story, "author")).toBe("unavailable");
+    expect(await recheckStory(admin, story, "author")).toBe("blocked");
     expect(f.persist).toHaveBeenCalledWith(admin, "denied", "r");
   });
 });
