@@ -1,6 +1,6 @@
 # Story meaning framing
 
-- [ ] Prefill “They might be”, add it when missing before review/submission, preserve length validation, and run focused tests/lint. No moderation or database changes.
+- [x] Prefill “They might be”, add it when missing before review/submission without duplication, preserve the complete 80-character limit. 45 focused tests passed; changed-file lint clean; automatic build OK. No moderation or database changes.
 
 # Step 48: public facts and report labels
 
