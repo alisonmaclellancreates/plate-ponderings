@@ -239,12 +239,14 @@ describe("AddStoryFlow", () => {
       "src",
       "blob:processed-2",
     );
-    expect(vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-1"))
-      .toHaveLength(1);
+    expect(
+      vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-1"),
+    ).toHaveLength(1);
     expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed-2");
     unmount();
-    expect(vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-2"))
-      .toHaveLength(1);
+    expect(
+      vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-2"),
+    ).toHaveLength(1);
   });
 
   it("unmount releases a confirmed preview but step changes keep it alive", async () => {
@@ -259,8 +261,9 @@ describe("AddStoryFlow", () => {
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed");
     unmount();
-    expect(vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed"))
-      .toHaveLength(1);
+    expect(
+      vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed"),
+    ).toHaveLength(1);
   });
   it("requires more than the prefilled starter before continuing", async () => {
     const user = userEvent.setup();
