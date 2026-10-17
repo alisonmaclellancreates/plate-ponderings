@@ -195,3 +195,4 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Step 47 built: live Your Submissions, Updated labels, header dot (refreshes after recheck), conditional dismiss, submissions_viewed; notifications cascade (0014). PR Codecov pending.
 
 - Step 48: plan revisions (hide/unhide refresh, reporter_id SET NULL, capped recheckAllPending, no authorKey) then build after approval
+- [ ] Step 49: story photos (choose, AI box detect, adjust, canvas blur, JPEG export, server upload).
