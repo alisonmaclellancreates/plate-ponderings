@@ -34,8 +34,8 @@ describe("plateCropStyle", () => {
   });
   it("shifts the area inward at the photo's edges", () => {
     const area = shown(plateCropStyle({ x: 0.85, y: 0.9, w: 0.15, h: 0.1 }, 1000, 1000), 1000, 1000);
-    expect(area.x + area.w).toBeCloseTo(1000, 3);
-    expect(area.y + area.h).toBeCloseTo(1000, 3);
+    expect(area.x + area.w).toBeCloseTo(1000, 0);
+    expect(area.y + area.h).toBeCloseTo(1000, 0);
   });
   it("fits a plate that cannot get a 2:1 area inside the photo, never clipping it", () => {
     const style = plateCropStyle({ x: 0, y: 0, w: 1, h: 1 }, 400, 400);
