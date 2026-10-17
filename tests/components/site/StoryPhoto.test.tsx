@@ -39,8 +39,12 @@ describe("StoryPhotoZoom", () => {
   it("opens the whole photo with the meaning and handle, and closes with Close photo", async () => {
     render(<StoryPhotoZoom {...props} />);
     const { user, trigger } = await open();
-    const dialog = screen.getByRole("dialog", { name: props.meaning });
+    const dialog = screen.getByRole("dialog", {
+      name: props.meaning,
+      description: "Photo shared by Traveler4821",
+    });
     expect(screen.getByText("Photo shared by Traveler4821")).toBeInTheDocument();
+    expect(dialog).toHaveAccessibleDescription("Photo shared by Traveler4821");
     expect(screen.getByRole("img", { name: "Full photo shared by Traveler4821" })).toHaveAttribute(
       "src",
       props.photo,

@@ -231,3 +231,4 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Apply 0018 photo_box (tests/db/story-photo-box.sql: Alison runs in rollback)
 - [x] Server rounds box to 4 dp and clamps to photo edges before save; edge-touching test
 - [x] Save/return/clear box; zoomed card + dialog; preview
+- [x] Dialog description is "Photo shared by {handle}" via DialogPrimitive.Description (no aria-describedby override); preview sample built from a box-free base so photoBox is never undefined. 6 dialog tests and 9 preview tests pass; changed-file lint clean; build OK.
