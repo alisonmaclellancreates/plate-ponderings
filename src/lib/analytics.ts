@@ -34,7 +34,7 @@ export const STORY_SUBMITTED_OUTCOMES = [
 ] as const;
 type EventProperties<R extends EventRegistry> = {
   [E in keyof R]: {
-    [P in R[E][number]: E extends "subject_spotted"
+    [P in R[E][number]]: E extends "subject_spotted"
       ? P extends "outcome"
         ? (typeof SUBJECT_SPOTTED_OUTCOMES)[number]
         : string | number | boolean
