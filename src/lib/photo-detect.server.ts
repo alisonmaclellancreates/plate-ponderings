@@ -10,13 +10,15 @@ export type DetectBoxResult =
   | { outcome: "unavailable"; block: HandleBlockCategory | null; runId?: string | undefined };
 
 const fraction = z.number().min(0).max(1);
+// Strict structured output requires every key in `required`; optional keys are
+// rejected with invalid_json_schema. Nullable keys stay required but may be null.
 const boxSchema = z
   .object({
     found: z.boolean(),
-    x: fraction.optional(),
-    y: fraction.optional(),
-    w: fraction.optional(),
-    h: fraction.optional(),
+    x: fraction.nullable(),
+    y: fraction.nullable(),
+    w: fraction.nullable(),
+    h: fraction.nullable(),
   })
   .strict();
 
@@ -86,10 +88,10 @@ export async function detectPlateBoxInImage(dataUrl: string): Promise<DetectBoxR
     const output = await result.output;
     if (
       !output.found ||
-      output.x === undefined ||
-      output.y === undefined ||
-      output.w === undefined ||
-      output.h === undefined ||
+      output.x === null ||
+      output.y === null ||
+      output.w === null ||
+      output.h === null ||
       output.w < MIN_BOX ||
       output.h < MIN_BOX
     )
