@@ -1,17 +1,18 @@
 import { expect, it, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
-const m = vi.hoisted(() => ({ empty: false }));
+const m = vi.hoisted(() => ({ empty: false, failed: false, refetch: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
 }));
-vi.mock("@/components/site/Explore", () => ({ Explore: () => <p>archive</p> }));
+vi.mock("@/components/site/Explore", () => ({ Explore: ({ live }: { live: { error: boolean; retry: () => void } }) => <><p>archive</p>{live.error && <div role="alert"><button onClick={live.retry}>Try again</button></div>}</> }));
 vi.mock("@tanstack/react-query", () => ({
   useSuspenseInfiniteQuery: () => ({
-    data: { pages: m.empty ? [] : [{ today: "2026-10-17", plates: [] }] },
+    data: { pages: m.empty ? [] : [{ today: "2026-10-17", plates: [], error: m.failed }] },
     hasNextPage: false,
-    isFetchingNextPage: false,
+    isFetching: false,
     fetchNextPage: vi.fn(),
+    refetch: m.refetch,
   }),
   queryOptions: (o: unknown) => o,
   infiniteQueryOptions: (o: unknown) => o,
@@ -37,13 +38,17 @@ it("renders the archive with matching page and social metadata", () => {
   );
 });
 
-it("refuses malformed empty query state rather than inventing a date", () => {
-  m.empty = true;
+it.each(["empty", "failed"] as const)("keeps %s archive state inline and wires retry", (state) => {
+  m[state] = true;
   try {
     const C = (Route as unknown as { component: () => ReactNode }).component;
-    expect(() => render(<C />)).toThrow("couldn't load");
+    render(<C />);
+    expect(screen.getByText("archive")).toBeTruthy();
+    expect(screen.getByRole("alert")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(m.refetch).toHaveBeenCalled();
   } finally {
-    m.empty = false;
+    m[state] = false;
   }
 });
 

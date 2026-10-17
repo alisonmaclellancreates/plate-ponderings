@@ -14,6 +14,8 @@ export function Explore({
         hasMore: boolean;
         busy: boolean;
         loadMore: () => Promise<unknown>;
+        error?: boolean;
+        retry?: () => Promise<unknown>;
       }
     | undefined;
 }) {
@@ -58,6 +60,18 @@ export function Explore({
             </li>
           ))}
         </ul>
+        {live?.error && (
+          <div role="alert" className="mt-8">
+            <p>We couldn't load the featured plates right now.</p>
+            <Button
+              className="brand-btn brand-btn-navy mt-3"
+              disabled={live.busy}
+              onClick={() => live.retry?.()}
+            >
+              Try again
+            </Button>
+          </div>
+        )}
         {(live ? live.hasMore : shown < plates.length) && (
           <div className="mt-8 flex justify-center">
             <Button

@@ -417,6 +417,7 @@ function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
     : featuredPlates()
         .filter((p) => p.plateOfTheDay !== TODAY)
         .slice(0, 4);
+  if (recent.length === 0) return null;
   return (
     <section aria-labelledby="recent-heading" className="mx-auto max-w-6xl px-4 py-12">
       <div className="flex flex-wrap items-end justify-between gap-2">

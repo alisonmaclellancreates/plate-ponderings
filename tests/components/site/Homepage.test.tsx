@@ -45,9 +45,7 @@ describe("Homepage", () => {
     render(<Homepage live={{ today: "2026-10-17", pick: null, recent: [] }} />);
     expect(screen.queryByRole("region", { name: "Plate of the Day" })).toBeNull();
     expect(screen.getByRole("search")).toBeTruthy();
-    expect(
-      screen.getByRole("region", { name: "Recently Featured" }).querySelectorAll("li"),
-    ).toHaveLength(0);
+    expect(screen.queryByRole("region", { name: "Recently Featured" })).toBeNull();
   });
   it.each([0, 1, 2])("uses real count %i and the approved daily invitation", async (count) => {
     media({});
