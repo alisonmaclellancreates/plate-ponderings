@@ -53,12 +53,12 @@ it("shows every row type with Updated labels, and Dismiss changes nothing", asyn
   expect(text[5]).toContain("We couldn't add your story.");
   const pendingStory = rows[3];
   if (!pendingStory) throw new Error("Missing pending story row");
-  expect(within(pendingStory).getByRole("link", { name: "View Plate" }).getAttribute("href")).toBe(
-    "/plate/pnw-lv",
-  );
+  expect(
+    within(pendingStory).getAllByRole("link", { name: "View Plate" })[0]?.getAttribute("href"),
+  ).toBe("/plate/pnw-lv");
   expect(screen.getAllByText("Updated")).toHaveLength(3);
   const dismiss = screen.getAllByRole("button", { name: "Dismiss" });
-  expect(dismiss).toHaveLength(2);
+  expect(dismiss).toHaveLength(4); // mobile and desktop copies of two rows
   const first = dismiss[0];
   if (!first) throw new Error("Missing Dismiss");
   await userEvent.setup().click(first);
