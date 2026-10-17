@@ -51,7 +51,7 @@ describe("/previews/story-photo", () => {
     render(<Component />);
     await waitFor(() => expect(screen.getByRole("button", { name: "No box found" })).toBeEnabled());
     await user.click(screen.getByRole("button", { name: "No box found" }));
-    expect(screen.getByRole("heading", { name: "Keep the plate clear" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Adjust the plate area" })).toBeInTheDocument();
     expect(
       screen.getByText(
         "We couldn't find the plate in this photo. Draw a box around it to keep it clear.",

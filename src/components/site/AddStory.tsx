@@ -280,7 +280,7 @@ function Editor({ title, children }: { title: string; children: ReactNode }) {
 function AdjustEditor() {
   const handle = "absolute size-3 rounded-sm border-2 border-navy bg-cream";
   return (
-    <Editor title="Keep the plate clear">
+    <Editor title="Adjust the plate area">
       <div className="relative overflow-hidden rounded-lg">
         <img
           src={STORY_PHOTO_PLACEHOLDER}
@@ -302,8 +302,8 @@ function AdjustEditor() {
       </div>
       <p className="mt-3">Move and resize the box so only the license plate is clear.</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Everything outside the box is blurred. Keyboard: arrow keys move the box, Shift + arrow
-        keys resize it.
+        Everything outside the box is blurred. Keyboard: arrow keys move the box, Shift + arrow keys
+        resize it.
       </p>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <button type="button" className={outline}>

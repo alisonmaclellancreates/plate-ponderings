@@ -52,8 +52,30 @@ async function call(fn: unknown, data: unknown) {
 /** A small valid JPEG data URL (SOF0 says 800x600). */
 function jpegDataUrl(width = 800, height = 600): string {
   const bytes = new Uint8Array([
-    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x0a, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0xff, 0xc0, 0x00,
-    0x11, 0x08, height >> 8, height & 0xff, width >> 8, width & 0xff, 0x03,
+    0xff,
+    0xd8,
+    0xff,
+    0xe0,
+    0x00,
+    0x0a,
+    0x4a,
+    0x46,
+    0x49,
+    0x46,
+    0x00,
+    0x01,
+    0x01,
+    0x02,
+    0xff,
+    0xc0,
+    0x00,
+    0x11,
+    0x08,
+    height >> 8,
+    height & 0xff,
+    width >> 8,
+    width & 0xff,
+    0x03,
   ]);
   let bin = "";
   for (const b of bytes) bin += String.fromCharCode(b);
@@ -124,17 +146,20 @@ describe("detectPlateBox", () => {
 describe("uploadStoryPhoto", () => {
   it("stores the photo in the caller's own folder", async () => {
     const result = await call(uploadStoryPhoto, { jpeg: jpegDataUrl() });
-    expect(result).toEqual({ outcome: "ok", path: expect.stringMatching(/^caller-uuid\/.+\.jpg$/) });
-    const [path, bytes, opts] = mocks.upload.mock.calls[0];
+    expect(result).toEqual({
+      outcome: "ok",
+      path: expect.stringMatching(/^caller-uuid\/.+\.jpg$/),
+    });
+    const [path, bytes, opts] = mocks.upload.mock.calls[0]!;
     expect(path).toMatch(/^caller-uuid\//);
     expect(bytes).toBeInstanceOf(Uint8Array);
     expect(opts).toEqual({ contentType: "image/jpeg" });
   });
 
   it("rejects a photo that is not a JPEG", async () => {
-    await expect(
-      call(uploadStoryPhoto, { jpeg: "data:image/png;base64,AAAA" }),
-    ).resolves.toEqual({ outcome: "invalid" });
+    await expect(call(uploadStoryPhoto, { jpeg: "data:image/png;base64,AAAA" })).resolves.toEqual({
+      outcome: "invalid",
+    });
     expect(mocks.upload).not.toHaveBeenCalled();
   });
 

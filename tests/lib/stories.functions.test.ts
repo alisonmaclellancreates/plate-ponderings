@@ -58,7 +58,13 @@ async function call(fn: unknown, data: unknown) {
   return await (fn as (a: unknown) => Promise<Record<string, unknown>>)({ data, context });
 }
 
-const INPUT = { plateId: "plate-1", meaning: "Pacific Northwest love.", source: "guess", more: "" };
+const INPUT = {
+  plateId: "plate-1",
+  meaning: "Pacific Northwest love.",
+  source: "guess",
+  more: "",
+  photoPath: "",
+};
 
 let tables: Record<string, Result>;
 let storyInsert: Result;
@@ -467,6 +473,7 @@ describe("getPlateStories failed and empty lookups", () => {
         publishedAt: "",
         isOwn: false,
         hearted: false,
+        photo: null,
       },
     ]);
     expect(result.pending).toEqual([]);

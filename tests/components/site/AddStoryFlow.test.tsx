@@ -70,6 +70,8 @@ vi.mock("@/lib/photo-canvas", () => ({
   decodePhoto: m.decode,
   renderBlurredPhoto: m.renderBlurred,
   canvasToJpegBlob: m.toJpeg,
+  toDetectDataUrl: vi.fn(() => "data:image/jpeg;base64,detect"),
+  blobToDataUrl: vi.fn(async () => "data:image/jpeg;base64,processed"),
 }));
 
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
@@ -91,27 +93,30 @@ beforeEach(() => {
   m.detect.mockResolvedValue({ outcome: "ok", box: { x: 0.3, y: 0.4, w: 0.25, h: 0.12 } });
   m.renderBlurred.mockResolvedValue(undefined);
   m.toJpeg.mockResolvedValue(new Blob(["jpeg"], { type: "image/jpeg" }));
-  m.upload.mockResolvedValue({ path: "user-1/photo.jpg" });
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    filter: "",
-    drawImage: vi.fn(),
-  } as unknown as CanvasRenderingContext2D);
+  m.upload.mockResolvedValue({ outcome: "ok", path: "user-1/photo.jpg" });
+  m.renderBlurred.mockReturnValue(document.createElement("canvas"));
+  URL.revokeObjectURL = vi.fn();
   URL.createObjectURL = vi.fn(() => "blob:mock");
 });
 
-/** Choose a photo, confirm the suggested box, and land on review. */
+/** Choose a photo, confirm the suggested box, and land back on step 2. */
 async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Next" }));
   const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
-  await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+  await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
   await waitFor(() =>
-    expect(screen.getByRole("heading", { name: "Keep the plate clear" })).toBeInTheDocument(),
+    expect(screen.getByRole("heading", { name: "Adjust the plate area" })).toBeInTheDocument(),
   );
-  await user.click(screen.getByRole("button", { name: "Confirm" }));
+  await user.click(screen.getByRole("button", { name: "Next" }));
   await waitFor(() =>
     expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
   );
   await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+  await waitFor(() =>
+    expect(
+      screen.getByAltText("Your processed photo, blurred except the plate"),
+    ).toBeInTheDocument(),
+  );
 }
 
 describe("AddStoryFlow", () => {
@@ -129,7 +134,13 @@ describe("AddStoryFlow", () => {
     await user.click(screen.getByRole("button", { name: "Submit Story" }));
     await waitFor(() => expect(screen.getByText("Story submitted!")).toBeInTheDocument());
     expect(m.submit).toHaveBeenCalledWith({
-      data: { plateId: "p1", meaning: "Pacific Northwest love.", source: "owner", more: "" },
+      data: {
+        plateId: "p1",
+        meaning: "Pacific Northwest love.",
+        source: "owner",
+        more: "",
+        photoPath: "",
+      },
     });
     expect(m.track).toHaveBeenCalledWith("story_submitted", {
       source: "owner",
@@ -253,7 +264,7 @@ describe("AddStoryFlow", () => {
     await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
     await addPhoto(user);
     expect(m.upload).toHaveBeenCalledWith({
-      data: { dataUrl: expect.stringMatching(/^data:image\/jpeg/) },
+      data: { jpeg: "data:image/jpeg;base64,processed" },
     });
     expect(m.track).toHaveBeenCalledWith("photo_added", { box_found: true, box_adjusted: false });
     await user.click(screen.getByRole("button", { name: "Next" }));
@@ -275,9 +286,10 @@ describe("AddStoryFlow", () => {
     m.detect.mockResolvedValue({ outcome: "unavailable" });
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
     await user.click(screen.getByRole("button", { name: "Next" }));
     const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
-    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
     await waitFor(() =>
       expect(
         screen.getByText(
@@ -291,9 +303,10 @@ describe("AddStoryFlow", () => {
     m.decode.mockRejectedValue(new Error("bad file"));
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
     await user.click(screen.getByRole("button", { name: "Next" }));
     const file = new File(["nope"], "photo.jpg", { type: "image/jpeg" });
-    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await user.upload(document.getElementById("story-photo") as HTMLInputElement, file);
     await waitFor(() =>
       expect(
         screen.getByText(
@@ -463,6 +476,7 @@ describe("AddStoryFlow branches", () => {
           meaning: "Pacific Northwest love.",
           source: "guess",
           more: "Seen near Seattle.",
+          photoPath: "",
         },
       }),
     );

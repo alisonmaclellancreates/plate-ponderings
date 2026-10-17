@@ -114,7 +114,10 @@ export function jpegDimensions(bytes: Uint8Array): { width: number; height: numb
     if (length < 2) return null;
     // Start-of-frame markers carry the dimensions; skip everything else.
     if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
-      return { height: (bytes[offset + 5]! << 8) | bytes[offset + 6]!, width: (bytes[offset + 7]! << 8) | bytes[offset + 8]! };
+      return {
+        height: (bytes[offset + 5]! << 8) | bytes[offset + 6]!,
+        width: (bytes[offset + 7]! << 8) | bytes[offset + 8]!,
+      };
     }
     offset += 2 + length;
   }
