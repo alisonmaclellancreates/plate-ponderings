@@ -452,6 +452,8 @@ it.each([
   m.dotQuery.mockReturnValue({ data: { unread } });
   render(<MemberProfile showHandle />);
   expect(screen.queryAllByTestId("unread-dot")).toHaveLength(count);
+  fireEvent.click(screen.getByRole("button", { name: "Traveler1234 menu" }));
+  expect(screen.queryAllByTestId("menu-unread-dot")).toHaveLength(count);
   expect(m.dotQuery).toHaveBeenCalledWith(
     expect.objectContaining({ queryKey: ["unread-dot"], enabled: true }),
   );
