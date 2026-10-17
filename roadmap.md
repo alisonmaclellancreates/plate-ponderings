@@ -2,8 +2,8 @@
 
 # Step 43: Copilot pending feedback and pause analytics
 
-- [ ] Retain submitted plate values and verify already-spotted feedback for search arrivals and direct /spot submissions, including edits to prefilled values.
-- [ ] Allow and capture subject_spotted outcome rate_limited; run behaviour tests and changed-file lint.
+- [x] Retain submitted plate values; behaviour tests verify search arrivals, direct /spot submissions and edits to prefilled values, including retained fields and Back to Search destinations.
+- [x] Allow and capture subject_spotted outcome rate_limited; capture and before_send tests pass. Full suite: 665 tests across 120 files, changed-file lint clean, automatic build OK. PR Codecov remains unconfirmed for this follow-up; latest previously read figure is 75.09%, not the local diagnostic coverage.
 
 # Step 43: PR #90 coverage correction
 
