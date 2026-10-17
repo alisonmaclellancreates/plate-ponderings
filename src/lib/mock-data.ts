@@ -255,12 +255,8 @@ export function publishedStories(plate: PlateRecord): Story[] {
   return plate.stories.filter((story) => (story.moderation ?? "published") === "published");
 }
 
-/** Progress since a plate was featured, from published story counts only. */
-export function featuredProgress(featured: number, now: number): string {
-  if (now === 0) return "Still a mystery";
-  if (featured === 0) return `Was a mystery, now ${storyCount(now)}`;
-  return `Had ${storyCount(featured)} when featured, now ${now}`;
-}
+/** Single source of truth for featured progress, defined in featured.ts. */
+export { featuredProgress } from "./featured";
 
 export const TODAY = "2026-10-16";
 
