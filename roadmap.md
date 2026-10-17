@@ -1,6 +1,6 @@
 # Step 46: real daily pick, featured shelf and archive
 
-- [ ] Add sample-only unnested Explore and homepage-featured previews, update live-page notes, test both pages and lint.
+- [x] Added sample-only unnested /previews/explore and /previews/homepage-featured, real grid/bands/shelf and live-page notes. 35 changed tests passed across five files; lint zero errors/six existing warnings; formatting passed; automatic build OK. No database, browser or AI checks.
 - [x] Contain featured read failures: omit homepage bands; Explore retries inline, including later-page failures. All 37 changed tests passed; repository lint zero errors/six existing warnings; formatting passed; automatic build OK. No database, browser or AI checks.
 - [x] Alison approved the plan and three service-only functions; singular daily copy retained and explore_filtered excluded entirely.
 - [x] Applied approved migration 0013; built atomic UTC selection, live featured pages, batch visible-summary reads and privacy-scoped analytics.
