@@ -23,16 +23,24 @@ function toDisplay(row: FeaturedRow): FeaturedDisplay {
   };
 }
 
-export type FeaturedHome = { today: string; pick: FeaturedDisplay | null; recent: FeaturedDisplay[] };
+export type FeaturedHome = {
+  today: string;
+  pick: FeaturedDisplay | null;
+  recent: FeaturedDisplay[];
+};
 export type FeaturedPage = { today: string; plates: FeaturedDisplay[]; next: string | null };
 
 export const getFeaturedHome = createServerFn({ method: "GET" }).handler(
   async (): Promise<FeaturedHome> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: pick, error: pickError } = await supabaseAdmin.rpc("pick_featured_subject_for_today");
+    const { data: pick, error: pickError } = await supabaseAdmin.rpc(
+      "pick_featured_subject_for_today",
+    );
     if (pickError) throw new Error("We couldn't load the featured plates right now.");
     const today = pick?.[0]?.day ?? new Date().toISOString().slice(0, 10);
-    const { data: rows, error } = await supabaseAdmin.rpc("get_featured_subject_days", { _limit: 5 });
+    const { data: rows, error } = await supabaseAdmin.rpc("get_featured_subject_days", {
+      _limit: 5,
+    });
     if (error) throw new Error("We couldn't load the featured plates right now.");
     const plates = (rows ?? []).map(toDisplay);
     const from = new Date(Date.parse(today) - 4 * 86_400_000).toISOString().slice(0, 10);
@@ -47,7 +55,12 @@ export const getFeaturedHome = createServerFn({ method: "GET" }).handler(
 export const getFeaturedArchive = createServerFn({ method: "POST" })
   .inputValidator((data: { before?: string }) => {
     const before = data.before;
-    if (before !== undefined && (!/^\d{4}-\d{2}-\d{2}$/.test(before) || !Number.isFinite(Date.parse(before)) || new Date(before).toISOString().slice(0, 10) !== before)) {
+    if (
+      before !== undefined &&
+      (!/^\d{4}-\d{2}-\d{2}$/.test(before) ||
+        !Number.isFinite(Date.parse(before)) ||
+        new Date(before).toISOString().slice(0, 10) !== before)
+    ) {
       throw new Error("Invalid feature date.");
     }
     return { before };
@@ -63,6 +76,6 @@ export const getFeaturedArchive = createServerFn({ method: "POST" })
     return {
       today: new Date().toISOString().slice(0, 10),
       plates,
-      next: (rows?.length ?? 0) > 12 ? plates[11]?.day ?? null : null,
+      next: (rows?.length ?? 0) > 12 ? (plates[11]?.day ?? null) : null,
     };
   });

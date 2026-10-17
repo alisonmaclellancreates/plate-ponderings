@@ -14,12 +14,7 @@ import type { FeaturedHome } from "@/lib/featured.functions";
 
 import { storyCount } from "@/lib/story-count";
 import { HEADLINES, useHeadlineIndex } from "@/lib/headlines";
-import {
-  PLATES,
-  featuredPlates,
-  TODAY,
-  type PlateRecord,
-} from "@/lib/mock-data";
+import { PLATES, featuredPlates, TODAY, type PlateRecord } from "@/lib/mock-data";
 
 function Headline() {
   const active = useHeadlineIndex();
@@ -361,7 +356,13 @@ function HowItWorks() {
   );
 }
 
-export function PlateOfTheDay({ plate, utcToday }: { plate: PlateRecord | FeaturedDisplay; utcToday?: string | undefined }) {
+export function PlateOfTheDay({
+  plate,
+  utcToday,
+}: {
+  plate: PlateRecord | FeaturedDisplay;
+  utcToday?: string | undefined;
+}) {
   const display = "day" in plate ? plate : previewFeatured(plate);
   const status = display.status;
   const n = display.count;
@@ -411,9 +412,11 @@ export function PlateOfTheDay({ plate, utcToday }: { plate: PlateRecord | Featur
 }
 
 function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
-  const recent = live ? live.recent : featuredPlates()
-    .filter((p) => p.plateOfTheDay !== TODAY)
-    .slice(0, 4);
+  const recent = live
+    ? live.recent
+    : featuredPlates()
+        .filter((p) => p.plateOfTheDay !== TODAY)
+        .slice(0, 4);
   return (
     <section aria-labelledby="recent-heading" className="mx-auto max-w-6xl px-4 py-12">
       <div className="flex flex-wrap items-end justify-between gap-2">
@@ -453,9 +456,11 @@ export function Homepage({
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : null,
   );
   const [searchError, setSearchError] = useState<string | null>(null);
-  const featured = live ? live.pick : PLATES.find((p) =>
-    variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
-  );
+  const featured = live
+    ? live.pick
+    : PLATES.find((p) =>
+        variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
+      );
   const search =
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (

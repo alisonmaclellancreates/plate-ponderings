@@ -25,10 +25,27 @@ it.each(featuredPlates())("renders published counts, status and progress for $te
 });
 
 it("opens a real featured plate with only the planned event properties", async () => {
-  render(<FeaturedPlateCard utcToday="2026-10-17" today plate={{ slug: "real-plate-id", jurisdiction: "Ontario", text: "REAL", day: "2026-10-17", count: 1, atPick: 0, status: "owner" }} />);
+  render(
+    <FeaturedPlateCard
+      utcToday="2026-10-17"
+      today
+      plate={{
+        slug: "real-plate-id",
+        jurisdiction: "Ontario",
+        text: "REAL",
+        day: "2026-10-17",
+        count: 1,
+        atPick: 0,
+        status: "owner",
+      }}
+    />,
+  );
   await userEvent.setup().click(screen.getByRole("link"));
   expect(screen.getByRole("link").getAttribute("href")).toBe("/plate/real-plate-id");
-  expect(track).toHaveBeenLastCalledWith("featured_subject_opened", { is_mystery: false, days_ago: 0 });
+  expect(track).toHaveBeenLastCalledWith("featured_subject_opened", {
+    is_mystery: false,
+    days_ago: 0,
+  });
 });
 
 it("names the card link with the plate, date, count, badge and progress", () => {

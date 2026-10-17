@@ -45,17 +45,36 @@ describe("Homepage", () => {
     render(<Homepage live={{ today: "2026-10-17", pick: null, recent: [] }} />);
     expect(screen.queryByRole("region", { name: "Plate of the Day" })).toBeNull();
     expect(screen.getByRole("search")).toBeTruthy();
-    expect(screen.getByRole("region", { name: "Recently Featured" }).querySelectorAll("li")).toHaveLength(0);
+    expect(
+      screen.getByRole("region", { name: "Recently Featured" }).querySelectorAll("li"),
+    ).toHaveLength(0);
   });
   it.each([0, 1, 2])("uses real count %i and the approved daily invitation", async (count) => {
     media({});
-    const pick = { slug: "real-id", jurisdiction: "Ontario", text: "REAL", day: "2026-10-17", count, atPick: 0, status: count === 0 ? "mystery" as const : "interpreted" as const };
+    const pick = {
+      slug: "real-id",
+      jurisdiction: "Ontario",
+      text: "REAL",
+      day: "2026-10-17",
+      count,
+      atPick: 0,
+      status: count === 0 ? ("mystery" as const) : ("interpreted" as const),
+    };
     render(<Homepage live={{ today: pick.day, pick, recent: [{ ...pick, day: "2026-10-16" }] }} />);
     const daily = screen.getByRole("region", { name: "Plate of the Day" });
-    expect(daily.textContent).toContain(count === 0 ? "No stories yet." : `Only ${count} ${count === 1 ? "story" : "stories"} so far.`);
+    expect(daily.textContent).toContain(
+      count === 0
+        ? "No stories yet."
+        : `Only ${count} ${count === 1 ? "story" : "stories"} so far.`,
+    );
     await userEvent.setup().click(within(daily).getByRole("link", { name: "View This Plate" }));
-    expect(track).toHaveBeenLastCalledWith("featured_subject_opened", { is_mystery: count === 0, days_ago: 0 });
-    expect(screen.getByRole("region", { name: "Recently Featured" }).querySelectorAll("li")).toHaveLength(1);
+    expect(track).toHaveBeenLastCalledWith("featured_subject_opened", {
+      is_mystery: count === 0,
+      days_ago: 0,
+    });
+    expect(
+      screen.getByRole("region", { name: "Recently Featured" }).querySelectorAll("li"),
+    ).toHaveLength(1);
   });
   it.each([
     { reduced: false, behavior: "smooth" },

@@ -41,11 +41,32 @@ it("shows 12 newest plates with CANYONS today, then loads the remaining two", as
 });
 
 it("loads real pages and focuses the first new date, even for a repeated plate", async () => {
-  const row = (day: string): FeaturedDisplay => ({ slug: "real-id", jurisdiction: "Ontario", text: "REAL", day, count: 0, atPick: 0, status: "mystery" });
+  const row = (day: string): FeaturedDisplay => ({
+    slug: "real-id",
+    jurisdiction: "Ontario",
+    text: "REAL",
+    day,
+    count: 0,
+    atPick: 0,
+    status: "mystery",
+  });
   const load = vi.fn();
   function Archive() {
     const [more, setMore] = useState(false);
-    return <Explore live={{ today: "2026-10-17", plates: more ? [row("2026-10-17"), row("2026-09-01")] : [row("2026-10-17")], hasMore: !more, busy: false, loadMore: async () => { load(); setMore(true); } }} />;
+    return (
+      <Explore
+        live={{
+          today: "2026-10-17",
+          plates: more ? [row("2026-10-17"), row("2026-09-01")] : [row("2026-10-17")],
+          hasMore: !more,
+          busy: false,
+          loadMore: async () => {
+            load();
+            setMore(true);
+          },
+        }}
+      />
+    );
   }
   render(<Archive />);
   expect(screen.getByText("Today")).toBeTruthy();
@@ -55,6 +76,10 @@ it("loads real pages and focuses the first new date, even for a repeated plate",
   expect(screen.queryByRole("button", { name: "Load More" })).toBeNull();
 });
 it("disables Load More while a real page is being fetched", () => {
-  render(<Explore live={{ today: "2026-10-17", plates: [], hasMore: true, busy: true, loadMore: vi.fn() }} />);
+  render(
+    <Explore
+      live={{ today: "2026-10-17", plates: [], hasMore: true, busy: true, loadMore: vi.fn() }}
+    />,
+  );
   expect(screen.getByRole("button", { name: "Load More" })).toBeDisabled();
 });

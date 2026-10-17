@@ -64,7 +64,10 @@ beforeEach(() => {
   };
   m.admin.from.mockImplementation((t: string) => chain(tables[t] ?? { data: null, error: null }));
   m.admin.rpc.mockImplementation(async () => ({
-    data: (tables["summaries"]?.data as ReturnType<typeof version>[] | null)?.filter((v) => !m.hidden.has(v.id)) ?? null,
+    data:
+      (tables["summaries"]?.data as ReturnType<typeof version>[] | null)?.filter(
+        (v) => !m.hidden.has(v.id),
+      ) ?? null,
     error: tables["summaries"]?.error,
   }));
   m.refresh.mockReturnValue(new Promise(() => {}));
@@ -77,11 +80,16 @@ const call = (plateId: unknown) =>
 
 describe("getPlateSummary", () => {
   it("keeps foreground reads fixed at two table reads and one visibility RPC for 100 versions", async () => {
-    tables["summaries"] = { data: Array.from({ length: 100 }, (_, i) => version(100-i, 10, 2, "12")), error: null };
+    tables["summaries"] = {
+      data: Array.from({ length: 100 }, (_, i) => version(100 - i, 10, 2, "12")),
+      error: null,
+    };
     const result = await call("plate-1");
     expect(result?.["earlier"]).toHaveLength(99);
     expect(m.admin.from).toHaveBeenCalledTimes(2);
-    expect(m.admin.rpc).toHaveBeenCalledExactlyOnceWith("get_visible_summary_versions", { _subject_id: "plate-1" });
+    expect(m.admin.rpc).toHaveBeenCalledExactlyOnceWith("get_visible_summary_versions", {
+      _subject_id: "plate-1",
+    });
   });
   it("returns the newest visible version and earlier visible versions, newest first", async () => {
     const result = await call("plate-1");
@@ -99,7 +107,9 @@ describe("getPlateSummary", () => {
       ],
       catchingUp: false,
     });
-    expect(m.admin.rpc).toHaveBeenCalledExactlyOnceWith("get_visible_summary_versions", { _subject_id: "plate-1" });
+    expect(m.admin.rpc).toHaveBeenCalledExactlyOnceWith("get_visible_summary_versions", {
+      _subject_id: "plate-1",
+    });
     expect(m.admin.from).not.toHaveBeenCalledWith("summaries");
     expect(m.run).not.toHaveBeenCalled();
   });

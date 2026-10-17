@@ -4,7 +4,19 @@ import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
 import { featuredPlates, TODAY } from "@/lib/mock-data";
 import type { FeaturedDisplay } from "@/lib/featured";
 
-export function Explore({ live }: { live?: { plates: FeaturedDisplay[]; today: string; hasMore: boolean; busy: boolean; loadMore: () => Promise<unknown> } | undefined }) {
+export function Explore({
+  live,
+}: {
+  live?:
+    | {
+        plates: FeaturedDisplay[];
+        today: string;
+        hasMore: boolean;
+        busy: boolean;
+        loadMore: () => Promise<unknown>;
+      }
+    | undefined;
+}) {
   const [shown, setShown] = useState(12);
   const [focusFrom, setFocusFrom] = useState<number | null>(null);
   const list = useRef<HTMLUListElement>(null);
@@ -38,7 +50,11 @@ export function Explore({ live }: { live?: { plates: FeaturedDisplay[]; today: s
         >
           {(live ? plates : plates.slice(0, shown)).map((plate) => (
             <li key={"day" in plate ? plate.day : plate.plateOfTheDay} className="min-w-0">
-              <FeaturedPlateCard plate={plate} today={"day" in plate ? plate.day === live?.today : plate.plateOfTheDay === TODAY} utcToday={live?.today} />
+              <FeaturedPlateCard
+                plate={plate}
+                today={"day" in plate ? plate.day === live?.today : plate.plateOfTheDay === TODAY}
+                utcToday={live?.today}
+              />
             </li>
           ))}
         </ul>

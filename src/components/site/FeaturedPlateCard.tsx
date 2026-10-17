@@ -5,7 +5,12 @@ import { StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
 import { storyCount } from "@/lib/story-count";
 import type { FeaturedPlate } from "@/lib/mock-data";
-import { featuredDisplay, featuredProgress, openFeatured, type FeaturedDisplay } from "@/lib/featured";
+import {
+  featuredDisplay,
+  featuredProgress,
+  openFeatured,
+  type FeaturedDisplay,
+} from "@/lib/featured";
 
 export function FeaturedPlateCard({
   plate,

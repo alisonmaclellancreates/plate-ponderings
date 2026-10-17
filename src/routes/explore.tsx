@@ -23,6 +23,17 @@ export const Route = createFileRoute("/explore")({
 });
 
 function LiveExplore() {
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(featuredArchiveOptions);
-  return <Explore live={{ plates: data.pages.flatMap((page) => page.plates), today: data.pages[0].today, hasMore: hasNextPage, busy: isFetchingNextPage, loadMore: fetchNextPage }} />;
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useSuspenseInfiniteQuery(featuredArchiveOptions);
+  return (
+    <Explore
+      live={{
+        plates: data.pages.flatMap((page) => page.plates),
+        today: data.pages[0].today,
+        hasMore: hasNextPage,
+        busy: isFetchingNextPage,
+        loadMore: fetchNextPage,
+      }}
+    />
+  );
 }
