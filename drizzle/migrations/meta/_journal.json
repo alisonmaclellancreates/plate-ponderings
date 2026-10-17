@@ -50,6 +50,13 @@
       "when": 1792225154022,
       "tag": "0006_step43b_drop_deprecated_handle_check_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792225165694,
+      "tag": "0007_step43b_subject_attempts_user_time_index",
+      "breakpoints": true
     }
   ]
 }
