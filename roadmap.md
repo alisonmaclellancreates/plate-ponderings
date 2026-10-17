@@ -234,6 +234,7 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Dialog description is "Photo shared by {handle}" via DialogPrimitive.Description (no aria-describedby override); preview sample built from a box-free base so photoBox is never undefined. 6 dialog tests and 9 preview tests pass; changed-file lint clean; build OK.
 
 ## Step 52b: accessibility review and automated checks
+- [ ] PR #117: inspect exact Codecov misses, add behavior-preserving tests for the five requested files, run related tests and lint, then read the post-sync PR coverage result.
 - Axe tests (vitest-axe) across all listed pages and dialogs; dialogs checked against document.body (Radix portals); region rule on for full pages, per-test opt-out with comment otherwise
 - PhotoEditor: draggable box gets accessible name "Plate area", keyboard move/resize (ask first if layout change needed); PhotoEditor with suggested box added to axe tests
 - eslint-plugin-jsx-a11y recommended on our components; zero lint errors
