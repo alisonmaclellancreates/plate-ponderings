@@ -95,3 +95,12 @@
 - [x] 507 tests pass; coverage 99.22/97.26/99.02/99.68 meets 95% gate; lint 0 errors/8 warnings; build OK; summary visibility and account DB tests pass; live admin reset verified; verification fixtures cleaned.
 - [ ] Alison checks hosted HIBP and password minimum in More → Users → Auth settings. Blocker: supported independent hosted-setting readback unavailable.
 - [ ] Confirm all five new events in PostHog. Blocker: event delivery not independently inspected; filtering is tested.
+
+# Step 43: look-up and Spot a Plate on the real backend
+
+- [ ] Plan approved, including the proposed migration (subject_save_attempts, profiles.last_recheck_at, handle_check_* renamed to ai_check_*).
+- [ ] Search and /plate/$id read with the admin client inside server functions, returning only needed fields, never created_by.
+- [ ] Simultaneous-spot unique-key conflict re-reads the key and returns exists/already-spotted/pending, never error; tested.
+- [ ] Shared AI pause: app_settings fields renamed to ai_check_*; handle check, subject check and recheck all read/write it; blocked behavior per change list; /admin panel and account previews updated to "AI check status" copy; AGENTS.md recovery instructions updated.
+- [ ] Search wiring, /plate/$id route, Spot a Plate outcomes, recheck trigger, 42b message constants and single-main previews fix.
+- [ ] Analytics: subject_searched, subject_spotted; tests, DB test rerun, live verification.
