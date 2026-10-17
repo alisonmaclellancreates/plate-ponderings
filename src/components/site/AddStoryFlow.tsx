@@ -138,6 +138,25 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   const [photoUnreadable, setPhotoUnreadable] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
   const started = useRef(false);
+  const photoInput = useRef<HTMLInputElement>(null);
+  const photoSelection = useRef(0);
+
+  useEffect(
+    () => () => {
+      photoSelection.current += 1;
+    },
+    [],
+  );
+
+  useEffect(
+    () => () => {
+      if (photoDraft) {
+        photoDraft.bitmap.close();
+        URL.revokeObjectURL(photoDraft.imageUrl);
+      }
+    },
+    [photoDraft],
+  );
 
   const { data: plateData } = useQuery({
     queryKey: ["plate", plateId],
@@ -166,6 +185,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
 
   const choosePhoto = async (file: File | undefined) => {
     if (!file || preview) return;
+    const selection = ++photoSelection.current;
     setPhotoUnreadable(false);
     let bitmap: ImageBitmap;
     try {
@@ -175,32 +195,41 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
       return;
     }
     const imageUrl = URL.createObjectURL(file);
+    let draft: PhotoDraft;
     // Detection is a shortcut, never a gate: any failure means draw the box.
     try {
       const result = await detectBox({ data: { image: toDetectDataUrl(bitmap) } });
-      setPhotoDraft({
+      draft = {
         bitmap,
         imageUrl,
         suggestion: result.outcome === "ok" ? result.box : null,
         noBoxMessage: result.outcome !== "ok" || result.box === null,
-      });
+      };
     } catch {
-      setPhotoDraft({ bitmap, imageUrl, suggestion: null, noBoxMessage: true });
+      draft = { bitmap, imageUrl, suggestion: null, noBoxMessage: true };
     }
+    if (selection !== photoSelection.current) {
+      bitmap.close();
+      URL.revokeObjectURL(imageUrl);
+      return;
+    }
+    setPhotoDraft(draft);
   };
 
-  const retryDetect = async () => {
-    if (!photoDraft) return;
-    try {
-      const result = await detectBox({ data: { image: toDetectDataUrl(photoDraft.bitmap) } });
-      setPhotoDraft({
-        ...photoDraft,
-        suggestion: result.outcome === "ok" ? result.box : null,
-        noBoxMessage: result.outcome !== "ok" || result.box === null,
-      });
-    } catch {
-      setPhotoDraft({ ...photoDraft, suggestion: null, noBoxMessage: true });
-    }
+  const chooseAnotherPhoto = () => {
+    const input = photoInput.current;
+    if (!input) return;
+    input.value = "";
+    input.click();
+  };
+
+  const skipEditorPhoto = () => {
+    photoSelection.current += 1;
+    setPhotoDraft(null);
+    setPhotoUnreadable(false);
+    if (photoInput.current) photoInput.current.value = "";
+    if (!preview) void track("photo_skipped", {});
+    setStep("2");
   };
 
   const handleUsePhoto = async (blob: Blob, adjusted: boolean) => {
@@ -380,6 +409,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
               <span className="font-semibold">Choose a photo or drag and drop</span>
               <span className="text-sm text-muted-foreground">JPEG, PNG, or WebP</span>
               <input
+                ref={photoInput}
                 id="story-photo"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -406,11 +436,8 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
             initialBox={photoDraft.suggestion}
             showNoBoxMessage={photoDraft.noBoxMessage}
             onUse={(blob, adjusted) => void handleUsePhoto(blob, adjusted)}
-            onRemove={() => {
-              setPhotoDraft(null);
-              if (!preview) void track("photo_skipped", {});
-            }}
-            onRetry={() => void retryDetect()}
+            onRemove={skipEditorPhoto}
+            onChooseAnother={chooseAnotherPhoto}
           />
         )}
       </Shell>

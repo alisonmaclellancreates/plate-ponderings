@@ -57,5 +57,12 @@ describe("/previews/story-photo", () => {
         "We couldn't find the plate in this photo. Draw a box around it to keep it clear.",
       ),
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Choose another photo" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Skip photo" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Choose another photo" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Skip photo" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

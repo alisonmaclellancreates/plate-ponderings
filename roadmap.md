@@ -1,3 +1,7 @@
+# Photo editor exits
+
+- [x] Replacement picker and adjustment skip implemented; cleanup, same-file reselection, cancellation, no-upload skip and box validation pass 45 changed tests. Preview updated. Lint zero errors/six existing warnings; automatic build OK. Desktop and 360×640 sample editor verified: exits visible, buttons/handles at least 44px, drawing enables Next and changes instruction, skip closes editor. Real file selection and cleanup are mocked tests, not live AI.
+
 # Story meaning framing
 
 - [x] Prefill “They might be”, add it when missing before review/submission without duplication, preserve the complete 80-character limit. 45 focused tests passed; changed-file lint clean; automatic build OK. No moderation or database changes.

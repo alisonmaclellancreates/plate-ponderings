@@ -93,7 +93,7 @@ function StoryPhotoSample() {
           showNoBoxMessage={state === "no-box"}
           onUse={() => setOpen(false)}
           onRemove={() => setOpen(false)}
-          onRetry={() => {}}
+          onChooseAnother={() => {}}
         />
       )}
     </main>
