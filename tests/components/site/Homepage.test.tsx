@@ -6,6 +6,9 @@ import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
 import type { PlateRecord } from "@/lib/mock-data";
 import type { ReactNode } from "react";
 import { track } from "@/lib/analytics";
+import { QueryClient } from "@tanstack/react-query";
+import { featuredHomeOptions } from "@/lib/featured-queries";
+import { getFeaturedHome } from "@/lib/featured.functions";
 
 const searchMock = vi.hoisted(() => ({ fn: vi.fn(), navigate: vi.fn() }));
 vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
@@ -20,6 +23,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@tanstack/react-start", () => ({ useServerFn: () => searchMock.fn }));
 vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn() }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
+vi.mock("@/lib/featured.functions", () => ({ getFeaturedHome: vi.fn(), getFeaturedArchive: vi.fn() }));
 
 function media({ mobile = false, reduced = false }) {
   window.matchMedia = vi.fn((q: string) => ({
@@ -40,6 +44,16 @@ afterEach(() => {
 });
 
 describe("Homepage", () => {
+  it("renders the working homepage without either featured band after a failed read", async () => {
+    media({});
+    vi.mocked(getFeaturedHome).mockRejectedValueOnce(new Error("Read failed"));
+    const live = await new QueryClient().ensureQueryData(featuredHomeOptions);
+    render(<Homepage live={live} />);
+    expect(screen.getByRole("search")).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "Plate of the Day" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Recently Featured" })).toBeNull();
+  });
   it("keeps the rest of the homepage when there is no eligible daily plate", () => {
     media({});
     render(<Homepage live={{ today: "2026-10-17", pick: null, recent: [] }} />);

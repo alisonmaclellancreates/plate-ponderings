@@ -34,6 +34,7 @@ it("contains an initial archive failure and retries the server read", async () =
   ]);
 });
 it("uses strict archive cursors and stops at the final page", async () => {
+  vi.mocked(getFeaturedArchive).mockReset();
   vi.mocked(getFeaturedArchive).mockResolvedValue({
     today: "2026-10-17",
     plates: [],
@@ -61,4 +62,15 @@ it("uses strict archive cursors and stops at the final page", async () => {
       [],
     ),
   ).toBeUndefined();
+});
+it("retains earlier archive pages when a later read fails and recovers on retry", async () => {
+  const first = { today: "2026-10-17", plates: [], next: "2026-10-05" };
+  const second = { today: "2026-10-17", plates: [], next: null };
+  vi.mocked(getFeaturedArchive).mockResolvedValueOnce(first).mockRejectedValueOnce(new Error("Read failed"));
+  const client = new QueryClient();
+  await client.ensureInfiniteQueryData(featuredArchiveOptions);
+  const failed = await client.fetchInfiniteQuery({ ...featuredArchiveOptions, pages: 2 });
+  expect(failed.pages).toEqual([first, { today: "", plates: [], next: null, error: true }]);
+  vi.mocked(getFeaturedArchive).mockResolvedValueOnce(first).mockResolvedValueOnce(second);
+  expect((await client.fetchInfiniteQuery({ ...featuredArchiveOptions, pages: 2 })).pages).toEqual([first, second]);
 });
