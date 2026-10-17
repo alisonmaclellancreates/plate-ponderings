@@ -160,6 +160,75 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   }, [preview]);
 
   const plate = preview?.plate ?? plateData?.plate;
+
+  const choosePhoto = async (file: File | undefined) => {
+    if (!file || preview) return;
+    setPhotoUnreadable(false);
+    let bitmap: ImageBitmap;
+    try {
+      bitmap = await decodePhoto(file);
+    } catch {
+      setPhotoUnreadable(true);
+      return;
+    }
+    const imageUrl = URL.createObjectURL(file);
+    // Detection is a shortcut, never a gate: any failure means draw the box.
+    try {
+      const result = await detectBox({ data: { image: toDetectDataUrl(bitmap) } });
+      setPhotoDraft({
+        bitmap,
+        imageUrl,
+        suggestion: result.outcome === "ok" ? result.box : null,
+        noBoxMessage: result.outcome !== "ok" || result.box === null,
+      });
+    } catch {
+      setPhotoDraft({ bitmap, imageUrl, suggestion: null, noBoxMessage: true });
+    }
+  };
+
+  const retryDetect = async () => {
+    if (!photoDraft) return;
+    try {
+      const result = await detectBox({ data: { image: toDetectDataUrl(photoDraft.bitmap) } });
+      setPhotoDraft({
+        ...photoDraft,
+        suggestion: result.outcome === "ok" ? result.box : null,
+        noBoxMessage: result.outcome !== "ok" || result.box === null,
+      });
+    } catch {
+      setPhotoDraft({ ...photoDraft, suggestion: null, noBoxMessage: true });
+    }
+  };
+
+  const usePhoto = async (blob: Blob, adjusted: boolean) => {
+    if (!photoDraft || preview) return;
+    setPhotoBusy(true);
+    try {
+      const uploaded = await uploadPhoto({ data: { jpeg: await blobToDataUrl(blob) } });
+      if (uploaded.outcome !== "ok") {
+        setPause({ heading: STORY_SUBMIT_ERROR_HEADING, message: STORY_SUBMIT_ERROR_MESSAGE });
+        setPhotoDraft(null);
+        return;
+      }
+      void track("photo_added", {
+        box_found: photoDraft.suggestion !== null,
+        box_adjusted: adjusted,
+      });
+      setPhotoReady({ path: uploaded.path, previewUrl: URL.createObjectURL(blob) });
+      setPhotoDraft(null);
+    } catch {
+      setPause({ heading: STORY_SUBMIT_ERROR_HEADING, message: STORY_SUBMIT_ERROR_MESSAGE });
+      setPhotoDraft(null);
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+
+  const skipPhoto = () => {
+    if (!preview) void track("photo_skipped", {});
+    setStep("3");
+  };
+
   if (!plate) return null;
   const ownerExists = preview ? false : (storiesData?.hasOwnerStory ?? false);
 
@@ -170,7 +239,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     setPause(null);
     try {
       const result = await submitStory({
-        data: { plateId, meaning, source: how, more },
+        data: { plateId, meaning, source: how, more, photoPath: photoReady?.path ?? "" },
       });
       const outcome =
         result.outcome === "rate-limited"
