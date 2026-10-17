@@ -45,6 +45,72 @@ beforeEach(() => {
 });
 
 describe("PhotoEditor", () => {
+  it("ignores movement without a drag and resets a moved box", async () => {
+    const user = userEvent.setup();
+    setup();
+    const frame = screen.getByTestId("photo-frame");
+    vi.spyOn(frame, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 800, height: 600 } as DOMRect);
+    fireEvent.pointerMove(frame, { clientX: 500, clientY: 400 });
+    expect(screen.getByTestId("plate-box")).toHaveStyle({ left: "30%" });
+    fireEvent.pointerDown(frame, { clientX: 300, clientY: 270, pointerId: 1 });
+    fireEvent.pointerMove(frame, { clientX: 380, clientY: 330, pointerId: 1 });
+    fireEvent.pointerUp(frame);
+    expect(screen.getByTestId("plate-box")).toHaveStyle({ left: "40%", top: "50%" });
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+    expect(screen.getByTestId("plate-box")).toHaveStyle({ left: "30%", top: "40%" });
+  });
+
+  it.each(["nw", "ne", "sw", "se"])("resizes with the %s handle and marks the box adjusted", async (corner) => {
+    const user = userEvent.setup();
+    const { onUse } = setup();
+    const frame = screen.getByTestId("photo-frame");
+    vi.spyOn(frame, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 800, height: 600 } as DOMRect);
+    const left = corner === "nw" || corner === "sw";
+    const top = corner === "nw" || corner === "ne";
+    const x = left ? 240 : 440;
+    const y = top ? 240 : 312;
+    fireEvent.pointerDown(screen.getByTestId(`handle-${corner}`), { clientX: x, clientY: y, pointerId: 1 });
+    fireEvent.pointerMove(frame, { clientX: x + (left ? -80 : 80), clientY: y + (top ? -60 : 60), pointerId: 1 });
+    fireEvent.pointerUp(frame);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", { name: "Review your photo" });
+    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+    await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), true));
+    expect(m.renderBlurred).toHaveBeenCalledWith(BITMAP, expect.objectContaining({
+      w: expect.closeTo(0.35), h: expect.closeTo(0.22),
+    }));
+  });
+
+  it("draws a new box outside the suggestion and can confirm a manually drawn box", async () => {
+    const user = userEvent.setup();
+    const { onUse } = setup({ initialBox: null, showNoBoxMessage: true });
+    const frame = screen.getByTestId("photo-frame");
+    vi.spyOn(frame, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 800, height: 600 } as DOMRect);
+    fireEvent.pointerDown(frame, { clientX: 0, clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(frame, { clientX: 1, clientY: 1, pointerId: 1 });
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    fireEvent.pointerMove(frame, { clientX: 400, clientY: 300, pointerId: 1 });
+    fireEvent.pointerUp(frame);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", { name: "Review your photo" });
+    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+    await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), true));
+  });
+
+  it("ignores other keys, supports shift nudges, and confirms a round-trip box as unchanged", async () => {
+    const user = userEvent.setup();
+    const { onUse } = setup();
+    const slider = screen.getByRole("slider", { name: "Plate area" });
+    fireEvent.keyDown(slider, { key: "a" });
+    fireEvent.keyDown(slider, { key: "ArrowDown", shiftKey: true });
+    fireEvent.keyDown(slider, { key: "ArrowUp", shiftKey: true });
+    fireEvent.keyDown(slider, { key: "ArrowLeft" });
+    fireEvent.keyDown(slider, { key: "ArrowRight" });
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", { name: "Review your photo" });
+    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+    await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), false));
+  });
   it("shows the no-box message and lets the visitor draw a box", async () => {
     setup({ initialBox: null, showNoBoxMessage: true });
     expect(

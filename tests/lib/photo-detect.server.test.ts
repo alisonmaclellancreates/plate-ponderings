@@ -58,10 +58,10 @@ describe("detectPlateBoxInImage", () => {
 
   it.each([
     [402, { type: "insufficient_credits" }, "credit_block"],
-    [403, { error: { type: "provider_access_denied" } }, "provider_denied"],
-    [403, { error: { code: "provider_access_denied" } }, "provider_denied"],
-    [403, {}, "provider_denied"],
-    [403, "not JSON", "provider_denied"],
+    [403, { error: { type: "provider_access_denied" } }, "provider_access_denied"],
+    [403, { error: { code: "provider_access_denied" } }, "provider_access_denied"],
+    [403, {}, null],
+    [403, "not JSON", null],
     [429, {}, null],
     [500, {}, null],
   ])("contains gateway status %s with body %o", async (status, body, block) => {

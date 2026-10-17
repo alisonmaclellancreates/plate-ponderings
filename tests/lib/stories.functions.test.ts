@@ -574,6 +574,14 @@ describe("getPlateStories failed and empty lookups", () => {
     expect(mocks.admin.storage.from).toHaveBeenCalledWith("story-photos");
     expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
   });
+  it.each([null, [], [{ signedUrl: "" }]])("omits a photo when signing yields no URL: %o", async (data) => {
+    tables["stories"] = { data: [{ id: "s1", meaning: "M", source: "guess", body: null, author_id: "a1", published_at: "x", photo_path: "a1/uuid.jpg" }], error: null };
+    const createSignedUrls = vi.fn().mockResolvedValue({ data, error: null });
+    mocks.admin.storage.from.mockReturnValue({ createSignedUrls });
+    const result = await call(getPlateStories, { plateId: "plate-1" });
+    expect(result["stories"]).toEqual([expect.objectContaining({ id: "s1", photo: null })]);
+    expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
+  });
   it("keeps stories whose author is gone, shown as Traveler, even with blocks", async () => {
     signedIn();
     tables["blocks"] = { data: [{ blocked_id: "a2" }], error: null };
