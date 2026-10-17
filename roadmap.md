@@ -104,3 +104,5 @@
 - [ ] Shared AI pause: app_settings fields renamed to ai_check_*; handle check, subject check and recheck all read/write it; blocked behavior per change list; /admin panel and account previews updated to "AI check status" copy; AGENTS.md recovery instructions updated.
 - [ ] Search wiring, /plate/$id route, Spot a Plate outcomes, recheck trigger, 42b message constants and single-main previews fix.
 - [ ] Analytics: subject_searched, subject_spotted; tests, DB test rerun, live verification.
+- [ ] Test that Resume AI checks clears the block for every check, not only that one block stops the others.
+- [ ] Confirm homepage look-up card moves keyboard focus to the first search field; test exists from static pages (Homepage.test.tsx), report as such.
