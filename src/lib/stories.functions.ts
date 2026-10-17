@@ -75,11 +75,11 @@ export const addStory = createServerFn({ method: "POST" })
       return { outcome: "error" };
     }
     // A photo needs a valid box; a box without a photo is refused.
-    const box = data.photoPath ? normalizeSubmittedBox(data.photoBox) : null;
-    if (data.photoPath ? !box : data.photoBox !== null) {
+    if (!data.photoPath && data.photoBox !== null) {
       trace("photo-box");
-      if (!data.photoPath) return { outcome: "validation" };
+      return { outcome: "validation" };
     }
+    const box = data.photoPath ? normalizeSubmittedBox(data.photoBox) : null;
     const photoBox = box ? [box.x, box.y, box.w, box.h] : null;
     // Every outcome that saves no story removes the uploaded photo.
     const deletePhoto = async (): Promise<void> => {
