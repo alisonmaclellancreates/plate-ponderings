@@ -1,5 +1,14 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43c: shared plate detail frame
+
+- [x] Approve the presentation-only PlateFrame plan.
+- [x] Extract the existing frame and show every full jurisdiction beneath the plate, aria-hidden, in both detail pages only. Source check confirms one frame markup owner and two consumers; Plate and other render locations untouched.
+- [x] Test shared frame and both consumers with the real Plate, including Newfoundland and Labrador and Utah and exclusion of the added line from accessibility.
+- [x] Browser-check published ROW43XYZ through normal lookup and /plate/ut-canyons at 1280px and 360px. Screenshots inspected: complete names, no overflow; normal word wrapping enabled, names fit on one line at both tested widths. Accessibility tree omits the added line; existing heading and named Plate preserved. Preview-long and real-short combinations are unit-tested only. No browser data injection or app fixture mechanism.
+- [x] Run bun run test:coverage: 671 tests / 121 files pass and configured coverage thresholds hold. Run bun run lint: zero errors, six unchanged UI warnings, no findings in changed files. Automatic build OK. Managed commit 08f8108 recorded the implementation without switching branches.
+- [ ] Confirm 100% current PR Codecov patch coverage. Blocker: GitHub open-PR read returned no open pull requests; no Step 43c PR figure exists to report yet. Local diagnostics are not a substitute.
+
 # Step 43b: retired columns and missing index only
 
 - [x] Confirm no active code or tests read the deprecated handle_check_* columns; matches outside generated types are historical migrations and documentation only.
