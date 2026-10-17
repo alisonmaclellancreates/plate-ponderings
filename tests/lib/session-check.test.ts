@@ -28,7 +28,10 @@ it.each([0, 429, 500])("does not clear a recoverable auth error (%s)", async (st
   expect(m.out).not.toHaveBeenCalled();
 });
 it.each(["throw", "reject"])("does not clear on network/storage %s", async (kind) => {
-  if (kind === "throw") m.user.mockImplementation(() => { throw new Error("storage"); });
+  if (kind === "throw")
+    m.user.mockImplementation(() => {
+      throw new Error("storage");
+    });
   else m.user.mockRejectedValue(new Error("network"));
   expect(await checkSignedIn()).toBeNull();
   expect(m.out).not.toHaveBeenCalled();
@@ -53,7 +56,11 @@ it("bounds a stuck check without clearing anything or requiring a callback", asy
 });
 it("delivers late success after temporarily returning signed out", async () => {
   let resolve: (value: unknown) => void = () => {};
-  m.user.mockReturnValue(new Promise((r) => { resolve = r; }));
+  m.user.mockReturnValue(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
   const late = vi.fn().mockResolvedValue(undefined);
   const result = checkSignedIn(late);
   await vi.advanceTimersByTimeAsync(AUTH_TIMEOUT_MS);
@@ -66,7 +73,11 @@ it("delivers late success after temporarily returning signed out", async () => {
 });
 it("handles failed late account hydration without an unhandled rejection", async () => {
   let resolve: (value: unknown) => void = () => {};
-  m.user.mockReturnValue(new Promise((r) => { resolve = r; }));
+  m.user.mockReturnValue(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
   const late = vi.fn().mockRejectedValue(new Error("account unavailable"));
   const result = checkSignedIn(late);
   await vi.advanceTimersByTimeAsync(AUTH_TIMEOUT_MS);

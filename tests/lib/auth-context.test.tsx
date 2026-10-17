@@ -272,19 +272,35 @@ it("does not erase a newer account when an older signed-out read resolves", asyn
 it("temporarily signs out after a timeout, then restores a late verified account", async () => {
   vi.useFakeTimers();
   let resolve: (value: unknown) => void = () => {};
-  m.user.mockReturnValueOnce(new Promise((r) => { resolve = r; }));
-  render(<AccountProvider><Consumer /></AccountProvider>);
-  await act(async () => { await vi.advanceTimersByTimeAsync(1000); });
+  m.user.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1000);
+  });
   expect(screen.getByText("signed out")).toBeInTheDocument();
   expect(screen.queryByText("loading")).toBeNull();
   expect(m.out).not.toHaveBeenCalled();
-  await act(async () => { resolve({ data: { user: { id: "late-id" } }, error: null }); });
+  await act(async () => {
+    resolve({ data: { user: { id: "late-id" } }, error: null });
+  });
   expect(screen.getByText("Traveler1234")).toBeInTheDocument();
   expect(m.identify).toHaveBeenCalledWith("late-id");
 });
 it.each([401, 403])("shows signed out and clears a rejected saved session (%s)", async (status) => {
   m.user.mockResolvedValue({ data: { user: null }, error: { status } });
-  render(<AccountProvider><Consumer /></AccountProvider>);
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
   await screen.findByText("signed out");
   expect(m.out).toHaveBeenCalledWith({ scope: "local" });
   expect(m.get).not.toHaveBeenCalled();
@@ -292,10 +308,23 @@ it.each([401, 403])("shows signed out and clears a rejected saved session (%s)",
 it("ignores late success after the visitor has signed out", async () => {
   vi.useFakeTimers();
   let resolve: (value: unknown) => void = () => {};
-  m.user.mockReturnValueOnce(new Promise((r) => { resolve = r; }));
-  render(<AccountProvider><Consumer /></AccountProvider>);
-  await act(async () => { await vi.advanceTimersByTimeAsync(1000); m.listener?.("SIGNED_OUT"); });
-  await act(async () => { resolve({ data: { user: { id: "stale" } } }); });
+  m.user.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1000);
+    m.listener?.("SIGNED_OUT");
+  });
+  await act(async () => {
+    resolve({ data: { user: { id: "stale" } } });
+  });
   expect(screen.getByText("signed out")).toBeInTheDocument();
   expect(m.get).not.toHaveBeenCalled();
   expect(m.identify).not.toHaveBeenCalled();

@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const user = vi.hoisted(() => vi.fn());
 const out = vi.hoisted(() => vi.fn());
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getUser: user, signOut: out } } }));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { auth: { getUser: user, signOut: out } },
+}));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
   Outlet: () => null,

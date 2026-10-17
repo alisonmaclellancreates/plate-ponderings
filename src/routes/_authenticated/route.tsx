@@ -8,8 +8,7 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ location }) => {
     const user = await checkSignedIn();
-    if (!user)
-      throw redirect({ to: "/auth", search: { returnTo: safeReturnPath(location.href) } });
+    if (!user) throw redirect({ to: "/auth", search: { returnTo: safeReturnPath(location.href) } });
   },
   component: Outlet,
 });
