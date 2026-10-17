@@ -46,8 +46,12 @@ describe("previews plate links", () => {
     const C = R.component;
     render(<C />);
     const links = screen.getAllByRole("link");
-    expect(links.find((link) => link.getAttribute("href") === "/")?.textContent).toContain("Live data:");
-    expect(links.find((link) => link.getAttribute("href") === "/explore")?.textContent).toContain("Live data:");
+    expect(links.find((link) => link.getAttribute("href") === "/")?.textContent).toContain(
+      "Live data:",
+    );
+    expect(links.find((link) => link.getAttribute("href") === "/explore")?.textContent).toContain(
+      "Live data:",
+    );
     expect(links.map((link) => link.getAttribute("href"))).toContain("/previews/explore");
     expect(links.map((link) => link.getAttribute("href"))).toContain("/previews/homepage-featured");
   });

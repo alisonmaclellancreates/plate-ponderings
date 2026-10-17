@@ -18,8 +18,16 @@ export const Route = createFileRoute("/previews")({
 const PREVIEWS = [
   { to: "/", label: "Homepage", note: "Live data: search, Plate of the Day, recently featured" },
   { to: "/explore", label: "The Roadside Archive", note: "Live data: featured days, newest first" },
-  { to: "/previews/explore", label: "Archive, sample data", note: "14 featured days, all progress states and Load More" },
-  { to: "/previews/homepage-featured", label: "Homepage featured, sample data", note: "Mystery, singular and plural fallback bands, four-card shelf" },
+  {
+    to: "/previews/explore",
+    label: "Archive, sample data",
+    note: "14 featured days, all progress states and Load More",
+  },
+  {
+    to: "/previews/homepage-featured",
+    label: "Homepage featured, sample data",
+    note: "Mystery, singular and plural fallback bands, four-card shelf",
+  },
   {
     to: "/home-no-match",
     label: "Homepage, no match",
