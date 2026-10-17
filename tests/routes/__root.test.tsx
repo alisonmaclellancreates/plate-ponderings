@@ -27,8 +27,8 @@ vi.mock("@/lib/lovable-error-reporting", () => ({ reportLovableError }));
 vi.mock("@/lib/analytics", () => ({ track }));
 vi.mock("@/lib/auth-context", () => ({
   AccountProvider: ({ children }: { children: ReactNode }) => children,
-  useAccountAuth: () => null,
 }));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 
 function OutletProbe() {
   const client = useQueryClient();

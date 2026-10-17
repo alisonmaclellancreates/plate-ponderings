@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getHandleCheckStatus, resumeHandleChecks } from "@/lib/accounts.functions";
-import { useAccountAuth } from "@/lib/auth-context";
+import { useAccountAuth } from "@/lib/account-auth";
 import { Button } from "@/components/ui/button";
 type Status = { allowed: boolean; category?: string | null; blockedAt?: string | null };
 export function HandleCheckStatus() {

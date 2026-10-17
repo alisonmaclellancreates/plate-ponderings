@@ -22,7 +22,7 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
-vi.mock("@/lib/auth-context", () => ({
+vi.mock("@/lib/account-auth", () => ({
   useAccountAuth: () => ({ account: { handle: "Traveler1234", isDemo: false }, refresh: vi.fn() }),
 }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));

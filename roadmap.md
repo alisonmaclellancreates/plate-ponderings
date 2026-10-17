@@ -74,6 +74,8 @@
 
 # Step 42: accounts, handles and session-aware header
 
+- [x] Pre-merge: separate the account hook, resolve the provider effect dependency without suppression; maintained files have 0 errors/0 warnings, repository-wide 0 errors/6 existing UI warnings. All 509 tests pass; build OK; protected profile redirect verified.
+- [x] Pre-merge: original desktop fixture auth user and SullyTest42 profile are absent; the handle-save attempts table is empty. Already deleted, no additional deletion needed.
 - [x] Scope terminal blocks to handle moderation only; verified admin status/manual reset; safe logs and gateway quotes documented in docs/step42-report.md and AGENTS.md.
 - [x] Approved plan revised; separate pause table removed; Traveler4821 excluded; five saves per 15 minutes enforced.
 - [x] Approved database changes applied; validated constraints, privileges and rollback-only account tests checked.

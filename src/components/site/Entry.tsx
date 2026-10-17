@@ -5,7 +5,7 @@ import { PlateHeader } from "@/components/site/AddStory";
 import { DEMO_SEES } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useAccountAuth } from "@/lib/auth-context";
+import { useAccountAuth } from "@/lib/account-auth";
 import { safeReturnPath, signupErrorMessage } from "@/lib/account-rules";
 import { useNavigate } from "@tanstack/react-router";
 

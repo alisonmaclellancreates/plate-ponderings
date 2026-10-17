@@ -33,7 +33,7 @@ vi.mock("@tanstack/react-start", () => ({
   },
   createMiddleware: () => ({ server: () => ({}) }),
 }));
-vi.mock("@/lib/auth-context", () => ({ useAccountAuth: () => null }));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 
 import { DemoPage, SignInPage, SignInPromptPage, SignUpPage } from "@/components/site/Entry";
 import { StoryStepOne } from "@/components/site/AddStory";
