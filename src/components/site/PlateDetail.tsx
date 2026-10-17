@@ -293,10 +293,10 @@ export function StoryCard({ story }: { story: Story }) {
   return (
     <article
       data-owner={owner || undefined}
-      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
+      className={`brand-card relative grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
     >
       <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
-      <div className="min-w-0 flex-1">
+      <div className={`min-w-0 flex-1 ${zoom ? "sm:min-h-32 sm:pr-44" : ""}`}>
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm">
             <span className="font-semibold">{story.handle}</span>{" "}
@@ -431,13 +431,14 @@ export function PlateDetail({ state }: { state: string }) {
 
 function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string }) {
   const owner = story.source === "owner";
+  const zoom = Boolean(story.photo && story.photoBox);
   return (
     <article
       data-owner={owner || undefined}
-      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
+      className={`brand-card relative grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
     >
       <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
-      <div className="min-w-0 flex-1">
+      <div className={`min-w-0 flex-1 ${zoom ? "sm:min-h-32 sm:pr-44" : ""}`}>
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm">
             <span className="font-semibold">{story.handle}</span>
