@@ -19,6 +19,7 @@ export async function checkStory(
   meaning: string,
   more: string,
   plateText: string,
+  photoDataUrl?: string,
 ): Promise<StoryCheckResult> {
   // Server-only test switch, off by default; nothing in a request can turn it on.
   if (process.env["STORY_CHECK_FORCE_UNAVAILABLE"] === "1")
