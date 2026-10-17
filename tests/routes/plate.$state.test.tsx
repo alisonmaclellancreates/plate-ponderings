@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 type PlateData = { id: string; jurisdiction: string; text: string };
 let loaderData: { state: string; plate?: PlateData | null } = { state: "owner" };
 let search: { jurisdiction?: string; text?: string } = {};
+vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => ({
     ...o,
