@@ -296,12 +296,12 @@ describe("AddStoryFlow", () => {
       await user.click(screen.getByRole("button", { name: "Next" }));
       await user.click(screen.getByRole("button", { name: "Submit Story" }));
       await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(1));
-      expect(m.submit.mock.calls[0][0].data.photoPath).toBe("user-1/photo.jpg");
+      expect(m.submit.mock.calls[0]?.[0]?.data.photoPath).toBe("user-1/photo.jpg");
       await user.click(screen.getByRole("button", { name: "Next" }));
       await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
       await user.click(screen.getByRole("button", { name: "Submit Story" }));
       await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(2));
-      expect(m.submit.mock.calls[1][0].data.photoPath).toBe("");
+      expect(m.submit.mock.calls[1]?.[0]?.data.photoPath).toBe("");
     },
   );
 
