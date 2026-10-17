@@ -57,6 +57,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 vi.mock("@/lib/demo-login.functions", () => ({ startDemo: vi.fn() }));
+vi.mock("@/lib/demo-admin.functions", () => ({ resetSeedData: vi.fn(), fillMissingGuesses: vi.fn() }));
 vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn(), getPlate: vi.fn() }));
 vi.mock("@/lib/stories.functions", () => ({
   getPlateStories: vi.fn(),

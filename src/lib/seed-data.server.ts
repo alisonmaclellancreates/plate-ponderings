@@ -31,7 +31,7 @@ export function buildSeed(day: string, accounts: Record<string, string>, photoPa
     const created = at(text === "WANDR4" ? 16 : text === "MUDFLAP" ? 14 : 10);
     const subject: Row<"subjects"> = { id: crypto.randomUUID(), identity_a: jurisdiction, identity_b: text, normalized_key: `${jurisdiction}|${text}`, image_path: null, status: text === "WANDR4" ? "pending" : "published", created_by: account(text === "MUDFLAP" || text === "WANDR4" ? "Traveler4821" : first ?? "MileMarker88"), created_at: created, published_at: text === "WANDR4" ? null : created };
     seed.subjects.push(subject);
-    const matches = section.matchAll(/\d+\. \*\*(\w+)\*\* · ([^·]+) · Oct (\d+), (\d+):(\d+) (am|pm) · (\d+) hearts(?: · (photo))?\n\s+- Meaning: ([^\n]+)\n\s+- Tell us more: ([^\n]+)/g);
+    const matches = section.matchAll(/\d+\. \*\*(\w+)\*\* · ([^·]+) · Oct (\d+), (\d+):(\d+) (am|pm) · (\d+) hearts?(?: · (photo))?\n\s+- Meaning: ([^\n]+)\n\s+- Tell us more: ([^\n]+)/g);
     for (const m of matches) {
       const [, handle = "", sourceLabel = "", date = "", hour = "", minute = "", period = "", hearts = "", photo, meaning = "", body = ""] = m;
       const source = SOURCES[sourceLabel.trim()];
