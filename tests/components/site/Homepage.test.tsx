@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Homepage, PlateOfTheDay } from "@/components/site/Homepage";
@@ -26,6 +26,11 @@ function media({ mobile = false, reduced = false }) {
 }
 const visibleHeadline = () =>
   screen.getByRole("heading", { level: 1 }).querySelector('[aria-hidden="false"]')?.textContent;
+
+beforeEach(() => {
+  searchMock.fn.mockReset();
+  searchMock.navigate.mockReset();
+});
 
 afterEach(() => {
   vi.useRealTimers();
