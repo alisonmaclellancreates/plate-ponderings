@@ -117,6 +117,73 @@ export function SubmissionsPage({ rows = SUBMISSIONS }: { rows?: Submission[] })
 export const HANDLE_HELP =
   "3-20 characters: letters, numbers, and underscores. Handles are unique (not case sensitive). Some names are reserved. We'll run a quick safety check when you save.";
 
+/** Presentational handle field; previews render it inertly with a fixed state. */
+export function HandleField({
+  draft,
+  available = false,
+  message = "",
+  busy = false,
+  isDemo = false,
+  onDraftChange,
+  onSubmit,
+}: {
+  draft: string;
+  available?: boolean;
+  message?: string;
+  busy?: boolean;
+  isDemo?: boolean;
+  onDraftChange?: (value: string) => void;
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
+    <form
+      className="min-w-0 flex-1 space-y-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit?.(e);
+      }}
+    >
+      <label htmlFor="handle" className="block font-semibold text-navy">
+        Handle
+      </label>
+      <div className="grid min-w-0 grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <input
+          id="handle"
+          name="handle"
+          value={draft}
+          onChange={(e) => onDraftChange?.(e.target.value)}
+          disabled={busy || isDemo}
+          aria-describedby={
+            available || isDemo || !handleFormatValid(draft)
+              ? "handle-status handle-help"
+              : "handle-help"
+          }
+          className="w-full min-w-0 rounded-md border border-border bg-card px-3 py-2"
+        />
+        {available ? (
+          <span id="handle-status" className="brand-badge w-fit" data-tone="green">
+            <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+            Available
+          </span>
+        ) : (
+          <span id="handle-status" className="min-w-0 text-sm text-muted-foreground sm:max-w-48">
+            {isDemo ? DEMO_MESSAGE : handleFormatValid(draft) ? "" : handleValidationMessage(draft)}
+          </span>
+        )}
+      </div>
+      <p id="handle-help" className="text-sm text-muted-foreground">
+        {HANDLE_HELP}
+      </p>
+      <div className="pt-2">
+        <Button type="submit" disabled={busy || isDemo} className="brand-btn brand-btn-navy">
+          Save Changes
+        </Button>
+      </div>
+      {message && <p role="status">{message}</p>}
+    </form>
+  );
+}
+
 export function ProfilePage() {
   const auth = useAccountAuth();
   const handle = auth?.account?.handle ?? CURRENT_USER.handle;
