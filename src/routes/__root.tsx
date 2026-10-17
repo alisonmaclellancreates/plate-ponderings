@@ -139,10 +139,11 @@ function RootComponent() {
             Skip to main content
           </a>
           <SiteHeader />
-          <main id="main-content" tabIndex={-1} className="flex-1">
+          {/* Skip target is a div, not main: every page renders its own <main> and landmarks must not nest. */}
+          <div id="main-content" tabIndex={-1} className="flex-1">
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
-          </main>
+          </div>
           <SiteFooter />
         </div>
       </AccountProvider>
