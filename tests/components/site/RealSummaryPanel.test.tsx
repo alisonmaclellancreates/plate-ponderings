@@ -97,9 +97,8 @@ describe("real summary panel", () => {
     render(<RealPlateDetail plate={plate} />);
     await user.click(screen.getByRole("button", { name: "Earlier summaries (5)" }));
     expect(m.track).toHaveBeenCalledWith("summary_history_opened", { versions_shown: 3 });
-    let items = within(screen.getByRole("list", { hidden: false, name: "" }) ?? panel());
     const list = document.getElementById("earlier-summaries")!;
-    items = within(list);
+    const items = within(list);
     expect(items.getAllByRole("listitem").map((li) => li.textContent?.match(/Oct \d+/)?.[0])).toEqual([
       "Oct 8",
       "Oct 7",
