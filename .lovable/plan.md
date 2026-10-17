@@ -1,10 +1,10 @@
 # Step 47: Your Submissions, made real
 
-## Data shape (no database changes proposed)
-The existing schema already covers this step:
-- `subjects.created_by` and `stories.author_id` own the rows; owner SELECT policies exist for pending/rejected.
+## Data shape (one database change proposed)
+- `subjects.created_by` and `stories.author_id` own the rows.
 - `notifications` (read own; update `read_at` only, refused for demo by policy) already receives rows from the recheck and spot flows.
 - No browser DELETE grant on subjects, stories or notifications. That absence is the database's refusal for dismiss; dismiss runs in an authenticated server function.
+- Proposed migration: `notifications.subject_id` and `notifications.story_id` foreign keys become `ON DELETE CASCADE` (drop and re-add the two constraints, same columns). Today they have no cascade, so a conditional row delete would fail while notifications still point at it. With cascade, the row delete itself removes its notifications, which is exactly "only when a row was deleted". Existing rows already satisfy the constraints; validated after apply.
 
 Row state machine (derived per record):
 ```text
@@ -16,10 +16,11 @@ story:   pending -> published (own hearts, View)   ; pending on published plate:
 "Updated" = an unread notification whose story_id (stories) or subject_id with no story_id (subjects) matches the row.
 
 ## Server functions (new `src/lib/submissions.functions.ts`, all `requireSupabaseAuth`)
-- `getSubmissions`: reads the caller's subjects and stories (owner-scoped), excludes hidden/deleted, merges newest first (`created_at`), attaches published story counts and the story's own heart count (existing `story_heart_counts` pattern via admin, counts only), unread flags. Returns plain DTOs with display text, jurisdiction name, status, action, updated, plus `unreadCount`.
+- `getSubmissions`: reads with the admin client, filtered by the verified `context.userId` (`created_by` / `author_id`), for every status, so published rows appear regardless of owner policies. Excludes hidden/deleted stories, merges newest first, attaches published story counts (subjects) and the story's own heart count (stories), unread flags. Returns only the planned fields: id, kind, display text, jurisdiction name, status, date, count, action, plate link, updated, plus `unreadCount`.
 - `markSubmissionsRead`: no-op for the demo role (checked server-side); otherwise updates the caller's unread notifications as the user, so RLS also refuses demo.
 - `getUnreadDot`: boolean, any unread notification for the caller.
-- `dismissSubmission({ kind, id })`: refuses demo with the brief's demo message; verifies via the user client that the row is the caller's and `rejected`; then with admin deletes its notifications, its photo from storage (story `photo_path`), and the row. Subject dismiss also removes any rejected stories' photos tied to it (none can be published).
+- `dismissSubmission({ kind, id })`: refuses demo first with the brief's demo message. Then one admin delete carrying every condition (`id`, owner = `context.userId`, `status = 'rejected'`) with `.select("id, photo_path")`. Only when a row comes back: remove its photo from storage (notifications go with the row by cascade). No match returns a not-found result and touches nothing else.
+- Recheck: when `recheckPendingSubjects` resolves on the client, invalidate the unread-dot query so a status change it creates shows the dot without a page change.
 
 ## UI
 - `/submissions` route: loader-free on the client (`useSuspenseQuery` under `_authenticated`), passes live rows into the existing `SubmissionsPage` layout unchanged; previews keep mock data. Dismiss removes the row optimistically and invalidates the query; demo sees the demo message.
@@ -31,7 +32,7 @@ story:   pending -> published (own hearts, View)   ; pending on published plate:
 Register `submissions_viewed` with `unread_count: number` only; test it carries no never-send fields.
 
 ## Tests (AI mocked, every branch)
-Server functions: each row type and action, hidden/deleted excluded, subjects never carry hearts, updated mapping, demo mark-read no-op, non-demo mark-read, dismiss refusals (demo, not owner, not rejected) and success deleting notifications, photo and row. Components: each row renders right details/action, no chevron for pending subject, dot on/off, viewed event and mark-read order. Then run changed test files, lint, and rerun every `tests/db` file (no schema change, run for safety only if you want; default: skip since database unchanged).
+Server functions: published, pending and rejected rows all appear (subjects and stories), each row type and action, hidden/deleted excluded, subjects never carry hearts, only planned fields returned, updated mapping, demo mark-read no-op, non-demo mark-read, dismiss demo refused before any delete, dismiss no-match (no photo removal), dismiss success removing the photo. Components: each row renders right details/action, no chevron for pending subject, dot on/off, dot query invalidated after the recheck resolves, viewed event and mark-read order. A `tests/db` addition proves deleting a rejected story or subject cascades its notifications. Then run changed test files, lint, and every `tests/db` file.
 
 ## Report
 Max 10 lines; Codecov after your PR.
