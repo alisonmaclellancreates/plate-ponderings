@@ -252,6 +252,9 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         has_more_text: more.trim().length > 0,
         outcome,
       });
+      // The server deletes the uploaded photo on every outcome that saves no
+      // story, so the form must forget it too; a retry re-adds the photo.
+      if (result.outcome !== "published" && result.outcome !== "pending") setPhotoReady(null);
       if (result.outcome === "published") setStep("done");
       else if (result.outcome === "pending") setStep("checking");
       else if (result.outcome === "rejected") {
