@@ -87,8 +87,8 @@ export function PhotoEditor({
   );
 
   const pointAt = (e: React.PointerEvent): Point => {
-    const rect = frame.current?.getBoundingClientRect();
-    if (!rect) return { x: 0, y: 0 };
+    // Pointer handlers exist only while the adjustment frame is mounted.
+    const rect = (frame.current as HTMLDivElement).getBoundingClientRect();
     return {
       x: Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)),
       y: Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height)),
@@ -128,8 +128,7 @@ export function PhotoEditor({
     drag.current = null;
   };
 
-  const nudge = (e: React.KeyboardEvent) => {
-    if (!box) return;
+  const nudge = (e: React.KeyboardEvent, currentBox: Box) => {
     const step = e.shiftKey ? 0.05 : 0.01;
     const moves: Record<string, [number, number]> = {
       ArrowLeft: [-step, 0],
@@ -140,32 +139,27 @@ export function PhotoEditor({
     const delta = moves[e.key];
     if (!delta) return;
     e.preventDefault();
-    setBox(moveBox(box, delta[0], delta[1]));
+    setBox(moveBox(currentBox, delta[0], delta[1]));
   };
 
-  const confirm = async () => {
-    if (!box) return;
+  const confirm = async (currentBox: Box) => {
     setProcessing(true);
     try {
-      const canvas = renderBlurredPhoto(bitmap, box);
+      const canvas = renderBlurredPhoto(bitmap, currentBox);
       const blob = await canvasToJpegBlob(canvas);
-      setProcessedUrl((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return URL.createObjectURL(blob);
-      });
+      setProcessedUrl(URL.createObjectURL(blob));
       setMode("review");
     } finally {
       setProcessing(false);
     }
   };
 
-  const use = async () => {
-    if (!box || !processedUrl) return;
+  const use = async (currentBox: Box) => {
     setProcessing(true);
     try {
-      const canvas = renderBlurredPhoto(bitmap, box);
+      const canvas = renderBlurredPhoto(bitmap, currentBox);
       const blob = await canvasToJpegBlob(canvas);
-      onUse(blob, !sameBox(box, initialBox));
+      onUse(blob, !sameBox(currentBox, initialBox));
     } finally {
       setProcessing(false);
     }
@@ -229,7 +223,7 @@ export function PhotoEditor({
                     aria-label="Plate area"
                     aria-valuetext={`${Math.round(box.w * 100)} percent wide`}
                     tabIndex={0}
-                    onKeyDown={nudge}
+                    onKeyDown={(e) => nudge(e, box)}
                     className="absolute cursor-move border-2 border-cream shadow-[0_0_0_2px_var(--navy)] focus:outline-2 focus:outline-teal"
                     style={{
                       left: `${box.x * 100}%`,
@@ -266,7 +260,7 @@ export function PhotoEditor({
                   type="button"
                   className={`${coral} sm:ml-auto`}
                   disabled={!box || processing}
-                  onClick={() => void confirm()}
+                  onClick={box ? () => void confirm(box) : undefined}
                 >
                   Next
                 </Button>
@@ -275,7 +269,7 @@ export function PhotoEditor({
           ) : (
             <div className="grid gap-5 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-start">
               <img
-                src={processedUrl ?? ""}
+                src={processedUrl as string}
                 alt="Your processed photo, blurred except the plate"
                 data-testid="processed-photo"
                 className="w-full rounded-lg"
@@ -288,7 +282,7 @@ export function PhotoEditor({
                     type="button"
                     className={coral}
                     disabled={processing}
-                    onClick={() => void use()}
+                    onClick={() => void use(box as Box)}
                   >
                     Use This Photo
                   </Button>
@@ -297,10 +291,7 @@ export function PhotoEditor({
                     variant="outline"
                     className={outline}
                     onClick={() => {
-                      setProcessedUrl((old) => {
-                        if (old) URL.revokeObjectURL(old);
-                        return null;
-                      });
+                      setProcessedUrl(null);
                       setMode("adjust");
                     }}
                   >

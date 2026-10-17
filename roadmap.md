@@ -1,3 +1,9 @@
+# PR #113 photo patch coverage
+
+- [x] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths; remove unreachable UI guards and duplicate URL revocation. No server/storage behaviour changes or canvas extraction.
+- [x] Requested related tests: 343 passed across 28 files. All eight named files have 100% local statements, branches and functions. Lint: zero errors/six existing warnings. Automatic build OK.
+- [ ] Confirm PR Codecov after managed GitHub sync and CI. Latest actual report remains 78.77462%/97 missing, updated 18:56:20 UTC; GitHub could not find managed local commit eab6021 at 19:03 UTC. No manual push permitted.
+
 # Photo editor exits
 
 - [x] Replacement picker and adjustment skip implemented; cleanup, same-file reselection, cancellation, no-upload skip and box validation pass 45 changed tests. Preview updated. Lint zero errors/six existing warnings; automatic build OK. Desktop and 360×640 sample editor verified: exits visible, buttons/handles at least 44px, drawing enables Next and changes instruction, skip closes editor. Real file selection and cleanup are mocked tests, not live AI.

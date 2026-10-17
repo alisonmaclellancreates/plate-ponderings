@@ -217,8 +217,8 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   };
 
   const chooseAnotherPhoto = () => {
-    const input = photoInput.current;
-    if (!input) return;
+    // The editor's replacement callback exists only with this input mounted.
+    const input = photoInput.current as HTMLInputElement;
     input.value = "";
     input.click();
   };
@@ -227,13 +227,12 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     photoSelection.current += 1;
     setPhotoDraft(null);
     setPhotoUnreadable(false);
-    if (photoInput.current) photoInput.current.value = "";
-    if (!preview) void track("photo_skipped", {});
+    (photoInput.current as HTMLInputElement).value = "";
+    void track("photo_skipped", {});
     setStep("2");
   };
 
-  const handleUsePhoto = async (blob: Blob, adjusted: boolean) => {
-    if (!photoDraft || preview) return;
+  const handleUsePhoto = async (blob: Blob, adjusted: boolean, draft: PhotoDraft) => {
     setPhotoBusy(true);
     try {
       const uploaded = await uploadPhoto({ data: { jpeg: await blobToDataUrl(blob) } });
@@ -243,7 +242,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
         return;
       }
       void track("photo_added", {
-        box_found: photoDraft.suggestion !== null,
+        box_found: draft.suggestion !== null,
         box_adjusted: adjusted,
       });
       setPhotoReady({ path: uploaded.path, previewUrl: URL.createObjectURL(blob) });
@@ -390,7 +389,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
               className={outline}
               onClick={() => {
                 setPhotoReady(null);
-                if (!preview) void track("photo_skipped", {});
+                void track("photo_skipped", {});
               }}
             >
               Remove Photo
@@ -435,7 +434,7 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
             bitmap={photoDraft.bitmap}
             initialBox={photoDraft.suggestion}
             showNoBoxMessage={photoDraft.noBoxMessage}
-            onUse={(blob, adjusted) => void handleUsePhoto(blob, adjusted)}
+            onUse={(blob, adjusted) => void handleUsePhoto(blob, adjusted, photoDraft)}
             onRemove={skipEditorPhoto}
             onChooseAnother={chooseAnotherPhoto}
           />

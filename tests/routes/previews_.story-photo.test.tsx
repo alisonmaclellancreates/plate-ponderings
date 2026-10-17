@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const m = vi.hoisted(() => ({
@@ -32,6 +32,52 @@ beforeEach(() => {
 });
 
 describe("/previews/story-photo", () => {
+  it("has app-specific metadata", () => {
+    const head = Route.options.head;
+    if (!head) throw new Error("Missing preview head");
+    const result = head({} as Parameters<typeof head>[0]);
+    expect(result).toMatchObject({
+      meta: expect.arrayContaining([{ title: "Story photo sample preview | What the Plate?" }]),
+    });
+  });
+
+  it.each(["Suggested box", "Review"])(
+    "opens %s and closes when the processed photo is used",
+    async (name) => {
+      const user = userEvent.setup();
+      render(<Component />);
+      await waitFor(() => expect(screen.getByRole("button", { name })).toBeEnabled());
+      await user.click(screen.getByRole("button", { name }));
+      expect(screen.getByRole("slider", { name: "Plate area" })).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await screen.findByRole("heading", { name: "Review your photo" });
+      await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    },
+  );
+
+  it("contains sample decoding failure", async () => {
+    m.decode.mockRejectedValue(new Error("unreadable"));
+    render(<Component />);
+    await waitFor(() => expect(m.decode).toHaveBeenCalled());
+    expect(screen.getByRole("button", { name: "Suggested box" })).toBeDisabled();
+  });
+
+  it("ignores decoding that finishes after unmount", async () => {
+    let resolve: ((bitmap: ImageBitmap) => void) | undefined;
+    m.decode.mockReturnValue(
+      new Promise<ImageBitmap>((done) => {
+        resolve = done;
+      }),
+    );
+    const { unmount } = render(<Component />);
+    await waitFor(() => expect(m.decode).toHaveBeenCalled());
+    unmount();
+    await act(async () => {
+      resolve?.({ width: 800, height: 600 } as ImageBitmap);
+    });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
   it("has no loader, so it never reads live data", () => {
     expect(Route.options.loader).toBeUndefined();
   });
