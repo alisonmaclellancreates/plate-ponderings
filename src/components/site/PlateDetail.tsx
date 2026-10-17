@@ -289,8 +289,115 @@ export function PlateDetail({ state }: { state: string }) {
   );
 }
 
-/** A real published plate: frame, identity and status strip from live data.
- *  The stories area stays on the mock design until step 44. */
+function RealStoryCard({ story }: { story: PlateStory }) {
+  const owner = story.source === "owner";
+  return (
+    <article
+      data-owner={owner || undefined}
+      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 ${owner ? "border-coral" : ""}`}
+    >
+      <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm">
+          <span className="font-semibold">{story.handle}</span>
+          {owner && (
+            <span className="ml-2 rounded-full bg-coral-pale px-2 py-0.5 text-xs font-semibold text-navy">
+              Owner weighed in
+            </span>
+          )}
+        </p>
+        <h3 className="mt-1 text-lg font-bold text-navy">{story.meaning}</h3>
+        <div className="mt-2">
+          <HowIKnowBadge how={story.source} />
+        </div>
+        {story.body && <p className="mt-2">{story.body}</p>}
+        <p className="mt-2 flex items-center gap-1 text-sm">
+          <Heart aria-hidden className="size-4 text-coral" />
+          <span>{story.hearts}</span>
+          <span className="sr-only">{story.hearts === 1 ? "heart" : "hearts"}</span>
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function RealStories({ plateId, signedIn }: { plateId: string; signedIn: boolean }) {
+  const [shown, setShown] = useState(STORY_PAGE_SIZE);
+  const { data } = useQuery({
+    queryKey: ["plate-stories", plateId],
+    queryFn: () => getPlateStories({ data: { plateId } }),
+  });
+  if (!data) return null;
+  const remaining = data.total - shown;
+  return (
+    <section aria-labelledby="stories-heading" className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="stories-heading" className="font-display text-3xl text-navy">
+          Stories
+        </h2>
+        {signedIn && (
+          <Link
+            to="/story/$step"
+            params={{ step: "1" }}
+            search={{ plate: plateId }}
+            className="brand-btn brand-btn-coral"
+          >
+            Add Your Story
+          </Link>
+        )}
+      </div>
+      {data.pending.length > 0 && <PendingPanel />}
+      <ul className="space-y-4">
+        {data.stories.slice(0, shown).map((s) => (
+          <li key={s.id}>
+            <RealStoryCard story={s} />
+          </li>
+        ))}
+      </ul>
+      {remaining > 0 && (
+        <button
+          type="button"
+          onClick={() => setShown((n) => n + STORY_PAGE_SIZE)}
+          className="font-semibold text-navy underline underline-offset-4"
+        >
+          Show {Math.min(STORY_PAGE_SIZE, remaining)} more {remaining === 1 ? "story" : "stories"}
+        </button>
+      )}
+    </section>
+  );
+}
+
+function RealStatusStrip({ plateId }: { plateId: string }) {
+  const { data } = useQuery({
+    queryKey: ["plate-stories", plateId],
+    queryFn: () => getPlateStories({ data: { plateId } }),
+  });
+  const count = data?.storyCount ?? 0;
+  const status: PlateStatus = data?.hasOwnerStory
+    ? "owner"
+    : count > 0
+      ? "interpreted"
+      : "mystery";
+  return (
+    <ul
+      aria-label="Plate status"
+      className="flex flex-wrap items-center gap-y-2 divide-x divide-border rounded-xl border border-border bg-card py-3"
+    >
+      <li className="flex items-center gap-2 px-4 font-semibold">
+        <MessageCircle aria-hidden className="size-5" />
+        {storyCount(count)}
+      </li>
+      <li className="px-4">
+        <StatusBadge status={status} />
+      </li>
+      <li className="px-4 font-semibold">
+        {data?.ownerHandle ? `Owner: ${data.ownerHandle}` : "No owner yet"}
+      </li>
+    </ul>
+  );
+}
+
+/** A real published plate: frame, identity, status strip and stories from live data. */
 export function RealPlateDetail({
   plate,
   backToSearch,
@@ -298,6 +405,16 @@ export function RealPlateDetail({
   plate: { id: string; jurisdiction: string; text: string };
   backToSearch?: { jurisdiction: string; text: string } | undefined;
 }) {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (active) setSignedIn(data.user !== null);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       {backToSearch ? (
@@ -321,22 +438,11 @@ export function RealPlateDetail({
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[auto_minmax(0,1fr)]">
         <PlateFrame jurisdiction={plate.jurisdiction} text={plate.text} />
         <div className="min-w-0">
-          <MysteryPrompt />
+          <MysteryPrompt signedIn={signedIn} plateId={plate.id} />
         </div>
       </div>
-      <ul
-        aria-label="Plate status"
-        className="flex flex-wrap items-center gap-y-2 divide-x divide-border rounded-xl border border-border bg-card py-3"
-      >
-        <li className="flex items-center gap-2 px-4 font-semibold">
-          <MessageCircle aria-hidden className="size-5" />
-          {storyCount(0)}
-        </li>
-        <li className="px-4">
-          <StatusBadge status="mystery" />
-        </li>
-        <li className="px-4 font-semibold">No owner yet</li>
-      </ul>
+      <RealStatusStrip plateId={plate.id} />
+      <RealStories plateId={plate.id} signedIn={signedIn} />
     </main>
   );
 }
