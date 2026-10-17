@@ -434,7 +434,7 @@ function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string 
   return (
     <article
       data-owner={owner || undefined}
-      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 ${owner ? "border-coral" : ""}`}
+      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
     >
       <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1">
@@ -456,6 +456,16 @@ function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string 
         {story.body && <p className="mt-2">{story.body}</p>}
         <HeartButton story={story} plateId={plateId} />
       </div>
+      {story.photo && (
+        <img
+          src={story.photo}
+          alt={`Photo shared by ${story.handle}`}
+          width={944}
+          height={704}
+          loading="lazy"
+          className="col-start-2 h-20 w-28 shrink-0 rounded-md object-cover sm:col-start-auto"
+        />
+      )}
     </article>
   );
 }
