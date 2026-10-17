@@ -24,6 +24,12 @@ export const Route = createFileRoute("/previews_/homepage-featured")({
   component: HomepageFeaturedPreview,
 });
 
+const SAMPLE_BANDS = [
+  { count: 0, label: "Mystery" },
+  { count: 1, label: "Fallback, singular" },
+  { count: 2, label: "Fallback, plural" },
+] as const;
+
 function HomepageFeaturedPreview() {
   const plates = featuredPlates();
   return (
@@ -31,23 +37,19 @@ function HomepageFeaturedPreview() {
       <h1 className="mx-auto max-w-6xl px-4 py-8 font-display text-4xl text-navy">
         Homepage featured samples
       </h1>
-      {[0, 1, 2].map((count) => {
-        const plate = plates.find((sample) => publishedStories(sample).length === count);
-        if (!plate) return null;
-        return (
-          <section
-            key={count}
-            aria-label={
-              count === 0 ? "Mystery" : count === 1 ? "Fallback, singular" : "Fallback, plural"
-            }
-          >
-            <h2 className="mx-auto max-w-6xl px-4 py-6 font-display text-2xl text-navy">
-              {count === 0 ? "Mystery" : count === 1 ? "Fallback, singular" : "Fallback, plural"}
-            </h2>
-            <PlateOfTheDay plate={plate} headingId={`sample-potd-${count}`} />
-          </section>
-        );
-      })}
+      {SAMPLE_BANDS.map(({ count, label }) =>
+        plates
+          .filter((sample) => publishedStories(sample).length === count)
+          .slice(0, 1)
+          .map((plate) => (
+            <section key={count} aria-label={label}>
+              <h2 className="mx-auto max-w-6xl px-4 py-6 font-display text-2xl text-navy">
+                {label}
+              </h2>
+              <PlateOfTheDay plate={plate} headingId={`sample-potd-${count}`} />
+            </section>
+          )),
+      )}
       <RecentlyFeatured />
     </main>
   );
