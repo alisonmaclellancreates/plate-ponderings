@@ -20,7 +20,7 @@
 - Static preview pages read only from `src/lib/mock-data.ts` and share the header, footer, plate and badge components in `src/components/site/`, so later steps swap the data source without touching page layouts.
 - Compose state-specific preview stories without mutating shared plate records, so catching-up examples cannot change other previews.
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
-- Homepage and archive share `FeaturedPlateCard` DTOs from service-only RPCs with date cursors; previews adapt mocks, preventing count/progress drift.
+- Featured pages share RPC DTOs and cursor queries; previews adapt mocks. Queries contain read failures: home omits empty bands, archive retries inline, preserving pages.
 - `/plate/$state` accepts existing preview aliases and mock plate slugs through the same detail layout, preserving preview URLs while giving each archive card its own working destination.
 - Only `src/lib/analytics.ts` imports the PostHog SDK; one runtime event registry derives event types and drives both capture and before_send filtering, preventing event definitions from drifting; root route effects capture query-free page paths after hydration. Registry-scoped instances support test-only events without adding production events.
 - Map public PostHog connector values to `VITE_POSTHOG_KEY` and `VITE_POSTHOG_HOST` in Vite configuration, keeping application code independent of connector-specific names.

@@ -83,3 +83,24 @@ it("disables Load More while a real page is being fetched", () => {
   );
   expect(screen.getByRole("button", { name: "Load More" })).toBeDisabled();
 });
+it("keeps the archive and retries an inline read failure", async () => {
+  const retry = vi.fn().mockResolvedValue(undefined);
+  const live = {
+    today: "",
+    plates: [],
+    hasMore: false,
+    busy: false,
+    loadMore: vi.fn(),
+    error: true,
+    retry,
+  };
+  const { rerender } = render(<Explore live={live} />);
+  expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
+  expect(screen.getByRole("alert")).toBeTruthy();
+  await userEvent.setup().click(screen.getByRole("button", { name: "Try again" }));
+  expect(retry).toHaveBeenCalledTimes(1);
+  rerender(<Explore live={{ ...live, busy: true }} />);
+  expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled();
+  rerender(<Explore live={{ ...live, error: false }} />);
+  expect(screen.queryByRole("alert")).toBeNull();
+});

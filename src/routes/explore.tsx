@@ -23,18 +23,20 @@ export const Route = createFileRoute("/explore")({
 });
 
 function LiveExplore() {
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { data, hasNextPage, isFetching, fetchNextPage, refetch } =
     useSuspenseInfiniteQuery(featuredArchiveOptions);
   const [first] = data.pages;
-  if (!first) throw new Error("We couldn't load the featured plates right now.");
+  const failed = data.pages.some((page) => page.error);
   return (
     <Explore
       live={{
         plates: data.pages.flatMap((page) => page.plates),
-        today: first.today,
-        hasMore: hasNextPage,
-        busy: isFetchingNextPage,
+        today: first?.today ?? "",
+        hasMore: hasNextPage && !failed,
+        busy: isFetching,
         loadMore: fetchNextPage,
+        error: failed || !first,
+        retry: refetch,
       }}
     />
   );
