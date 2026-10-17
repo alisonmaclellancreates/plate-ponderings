@@ -195,7 +195,15 @@ function NoMatchPanel({ values }: { values: Required<SearchValues> }) {
 
 const INTRO = "Curious about a plate you saw? Look it up, or add a new mystery to the collection.";
 
-function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
+function Hero({
+  search,
+  noMatch,
+  onNoMatch,
+}: {
+  search: SearchValues;
+  noMatch: Required<SearchValues> | null;
+  onNoMatch: (values: Required<SearchValues>) => void;
+}) {
   return (
     <section aria-label="Welcome" className="grid">
       <img
@@ -212,8 +220,8 @@ function Hero({ search, noMatch }: { search: SearchValues; noMatch: boolean }) {
           <Headline />
           <p className="mt-3 max-w-md text-lg">{INTRO}</p>
           <div className="mt-6">
-            <SearchCard values={search} />
-            {noMatch && <NoMatchPanel />}
+            <SearchCard values={search} onNoMatch={onNoMatch} />
+            {noMatch && <NoMatchPanel values={noMatch} />}
           </div>
         </div>
       </div>
@@ -416,6 +424,9 @@ export function Homepage({
   variant?: HomepageVariant;
   prefill?: SearchValues;
 }) {
+  const [noMatch, setNoMatch] = useState<Required<SearchValues> | null>(
+    variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : null,
+  );
   const featured = PLATES.find((p) =>
     variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
   );
@@ -424,7 +435,7 @@ export function Homepage({
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (
     <main>
-      <Hero search={search} noMatch={variant === "no-match"} />
+      <Hero search={search} noMatch={noMatch} onNoMatch={setNoMatch} />
       <ActionCards />
       <HowItWorks />
       <PlateOfTheDay plate={featured} />
