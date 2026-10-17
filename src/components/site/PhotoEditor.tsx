@@ -139,7 +139,9 @@ export function PhotoEditor({
     const delta = moves[e.key];
     if (!delta) return;
     e.preventDefault();
-    setBox(moveBox(currentBox, delta[0], delta[1]));
+    // Alt+arrows resize from the bottom-right corner; plain arrows move the box.
+    if (e.altKey) setBox(resizeBox(currentBox, "se", delta[0], delta[1]));
+    else setBox(moveBox(currentBox, delta[0], delta[1]));
   };
 
   const confirm = async (currentBox: Box) => {
@@ -221,7 +223,12 @@ export function PhotoEditor({
                     data-testid="plate-box"
                     role="slider"
                     aria-label="Plate area"
+                    aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(box.w * 100)}
                     aria-valuetext={`${Math.round(box.w * 100)} percent wide`}
+                    title="Arrow keys move the box. Alt plus arrow keys resize it."
                     tabIndex={0}
                     onKeyDown={(e) => nudge(e, box)}
                     className="absolute cursor-move border-2 border-cream shadow-[0_0_0_2px_var(--navy)] focus:outline-2 focus:outline-teal"

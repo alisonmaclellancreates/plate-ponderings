@@ -20,7 +20,7 @@ function Headline() {
   const active = useHeadlineIndex();
   // All three share one grid cell, so the area is always as tall as the longest headline.
   return (
-    <h1 className="grid text-5xl text-navy xl:text-6xl">
+    <h1 aria-live="polite" className="grid text-5xl text-navy xl:text-6xl">
       {HEADLINES.map((text, i) => (
         <span
           key={text}
