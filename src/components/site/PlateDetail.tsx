@@ -184,7 +184,15 @@ function StorySoFar({
   );
 }
 
-function RealStorySoFar({ plateId, fallback }: { plateId: string; fallback: React.ReactNode }) {
+function RealStorySoFar({
+  plateId,
+  fallback,
+  hiddenGuess = false,
+}: {
+  plateId: string;
+  fallback: React.ReactNode;
+  hiddenGuess?: boolean;
+}) {
   const { data } = useQuery({
     queryKey: ["plate-summary", plateId],
     queryFn: () => getPlateSummary({ data: { plateId } }),
@@ -196,7 +204,7 @@ function RealStorySoFar({ plateId, fallback }: { plateId: string; fallback: Reac
     storyCount: v.storyCount,
     text: v.text,
   });
-  if (!data || (!data.current && !data.catchingUp)) return <>{fallback}</>;
+  if (hiddenGuess || !data || (!data.current && !data.catchingUp)) return <>{fallback}</>;
   return (
     <SummaryPanel
       current={data.current ? toPanel(data.current) : undefined}
@@ -557,6 +565,7 @@ export function RealPlateDetail({
         <div className="min-w-0">
           <RealStorySoFar
             plateId={plate.id}
+            hiddenGuess={guess?.status === "hidden"}
             fallback={
               <MysteryPrompt
                 signedIn={signedIn}

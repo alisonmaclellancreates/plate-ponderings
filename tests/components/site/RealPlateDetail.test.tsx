@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   guess: { status: "absent" } as Record<string, unknown>,
   account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean },
   getPlateStories: vi.fn(),
+  summary: null as unknown,
   stories: null as unknown,
 }));
 
@@ -43,7 +44,14 @@ vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => ({ account: m.accou
 vi.mock("@tanstack/react-query", () => ({
   useQuery: ({ queryFn, queryKey }: { queryFn: () => unknown; queryKey: string[] }) => {
     queryFn();
-    return { data: queryKey[0] === "plate-guess" ? m.guess : m.stories };
+    return {
+      data:
+        queryKey[0] === "plate-guess"
+          ? m.guess
+          : queryKey[0] === "plate-summary"
+            ? m.summary
+            : m.stories,
+    };
   },
 }));
 vi.mock("@/lib/stories.functions", () => ({
@@ -73,6 +81,7 @@ beforeEach(() => {
   m.getUser.mockResolvedValue({ data: { user: null } });
   m.account = null;
   m.guess = { status: "absent" };
+  m.summary = null;
   m.stories = {
     stories: [],
     pending: [],
@@ -247,12 +256,25 @@ describe("RealPlateDetail", () => {
 
 it("hidden guesses do not alter counts and pending human stories do not unlock them", () => {
   m.guess = { status: "hidden" };
+  m.summary = {
+    current: {
+      version: 1,
+      generatedAt: "2026-10-01",
+      consensus: "agree",
+      storyCount: 1,
+      text: "A stale summary",
+    },
+    earlier: [],
+    catchingUp: false,
+  };
   m.stories = { ...(m.stories as object), pending: [story("pending")] };
   render(<RealPlateDetail plate={plate} />);
   expect(
     within(screen.getByRole("list", { name: "Plate status" })).getByText("0 stories"),
   ).toBeTruthy();
   expect(screen.queryByRole("region", { name: "What the Plate?'s guess" })).toBeNull();
+  expect(screen.getByText("We've got a guess waiting.")).toBeInTheDocument();
+  expect(screen.queryByText("A stale summary")).toBeNull();
 });
 it("revealed guesses do not become human stories or change owner-first order", () => {
   vi.stubGlobal(
