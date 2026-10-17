@@ -30,7 +30,7 @@ export const Route = createFileRoute("/plate/$state")({
         ],
       };
     }
-    if (loaderData.plate) {
+    {
       const title = `${loaderData.plate.text} (${loaderData.plate.jurisdiction}) | What the Plate?`;
       const description = `Stories about the ${loaderData.plate.jurisdiction} plate ${loaderData.plate.text}, and what people think it means.`;
       return {
@@ -44,6 +44,7 @@ export const Route = createFileRoute("/plate/$state")({
         ],
       };
     }
+  },
   component: PlateDetailRoute,
 });
 
