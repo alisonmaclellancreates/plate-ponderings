@@ -88,10 +88,10 @@ export async function detectPlateBoxInImage(dataUrl: string): Promise<DetectBoxR
     const output = await result.output;
     if (
       !output.found ||
-      output.x === undefined ||
-      output.y === undefined ||
-      output.w === undefined ||
-      output.h === undefined ||
+      output.x === null ||
+      output.y === null ||
+      output.w === null ||
+      output.h === null ||
       output.w < MIN_BOX ||
       output.h < MIN_BOX
     )
