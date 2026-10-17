@@ -36,6 +36,43 @@ describe("analytics", () => {
       ).toEqual({ event: "subject_spotted", properties: { outcome } });
     }
   });
+  it("story events carry every planned outcome but never meaning, body or handle", async () => {
+    const analytics = await import("@/lib/analytics");
+    expect(analytics.STORY_SUBMITTED_OUTCOMES).toEqual([
+      "published",
+      "pending",
+      "rejected",
+      "rate_limited",
+      "error",
+    ]);
+    for (const outcome of analytics.STORY_SUBMITTED_OUTCOMES) {
+      await analytics.track("story_submitted", { source: "guess", has_more_text: false, outcome });
+      expect(sdk.capture).toHaveBeenLastCalledWith("story_submitted", {
+        source: "guess",
+        has_more_text: false,
+        outcome,
+      });
+      const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
+      expect(
+        beforeSend({
+          event: "story_submitted",
+          properties: {
+            source: "guess",
+            has_more_text: false,
+            outcome,
+            meaning: "private meaning",
+            body: "private body",
+            handle: "private",
+          },
+        }),
+      ).toEqual({
+        event: "story_submitted",
+        properties: { source: "guess", has_more_text: false, outcome },
+      });
+    }
+    await analytics.track("story_started", {});
+    expect(sdk.capture).toHaveBeenLastCalledWith("story_started", {});
+  });
   it("account events carry no email, handle, password or moderation output", async () => {
     const analytics = await import("@/lib/analytics");
     for (const event of [
