@@ -224,7 +224,9 @@ it("admin sees the blocked design and success only after a confirmed resume", as
   await screen.findByTestId("blocked-icon");
   expect(screen.getByText("Blocked")).toBeInTheDocument();
   expect(
-    screen.getByText("AI checks are paused. Nothing is published without a check. People keep their current handles."),
+    screen.getByText(
+      "AI checks are paused. Nothing is published without a check. People keep their current handles.",
+    ),
   ).toBeInTheDocument();
   expect(screen.queryByText("AI checks resumed.")).toBeNull();
   m.status.mockResolvedValue({ allowed: true, category: null });

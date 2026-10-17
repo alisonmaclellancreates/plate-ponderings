@@ -123,7 +123,9 @@ it("status panel previews show Ready without Resume and the Blocked design", () 
   expect(screen.getByTestId("blocked-icon")).toBeInTheDocument();
   expect(screen.getByText("Blocked")).toBeInTheDocument();
   expect(
-    screen.getByText("AI checks are paused. Nothing is published without a check. People keep their current handles."),
+    screen.getByText(
+      "AI checks are paused. Nothing is published without a check. People keep their current handles.",
+    ),
   ).toBeInTheDocument();
   expect(screen.getByText(/^Paused since /)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Resume AI checks" }));

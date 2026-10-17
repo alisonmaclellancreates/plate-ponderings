@@ -25,14 +25,20 @@ const R = Route as unknown as {
 
 describe("plate detail route", () => {
   it("loads known states and rejects unknown ones", async () => {
-    expect(await R.loader({ params: { state: "mystery" } })).toEqual({ state: "mystery", plate: null });
+    expect(await R.loader({ params: { state: "mystery" } })).toEqual({
+      state: "mystery",
+      plate: null,
+    });
     await expect(R.loader({ params: { state: "nope" } })).rejects.toThrow("not found");
     await expect(R.loader({ params: { state: "toString" } })).rejects.toThrow("not found");
     await expect(R.loader({ params: { state: "constructor" } })).rejects.toThrow("not found");
   });
 
   it("accepts any mock plate slug, as the Explore cards link", async () => {
-    expect(await R.loader({ params: { state: "ut-canyons" } })).toEqual({ state: "ut-canyons", plate: null });
+    expect(await R.loader({ params: { state: "ut-canyons" } })).toEqual({
+      state: "ut-canyons",
+      plate: null,
+    });
     await expect(R.loader({ params: { state: "not-a-plate" } })).rejects.toThrow("not found");
   });
 

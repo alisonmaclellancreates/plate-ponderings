@@ -41,7 +41,10 @@ describe("RealPlateDetail", () => {
 
   it("links Back to Search with the searched values when arriving from search", () => {
     render(
-      <RealPlateDetail plate={plate} backToSearch={{ jurisdiction: "Washington", text: "B7K 2L9" }} />,
+      <RealPlateDetail
+        plate={plate}
+        backToSearch={{ jurisdiction: "Washington", text: "B7K 2L9" }}
+      />,
     );
     const back = screen.getByRole("link", { name: "Back to Search" });
     expect(back.getAttribute("href")).toBe("/?jurisdiction=Washington&text=B7K+2L9");

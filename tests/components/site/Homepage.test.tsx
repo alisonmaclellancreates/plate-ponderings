@@ -185,9 +185,9 @@ describe("Homepage", () => {
     const user = userEvent.setup();
     render(<Homepage />);
     await submitSearch(user);
-    expect(
-      screen.getAllByRole("region", { name: "No plate found. Yet!" }).length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByRole("region", { name: "No plate found. Yet!" }).length).toBeGreaterThan(
+      0,
+    );
     expect(screen.getAllByDisplayValue("DRAGON").length).toBeGreaterThan(0);
   });
 

@@ -40,8 +40,7 @@ type Result = { data: unknown; error: unknown };
 /** A chainable query mock; terminal methods resolve `result`. */
 function chain(result: Result) {
   const b: Record<string, unknown> = {};
-  for (const name of ["select", "eq", "in", "neq", "insert", "update"])
-    b[name] = vi.fn(() => b);
+  for (const name of ["select", "eq", "in", "neq", "insert", "update"]) b[name] = vi.fn(() => b);
   b["maybeSingle"] = vi.fn(async () => result);
   b["single"] = vi.fn(async () => result);
   b["then"] = (resolve: (r: Result) => void) => resolve(result);
@@ -83,7 +82,9 @@ beforeEach(() => {
   mocks.admin.from.mockImplementation((table: string) => {
     const c = chain(tables[table] ?? { data: null, error: null });
     if (table === "subjects" || table === "profiles") {
-      const insertOrUpdate = vi.fn(() => chain(table === "subjects" ? insertResult : { data: null, error: null }));
+      const insertOrUpdate = vi.fn(() =>
+        chain(table === "subjects" ? insertResult : { data: null, error: null }),
+      );
       c["insert"] = insertOrUpdate;
       c["update"] = insertOrUpdate;
     }
@@ -91,7 +92,9 @@ beforeEach(() => {
   });
   mocks.admin.rpc.mockResolvedValue({ data: true, error: null });
   context.supabase.rpc.mockResolvedValue({ data: false, error: null });
-  context.supabase.from.mockImplementation(() => chain({ data: { last_recheck_at: null }, error: null }));
+  context.supabase.from.mockImplementation(() =>
+    chain({ data: { last_recheck_at: null }, error: null }),
+  );
   mocks.readBlock.mockResolvedValue({ category: null, blockedAt: null });
   mocks.persistBlock.mockResolvedValue(undefined);
   mocks.check.mockResolvedValue({ outcome: "approved", block: null, runId: "run-1" });
@@ -195,7 +198,9 @@ describe("spotPlate", () => {
     mocks.admin.from.mockImplementation((table: string) => {
       const c = chain(tables[table] ?? { data: null, error: null });
       if (table === "subjects") {
-        c["maybeSingle"] = vi.fn(async () => (++lookups === 1 ? { data: null, error: null } : PUBLISHED));
+        c["maybeSingle"] = vi.fn(async () =>
+          ++lookups === 1 ? { data: null, error: null } : PUBLISHED,
+        );
         c["insert"] = vi.fn(() => chain(insertResult));
       }
       return c;
@@ -232,7 +237,9 @@ describe("recheckPendingSubjects", () => {
     const notifications: unknown[] = [];
     mocks.admin.from.mockImplementation((table: string) => {
       const c = chain(
-        table === "subjects" ? { data: [pendingRow], error: null } : (tables[table] ?? { data: null, error: null }),
+        table === "subjects"
+          ? { data: [pendingRow], error: null }
+          : (tables[table] ?? { data: null, error: null }),
       );
       if (table === "subjects") c["update"] = vi.fn(() => chain({ data: null, error: null }));
       if (table === "profiles") c["update"] = vi.fn(() => chain({ data: null, error: null }));

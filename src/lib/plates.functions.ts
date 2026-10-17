@@ -11,9 +11,7 @@ export type PlateSummary = {
 };
 
 export type SearchResult =
-  | { status: "found"; plate: PlateSummary }
-  | { status: "no-match" }
-  | { status: "error" };
+  { status: "found"; plate: PlateSummary } | { status: "no-match" } | { status: "error" };
 
 type SpotInput = { jurisdiction: string; text: string };
 
@@ -101,7 +99,9 @@ async function existingOutcome(
 ): Promise<SpotResult | null> {
   const { data, error } = await admin
     .from("subjects")
-    .select("id,identity_a,identity_b,status,created_by,jurisdictions!subjects_identity_a_fkey(name)")
+    .select(
+      "id,identity_a,identity_b,status,created_by,jurisdictions!subjects_identity_a_fkey(name)",
+    )
     .eq("normalized_key", key)
     .in("status", ["pending", "published"])
     .maybeSingle();
@@ -188,7 +188,11 @@ export const spotPlate = createServerFn({ method: "POST" })
     }
     return {
       outcome: "new",
-      plate: { id: inserted.data.id, jurisdiction: data.jurisdiction, text: inserted.data.identity_b },
+      plate: {
+        id: inserted.data.id,
+        jurisdiction: data.jurisdiction,
+        text: inserted.data.identity_b,
+      },
     };
   });
 
@@ -246,10 +250,7 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
           subject_id: subject.id,
         });
       } else {
-        await supabaseAdmin
-          .from("subjects")
-          .update({ status: "rejected" })
-          .eq("id", subject.id);
+        await supabaseAdmin.from("subjects").update({ status: "rejected" }).eq("id", subject.id);
         await supabaseAdmin.from("notifications").insert({
           user_id: context.userId,
           kind: "subject_rejected",

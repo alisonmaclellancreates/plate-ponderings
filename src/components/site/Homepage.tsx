@@ -170,7 +170,11 @@ function SearchCard({
           )}
         </div>
       </div>
-      <button type="submit" disabled={busy} className="brand-btn brand-btn-navy mt-4 w-full sm:w-auto">
+      <button
+        type="submit"
+        disabled={busy}
+        className="brand-btn brand-btn-navy mt-4 w-full sm:w-auto"
+      >
         Search
       </button>
     </form>
