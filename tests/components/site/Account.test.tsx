@@ -107,7 +107,7 @@ describe("ProfilePage", () => {
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     const field = screen.getByLabelText("Handle");
     expect(field).toHaveValue("Traveler1234");
-    expect(field).toHaveAccessibleDescription(HANDLE_HELP);
+    expect(field).toHaveAccessibleDescription(HANDLE_HELP.trim());
     expect(screen.getByRole("button", { name: "Save Changes" })).toBeInTheDocument();
     expect(screen.getByTestId("sample-story")).toHaveTextContent("Traveler1234");
   });
