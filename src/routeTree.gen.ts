@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as DemoFormRouteImport } from './routes/demo-form'
@@ -21,19 +20,20 @@ import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as NotFoundRouteImport } from './routes/not-found'
 import { Route as PreviewsRouteImport } from './routes/previews'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignInPromptRouteImport } from './routes/sign-in-prompt'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as StoryMenuRouteImport } from './routes/story-menu'
-import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenticated/submissions'
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
-import { Route as SettingsDeleteConfirmRouteImport } from './routes/settings_.delete-confirm'
-import { Route as SpotIndexRouteImport } from './routes/spot.index'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
-import { Route as StoryStepRouteImport } from './routes/story.$step'
+import { Route as AuthenticatedSettingsDeleteConfirmRouteImport } from './routes/_authenticated/settings_.delete-confirm'
+import { Route as AuthenticatedSpotIndexRouteImport } from './routes/_authenticated/spot.index'
+import { Route as AuthenticatedStoryStepRouteImport } from './routes/_authenticated/story.$step'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,11 +43,6 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -95,16 +90,6 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -125,11 +110,27 @@ const StoryMenuRoute = StoryMenuRouteImport.update({
   path: '/story-menu',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SubmissionsRoute = SubmissionsRouteImport.update({
-  id: '/submissions',
-  path: '/submissions',
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/_authenticated/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/_authenticated/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/_authenticated/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSubmissionsRoute =
+  AuthenticatedSubmissionsRouteImport.update({
+    id: '/_authenticated/submissions',
+    path: '/submissions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PlateStateRoute = PlateStateRouteImport.update({
   id: '/plate/$state',
   path: '/plate/$state',
@@ -140,23 +141,24 @@ const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
   path: '/preview/components',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsDeleteConfirmRoute = SettingsDeleteConfirmRouteImport.update({
-  id: '/settings_/delete-confirm',
-  path: '/settings/delete-confirm',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SpotIndexRoute = SpotIndexRouteImport.update({
-  id: '/spot/',
-  path: '/spot/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
   id: '/spot/$outcome',
   path: '/spot/$outcome',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StoryStepRoute = StoryStepRouteImport.update({
-  id: '/story/$step',
+const AuthenticatedSettingsDeleteConfirmRoute =
+  AuthenticatedSettingsDeleteConfirmRouteImport.update({
+    id: '/_authenticated/settings_/delete-confirm',
+    path: '/settings/delete-confirm',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedSpotIndexRoute = AuthenticatedSpotIndexRouteImport.update({
+  id: '/_authenticated/spot/',
+  path: '/spot/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedStoryStepRoute = AuthenticatedStoryStepRouteImport.update({
+  id: '/_authenticated/story/$step',
   path: '/story/$step',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -164,7 +166,6 @@ const StoryStepRoute = StoryStepRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/demo-form': typeof DemoFormRoute
@@ -174,24 +175,24 @@ export interface FileRoutesByFullPath {
   '/not-found': typeof NotFoundRoute
   '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
-  '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
   '/story-menu': typeof StoryMenuRoute
-  '/submissions': typeof SubmissionsRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
-  '/settings/delete-confirm': typeof SettingsDeleteConfirmRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
-  '/story/$step': typeof StoryStepRoute
-  '/spot/': typeof SpotIndexRoute
+  '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
+  '/story/$step': typeof AuthenticatedStoryStepRoute
+  '/spot/': typeof AuthenticatedSpotIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/demo-form': typeof DemoFormRoute
@@ -201,25 +202,25 @@ export interface FileRoutesByTo {
   '/not-found': typeof NotFoundRoute
   '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
-  '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
   '/story-menu': typeof StoryMenuRoute
-  '/submissions': typeof SubmissionsRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
-  '/settings/delete-confirm': typeof SettingsDeleteConfirmRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
-  '/story/$step': typeof StoryStepRoute
-  '/spot': typeof SpotIndexRoute
+  '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
+  '/story/$step': typeof AuthenticatedStoryStepRoute
+  '/spot': typeof AuthenticatedSpotIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/demo-form': typeof DemoFormRoute
@@ -229,26 +230,26 @@ export interface FileRoutesById {
   '/not-found': typeof NotFoundRoute
   '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
-  '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
   '/story-menu': typeof StoryMenuRoute
-  '/submissions': typeof SubmissionsRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
-  '/settings_/delete-confirm': typeof SettingsDeleteConfirmRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
-  '/story/$step': typeof StoryStepRoute
-  '/spot/': typeof SpotIndexRoute
+  '/_authenticated/settings_/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
+  '/_authenticated/story/$step': typeof AuthenticatedStoryStepRoute
+  '/_authenticated/spot/': typeof AuthenticatedSpotIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/admin'
     | '/contact'
     | '/demo'
     | '/demo-form'
@@ -258,24 +259,24 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/previews'
     | '/privacy'
-    | '/profile'
-    | '/settings'
     | '/sign-in'
     | '/sign-in-prompt'
     | '/sign-up'
     | '/story-menu'
+    | '/admin'
+    | '/profile'
+    | '/settings'
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
-    | '/settings/delete-confirm'
     | '/spot/$outcome'
+    | '/settings/delete-confirm'
     | '/story/$step'
     | '/spot/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/contact'
     | '/demo'
     | '/demo-form'
@@ -285,24 +286,24 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/previews'
     | '/privacy'
-    | '/profile'
-    | '/settings'
     | '/sign-in'
     | '/sign-in-prompt'
     | '/sign-up'
     | '/story-menu'
+    | '/admin'
+    | '/profile'
+    | '/settings'
     | '/submissions'
     | '/plate/$state'
     | '/preview/components'
-    | '/settings/delete-confirm'
     | '/spot/$outcome'
+    | '/settings/delete-confirm'
     | '/story/$step'
     | '/spot'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/admin'
     | '/contact'
     | '/demo'
     | '/demo-form'
@@ -312,25 +313,25 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/previews'
     | '/privacy'
-    | '/profile'
-    | '/settings'
     | '/sign-in'
     | '/sign-in-prompt'
     | '/sign-up'
     | '/story-menu'
-    | '/submissions'
+    | '/_authenticated/admin'
+    | '/_authenticated/profile'
+    | '/_authenticated/settings'
+    | '/_authenticated/submissions'
     | '/plate/$state'
     | '/preview/components'
-    | '/settings_/delete-confirm'
     | '/spot/$outcome'
-    | '/story/$step'
-    | '/spot/'
+    | '/_authenticated/settings_/delete-confirm'
+    | '/_authenticated/story/$step'
+    | '/_authenticated/spot/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRoute
   ContactRoute: typeof ContactRoute
   DemoRoute: typeof DemoRoute
   DemoFormRoute: typeof DemoFormRoute
@@ -340,19 +341,20 @@ export interface RootRouteChildren {
   NotFoundRoute: typeof NotFoundRoute
   PreviewsRoute: typeof PreviewsRoute
   PrivacyRoute: typeof PrivacyRoute
-  ProfileRoute: typeof ProfileRoute
-  SettingsRoute: typeof SettingsRoute
   SignInRoute: typeof SignInRoute
   SignInPromptRoute: typeof SignInPromptRoute
   SignUpRoute: typeof SignUpRoute
   StoryMenuRoute: typeof StoryMenuRoute
-  SubmissionsRoute: typeof SubmissionsRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSubmissionsRoute: typeof AuthenticatedSubmissionsRoute
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
-  SettingsDeleteConfirmRoute: typeof SettingsDeleteConfirmRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
-  StoryStepRoute: typeof StoryStepRoute
-  SpotIndexRoute: typeof SpotIndexRoute
+  AuthenticatedSettingsDeleteConfirmRoute: typeof AuthenticatedSettingsDeleteConfirmRoute
+  AuthenticatedStoryStepRoute: typeof AuthenticatedStoryStepRoute
+  AuthenticatedSpotIndexRoute: typeof AuthenticatedSpotIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -369,13 +371,6 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -441,20 +436,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
@@ -483,11 +464,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryMenuRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/submissions': {
-      id: '/submissions'
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/submissions': {
+      id: '/_authenticated/submissions'
       path: '/submissions'
       fullPath: '/submissions'
-      preLoaderRoute: typeof SubmissionsRouteImport
+      preLoaderRoute: typeof AuthenticatedSubmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plate/$state': {
@@ -504,20 +506,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings_/delete-confirm': {
-      id: '/settings_/delete-confirm'
-      path: '/settings/delete-confirm'
-      fullPath: '/settings/delete-confirm'
-      preLoaderRoute: typeof SettingsDeleteConfirmRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/spot/': {
-      id: '/spot/'
-      path: '/spot'
-      fullPath: '/spot/'
-      preLoaderRoute: typeof SpotIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/spot/$outcome': {
       id: '/spot/$outcome'
       path: '/spot/$outcome'
@@ -525,11 +513,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpotOutcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/story/$step': {
-      id: '/story/$step'
+    '/_authenticated/settings_/delete-confirm': {
+      id: '/_authenticated/settings_/delete-confirm'
+      path: '/settings/delete-confirm'
+      fullPath: '/settings/delete-confirm'
+      preLoaderRoute: typeof AuthenticatedSettingsDeleteConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/spot/': {
+      id: '/_authenticated/spot/'
+      path: '/spot'
+      fullPath: '/spot/'
+      preLoaderRoute: typeof AuthenticatedSpotIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/story/$step': {
+      id: '/_authenticated/story/$step'
       path: '/story/$step'
       fullPath: '/story/$step'
-      preLoaderRoute: typeof StoryStepRouteImport
+      preLoaderRoute: typeof AuthenticatedStoryStepRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -538,7 +540,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRoute,
   ContactRoute: ContactRoute,
   DemoRoute: DemoRoute,
   DemoFormRoute: DemoFormRoute,
@@ -548,19 +549,21 @@ const rootRouteChildren: RootRouteChildren = {
   NotFoundRoute: NotFoundRoute,
   PreviewsRoute: PreviewsRoute,
   PrivacyRoute: PrivacyRoute,
-  ProfileRoute: ProfileRoute,
-  SettingsRoute: SettingsRoute,
   SignInRoute: SignInRoute,
   SignInPromptRoute: SignInPromptRoute,
   SignUpRoute: SignUpRoute,
   StoryMenuRoute: StoryMenuRoute,
-  SubmissionsRoute: SubmissionsRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSubmissionsRoute: AuthenticatedSubmissionsRoute,
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
-  SettingsDeleteConfirmRoute: SettingsDeleteConfirmRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,
-  StoryStepRoute: StoryStepRoute,
-  SpotIndexRoute: SpotIndexRoute,
+  AuthenticatedSettingsDeleteConfirmRoute:
+    AuthenticatedSettingsDeleteConfirmRoute,
+  AuthenticatedStoryStepRoute: AuthenticatedStoryStepRoute,
+  AuthenticatedSpotIndexRoute: AuthenticatedSpotIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

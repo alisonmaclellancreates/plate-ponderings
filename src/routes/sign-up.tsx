@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SignUpPage } from "@/components/site/Entry";
+import { safeReturnPath } from "@/lib/account-rules";
 
 const TITLE = "Create an Account | What the Plate?";
 const DESCRIPTION = "Join the community and add your story.";
 
 export const Route = createFileRoute("/sign-up")({
+  validateSearch: (search: Record<string, unknown>) => ({ returnTo: safeReturnPath(search['returnTo']) }),
   head: () => ({
     meta: [
       { title: TITLE },
@@ -15,5 +17,6 @@ export const Route = createFileRoute("/sign-up")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <SignUpPage />,
+  component: SignUpRoute,
 });
+function SignUpRoute() { const { returnTo } = Route.useSearch(); return <SignUpPage returnTo={returnTo} />; }
