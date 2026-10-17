@@ -25,8 +25,8 @@ import {
   getDemoSetting,
   checkHandle,
   saveHandle,
-  getHandleCheckStatus,
-  resumeHandleChecks,
+  getAiCheckStatus,
+  resumeAiChecks,
 } from "@/lib/accounts.functions";
 import {
   HANDLE_UNAVAILABLE,
@@ -254,24 +254,24 @@ describe("manual recovery", () => {
   it("only non-demo admins can inspect or reset state", async () => {
     for (const value of [[], [{ role: "demo" }, { role: "admin" }]]) {
       roles.data = value;
-      expect(await call(getHandleCheckStatus)).toEqual({ allowed: false });
-      expect(await call(resumeHandleChecks)).toEqual({ resumed: false });
+      expect(await call(getAiCheckStatus)).toEqual({ allowed: false });
+      expect(await call(resumeAiChecks)).toEqual({ resumed: false });
     }
     roles.error = {};
-    expect(await call(getHandleCheckStatus)).toEqual({ allowed: false });
-    expect(await call(resumeHandleChecks)).toEqual({ resumed: false });
+    expect(await call(getAiCheckStatus)).toEqual({ allowed: false });
+    expect(await call(resumeAiChecks)).toEqual({ resumed: false });
   });
   it("shows status and clears explicitly without an AI call", async () => {
-    expect(await call(getHandleCheckStatus)).toEqual({
+    expect(await call(getAiCheckStatus)).toEqual({
       allowed: true,
       category: null,
       blockedAt: null,
     });
-    expect(await call(resumeHandleChecks)).toEqual({ resumed: true });
+    expect(await call(resumeAiChecks)).toEqual({ resumed: true });
     persist.error = {};
-    expect(await call(resumeHandleChecks)).toEqual({ resumed: false });
+    expect(await call(resumeAiChecks)).toEqual({ resumed: false });
     settings.error = {};
-    await expect(call(getHandleCheckStatus)).rejects.toThrow();
+    await expect(call(getAiCheckStatus)).rejects.toThrow();
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
 });

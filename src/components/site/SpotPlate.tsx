@@ -236,7 +236,7 @@ function WhatHappensNext() {
   );
 }
 
-function AlreadySpottedPanel({ values }: { values: Required<SpotValues> }) {
+function AlreadySpottedPanel({ values }: { values: { jurisdiction: string; text: string } }) {
   return (
     <section
       aria-labelledby="already-spotted"
@@ -606,7 +606,7 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
   const spot = useServerFn(spotPlate);
   const [stage, setStage] = useState<SpotStage>({ kind: "form" });
   const isDemo = Boolean(auth?.account?.isDemo);
-  async function onSpot(next: Required<SpotValues>) {
+  async function onSpot(next: { jurisdiction: string; text: string }) {
     setStage({ kind: "checking" });
     try {
       const result = await spot({ data: next });

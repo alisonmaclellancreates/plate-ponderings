@@ -30,7 +30,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 import { HandleField } from "@/components/site/Account";
 import { SignInPage, SignUpPage } from "@/components/site/Entry";
-import { HandleCheckStatusPanel } from "@/components/site/HandleCheckStatus";
+import { AiCheckStatusPanel } from "@/components/site/AiCheckStatus";
 import { HANDLE_REJECTED, HANDLE_TAKEN } from "@/lib/account-rules";
 import { Route as AccountPreviewsRoute } from "@/routes/previews_.account";
 
@@ -111,12 +111,12 @@ it("handle field previews are inert without handlers", () => {
 });
 
 it("status panel previews show Ready without Resume and the Blocked design", () => {
-  const v = render(<HandleCheckStatusPanel status={{ allowed: true, category: null }} />);
+  const v = render(<AiCheckStatusPanel status={{ allowed: true, category: null }} />);
   expect(screen.getByText("Ready")).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Resume handle checks" })).toBeNull();
   v.unmount();
   render(
-    <HandleCheckStatusPanel
+    <AiCheckStatusPanel
       status={{ allowed: true, category: "credit_block", blockedAt: "2026-10-17T01:00:00.000Z" }}
     />,
   );
