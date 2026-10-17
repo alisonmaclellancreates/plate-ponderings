@@ -2,6 +2,9 @@
 
 - [x] Read step brief; move original seed photos to docs/seed-photos and delete measuring copies.
 - [ ] Present one plan and proposed additive database changes; await Alison's approval before applying.
+- [ ] Incorporate corrected literal counts (15 published stories, 9 summaries, 1 pending and 1 rejected); refuse reset before deletion when demo_today is empty.
+- [ ] Propose full 0019 SQL; process seed JPEGs at ≤1200 px/0.85, report individual/total bytes and stop before bundling if total exceeds 1 MB.
+- [ ] Build demo/refusals, frozen date and reset/seed before removing previews last.
 - [ ] Build demo login/exits/banner, audit write refusals and exclude demo rechecks/read updates.
 - [ ] Implement shared effective today, admin-only reset and sequential missing-guess fill.
 - [ ] Process seed JPEGs, seed exact docs/seed.md content and remove mock/preview scaffolding.
