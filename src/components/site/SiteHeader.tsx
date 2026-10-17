@@ -162,7 +162,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
         <div className="ml-auto hidden items-center gap-4 md:flex">
           {signedOut ? (
             <>
-              <Link to="/sign-in" className={signIn}>
+              <Link to="/sign-in" search={{ returnTo: "/" }} className={signIn}>
                 Sign in
               </Link>
               {demoEnabled && (
@@ -181,7 +181,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
         </div>
         <div className="ml-auto flex items-center gap-3 md:hidden">
           {signedOut ? (
-            <Link to="/sign-in" className={signIn}>
+            <Link to="/sign-in" search={{ returnTo: "/" }} className={signIn}>
               Sign in
             </Link>
           ) : mode === "demo" ? (

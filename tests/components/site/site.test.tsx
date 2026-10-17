@@ -60,10 +60,10 @@ describe("badges", () => {
 
 describe("SiteHeader", () => {
   it("links home, shows the handle, notification and toggles the mobile menu", () => {
-    render(<SiteHeader />);
+    render(<SiteHeader mode="member" />);
     expect(screen.getByRole("link", { name: "What the Plate? home" })).toHaveAttribute("href", "/");
     expect(screen.getAllByText("Traveler4821").length).toBeGreaterThan(0);
-    expect(screen.getAllByTestId("notification-dot").length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("notification-dot")).toBeNull();
     const button = screen.getByRole("button", { name: "Open menu" });
     fireEvent.click(button);
     const mobile = screen.getByRole("navigation", { name: "Mobile" });
