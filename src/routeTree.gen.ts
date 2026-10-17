@@ -15,34 +15,17 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DemoRouteImport } from './routes/demo'
-import { Route as DemoFormRouteImport } from './routes/demo-form'
 import { Route as ExploreRouteImport } from './routes/explore'
-import { Route as HomeFallbackRouteImport } from './routes/home-fallback'
-import { Route as HomeNoMatchRouteImport } from './routes/home-no-match'
 import { Route as NotFoundRouteImport } from './routes/not-found'
-import { Route as PreviewsRouteImport } from './routes/previews'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignInPromptRouteImport } from './routes/sign-in-prompt'
 import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as StoryMenuRouteImport } from './routes/story-menu'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenticated/submissions'
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
-import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
-import { Route as PreviewsAccountRouteImport } from './routes/previews_.account'
-import { Route as PreviewsAdminRouteImport } from './routes/previews_.admin'
-import { Route as PreviewsExploreRouteImport } from './routes/previews_.explore'
-import { Route as PreviewsHomepageFeaturedRouteImport } from './routes/previews_.homepage-featured'
-import { Route as PreviewsSettingsRouteImport } from './routes/previews_.settings'
-import { Route as PreviewsSettingsDeleteConfirmRouteImport } from './routes/previews_.settings-delete-confirm'
-import { Route as PreviewsStoryErrorRouteImport } from './routes/previews_.story-error'
-import { Route as PreviewsStoryPhotoRouteImport } from './routes/previews_.story-photo'
-import { Route as PreviewsStoryRateLimitedRouteImport } from './routes/previews_.story-rate-limited'
-import { Route as PreviewsSubmissionsRouteImport } from './routes/previews_.submissions'
-import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
 import { Route as AuthenticatedSettingsDeleteConfirmRouteImport } from './routes/_authenticated/settings_.delete-confirm'
 import { Route as AuthenticatedSpotIndexRouteImport } from './routes/_authenticated/spot.index'
 import { Route as AuthenticatedStoryStepRouteImport } from './routes/_authenticated/story.$step'
@@ -76,34 +59,14 @@ const DemoRoute = DemoRouteImport.update({
   path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoFormRoute = DemoFormRouteImport.update({
-  id: '/demo-form',
-  path: '/demo-form',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ExploreRoute = ExploreRouteImport.update({
   id: '/explore',
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HomeFallbackRoute = HomeFallbackRouteImport.update({
-  id: '/home-fallback',
-  path: '/home-fallback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HomeNoMatchRoute = HomeNoMatchRouteImport.update({
-  id: '/home-no-match',
-  path: '/home-no-match',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const NotFoundRoute = NotFoundRouteImport.update({
   id: '/not-found',
   path: '/not-found',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsRoute = PreviewsRouteImport.update({
-  id: '/previews',
-  path: '/previews',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -124,11 +87,6 @@ const SignInPromptRoute = SignInPromptRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StoryMenuRoute = StoryMenuRouteImport.update({
-  id: '/story-menu',
-  path: '/story-menu',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -157,69 +115,6 @@ const PlateStateRoute = PlateStateRouteImport.update({
   path: '/plate/$state',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PreviewComponentsRoute = PreviewComponentsRouteImport.update({
-  id: '/preview/components',
-  path: '/preview/components',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsAccountRoute = PreviewsAccountRouteImport.update({
-  id: '/previews_/account',
-  path: '/previews/account',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsAdminRoute = PreviewsAdminRouteImport.update({
-  id: '/previews_/admin',
-  path: '/previews/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsExploreRoute = PreviewsExploreRouteImport.update({
-  id: '/previews_/explore',
-  path: '/previews/explore',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsHomepageFeaturedRoute =
-  PreviewsHomepageFeaturedRouteImport.update({
-    id: '/previews_/homepage-featured',
-    path: '/previews/homepage-featured',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PreviewsSettingsRoute = PreviewsSettingsRouteImport.update({
-  id: '/previews_/settings',
-  path: '/previews/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsSettingsDeleteConfirmRoute =
-  PreviewsSettingsDeleteConfirmRouteImport.update({
-    id: '/previews_/settings-delete-confirm',
-    path: '/previews/settings-delete-confirm',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PreviewsStoryErrorRoute = PreviewsStoryErrorRouteImport.update({
-  id: '/previews_/story-error',
-  path: '/previews/story-error',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsStoryPhotoRoute = PreviewsStoryPhotoRouteImport.update({
-  id: '/previews_/story-photo',
-  path: '/previews/story-photo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreviewsStoryRateLimitedRoute =
-  PreviewsStoryRateLimitedRouteImport.update({
-    id: '/previews_/story-rate-limited',
-    path: '/previews/story-rate-limited',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PreviewsSubmissionsRoute = PreviewsSubmissionsRouteImport.update({
-  id: '/previews_/submissions',
-  path: '/previews/submissions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
-  id: '/spot/$outcome',
-  path: '/spot/$outcome',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedSettingsDeleteConfirmRoute =
   AuthenticatedSettingsDeleteConfirmRouteImport.update({
     id: '/settings_/delete-confirm',
@@ -243,34 +138,17 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
-  '/demo-form': typeof DemoFormRoute
   '/explore': typeof ExploreRoute
-  '/home-fallback': typeof HomeFallbackRoute
-  '/home-no-match': typeof HomeNoMatchRoute
   '/not-found': typeof NotFoundRoute
-  '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
-  '/story-menu': typeof StoryMenuRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
-  '/preview/components': typeof PreviewComponentsRoute
-  '/previews/account': typeof PreviewsAccountRoute
-  '/previews/admin': typeof PreviewsAdminRoute
-  '/previews/explore': typeof PreviewsExploreRoute
-  '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
-  '/previews/settings': typeof PreviewsSettingsRoute
-  '/previews/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
-  '/previews/story-error': typeof PreviewsStoryErrorRoute
-  '/previews/story-photo': typeof PreviewsStoryPhotoRoute
-  '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
-  '/previews/submissions': typeof PreviewsSubmissionsRoute
-  '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
   '/spot/': typeof AuthenticatedSpotIndexRoute
@@ -281,34 +159,17 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
-  '/demo-form': typeof DemoFormRoute
   '/explore': typeof ExploreRoute
-  '/home-fallback': typeof HomeFallbackRoute
-  '/home-no-match': typeof HomeNoMatchRoute
   '/not-found': typeof NotFoundRoute
-  '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
-  '/story-menu': typeof StoryMenuRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
-  '/preview/components': typeof PreviewComponentsRoute
-  '/previews/account': typeof PreviewsAccountRoute
-  '/previews/admin': typeof PreviewsAdminRoute
-  '/previews/explore': typeof PreviewsExploreRoute
-  '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
-  '/previews/settings': typeof PreviewsSettingsRoute
-  '/previews/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
-  '/previews/story-error': typeof PreviewsStoryErrorRoute
-  '/previews/story-photo': typeof PreviewsStoryPhotoRoute
-  '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
-  '/previews/submissions': typeof PreviewsSubmissionsRoute
-  '/spot/$outcome': typeof SpotOutcomeRoute
   '/settings/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/story/$step': typeof AuthenticatedStoryStepRoute
   '/spot': typeof AuthenticatedSpotIndexRoute
@@ -321,34 +182,17 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
-  '/demo-form': typeof DemoFormRoute
   '/explore': typeof ExploreRoute
-  '/home-fallback': typeof HomeFallbackRoute
-  '/home-no-match': typeof HomeNoMatchRoute
   '/not-found': typeof NotFoundRoute
-  '/previews': typeof PreviewsRoute
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
   '/sign-in-prompt': typeof SignInPromptRoute
   '/sign-up': typeof SignUpRoute
-  '/story-menu': typeof StoryMenuRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/submissions': typeof AuthenticatedSubmissionsRoute
   '/plate/$state': typeof PlateStateRoute
-  '/preview/components': typeof PreviewComponentsRoute
-  '/previews_/account': typeof PreviewsAccountRoute
-  '/previews_/admin': typeof PreviewsAdminRoute
-  '/previews_/explore': typeof PreviewsExploreRoute
-  '/previews_/homepage-featured': typeof PreviewsHomepageFeaturedRoute
-  '/previews_/settings': typeof PreviewsSettingsRoute
-  '/previews_/settings-delete-confirm': typeof PreviewsSettingsDeleteConfirmRoute
-  '/previews_/story-error': typeof PreviewsStoryErrorRoute
-  '/previews_/story-photo': typeof PreviewsStoryPhotoRoute
-  '/previews_/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
-  '/previews_/submissions': typeof PreviewsSubmissionsRoute
-  '/spot/$outcome': typeof SpotOutcomeRoute
   '/_authenticated/settings_/delete-confirm': typeof AuthenticatedSettingsDeleteConfirmRoute
   '/_authenticated/story/$step': typeof AuthenticatedStoryStepRoute
   '/_authenticated/spot/': typeof AuthenticatedSpotIndexRoute
@@ -361,34 +205,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/demo'
-    | '/demo-form'
     | '/explore'
-    | '/home-fallback'
-    | '/home-no-match'
     | '/not-found'
-    | '/previews'
     | '/privacy'
     | '/sign-in'
     | '/sign-in-prompt'
     | '/sign-up'
-    | '/story-menu'
     | '/admin'
     | '/profile'
     | '/settings'
     | '/submissions'
     | '/plate/$state'
-    | '/preview/components'
-    | '/previews/account'
-    | '/previews/admin'
-    | '/previews/explore'
-    | '/previews/homepage-featured'
-    | '/previews/settings'
-    | '/previews/settings-delete-confirm'
-    | '/previews/story-error'
-    | '/previews/story-photo'
-    | '/previews/story-rate-limited'
-    | '/previews/submissions'
-    | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
     | '/spot/'
@@ -399,34 +226,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/demo'
-    | '/demo-form'
     | '/explore'
-    | '/home-fallback'
-    | '/home-no-match'
     | '/not-found'
-    | '/previews'
     | '/privacy'
     | '/sign-in'
     | '/sign-in-prompt'
     | '/sign-up'
-    | '/story-menu'
     | '/admin'
     | '/profile'
     | '/settings'
     | '/submissions'
     | '/plate/$state'
-    | '/preview/components'
-    | '/previews/account'
-    | '/previews/admin'
-    | '/previews/explore'
-    | '/previews/homepage-featured'
-    | '/previews/settings'
-    | '/previews/settings-delete-confirm'
-    | '/previews/story-error'
-    | '/previews/story-photo'
-    | '/previews/story-rate-limited'
-    | '/previews/submissions'
-    | '/spot/$outcome'
     | '/settings/delete-confirm'
     | '/story/$step'
     | '/spot'
@@ -438,34 +248,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/demo'
-    | '/demo-form'
     | '/explore'
-    | '/home-fallback'
-    | '/home-no-match'
     | '/not-found'
-    | '/previews'
     | '/privacy'
     | '/sign-in'
     | '/sign-in-prompt'
     | '/sign-up'
-    | '/story-menu'
     | '/_authenticated/admin'
     | '/_authenticated/profile'
     | '/_authenticated/settings'
     | '/_authenticated/submissions'
     | '/plate/$state'
-    | '/preview/components'
-    | '/previews_/account'
-    | '/previews_/admin'
-    | '/previews_/explore'
-    | '/previews_/homepage-featured'
-    | '/previews_/settings'
-    | '/previews_/settings-delete-confirm'
-    | '/previews_/story-error'
-    | '/previews_/story-photo'
-    | '/previews_/story-rate-limited'
-    | '/previews_/submissions'
-    | '/spot/$outcome'
     | '/_authenticated/settings_/delete-confirm'
     | '/_authenticated/story/$step'
     | '/_authenticated/spot/'
@@ -478,30 +271,13 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   DemoRoute: typeof DemoRoute
-  DemoFormRoute: typeof DemoFormRoute
   ExploreRoute: typeof ExploreRoute
-  HomeFallbackRoute: typeof HomeFallbackRoute
-  HomeNoMatchRoute: typeof HomeNoMatchRoute
   NotFoundRoute: typeof NotFoundRoute
-  PreviewsRoute: typeof PreviewsRoute
   PrivacyRoute: typeof PrivacyRoute
   SignInRoute: typeof SignInRoute
   SignInPromptRoute: typeof SignInPromptRoute
   SignUpRoute: typeof SignUpRoute
-  StoryMenuRoute: typeof StoryMenuRoute
   PlateStateRoute: typeof PlateStateRoute
-  PreviewComponentsRoute: typeof PreviewComponentsRoute
-  PreviewsAccountRoute: typeof PreviewsAccountRoute
-  PreviewsAdminRoute: typeof PreviewsAdminRoute
-  PreviewsExploreRoute: typeof PreviewsExploreRoute
-  PreviewsHomepageFeaturedRoute: typeof PreviewsHomepageFeaturedRoute
-  PreviewsSettingsRoute: typeof PreviewsSettingsRoute
-  PreviewsSettingsDeleteConfirmRoute: typeof PreviewsSettingsDeleteConfirmRoute
-  PreviewsStoryErrorRoute: typeof PreviewsStoryErrorRoute
-  PreviewsStoryPhotoRoute: typeof PreviewsStoryPhotoRoute
-  PreviewsStoryRateLimitedRoute: typeof PreviewsStoryRateLimitedRoute
-  PreviewsSubmissionsRoute: typeof PreviewsSubmissionsRoute
-  SpotOutcomeRoute: typeof SpotOutcomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -548,13 +324,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo-form': {
-      id: '/demo-form'
-      path: '/demo-form'
-      fullPath: '/demo-form'
-      preLoaderRoute: typeof DemoFormRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/explore': {
       id: '/explore'
       path: '/explore'
@@ -562,32 +331,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/home-fallback': {
-      id: '/home-fallback'
-      path: '/home-fallback'
-      fullPath: '/home-fallback'
-      preLoaderRoute: typeof HomeFallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/home-no-match': {
-      id: '/home-no-match'
-      path: '/home-no-match'
-      fullPath: '/home-no-match'
-      preLoaderRoute: typeof HomeNoMatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/not-found': {
       id: '/not-found'
       path: '/not-found'
       fullPath: '/not-found'
       preLoaderRoute: typeof NotFoundRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews': {
-      id: '/previews'
-      path: '/previews'
-      fullPath: '/previews'
-      preLoaderRoute: typeof PreviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -616,13 +364,6 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/story-menu': {
-      id: '/story-menu'
-      path: '/story-menu'
-      fullPath: '/story-menu'
-      preLoaderRoute: typeof StoryMenuRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -658,90 +399,6 @@ declare module '@tanstack/react-router' {
       path: '/plate/$state'
       fullPath: '/plate/$state'
       preLoaderRoute: typeof PlateStateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/preview/components': {
-      id: '/preview/components'
-      path: '/preview/components'
-      fullPath: '/preview/components'
-      preLoaderRoute: typeof PreviewComponentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/account': {
-      id: '/previews_/account'
-      path: '/previews/account'
-      fullPath: '/previews/account'
-      preLoaderRoute: typeof PreviewsAccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/admin': {
-      id: '/previews_/admin'
-      path: '/previews/admin'
-      fullPath: '/previews/admin'
-      preLoaderRoute: typeof PreviewsAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/explore': {
-      id: '/previews_/explore'
-      path: '/previews/explore'
-      fullPath: '/previews/explore'
-      preLoaderRoute: typeof PreviewsExploreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/homepage-featured': {
-      id: '/previews_/homepage-featured'
-      path: '/previews/homepage-featured'
-      fullPath: '/previews/homepage-featured'
-      preLoaderRoute: typeof PreviewsHomepageFeaturedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/settings': {
-      id: '/previews_/settings'
-      path: '/previews/settings'
-      fullPath: '/previews/settings'
-      preLoaderRoute: typeof PreviewsSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/settings-delete-confirm': {
-      id: '/previews_/settings-delete-confirm'
-      path: '/previews/settings-delete-confirm'
-      fullPath: '/previews/settings-delete-confirm'
-      preLoaderRoute: typeof PreviewsSettingsDeleteConfirmRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/story-error': {
-      id: '/previews_/story-error'
-      path: '/previews/story-error'
-      fullPath: '/previews/story-error'
-      preLoaderRoute: typeof PreviewsStoryErrorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/story-photo': {
-      id: '/previews_/story-photo'
-      path: '/previews/story-photo'
-      fullPath: '/previews/story-photo'
-      preLoaderRoute: typeof PreviewsStoryPhotoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/story-rate-limited': {
-      id: '/previews_/story-rate-limited'
-      path: '/previews/story-rate-limited'
-      fullPath: '/previews/story-rate-limited'
-      preLoaderRoute: typeof PreviewsStoryRateLimitedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/previews_/submissions': {
-      id: '/previews_/submissions'
-      path: '/previews/submissions'
-      fullPath: '/previews/submissions'
-      preLoaderRoute: typeof PreviewsSubmissionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/spot/$outcome': {
-      id: '/spot/$outcome'
-      path: '/spot/$outcome'
-      fullPath: '/spot/$outcome'
-      preLoaderRoute: typeof SpotOutcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/settings_/delete-confirm': {
@@ -799,30 +456,13 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   DemoRoute: DemoRoute,
-  DemoFormRoute: DemoFormRoute,
   ExploreRoute: ExploreRoute,
-  HomeFallbackRoute: HomeFallbackRoute,
-  HomeNoMatchRoute: HomeNoMatchRoute,
   NotFoundRoute: NotFoundRoute,
-  PreviewsRoute: PreviewsRoute,
   PrivacyRoute: PrivacyRoute,
   SignInRoute: SignInRoute,
   SignInPromptRoute: SignInPromptRoute,
   SignUpRoute: SignUpRoute,
-  StoryMenuRoute: StoryMenuRoute,
   PlateStateRoute: PlateStateRoute,
-  PreviewComponentsRoute: PreviewComponentsRoute,
-  PreviewsAccountRoute: PreviewsAccountRoute,
-  PreviewsAdminRoute: PreviewsAdminRoute,
-  PreviewsExploreRoute: PreviewsExploreRoute,
-  PreviewsHomepageFeaturedRoute: PreviewsHomepageFeaturedRoute,
-  PreviewsSettingsRoute: PreviewsSettingsRoute,
-  PreviewsSettingsDeleteConfirmRoute: PreviewsSettingsDeleteConfirmRoute,
-  PreviewsStoryErrorRoute: PreviewsStoryErrorRoute,
-  PreviewsStoryPhotoRoute: PreviewsStoryPhotoRoute,
-  PreviewsStoryRateLimitedRoute: PreviewsStoryRateLimitedRoute,
-  PreviewsSubmissionsRoute: PreviewsSubmissionsRoute,
-  SpotOutcomeRoute: SpotOutcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
