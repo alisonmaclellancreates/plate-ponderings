@@ -73,12 +73,12 @@ export const Route = createFileRoute("/plate/$state")({
 function PlateDetailRoute() {
   const { state, plate } = Route.useLoaderData();
   const search = Route.useSearch();
-  if (plate)
-    return (
-      <RealPlateDetail
-        plate={plate}
-        backToSearch={search.jurisdiction && search.text ? search : undefined}
-      />
-    );
+  if (plate) {
+    const backToSearch =
+      search.jurisdiction && search.text
+        ? { jurisdiction: search.jurisdiction, text: search.text }
+        : undefined;
+    return <RealPlateDetail plate={plate} backToSearch={backToSearch} />;
+  }
   return <PlateDetail state={state} />;
 }
