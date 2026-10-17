@@ -337,6 +337,24 @@ export type Database = {
           },
         ]
       }
+      story_save_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subject_save_attempts: {
         Row: {
           attempted_at: string
@@ -523,6 +541,10 @@ export type Database = {
     }
     Functions: {
       consume_handle_save_attempt: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      consume_story_save_attempt: {
         Args: { _user_id: string }
         Returns: boolean
       }

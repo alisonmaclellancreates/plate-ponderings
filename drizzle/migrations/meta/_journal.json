@@ -57,6 +57,13 @@
       "when": 1792225165694,
       "tag": "0007_step43b_subject_attempts_user_time_index",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792227504499,
+      "tag": "0008_step44_story_attempts",
+      "breakpoints": true
     }
   ]
 }
