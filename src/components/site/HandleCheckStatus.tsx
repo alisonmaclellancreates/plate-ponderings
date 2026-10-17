@@ -45,11 +45,7 @@ export function HandleCheckStatusPanel({
           {status?.blockedAt && (
             <p className="mt-1 text-sm">{new Date(status.blockedAt).toLocaleString()}</p>
           )}
-          <Button
-            disabled={busy}
-            className="brand-btn brand-btn-navy mt-3"
-            onClick={onResume}
-          >
+          <Button disabled={busy} className="brand-btn brand-btn-navy mt-3" onClick={onResume}>
             Resume handle checks
           </Button>
         </div>
