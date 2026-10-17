@@ -2,12 +2,15 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { StoryStepPage } from "@/components/site/AddStory";
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
 import { STORY_STEPS, type StoryStep } from "@/lib/story-form";
+import { plateIdOrNull } from "@/lib/account-rules";
 
 const isStep = (s: string): s is StoryStep => Object.hasOwn(STORY_STEPS, s);
 
 export const Route = createFileRoute("/_authenticated/story/$step")({
-  validateSearch: (search: Record<string, unknown>): { plate?: string } =>
-    typeof search["plate"] === "string" && search["plate"] ? { plate: search["plate"] } : {},
+  validateSearch: (search: Record<string, unknown>): { plate?: string } => {
+    const plate = plateIdOrNull(search["plate"]);
+    return plate ? { plate } : {};
+  },
   loader: ({ params }) => {
     if (!isStep(params.step)) throw notFound();
     return { step: params.step };
@@ -23,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/story/$step")({
     }
     const label = STORY_STEPS[loaderData.step];
     const title = `Add Your Story · ${label} | What the Plate?`;
-    const description = `Add a story for Oregon PNW LV: ${label.toLowerCase()}.`;
+    const description = `Add your story to a plate. Step: ${label.toLowerCase()}.`;
     return {
       meta: [
         { title },
