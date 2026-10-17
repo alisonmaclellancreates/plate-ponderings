@@ -10,7 +10,13 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-import { AboutPage, CONTACT_EMAIL, ContactPage, NotFoundPage, PrivacyPage } from "@/components/site/InfoPages";
+import {
+  AboutPage,
+  CONTACT_EMAIL,
+  ContactPage,
+  NotFoundPage,
+  PrivacyPage,
+} from "@/components/site/InfoPages";
 import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
 
 describe("AboutPage", () => {

@@ -5,7 +5,6 @@ import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
 
 export const CONTACT_EMAIL = "hello@sailawaystudios.net";
 
-
 export function AboutPage() {
   return (
     <main>
