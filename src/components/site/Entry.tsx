@@ -6,7 +6,12 @@ import { DEMO_SEES } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccountAuth } from "@/lib/account-auth";
-import { safeReturnPath, signupErrorMessage } from "@/lib/account-rules";
+import {
+  safeReturnPath,
+  signupErrorMessage,
+  SIGN_IN_ERROR,
+  SIGN_UP_ERROR,
+} from "@/lib/account-rules";
 import { useNavigate } from "@tanstack/react-router";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
@@ -139,11 +144,7 @@ function useEntry(kind: "signed_in" | "signed_up", returnTo: string) {
           ? await supabase.auth.signUp({ email, password })
           : await supabase.auth.signInWithPassword({ email, password });
       if (result.error) {
-        setError(
-          kind === "signed_up"
-            ? signupErrorMessage(result.error)
-            : "We couldn't sign you in. Check your email and password and try again.",
-        );
+        setError(kind === "signed_up" ? signupErrorMessage(result.error) : SIGN_IN_ERROR);
         return;
       }
       if (!result.data.session) {
@@ -153,11 +154,7 @@ function useEntry(kind: "signed_in" | "signed_up", returnTo: string) {
       await auth?.completeSignIn(kind);
       await navigate({ to: safeReturnPath(returnTo) });
     } catch {
-      setError(
-        kind === "signed_up"
-          ? "Your account couldn't be created. You can try again or sign in."
-          : "We couldn't sign you in. Check your email and password and try again.",
-      );
+      setError(kind === "signed_up" ? SIGN_UP_ERROR : SIGN_IN_ERROR);
     } finally {
       setBusy(false);
     }
