@@ -11,8 +11,10 @@
 
 ## Checks actually run
 
-- Full suite after pre-merge cleanup: **509 tests passed across 114 files**, including subscription stability and in-flight read cancellation on unmount.
-- Coverage: **99.22% statements, 97.26% branches, 99.02% functions, 99.68% lines**. The existing 95% gate is unchanged and passes.
+- Full suite after patch-coverage follow-up: **533 tests passed across 114 files**.
+- Coverage: **99.56% statements, 98.97% branches, 99.51% functions, 99.84% lines**. The existing 95% gate is unchanged and passes. All eight reported files have **100% statement, branch and line coverage locally**. Seven also have 100% function coverage; the run-id helper retains an unreachable placeholder resolver function (94.11% function coverage), unrelated to the patch line/branch gaps.
+- Added behaviour tests for server input validators (the test harness now runs the actual validators), non-string refusal without privileged reads or moderation, terminal-block persistence without a run ID, stale availability responses, invalid drafts, signed-out profile submission, duplicate saves/auth submissions, omitted form fields, safe message-less password errors, multi-chunk streaming, failed auth-change refresh and stale signed-out reads, denial-code fallbacks, and the signed-out member-menu boundary. No production branches were removed or coverage rules weakened. The only production change exports the existing member-menu component for direct testing.
+- PR readback through AlisonMacLellanCreates's GitHub API: **PR #86**, latest completed CI succeeded for commit `16ede3097410dda5cae51e92872e761f3465f4e1` before this follow-up; Codecov's report updated at **00:34:45 UTC on October 17, 2026** still reads **94.60154%**. CI has not yet run for these new tests. This is the old PR result, not confirmation of the new patch. Re-read Codecov after the follow-up sync and CI finish.
 - Analytics test rerun after the test-only TypeScript correction: **11 tests passed**.
 - Lint after pre-merge cleanup: **0 errors, 0 warnings in maintained files**; repository-wide **0 errors, 6 existing UI component-export warnings**. Context types and the consumer hook now live in `src/lib/account-auth.ts`; the provider exports only its component, stabilizes refresh, declares effect dependencies, and captures the generation ref for cleanup without disabling any rule.
 - Automatic preview build: **build OK** after the final test correction.
