@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -39,6 +40,10 @@ import { Route as AuthenticatedStoryStepRouteImport } from './routes/_authentica
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -117,25 +122,25 @@ const StoryMenuRoute = StoryMenuRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/_authenticated/admin',
+  id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/_authenticated/profile',
+  id: '/profile',
   path: '/profile',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/_authenticated/settings',
+  id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSubmissionsRoute =
   AuthenticatedSubmissionsRouteImport.update({
-    id: '/_authenticated/submissions',
+    id: '/submissions',
     path: '/submissions',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const PlateStateRoute = PlateStateRouteImport.update({
   id: '/plate/$state',
@@ -154,19 +159,19 @@ const SpotOutcomeRoute = SpotOutcomeRouteImport.update({
 } as any)
 const AuthenticatedSettingsDeleteConfirmRoute =
   AuthenticatedSettingsDeleteConfirmRouteImport.update({
-    id: '/_authenticated/settings_/delete-confirm',
+    id: '/settings_/delete-confirm',
     path: '/settings/delete-confirm',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSpotIndexRoute = AuthenticatedSpotIndexRouteImport.update({
-  id: '/_authenticated/spot/',
+  id: '/spot/',
   path: '/spot/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStoryStepRoute = AuthenticatedStoryStepRouteImport.update({
-  id: '/_authenticated/story/$step',
+  id: '/story/$step',
   path: '/story/$step',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -228,6 +233,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
@@ -314,6 +320,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/about'
     | '/auth'
     | '/contact'
@@ -343,6 +350,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
@@ -358,16 +366,9 @@ export interface RootRouteChildren {
   SignInPromptRoute: typeof SignInPromptRoute
   SignUpRoute: typeof SignUpRoute
   StoryMenuRoute: typeof StoryMenuRoute
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedSubmissionsRoute: typeof AuthenticatedSubmissionsRoute
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
-  AuthenticatedSettingsDeleteConfirmRoute: typeof AuthenticatedSettingsDeleteConfirmRoute
-  AuthenticatedStoryStepRoute: typeof AuthenticatedStoryStepRoute
-  AuthenticatedSpotIndexRoute: typeof AuthenticatedSpotIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -377,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -489,28 +497,28 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/submissions': {
       id: '/_authenticated/submissions'
       path: '/submissions'
       fullPath: '/submissions'
       preLoaderRoute: typeof AuthenticatedSubmissionsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/plate/$state': {
       id: '/plate/$state'
@@ -538,27 +546,52 @@ declare module '@tanstack/react-router' {
       path: '/settings/delete-confirm'
       fullPath: '/settings/delete-confirm'
       preLoaderRoute: typeof AuthenticatedSettingsDeleteConfirmRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/spot/': {
       id: '/_authenticated/spot/'
       path: '/spot'
       fullPath: '/spot/'
       preLoaderRoute: typeof AuthenticatedSpotIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/story/$step': {
       id: '/_authenticated/story/$step'
       path: '/story/$step'
       fullPath: '/story/$step'
       preLoaderRoute: typeof AuthenticatedStoryStepRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSubmissionsRoute: typeof AuthenticatedSubmissionsRoute
+  AuthenticatedSettingsDeleteConfirmRoute: typeof AuthenticatedSettingsDeleteConfirmRoute
+  AuthenticatedStoryStepRoute: typeof AuthenticatedStoryStepRoute
+  AuthenticatedSpotIndexRoute: typeof AuthenticatedSpotIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSubmissionsRoute: AuthenticatedSubmissionsRoute,
+  AuthenticatedSettingsDeleteConfirmRoute:
+    AuthenticatedSettingsDeleteConfirmRoute,
+  AuthenticatedStoryStepRoute: AuthenticatedStoryStepRoute,
+  AuthenticatedSpotIndexRoute: AuthenticatedSpotIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
@@ -574,17 +607,9 @@ const rootRouteChildren: RootRouteChildren = {
   SignInPromptRoute: SignInPromptRoute,
   SignUpRoute: SignUpRoute,
   StoryMenuRoute: StoryMenuRoute,
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedSubmissionsRoute: AuthenticatedSubmissionsRoute,
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,
-  AuthenticatedSettingsDeleteConfirmRoute:
-    AuthenticatedSettingsDeleteConfirmRoute,
-  AuthenticatedStoryStepRoute: AuthenticatedStoryStepRoute,
-  AuthenticatedSpotIndexRoute: AuthenticatedSpotIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
