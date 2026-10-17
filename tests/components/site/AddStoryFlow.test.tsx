@@ -294,7 +294,14 @@ describe("AddStoryFlow", () => {
     await user.click(screen.getByRole("button", { name: "Submit Story" }));
     await waitFor(() =>
       expect(m.submit).toHaveBeenCalledWith({
-        data: { plateId: "p1", meaning: expected, source: "owner", more: "", photoPath: "" },
+        data: {
+          plateId: "p1",
+          meaning: expected,
+          source: "owner",
+          more: "",
+          photoPath: "",
+          photoBox: null,
+        },
       }),
     );
   });
@@ -329,6 +336,7 @@ describe("AddStoryFlow", () => {
         source: "owner",
         more: "",
         photoPath: "",
+        photoBox: null,
       },
     });
     expect(m.track).toHaveBeenCalledWith("story_submitted", {
@@ -467,6 +475,7 @@ describe("AddStoryFlow", () => {
         source: "owner",
         more: "",
         photoPath: "user-1/photo.jpg",
+        photoBox: expect.objectContaining({ x: expect.any(Number), w: expect.any(Number) }),
       },
     });
   });
@@ -496,6 +505,7 @@ describe("AddStoryFlow", () => {
       await user.click(screen.getByRole("button", { name: "Submit Story" }));
       await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(2));
       expect(m.submit.mock.calls[1]?.[0]?.data.photoPath).toBe("");
+      expect(m.submit.mock.calls[1]?.[0]?.data.photoBox).toBeNull();
     },
   );
 
@@ -751,6 +761,7 @@ describe("AddStoryFlow branches", () => {
           source: "guess",
           more: "Seen near Seattle.",
           photoPath: "",
+          photoBox: null,
         },
       }),
     );

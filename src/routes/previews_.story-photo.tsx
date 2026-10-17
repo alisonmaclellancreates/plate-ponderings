@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PhotoEditor } from "@/components/site/PhotoEditor";
 import { decodePhoto } from "@/lib/photo-canvas";
-import { STORY_PHOTO_PLACEHOLDER } from "@/lib/mock-data";
+import { STORY_PHOTO_BOX, STORY_PHOTO_PLACEHOLDER, type Story } from "@/lib/mock-data";
+import { StoryCard } from "@/components/site/PlateDetail";
 import type { Box } from "@/lib/photo-blur";
 
 const TITLE = "Story photo sample preview | What the Plate?";
@@ -23,7 +24,25 @@ export const Route = createFileRoute("/previews_/story-photo")({
   component: StoryPhotoSample,
 });
 
-const SAMPLE_BOX: Box = { x: 0.37, y: 0.46, w: 0.25, h: 0.12 };
+const SAMPLE_BOX: Box = STORY_PHOTO_BOX;
+
+const SAMPLE_STORY_BASE: Story = {
+  id: "sample-photo",
+  handle: "Traveler4821",
+  date: "2026-10-01",
+  meaning: "They might be a fan of the open road",
+  howIKnow: "guess",
+  hearts: 2,
+  photo: STORY_PHOTO_PLACEHOLDER,
+};
+
+const SAMPLE_STORY: Story = { ...SAMPLE_STORY_BASE, photoBox: STORY_PHOTO_BOX };
+
+const OLDER_STORY: Story = {
+  ...SAMPLE_STORY_BASE,
+  id: "sample-older",
+  meaning: "They might be counting road trips",
+};
 
 type State = "box" | "no-box" | "review";
 
@@ -83,6 +102,15 @@ function StoryPhotoSample() {
             {label}
           </button>
         ))}
+      </div>
+      <h2 className="font-display text-2xl text-navy">Story cards</h2>
+      <p className="text-muted-foreground">
+        The zoomed plate opens the full photo. The second story was saved before plate boxes were
+        kept, so it shows the photo as before.
+      </p>
+      <div className="space-y-4">
+        <StoryCard story={SAMPLE_STORY} />
+        <StoryCard story={OLDER_STORY} />
       </div>
       {open && bitmap && (
         <PhotoEditor

@@ -168,9 +168,68 @@ describe("addStory", () => {
   describe("photoPath", () => {
     const UUID = "123e4567-e89b-42d3-a456-426614174000";
     const OWN = `caller/${UUID}.jpg`;
+    const BOX = { x: 0.37, y: 0.46, w: 0.25, h: 0.12 };
+    const captureRows = () => {
+      const rows: Record<string, unknown>[] = [];
+      mocks.admin.rpc.mockResolvedValue({ data: true, error: null });
+      mocks.admin.from.mockImplementation((table: string) => {
+        const c = chain(tables[table] ?? { data: null, error: null });
+        if (table === "stories")
+          c["insert"] = vi.fn((row: Record<string, unknown>) => {
+            rows.push(row);
+            return chain(storyInsert);
+          });
+        return c;
+      });
+      return rows;
+    };
+
+    it("saves the box on published and pending inserts", async () => {
+      const rows = captureRows();
+      await call(addStory, { ...INPUT, photoPath: OWN, photoBox: BOX });
+      mocks.check.mockResolvedValue({ outcome: "unavailable", block: null });
+      await call(addStory, { ...INPUT, photoPath: OWN, photoBox: BOX });
+      expect(rows.map((r) => [r["status"], r["photo_box"]])).toEqual([
+        ["published", [0.37, 0.46, 0.25, 0.12]],
+        ["pending", [0.37, 0.46, 0.25, 0.12]],
+      ]);
+    });
+
+    it("saves a box touching the right and bottom edges, rounded and clamped", async () => {
+      const rows = captureRows();
+      const result = await call(addStory, {
+        ...INPUT,
+        photoPath: OWN,
+        photoBox: { x: 0.700004, y: 0.83333, w: 0.300004, h: 0.166674 },
+      });
+      expect(result).toEqual({ outcome: "published" });
+      expect(rows[0]?.["photo_box"]).toEqual([0.7, 0.8333, 0.3, 0.1667]);
+    });
+
+    it("saves no box for a story without a photo", async () => {
+      const rows = captureRows();
+      await call(addStory, INPUT);
+      expect(rows[0]?.["photo_box"]).toBeNull();
+    });
+
+    it("refuses a box without a photo before touching the database", async () => {
+      const result = await call(addStory, { ...INPUT, photoBox: BOX });
+      expect(result).toEqual({ outcome: "validation" });
+      expect(mocks.admin.from).not.toHaveBeenCalled();
+    });
+
+    it.each([undefined, null, { x: 0.1 }, { x: 2, y: 0, w: 0.1, h: 0.1 }, "box"])(
+      "refuses a photo with box %o and deletes the photo",
+      async (photoBox) => {
+        const result = await call(addStory, { ...INPUT, photoPath: OWN, photoBox });
+        expect(result).toEqual({ outcome: "validation" });
+        expect(mocks.remove).toHaveBeenCalledWith([OWN]);
+        expect(mocks.check).not.toHaveBeenCalled();
+      },
+    );
 
     it("accepts exactly the caller's folder plus one uuid.jpg", async () => {
-      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      const result = await call(addStory, { ...INPUT, photoPath: OWN, photoBox: BOX });
       expect(result).toEqual({ outcome: "published" });
     });
 
@@ -187,7 +246,7 @@ describe("addStory", () => {
     });
 
     it("downloads the photo and adds it to the same single check", async () => {
-      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      const result = await call(addStory, { ...INPUT, photoPath: OWN, photoBox: BOX });
       expect(result).toEqual({ outcome: "published" });
       expect(mocks.download).toHaveBeenCalledWith(OWN);
       expect(mocks.check).toHaveBeenCalledWith(
@@ -200,14 +259,14 @@ describe("addStory", () => {
 
     it("rejects the story and deletes the photo when the check fails", async () => {
       mocks.check.mockResolvedValue({ outcome: "rejected", block: null });
-      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      const result = await call(addStory, { ...INPUT, photoPath: OWN, photoBox: BOX });
       expect(result).toEqual({ outcome: "rejected" });
       expect(mocks.remove).toHaveBeenCalledWith([OWN]);
     });
 
     it("saves nothing and deletes the photo when the download fails", async () => {
       mocks.download.mockResolvedValue({ data: null, error: new Error("missing") });
-      const result = await call(addStory, { ...INPUT, photoPath: OWN });
+      const result = await call(addStory, { ...INPUT, photoPath: OWN, photoBox: BOX });
       expect(result).toEqual({ outcome: "error" });
       expect(mocks.check).not.toHaveBeenCalled();
       expect(mocks.remove).toHaveBeenCalledWith([OWN]);
@@ -536,6 +595,7 @@ describe("getPlateStories failed and empty lookups", () => {
         isOwn: false,
         hearted: false,
         photo: null,
+        photoBox: null,
       },
     ]);
     expect(result.pending).toEqual([]);
@@ -552,6 +612,7 @@ describe("getPlateStories failed and empty lookups", () => {
           author_id: "a1",
           published_at: "x",
           photo_path: "a1/uuid.jpg",
+          photo_box: [0.1, 0.2, 0.3, 0.4],
         },
       ],
       error: null,
@@ -569,10 +630,40 @@ describe("getPlateStories failed and empty lookups", () => {
       stories: { id: string; photo: string | null }[];
     };
     expect(result.stories).toEqual([
-      expect.objectContaining({ id: "s1", photo: "https://signed.example/photo.jpg" }),
+      expect.objectContaining({
+        id: "s1",
+        photo: "https://signed.example/photo.jpg",
+        photoBox: { x: 0.1, y: 0.2, w: 0.3, h: 0.4 },
+      }),
     ]);
     expect(mocks.admin.storage.from).toHaveBeenCalledWith("story-photos");
     expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
+  });
+  it("returns a signed photo without a box for a story saved before boxes", async () => {
+    tables["stories"] = {
+      data: [
+        {
+          id: "s1",
+          meaning: "M",
+          source: "guess",
+          body: null,
+          author_id: "a1",
+          published_at: "x",
+          photo_path: "a1/uuid.jpg",
+          photo_box: null,
+        },
+      ],
+      error: null,
+    };
+    const createSignedUrls = vi.fn().mockResolvedValue({
+      data: [{ signedUrl: "https://signed.example/old.jpg" }],
+      error: null,
+    });
+    mocks.admin.storage.from.mockReturnValue({ createSignedUrls });
+    const result = await call(getPlateStories, { plateId: "plate-1" });
+    expect(result["stories"]).toEqual([
+      expect.objectContaining({ photo: "https://signed.example/old.jpg", photoBox: null }),
+    ]);
   });
   it.each([null, [], [{ signedUrl: "" }]])(
     "omits a photo when signing yields no URL: %o",
@@ -594,7 +685,9 @@ describe("getPlateStories failed and empty lookups", () => {
       const createSignedUrls = vi.fn().mockResolvedValue({ data, error: null });
       mocks.admin.storage.from.mockReturnValue({ createSignedUrls });
       const result = await call(getPlateStories, { plateId: "plate-1" });
-      expect(result["stories"]).toEqual([expect.objectContaining({ id: "s1", photo: null })]);
+      expect(result["stories"]).toEqual([
+        expect.objectContaining({ id: "s1", photo: null, photoBox: null }),
+      ]);
       expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
     },
   );

@@ -101,7 +101,7 @@ export async function recheckStory(
     .update(
       approved
         ? { status: "published", published_at: new Date().toISOString() }
-        : { status: "rejected" },
+        : { status: "rejected", photo_path: null, photo_box: null },
     )
     .eq("id", story.id)
     .eq("status", "pending")

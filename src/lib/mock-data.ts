@@ -1,3 +1,4 @@
+import type { Box } from "./photo-blur";
 /** Static preview data shared by every preview page. Replaced by Cloud data in a later step. */
 
 export type PlateStatus = "mystery" | "interpreted" | "owner";
@@ -14,6 +15,8 @@ export interface Story {
   longer?: string;
   /** Optional photo URL shown small on the right of the story card. */
   photo?: string;
+  /** Plate box within the photo; absent for photos saved before boxes were kept. */
+  photoBox?: Box;
   hearts: number;
   /** Omitted means published. Unpublished stories never count. */
   moderation?: Moderation;
@@ -53,10 +56,13 @@ const s = (
 
 /** Blurred placeholder photo with a clear plate area, used until real uploads exist. */
 export const STORY_PHOTO_PLACEHOLDER = "/mock/story-photo-placeholder.jpg";
+/** Where the clear plate sits in the placeholder photo. */
+export const STORY_PHOTO_BOX: Box = { x: 0.37, y: 0.46, w: 0.25, h: 0.12 };
 
 const withPhoto = (...args: Parameters<typeof s>): Story => ({
   ...s(...args),
   photo: STORY_PHOTO_PLACEHOLDER,
+  photoBox: STORY_PHOTO_BOX,
 });
 
 export const PLATES: PlateRecord[] = [
