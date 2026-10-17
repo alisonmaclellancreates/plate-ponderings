@@ -35,9 +35,7 @@ export const getFeaturedHome = createServerFn({ method: "GET" }).handler(
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { effectiveToday } = await import("./effective-today.server");
     const today = await effectiveToday(supabaseAdmin);
-    const { error: pickError } = await supabaseAdmin.rpc(
-      "pick_featured_subject_for_today",
-    );
+    const { error: pickError } = await supabaseAdmin.rpc("pick_featured_subject_for_today");
     if (pickError) throw new Error("We couldn't load the featured plates right now.");
     const { data: rows, error } = await supabaseAdmin.rpc("get_featured_subject_days", {
       _limit: 5,

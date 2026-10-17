@@ -2,14 +2,7 @@ import { useState } from "react";
 import type React from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Heart,
-  Hourglass,
-  MessageCircle,
-  MoreHorizontal,
-  UserCircle2,
-} from "lucide-react";
+import { ArrowLeft, Hourglass, MessageCircle, UserCircle2 } from "lucide-react";
 import { GuessTeaser, PlateGuessPanel } from "@/components/site/PlateGuessPanel";
 import { getPlateGuess } from "@/lib/plate-guesses.functions";
 import { PlateFrame } from "@/components/site/PlateFrame";
@@ -18,50 +11,12 @@ import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Ba
 import { formatDay } from "@/lib/format-day";
 import { StoryPhotoThumbnail, StoryPhotoZoom } from "@/components/site/StoryPhoto";
 import { useAccountAuth } from "@/lib/account-auth";
-import {
-  CATCHING_UP_STORY,
-  PLATES,
-  PNW_LV_SUMMARY,
-  plateStatus,
-  publishedStories,
-  type PlateRecord,
-  type PlateStatus,
-  type Story,
-  type Summary,
-} from "@/lib/mock-data";
+import type { PlateStatus, Summary } from "@/lib/domain";
 import { storyCount } from "@/lib/story-count";
 import { track } from "@/lib/analytics";
 import { CATCHING_UP_MESSAGE, HISTORY_PAGE_SIZE } from "@/lib/summary";
 import { getPlateSummary, type PlateSummaryVersion } from "@/lib/summaries.functions";
 import { getPlateStories, STORY_PAGE_SIZE, type PlateStory } from "@/lib/stories.functions";
-import {
-  PAGE_SIZE,
-  PLATE_DETAIL_STATES,
-  orderStories,
-  type PlateDetailState,
-} from "@/lib/plate-detail";
-
-function StatusStrip({ plate }: { plate: PlateRecord }) {
-  const owner = plate.stories.find((s) => s.howIKnow === "owner");
-  return (
-    <ul
-      aria-label="Plate status"
-      className="flex flex-wrap items-center gap-y-2 divide-x divide-border rounded-xl border border-border bg-card py-3"
-    >
-      <li className="flex items-center gap-2 px-4 font-semibold">
-        <MessageCircle aria-hidden className="size-5" />
-        {storyCount(plate.stories.length)}
-      </li>
-      <li className="px-4">
-        <StatusBadge status={plateStatus(plate)} />
-      </li>
-      <li className="px-4 font-semibold">
-        {owner ? `Says it's their plate: ${owner.handle}` : "No owner claim yet"}
-      </li>
-    </ul>
-  );
-}
-
 type PanelSummary = Summary & { id?: string };
 
 function EarlierSummaries({ earlier, open }: { earlier: PanelSummary[]; open: boolean }) {
@@ -165,27 +120,6 @@ function SummaryPanel({
   );
 }
 
-function StorySoFar({
-  plate,
-  historyOpen,
-  catchingUp,
-}: {
-  plate: PlateRecord;
-  historyOpen: boolean;
-  catchingUp: boolean;
-}) {
-  const [current, ...earlier] = plate.summaries;
-  if (!current) return null;
-  return (
-    <SummaryPanel
-      current={current}
-      earlier={earlier}
-      historyOpen={historyOpen}
-      catchingUp={catchingUp}
-    />
-  );
-}
-
 function RealStorySoFar({
   plateId,
   fallback,
@@ -285,148 +219,6 @@ function MysteryPrompt({
         Different roads. Different stories. What's yours?
       </div>
     </section>
-  );
-}
-
-export function StoryCard({ story }: { story: Story }) {
-  const owner = story.howIKnow === "owner";
-  const zoom = Boolean(story.photo && story.photoBox);
-  return (
-    <article
-      data-owner={owner || undefined}
-      className={`brand-card relative grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
-    >
-      <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
-      <div className={`min-w-0 flex-1 ${zoom ? "sm:min-h-32 sm:pr-44" : ""}`}>
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm">
-            <span className="font-semibold">{story.handle}</span>{" "}
-            <span className="text-muted-foreground">· {formatDay(story.date)}</span>
-            {owner && (
-              <span className="ml-2 rounded-full bg-coral-pale px-2 py-0.5 text-xs font-semibold text-navy">
-                Owner claim
-              </span>
-            )}
-          </p>
-          <button
-            type="button"
-            aria-label={`More options for ${story.handle}'s story`}
-            className="text-muted-foreground"
-          >
-            <MoreHorizontal aria-hidden className="size-5" />
-          </button>
-        </div>
-        <h3 className="mt-1 text-lg font-bold text-navy">{story.meaning}</h3>
-        <div className="mt-2">
-          <HowIKnowBadge how={story.howIKnow} />
-        </div>
-        {story.longer && <p className="mt-2">{story.longer}</p>}
-        {story.photo && story.photoBox && (
-          <StoryPhotoZoom
-            photo={story.photo}
-            box={story.photoBox}
-            handle={story.handle}
-            meaning={story.meaning}
-          />
-        )}
-        <p className="mt-2 flex items-center gap-1 text-sm">
-          <Heart aria-hidden className="size-4 text-coral" />
-          <span>{story.hearts}</span>
-          <span className="sr-only">{story.hearts === 1 ? "heart" : "hearts"}</span>
-        </p>
-      </div>
-      {story.photo && !zoom && <StoryPhotoThumbnail photo={story.photo} handle={story.handle} />}
-    </article>
-  );
-}
-
-function PendingPanel() {
-  return (
-    <div role="status" className="flex gap-3 rounded-xl bg-slate p-4">
-      <Hourglass aria-hidden className="size-5 shrink-0 text-navy" />
-      <p>
-        <span className="font-semibold">Your story is waiting for its check.</span> Only you can see
-        this for now.
-      </p>
-    </div>
-  );
-}
-
-export function Stories({ stories, pending }: { stories: Story[]; pending: boolean }) {
-  const [shown, setShown] = useState(PAGE_SIZE);
-  const ordered = orderStories(stories);
-  const remaining = ordered.length - shown;
-  return (
-    <section aria-labelledby="stories-heading" className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="stories-heading" className="font-display text-3xl text-navy">
-          Stories
-        </h2>
-        <button type="button" className="brand-btn brand-btn-coral">
-          Add Your Story
-        </button>
-      </div>
-      {pending && <PendingPanel />}
-      <ul className="space-y-4">
-        {ordered.slice(0, shown).map((s) => (
-          <li key={s.id}>
-            <StoryCard story={s} />
-          </li>
-        ))}
-      </ul>
-      {remaining > 0 && (
-        <button
-          type="button"
-          onClick={() => setShown((n) => n + PAGE_SIZE)}
-          className="font-semibold text-navy underline underline-offset-4"
-        >
-          Show {Math.min(PAGE_SIZE, remaining)} more {remaining === 1 ? "story" : "stories"}
-        </button>
-      )}
-    </section>
-  );
-}
-
-export function PlateDetail({ state }: { state: string }) {
-  const slug = Object.hasOwn(PLATE_DETAIL_STATES, state)
-    ? PLATE_DETAIL_STATES[state as PlateDetailState].slug
-    : state;
-  const record = PLATES.find((p) => p.slug === slug);
-  const basePlate = record ? { ...record, stories: publishedStories(record) } : undefined;
-  if (!basePlate) return null;
-  const plate =
-    state === "catching-up"
-      ? { ...basePlate, stories: [...basePlate.stories, CATCHING_UP_STORY] }
-      : slug === "or-pnwlv"
-        ? { ...basePlate, summaries: [PNW_LV_SUMMARY] }
-        : basePlate;
-  const hasStories = plate.stories.length > 0;
-  return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
-      <a
-        href="/explore"
-        className="inline-flex items-center gap-1 font-semibold text-navy underline-offset-4 hover:underline"
-      >
-        <ArrowLeft aria-hidden className="size-4" />
-        Back to Explore
-      </a>
-      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[auto_minmax(0,1fr)]">
-        <PlateFrame jurisdiction={plate.jurisdiction} text={plate.text} />
-        <div className="min-w-0">
-          {hasStories ? (
-            <StorySoFar
-              plate={plate}
-              historyOpen={state === "interpreted-history"}
-              catchingUp={state === "catching-up"}
-            />
-          ) : (
-            <MysteryPrompt />
-          )}
-        </div>
-      </div>
-      <StatusStrip plate={plate} />
-      {hasStories && <Stories stories={plate.stories} pending={state === "pending-story"} />}
-    </main>
   );
 }
 

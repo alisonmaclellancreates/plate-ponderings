@@ -174,11 +174,6 @@ type EntryFormProps = {
   submit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
-/** Inert submit for previews: never calls the server. */
-const inertSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-};
-
 export function SignInForm({ busy, error, submit }: EntryFormProps) {
   const errorId = useId();
   const describedBy = error ? errorId : undefined;
@@ -209,22 +204,11 @@ export function SignUpForm({ busy, error, submit }: EntryFormProps) {
   );
 }
 
-export function SignInPage({
-  returnTo = "/",
-  previewError,
-}: {
-  returnTo?: string;
-  previewError?: string;
-}) {
+export function SignInPage({ returnTo = "/" }: { returnTo?: string }) {
   const { busy, error, submit } = useEntry("signed_in", returnTo);
-  const preview = previewError !== undefined;
   return (
     <EntryShell title="Sign In" subtitle="Welcome back!">
-      <SignInForm
-        busy={preview ? false : busy}
-        error={preview ? previewError : error}
-        submit={preview ? inertSubmit : submit}
-      />
+      <SignInForm busy={busy} error={error} submit={submit} />
       <p className="mt-5 text-center">
         <Link to="/sign-up" search={{ returnTo: safeReturnPath(returnTo) }} className={link}>
           Create an account
@@ -234,22 +218,11 @@ export function SignInPage({
   );
 }
 
-export function SignUpPage({
-  returnTo = "/",
-  previewError,
-}: {
-  returnTo?: string;
-  previewError?: string;
-}) {
+export function SignUpPage({ returnTo = "/" }: { returnTo?: string }) {
   const { busy, error, submit } = useEntry("signed_up", returnTo);
-  const preview = previewError !== undefined;
   return (
     <EntryShell title="Create an Account" subtitle="Join the community and add your story.">
-      <SignUpForm
-        busy={preview ? false : busy}
-        error={preview ? previewError : error}
-        submit={preview ? inertSubmit : submit}
-      />
+      <SignUpForm busy={busy} error={error} submit={submit} />
       <p className="mt-4 text-sm text-muted-foreground">
         We'll give you a handle to start. You can change it anytime in your profile.
       </p>
@@ -296,10 +269,18 @@ export function DemoPage() {
           <li key={s}>{s}</li>
         ))}
       </ul>
-      <Button className="brand-btn brand-btn-navy mt-6 w-full" disabled={busy} onClick={() => void enterDemo()}>
+      <Button
+        className="brand-btn brand-btn-navy mt-6 w-full"
+        disabled={busy}
+        onClick={() => void enterDemo()}
+      >
         {busy ? "Starting the Demo…" : "Start the Demo"}
       </Button>
-      {error && <p role="alert" className="mt-3 text-coral-cta">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-3 text-coral-cta">
+          {error}
+        </p>
+      )}
     </EntryShell>
   );
 }

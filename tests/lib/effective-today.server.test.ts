@@ -9,7 +9,10 @@ it("uses the database's date rather than a browser clock", async () => {
   expect(await effectiveToday(client)).toBe("2026-10-17");
   expect(rpc).toHaveBeenCalledWith("effective_today");
 });
-it.each([{ data: null, error: null }, { data: "2026-10-17", error: {} }])("refuses an unavailable effective date %j", async (result) => {
+it.each([
+  { data: null, error: null },
+  { data: "2026-10-17", error: {} },
+])("refuses an unavailable effective date %j", async (result) => {
   const client = { rpc: vi.fn().mockResolvedValue(result) } as unknown as SupabaseClient<Database>;
   await expect(effectiveToday(client)).rejects.toThrow("couldn't load");
 });

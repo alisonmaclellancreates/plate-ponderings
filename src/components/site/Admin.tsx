@@ -1,7 +1,8 @@
 import { Plate } from "@/components/site/Plate";
-import { REPORTED_STORIES, type ReportedStory } from "@/lib/mock-data";
+import type { ReportedStory } from "@/lib/domain";
 import { REPORT_REASON_OPTIONS } from "@/lib/report-reasons";
 import { AiCheckStatus } from "./AiCheckStatus";
+import type { ReactNode } from "react";
 
 type Toggle = ((row: ReportedStory) => void) | undefined;
 
@@ -45,15 +46,14 @@ function ReportRow({
   );
 }
 
-export const SAMPLE_RECHECK_NOTE = "2 items waiting for a safety check.";
-
 export function AdminPage({
-  rows = REPORTED_STORIES,
+  rows = [],
   onToggle,
   onRecheck,
   busy = false,
-  note = SAMPLE_RECHECK_NOTE,
+  note = "",
   message = "",
+  demoControls,
 }: {
   rows?: ReportedStory[];
   onToggle?: Toggle;
@@ -61,11 +61,13 @@ export function AdminPage({
   busy?: boolean;
   note?: string;
   message?: string;
+  demoControls?: ReactNode;
 }) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="font-display text-4xl text-navy">Admin</h1>
       <AiCheckStatus />
+      {demoControls}
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
           type="button"

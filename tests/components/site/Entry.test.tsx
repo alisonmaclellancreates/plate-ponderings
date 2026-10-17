@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -37,8 +37,6 @@ vi.mock("@tanstack/react-start", () => ({
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 
 import { DemoPage, SignInPage, SignUpPage } from "@/components/site/Entry";
-import { StoryStepOne } from "@/components/site/AddStory";
-import { SiteHeader } from "@/components/site/SiteHeader";
 
 describe("entry screens", () => {
   it("sign in toggles password visibility and has no extras", () => {
@@ -73,40 +71,5 @@ describe("entry screens", () => {
     render(<DemoPage />);
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
     expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
-  });
-
-  it("demo form shows the banner and disables every control", () => {
-    render(<StoryStepOne demo />);
-    expect(screen.getByTestId("demo-banner")).toHaveTextContent(/turned off/);
-    for (const r of screen.getAllByRole("radio")) expect(r).toBeDisabled();
-    const meaning = screen.getByLabelText(/What do you think it means/);
-    expect(meaning).toBeDisabled();
-    expect(meaning).toHaveAttribute("placeholder", "Adding stories is turned off in the demo.");
-    expect(screen.getByLabelText(/Tell us more/)).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
-  });
-});
-
-describe("header modes", () => {
-  it("signed out shows Sign in, Try the Demo, and moves the demo into the mobile menu", () => {
-    render(<SiteHeader mode="signed-out" />);
-    expect(screen.getAllByRole("link", { name: "Sign in" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "Try the Demo" })).toHaveLength(1);
-    expect(screen.queryByText("Traveler4821")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
-    const mobile = screen.getByRole("navigation", { name: "Mobile" });
-    expect(within(mobile).getByRole("link", { name: "Try the Demo" })).toHaveAttribute(
-      "href",
-      "/demo",
-    );
-  });
-
-  it("demo shows Traveler4821 with the profile menu open, including Exit Demo", () => {
-    render(<SiteHeader mode="demo" />);
-    expect(screen.getAllByText("Traveler4821").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "Exit Demo" }).length).toBeGreaterThan(0);
-    const toggle = screen.getByRole("button", { expanded: true, name: "Traveler4821" });
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 });

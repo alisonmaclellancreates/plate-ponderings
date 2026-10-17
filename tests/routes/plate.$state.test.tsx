@@ -143,49 +143,13 @@ describe("plate detail route", () => {
       else expect(back).not.toBeInTheDocument();
     },
   );
-  it("loads known states and rejects unknown ones", async () => {
-    expect(await R.loader({ params: { state: "mystery" } })).toEqual({
-      state: "mystery",
-      plate: null,
-    });
-    await expect(R.loader({ params: { state: "nope" } })).rejects.toThrow("not found");
-    await expect(R.loader({ params: { state: "toString" } })).rejects.toThrow("not found");
-    await expect(R.loader({ params: { state: "constructor" } })).rejects.toThrow("not found");
-  });
-
-  it("accepts any mock plate slug, as the Explore cards link", async () => {
-    expect(await R.loader({ params: { state: "ut-canyons" } })).toEqual({
-      state: "ut-canyons",
-      plate: null,
-    });
-    await expect(R.loader({ params: { state: "not-a-plate" } })).rejects.toThrow("not found");
-  });
-
-  it("head for a slug-only plate labels it as plate stories", () => {
-    const meta = R.head({ loaderData: { state: "ut-canyons" } }).meta;
-    expect(meta.find((m) => "title" in m)?.["title"]).toBe(
-      "CANYONS (Utah) · Plate stories | What the Plate?",
-    );
-  });
-
-  it("head with an unknown state falls back to noindex", () => {
-    const meta = R.head({ loaderData: { state: "nope" } }).meta;
-    expect(meta.find((m) => "title" in m)?.["title"]).toBe("Plate unavailable | What the Plate?");
-    expect(meta.find((m) => m["name"] === "robots")?.["content"]).toBe("noindex");
-  });
-
-  it("head has unique titles per state and noindex fallback", () => {
-    const meta = R.head({ loaderData: { state: "owner" } }).meta;
-    const title = meta.find((m) => "title" in m)?.["title"];
-    expect(title).toContain("TEATIME");
-    expect(meta.find((m) => m["property"] === "og:title")?.["content"]).toBe(title);
-    expect(R.head({}).meta.find((m) => m["name"] === "robots")?.["content"]).toBe("noindex");
-  });
-
-  it("renders the state from loader data", () => {
-    loaderData = { state: "mystery" };
-    const C = R.component;
-    render(<C />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Washington plate B7K2L9");
+  it.each(["mystery", "ut-canyons", "nope", "constructor"])(
+    "does not resolve removed sample alias %s",
+    async (state) => {
+      await expect(R.loader({ params: { state } })).rejects.toThrow("not found");
+    },
+  );
+  it("missing loader metadata stays noindex", () => {
+    expect(R.head({}).meta).toContainEqual({ name: "robots", content: "noindex" });
   });
 });

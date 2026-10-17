@@ -1,4 +1,4 @@
-import type { Box } from "./photo-blur";
+import type { Box } from "@/lib/photo-blur";
 /** Static preview data shared by every preview page. Replaced by Cloud data in a later step. */
 
 export type PlateStatus = "mystery" | "interpreted" | "owner";
@@ -261,7 +261,7 @@ export function publishedStories(plate: PlateRecord): Story[] {
 }
 
 /** Single source of truth for featured progress, defined in featured.ts. */
-export { featuredProgress } from "./featured";
+export { featuredProgress } from "@/lib/featured";
 
 export const TODAY = "2026-10-16";
 
@@ -481,3 +481,15 @@ export const SUBMISSIONS_SAMPLE: Submission[] = [
     updated: true,
   },
 ];
+
+export function asFeatured(p: PlateRecord) {
+  return {
+    slug: p.slug,
+    jurisdiction: p.jurisdiction,
+    text: p.text,
+    day: p.plateOfTheDay ?? "",
+    count: publishedStories(p).length,
+    atPick: p.featuredStoryCount ?? 0,
+    status: plateStatus(p),
+  };
+}

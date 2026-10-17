@@ -1,12 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { ScenicHeader } from "@/components/site/SpotPlate";
-import { BLOCKED_HANDLES, BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
+import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/domain";
 
 export type BlockedEntry = { key: string; handle: string };
-const SAMPLE_BLOCKED: BlockedEntry[] = BLOCKED_HANDLES.map((handle) => ({ key: handle, handle }));
 
 export function SettingsPage({
-  blocked = SAMPLE_BLOCKED,
+  blocked = [],
   onUnblock,
   busy = false,
   message = "",

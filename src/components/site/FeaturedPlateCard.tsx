@@ -4,24 +4,18 @@ import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
 import { storyCount } from "@/lib/story-count";
-import type { FeaturedPlate } from "@/lib/mock-data";
-import {
-  featuredDisplay,
-  featuredProgress,
-  openFeatured,
-  type FeaturedDisplay,
-} from "@/lib/featured";
+import { featuredProgress, openFeatured, type FeaturedDisplay } from "@/lib/featured";
 
 export function FeaturedPlateCard({
   plate,
   today = false,
   utcToday,
 }: {
-  plate: FeaturedPlate | FeaturedDisplay;
+  plate: FeaturedDisplay;
   today?: boolean;
   utcToday?: string | undefined;
 }) {
-  const display = featuredDisplay(plate);
+  const display = plate;
   const count = display.count;
   return (
     <Link

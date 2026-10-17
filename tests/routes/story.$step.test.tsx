@@ -12,11 +12,6 @@ vi.mock("@tanstack/react-router", () => ({
   }),
   notFound: () => new Error("not found"),
 }));
-vi.mock("@/components/site/AddStory", async (orig) => ({
-  ...(await orig<typeof import("@/components/site/AddStory")>()),
-  StoryStepPage: ({ step }: { step: string }) => <p>{step}</p>,
-}));
-
 vi.mock("@/components/site/AddStoryFlow", () => ({
   AddStoryFlow: ({ plateId }: { plateId: string }) => <p>flow:{plateId}</p>,
 }));
@@ -49,9 +44,9 @@ describe("story step route", () => {
     expect(R.head({}).meta.find((m) => m["name"] === "robots")?.["content"]).toBe("noindex");
   });
 
-  it("renders the step from loader data", () => {
+  it("missing plate uses real missing-plate flow", () => {
     const C = R.component;
-    expect(render(<C />).container.textContent).toBe("done");
+    expect(render(<C />).container.textContent).toBe("flow:");
   });
 
   it("keeps only a well-formed plate id from the search", () => {
