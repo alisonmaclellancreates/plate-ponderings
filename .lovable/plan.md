@@ -1,35 +1,52 @@
-# Step 49c: make story photos easy to see
+# Step 52b: Accessibility review, fixes, and automated checks
 
-## The database change (awaiting approval, not applied)
+Branch: current feature branch. No database changes. No feature, wording, or layout changes except where a fix requires it (each listed in the report).
 
-Migration 0018, staged unchanged in `docs/proposed-migrations/0018_step49c_story_photo_box.sql`:
+## 1. Automated axe checks
+- Add `vitest-axe` (axe-core matcher) as a dev dependency.
+- New test file `tests/a11y/axe.test.tsx` rendering real components and asserting no violations for: homepage, real plate page with stories + summary history + revealed guess, mystery plate with teaser, the three story form steps, sign in, sign up, sign-in prompt, Spot a Plate and its outcomes, Your Submissions, Settings, /admin, and every dialog (report, delete, photo zoom, alert-dialog where used).
+- Colour-contrast rule disabled in axe (jsdom cannot measure it); contrast covered by item 3.
 
-- New nullable column `stories.photo_box real[]`: `{x, y, width, height}` as fractions.
-- `stories_photo_box_valid`: one dimension, exactly 4 non-null values, x,y >= 0, width,height > 0, x+width <= 1, y+height <= 1.
-- `stories_photo_box_needs_photo`: a box requires `photo_path`.
-- Additive; existing rows stay null and pass. Grants and RLS unchanged (server-only writes).
-- `tests/db/story-photo-box.sql` (rollback-wrapped): out-of-range, wrong length, null element, overflow, zero size and box-without-photo refused; a valid box accepted.
+## 2. Accessibility lint
+- Add `eslint-plugin-jsx-a11y`, recommended ruleset, scoped to our components (src/components/site, src/routes, src/lib); generated src/components/ui primitives excluded unless a rule finds a real problem there.
+- Fix all findings; lint must end at zero errors.
 
-## Data flow
+## 3. Colour contrast
+- Script (`scripts/contrast-report.mjs` or a test helper) computing WCAG ratios for every text/background brand token pair: navy, coral, coral-cta, teal, gold, slate, muted-foreground, badge tones, placeholders, focus rings, disabled states, on cream/card/cream-warm backgrounds.
+- Report a full ratio table. Thresholds: 4.5:1 normal text, 3:1 large text and focus indicators.
+- Any failing pair: propose the smallest token change and wait for Alison's approval (Rowan reviews) before touching colours.
 
-```text
-PhotoEditor confirmed box --> AddStoryFlow photoReady.box --> submitStory({photoPath, photoBox})
-  server: photo => valid box required; box without photo => refused
-  insert published/pending rows with photo_box
-getPlateStories --> { photo: signedUrl, photoBox: Box | null }
-```
+## 4. Keyboard and focus
+- Verify Tab order and visible focus styles (global :focus-visible already exists; extend where missing).
+- Dialogs: focus trap, Esc close, focus return to opener (Radix provides this; verify with tests).
+- Route change: focus moves to the new page's main heading (or skip-link target). Add a skip link to main content in the root layout.
+- Tests for dialog focus behaviour.
 
-Every path that nulls `photo_path` also nulls `photo_box`: tombstone (delete, admin removal, account deletion), submissions dismiss/reset, rejection and recheck rejection (photo_path cleared alongside the storage removal). Box never sent to analytics.
+## 5. Screen reader semantics
+- Audit: one h1 per page, heading order, landmarks (header/nav/main/footer), images described or decorative, icon-only buttons named, status changes announced (role="status"/aria-live), plate artwork announced once by accessible name.
+- Fix findings; extend the axe/semantics tests.
 
-## UI
+## 6. Motion
+- Respect prefers-reduced-motion for all animations/transitions (spot-drive already gated; headline-slide transition already gated; audit the rest).
 
-- Shared `StoryPhoto` component used by both `RealStoryCard` and sample `StoryCard`.
-  - With box: 2:1 frame, rounded, 200x100 at 360px under text/badge above hearts, 160x80 on the right at sm+ clear of the menu. Pure-CSS crop of the same `<img>` (box + margin, expanded to 2:1 around centre, shifted inward, fit when too small; never stretched or clipped). Expand icon lower-right on cream backing, aria-hidden. Whole frame is one button, navy focus ring, name "View full photo shared by {handle}". Keeps lazy loading, size attributes, alt text.
-  - Without box (older stories): current thumbnail, unchanged, no button.
-- Open view: existing shadcn Dialog. Heading = meaning, "Photo shared by {handle}", Close button "Close photo" visible above the image on mobile; image `object-contain`, max its stored size. Esc, outside tap and Close all close; Radix traps focus and returns it to the trigger. Image `onError` shows a short reload message instead of a broken image.
-- Crop maths in a pure helper (`src/lib/photo-crop.ts`) with unit tests.
-- `/previews/story-photo`: zoomed card, story without a box, and open view, sample data only.
+## 7. Menus close on Escape and outside click
+- MemberProfile menu, SiteHeader mobile menu, StoryActions story menu: close on Esc and outside click; focus returns to the opening button. Tests for both close paths per menu.
 
-## Checks
+## 8. Report and Delete as real modal dialogs
+- Move ReportDialog and DeleteStoryDialog from inline panels into modal dialogs built on the project's existing dialog primitives (Radix via src/components/ui/dialog.tsx): backdrop, aria-modal, focus trap, Esc close, focus returned to the menu button.
+- Wording and layout inside them unchanged.
 
-Tests for box validation (server + db), saving on both inserts, clearing paths, crop helper, zoomed card, fallback, open/close three ways, focus return, expired-link message, no photo. Then `bunx vitest related` on changed sources plus changed tests, and `bun run lint`.
+## 9. Unread dot in profile menu
+- Repeat the header's unread dot beside "Your Submissions" in the profile menu, with the same hidden "New updates" text.
+
+## 10. Rotating homepage headline
+- Under prefers-reduced-motion: no rotation, show the first phrase (headlines.ts already holds the first headline for reduced motion on desktop; verify and extend).
+- When rotating: announce changes politely with aria-live="polite".
+
+## 11. Progress component (issue #54)
+- Check whether any page uses src/components/ui/progress.tsx (only FeaturedPlateCard matched a loose grep; verify real usage). If used, expose value to screen readers (role/aria-valuenow). If unused, leave issue #54 open and say so.
+
+## Verification
+- Local: `bunx vitest related` on every changed source file plus changed tests, and `bun run lint` (zero errors). No full suite, coverage, typecheck, or build locally; CI is authoritative.
+- Tests for every new branch; target 100% patch coverage on first push.
+- Report (max 10 lines): what changed, what ran, the PR Codecov figure, the contrast table, and any decisions for Alison.
