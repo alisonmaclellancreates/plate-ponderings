@@ -72,10 +72,7 @@ describe("entry screens", () => {
   it("demo lists what you'll see and starts the demo", () => {
     render(<DemoPage />);
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
-    expect(screen.getByRole("link", { name: "Start the Demo" })).toHaveAttribute(
-      "href",
-      "/demo-form",
-    );
+    expect(screen.getByRole("button", { name: "Start the Demo" })).toBeEnabled();
   });
 
   it("demo form shows the banner and disables every control", () => {
