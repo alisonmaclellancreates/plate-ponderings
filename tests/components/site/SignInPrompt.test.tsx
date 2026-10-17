@@ -21,7 +21,6 @@ const href = (
   return path + qs + (hash ? `#${hash}` : "");
 };
 
-
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => vi.fn(),
   Navigate: (p: {
@@ -102,7 +101,6 @@ function expectFallback() {
   expect(screen.queryByRole("img")).toBeNull();
   expect(screen.queryByRole("link", { name: "Sign In" })).toBeNull();
 }
-
 
 describe("sign-in prompt", () => {
   it("shows the plate the visitor came from, with choices that return to its story form", () => {
