@@ -1,7 +1,8 @@
 # PR #113 photo patch coverage
 
-- [ ] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths without behaviour changes.
-- [ ] Run requested related tests and lint; inspect PR Codecov after managed sync. Local coverage is diagnostic only.
+- [x] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths; remove unreachable UI guards and duplicate URL revocation. No server/storage behaviour changes or canvas extraction.
+- [x] Requested related tests: 343 passed across 28 files. All eight named files have 100% local statements, branches and functions. Lint: zero errors/six existing warnings. Automatic build OK.
+- [ ] Confirm PR Codecov after managed GitHub sync and CI. Latest actual report remains 78.77462%/97 missing, updated 18:56:20 UTC; GitHub could not find managed local commit eab6021 at 19:03 UTC. No manual push permitted.
 
 # Photo editor exits
 

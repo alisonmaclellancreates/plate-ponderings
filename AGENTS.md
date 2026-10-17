@@ -39,4 +39,4 @@
 - Hidden guesses retain the invitation despite old summaries; revealed guesses follow summaries before human stories at every width, preserving reading order.
 - Story-entry framing and validation share story-form helpers; review and submission use the same value to avoid hidden edits and length overflow.
 
-- AddStoryFlow owns draft cleanup and invalidates superseded selections; PhotoEditor uses replacement/removal callbacks so cancellation preserves the draft without detection.
+- AddStoryFlow owns draft cleanup and selection invalidation; PhotoEditor passes rendered box/draft values to callbacks, avoiding unreachable guards. URL effects own cleanup; picker cancellation preserves the draft.
