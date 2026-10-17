@@ -42,7 +42,9 @@ it("refuses malformed empty query state rather than inventing a date", () => {
   try {
     const C = (Route as unknown as { component: () => ReactNode }).component;
     expect(() => render(<C />)).toThrow("couldn't load");
-  } finally { m.empty = false; }
+  } finally {
+    m.empty = false;
+  }
 });
 
 it("loads the matching infinite archive query", async () => {
