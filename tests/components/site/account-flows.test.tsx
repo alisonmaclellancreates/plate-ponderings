@@ -234,16 +234,16 @@ it("ignores a stale taken response for earlier valid input and hides resolved re
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Another_Handle" } });
   expect(screen.queryByText("Available")).toBeNull();
 });
-it("member menus show only authorized admin actions and handle signout errors", async () => {
+it("member menus show only authorized admin actions and keep the menu open with the signout error", async () => {
   const v = render(<SiteHeader />);
   fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
   expect(screen.queryByRole("link", { name: "Admin" })).toBeNull();
-  m.out.mockRejectedValue(new Error());
+  m.out.mockRejectedValueOnce(new Error());
   fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
-  expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
-  await waitFor(() => expect(m.out).toHaveBeenCalledTimes(1));
-  fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
   await screen.findByRole("alert");
+  expect(screen.getByRole("alert")).toHaveTextContent("We couldn't sign you out. Try again.");
+  expect(screen.getByRole("list", { name: "Profile" })).toBeInTheDocument();
+  expect(m.out).toHaveBeenCalledTimes(1);
   v.unmount();
   m.account.isAdmin = true;
   render(<SiteHeader />);
@@ -262,12 +262,16 @@ it.each(["Your Submissions", "Your Profile", "Admin"])(
     expect(toggle).toHaveAttribute("aria-expanded", "false");
   },
 );
-it("closes the profile before signout finishes", async () => {
-  render(<MemberProfile showHandle={false} />);
+it("a successful sign-out leaves the menu open until the route change closes it", async () => {
+  m.out.mockResolvedValueOnce(undefined);
+  const view = render(<MemberProfile showHandle={false} />);
   fireEvent.click(screen.getByRole("button", { name: "Traveler1234 menu" }));
   fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
-  expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
   await waitFor(() => expect(m.out).toHaveBeenCalledTimes(1));
+  expect(screen.getByRole("list", { name: "Profile" })).toBeInTheDocument();
+  m.location = { href: "/profile", pathname: "/profile" };
+  view.rerender(<MemberProfile showHandle={false} />);
+  expect(screen.queryByRole("list", { name: "Profile" })).toBeNull();
 });
 it.each(["Explore", "Spot a Plate", "About", "Try the Demo"])(
   "closes the mobile menu immediately when %s is chosen",

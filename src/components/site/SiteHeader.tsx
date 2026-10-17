@@ -164,7 +164,7 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
               variant="ghost"
               className="w-full justify-start px-4 text-navy"
               onClick={() => {
-                setOpen(false);
+                setError("");
                 void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."));
               }}
             >
