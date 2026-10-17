@@ -1,3 +1,9 @@
+# PR #113 Copilot follow-ups
+
+- [ ] Stage migration 0017 and index-existence assertion; do not apply before Alison approves.
+- [ ] Release confirmed-photo preview URLs on removal/replacement, no-save submission and unmount; test each lifecycle.
+- [ ] Run requested related tests and lint; reply to both Copilot comments; confirm PR Codecov after managed sync.
+
 # PR #113 photo patch coverage
 
 - [x] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths; remove unreachable UI guards and duplicate URL revocation. No server/storage behaviour changes or canvas extraction.

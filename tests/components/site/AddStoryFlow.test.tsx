@@ -201,11 +201,16 @@ describe("AddStoryFlow", () => {
   );
 
   it("removing a confirmed photo clears its submitted path", async () => {
+    vi.mocked(URL.createObjectURL)
+      .mockReturnValueOnce("blob:original")
+      .mockReturnValueOnce("blob:processed");
     const user = userEvent.setup();
     render(<AddStoryFlow plateId="p1" />);
     await user.type(screen.getByLabelText(/What do you think it means/), "single.");
     await addPhoto(user);
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed");
     await user.click(screen.getByRole("button", { name: "Remove Photo" }));
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:processed");
     expect(
       screen.queryByAltText("Your processed photo, blurred except the plate"),
     ).not.toBeInTheDocument();
@@ -215,6 +220,47 @@ describe("AddStoryFlow", () => {
     await waitFor(() =>
       expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }),
     );
+  });
+
+  it("replacing a confirmed photo releases only the previous preview until unmount", async () => {
+    vi.mocked(URL.createObjectURL)
+      .mockReturnValueOnce("blob:original-1")
+      .mockReturnValueOnce("blob:processed-1")
+      .mockReturnValueOnce("blob:original-2")
+      .mockReturnValueOnce("blob:processed-2");
+    const user = userEvent.setup();
+    const { unmount } = render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await addPhoto(user);
+    await user.click(screen.getByRole("button", { name: "Remove Photo" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await addPhoto(user);
+    expect(screen.getByAltText("Your processed photo, blurred except the plate")).toHaveAttribute(
+      "src",
+      "blob:processed-2",
+    );
+    expect(vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-1"))
+      .toHaveLength(1);
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed-2");
+    unmount();
+    expect(vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed-2"))
+      .toHaveLength(1);
+  });
+
+  it("unmount releases a confirmed preview but step changes keep it alive", async () => {
+    vi.mocked(URL.createObjectURL)
+      .mockReturnValueOnce("blob:original")
+      .mockReturnValueOnce("blob:processed");
+    const user = userEvent.setup();
+    const { unmount } = render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "single.");
+    await addPhoto(user);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("blob:processed");
+    unmount();
+    expect(vi.mocked(URL.revokeObjectURL).mock.calls.filter(([url]) => url === "blob:processed"))
+      .toHaveLength(1);
   });
   it("requires more than the prefilled starter before continuing", async () => {
     const user = userEvent.setup();
@@ -421,6 +467,9 @@ describe("AddStoryFlow", () => {
   it.each(["rejected", "error", "validation"] as const)(
     "a %s outcome forgets the deleted photo, so a retry never sends its path",
     async (first) => {
+      vi.mocked(URL.createObjectURL)
+        .mockReturnValueOnce("blob:original")
+        .mockReturnValueOnce("blob:processed");
       m.submit.mockResolvedValueOnce({ outcome: first });
       const user = userEvent.setup();
       render(<AddStoryFlow plateId="p1" />);
@@ -432,6 +481,7 @@ describe("AddStoryFlow", () => {
       await user.click(screen.getByRole("button", { name: "Next" }));
       await user.click(screen.getByRole("button", { name: "Submit Story" }));
       await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(1));
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:processed");
       expect(m.submit.mock.calls[0]?.[0]?.data.photoPath).toBe("user-1/photo.jpg");
       await user.click(screen.getByRole("button", { name: "Next" }));
       await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
