@@ -18,6 +18,8 @@ import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getPlate } from "@/lib/plates.functions";
+import { startDemo } from "@/lib/demo-login.functions";
+import { track } from "@/lib/analytics";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
 
@@ -262,6 +264,27 @@ export function SignUpPage({
 }
 
 export function DemoPage() {
+  const begin = useServerFn(startDemo);
+  const navigate = useNavigate();
+  const auth = useAccountAuth();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function enterDemo() {
+    setBusy(true);
+    setError("");
+    try {
+      const session = await begin();
+      const result = await supabase.auth.setSession(session);
+      if (result.error) throw result.error;
+      await auth?.refresh();
+      await track("demo_started", {});
+      await navigate({ to: "/" });
+    } catch {
+      setError("The demo is not available right now. Please try again soon.");
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <EntryShell
       title="Try the Demo"
@@ -273,9 +296,10 @@ export function DemoPage() {
           <li key={s}>{s}</li>
         ))}
       </ul>
-      <Link to="/demo-form" className="brand-btn brand-btn-navy mt-6 w-full">
-        Start the Demo
-      </Link>
+      <Button className="brand-btn brand-btn-navy mt-6 w-full" disabled={busy} onClick={() => void enterDemo()}>
+        {busy ? "Starting the Demo…" : "Start the Demo"}
+      </Button>
+      {error && <p role="alert" className="mt-3 text-coral-cta">{error}</p>}
     </EntryShell>
   );
 }

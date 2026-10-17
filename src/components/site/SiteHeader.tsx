@@ -180,7 +180,7 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
                 void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."));
               }}
             >
-              Sign out
+              {auth.account.isDemo ? "Exit Demo" : "Sign out"}
             </Button>
           </li>
           {error && (
