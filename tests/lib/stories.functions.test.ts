@@ -128,7 +128,6 @@ describe("addStory", () => {
   });
   it("rate limits after five submissions per 15 minutes", async () => {
     mocks.admin.rpc.mockResolvedValue({ data: false, error: null });
-    mocks.admin.rpc.mockResolvedValueOnce({ data: true, error: null });
     expect(await call(addStory, INPUT)).toEqual({
       outcome: "rate-limited",
       message: RATE_LIMIT_MESSAGE,
