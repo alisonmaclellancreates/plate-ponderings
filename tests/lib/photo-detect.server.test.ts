@@ -65,7 +65,7 @@ describe("detectPlateBoxInImage", () => {
   });
 
   it("returns no box when the model finds none", async () => {
-    aiReturns({ found: false });
+    aiReturns({ found: false, x: null, y: null, w: null, h: null });
     await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({ outcome: "ok", box: null });
   });
 
