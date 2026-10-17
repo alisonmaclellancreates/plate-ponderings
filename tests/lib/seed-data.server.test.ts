@@ -11,6 +11,14 @@ const paths = Object.fromEntries(
 it("builds the literal scenario, histories and Pacific times relative to the demo day", () => {
   const seed = buildSeed("2026-10-17", accounts, paths);
   expect(seed.subjects).toHaveLength(16);
+  expect(seed.subjects.map((subject) => subject.identity_b)).toEqual([
+    "RAINY7Q", "EH2ZED", "MAPLE9X", "4GOT10", "DEJAVU2", "2FOG4ME", "YEEHA7Z",
+    "BRKFST4U", "QWERTY9", "1MORLAP", "SNACKZ", "BRB2NITE", "H2OH2O", "TUBA4ME",
+    "MUDFLAP", "WANDR4",
+  ]);
+  const subjectIds = new Set(seed.subjects.map((subject) => subject.id));
+  for (const rows of [seed.stories, seed.summaries, seed.featured_days, seed.notifications])
+    for (const row of rows) expect(subjectIds.has(row.subject_id)).toBe(true);
   expect(seed.subjects.filter((p) => p.status === "published")).toHaveLength(15);
   expect(seed.stories.filter((s) => s.status === "published")).toHaveLength(15);
   expect(seed.stories.filter((s) => s.status === "pending")).toHaveLength(1);

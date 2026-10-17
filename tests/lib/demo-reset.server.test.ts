@@ -19,6 +19,7 @@ const m = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/seed-photos.server", () => ({ seedPhotos: m.photos }));
 import { resetDemoSeed } from "@/lib/demo-reset.server";
+import { SEED_HANDLES } from "@/lib/seed-data.server";
 const content = new Map<string, unknown[]>();
 const files = new Set<string>();
 const users = new Map<string, { id: string; email?: string }>();
@@ -196,6 +197,15 @@ it("replaces unrelated content, preserves admins/sample/settings and leaves exac
     }
   }
   expect(counter).toBe(20);
+  expect([...handles.values()].sort()).toEqual([...SEED_HANDLES].sort());
+  expect([...handles.keys()].every((id) => Boolean(id) && users.has(id))).toBe(true);
+  expect(m.upload).toHaveBeenCalledTimes(10);
+  for (const [path, bytes, options] of m.upload.mock.calls) {
+    expect(path).toMatch(/^[\da-f-]+\/[\da-f-]+\.jpg$/);
+    expect(users.has(path.split("/")[0])).toBe(true);
+    expect(bytes).toEqual(new Uint8Array([1, 2, 3]));
+    expect(options).toEqual({ contentType: "image/jpeg", upsert: false });
+  }
   expect(m.rpc).toHaveBeenCalledWith("release_demo_reset", expect.anything());
 });
 it.each([

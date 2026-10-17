@@ -168,8 +168,8 @@ export function buildSeed(
     }
   }
   const subjectId = (text: string) => {
-    const row = seed.subjects.find((p) => p.identity_b === text);
-    if (!row) throw new Error("Seed plate missing.");
+    // All callers name literal PLATES entries, each inserted unconditionally above.
+    const row = seed.subjects.find((p) => p.identity_b === text) as Row<"subjects">;
     return row.id;
   };
   for (const [status, text, hour, minute] of [
