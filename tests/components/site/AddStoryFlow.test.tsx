@@ -472,6 +472,7 @@ describe("AddStoryFlow branches", () => {
           meaning: "Pacific Northwest love.",
           source: "guess",
           more: "Seen near Seattle.",
+          photoPath: "",
         },
       }),
     );
