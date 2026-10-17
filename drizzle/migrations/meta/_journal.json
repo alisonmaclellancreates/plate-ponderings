@@ -120,6 +120,13 @@
       "when": 1792257377535,
       "tag": "0016_step49_photo_detect_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792265272587,
+      "tag": "0017_step49_photo_detect_attempts_index",
+      "breakpoints": true
     }
   ]
 }
