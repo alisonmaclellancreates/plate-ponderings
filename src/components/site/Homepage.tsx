@@ -9,17 +9,12 @@ import { JURISDICTION_GROUPS } from "@/lib/jurisdictions";
 import { validateSpot, type SpotErrors } from "@/lib/spot";
 import { searchPlate } from "@/lib/plates.functions";
 import { track } from "@/lib/analytics";
+import { openFeatured, previewFeatured, type FeaturedDisplay } from "@/lib/featured";
+import type { FeaturedHome } from "@/lib/featured.functions";
 
 import { storyCount } from "@/lib/story-count";
 import { HEADLINES, useHeadlineIndex } from "@/lib/headlines";
-import {
-  PLATES,
-  plateStatus,
-  publishedStories,
-  featuredPlates,
-  TODAY,
-  type PlateRecord,
-} from "@/lib/mock-data";
+import { PLATES, featuredPlates, TODAY, type PlateRecord } from "@/lib/mock-data";
 
 function Headline() {
   const active = useHeadlineIndex();
@@ -361,16 +356,25 @@ function HowItWorks() {
   );
 }
 
-export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
-  const status = plateStatus(plate);
-  const n = publishedStories(plate).length;
+export function PlateOfTheDay({
+  plate,
+  utcToday,
+  headingId = "potd-heading",
+}: {
+  plate: PlateRecord | FeaturedDisplay;
+  utcToday?: string | undefined;
+  headingId?: string;
+}) {
+  const display = "day" in plate ? plate : previewFeatured(plate);
+  const status = display.status;
+  const n = display.count;
   const copy =
     status === "mystery"
       ? `No stories yet. What do you think ${plate.text} means? Be the first to share your interpretation!`
       : `Only ${storyCount(n)} so far. What do you think ${plate.text} means? Add yours to the conversation!`;
   return (
     <section
-      aria-labelledby="potd-heading"
+      aria-labelledby={headingId}
       className="bg-cover bg-center py-12"
       style={{ backgroundImage: "url(/brand/plate-of-the-day-landscape-v2.webp)" }}
     >
@@ -378,7 +382,7 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
         <div className="rounded-2xl bg-cream p-6 shadow-sm md:p-8">
           <div className="flex items-center gap-2">
             <Star aria-hidden className="size-6 fill-gold text-gold" />
-            <h2 id="potd-heading" className="font-display text-4xl text-navy">
+            <h2 id={headingId} className="font-display text-4xl text-navy">
               Plate of the Day
             </h2>
           </div>
@@ -396,6 +400,7 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
               <Link
                 to="/plate/$state"
                 params={{ state: plate.slug }}
+                onClick={utcToday ? () => openFeatured(display, utcToday) : undefined}
                 className="brand-btn brand-btn-navy mt-4"
               >
                 View This Plate
@@ -408,10 +413,13 @@ export function PlateOfTheDay({ plate }: { plate: PlateRecord }) {
   );
 }
 
-function RecentlyFeatured() {
-  const recent = featuredPlates()
-    .filter((p) => p.plateOfTheDay !== TODAY)
-    .slice(0, 4);
+export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
+  const recent = live
+    ? live.recent
+    : featuredPlates()
+        .filter((p) => p.plateOfTheDay !== TODAY)
+        .slice(0, 4);
+  if (recent.length === 0) return null;
   return (
     <section aria-labelledby="recent-heading" className="mx-auto max-w-6xl px-4 py-12">
       <div className="flex flex-wrap items-end justify-between gap-2">
@@ -427,8 +435,8 @@ function RecentlyFeatured() {
       </div>
       <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {recent.map((p) => (
-          <li key={p.slug} className="min-w-0">
-            <FeaturedPlateCard plate={p} />
+          <li key={"day" in p ? p.day : p.plateOfTheDay} className="min-w-0">
+            <FeaturedPlateCard plate={p} utcToday={live?.today} />
           </li>
         ))}
       </ul>
@@ -441,18 +449,21 @@ export type HomepageVariant = "default" | "no-match" | "fallback";
 export function Homepage({
   variant = "default",
   prefill,
+  live,
 }: {
   variant?: HomepageVariant;
   prefill?: SearchValues;
+  live?: FeaturedHome | undefined;
 }) {
   const [noMatch, setNoMatch] = useState<Required<SearchValues> | null>(
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : null,
   );
   const [searchError, setSearchError] = useState<string | null>(null);
-  const featured = PLATES.find((p) =>
-    variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
-  );
-  if (!featured) return null;
+  const featured = live
+    ? live.pick
+    : PLATES.find((p) =>
+        variant === "fallback" ? p.slug === "co-wander" : p.plateOfTheDay === TODAY,
+      );
   const search =
     variant === "no-match" ? { jurisdiction: "Utah", text: "DRAGON" } : (prefill ?? {});
   return (
@@ -466,8 +477,8 @@ export function Homepage({
       />
       <ActionCards />
       <HowItWorks />
-      <PlateOfTheDay plate={featured} />
-      <RecentlyFeatured />
+      {featured && <PlateOfTheDay plate={featured} utcToday={live?.today} />}
+      <RecentlyFeatured live={live} />
       <p className="font-display px-4 pt-4 text-center text-4xl text-navy">
         Different roads. Different stories. What's yours?
       </p>

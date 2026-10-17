@@ -33,6 +33,8 @@ import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenti
 import { Route as PlateStateRouteImport } from './routes/plate.$state'
 import { Route as PreviewComponentsRouteImport } from './routes/preview.components'
 import { Route as PreviewsAccountRouteImport } from './routes/previews_.account'
+import { Route as PreviewsExploreRouteImport } from './routes/previews_.explore'
+import { Route as PreviewsHomepageFeaturedRouteImport } from './routes/previews_.homepage-featured'
 import { Route as PreviewsStoryErrorRouteImport } from './routes/previews_.story-error'
 import { Route as PreviewsStoryRateLimitedRouteImport } from './routes/previews_.story-rate-limited'
 import { Route as SpotOutcomeRouteImport } from './routes/spot.$outcome'
@@ -160,6 +162,17 @@ const PreviewsAccountRoute = PreviewsAccountRouteImport.update({
   path: '/previews/account',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreviewsExploreRoute = PreviewsExploreRouteImport.update({
+  id: '/previews_/explore',
+  path: '/previews/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewsHomepageFeaturedRoute =
+  PreviewsHomepageFeaturedRouteImport.update({
+    id: '/previews_/homepage-featured',
+    path: '/previews/homepage-featured',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PreviewsStoryErrorRoute = PreviewsStoryErrorRouteImport.update({
   id: '/previews_/story-error',
   path: '/previews/story-error',
@@ -217,6 +230,8 @@ export interface FileRoutesByFullPath {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews/account': typeof PreviewsAccountRoute
+  '/previews/explore': typeof PreviewsExploreRoute
+  '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -248,6 +263,8 @@ export interface FileRoutesByTo {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews/account': typeof PreviewsAccountRoute
+  '/previews/explore': typeof PreviewsExploreRoute
+  '/previews/homepage-featured': typeof PreviewsHomepageFeaturedRoute
   '/previews/story-error': typeof PreviewsStoryErrorRoute
   '/previews/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -281,6 +298,8 @@ export interface FileRoutesById {
   '/plate/$state': typeof PlateStateRoute
   '/preview/components': typeof PreviewComponentsRoute
   '/previews_/account': typeof PreviewsAccountRoute
+  '/previews_/explore': typeof PreviewsExploreRoute
+  '/previews_/homepage-featured': typeof PreviewsHomepageFeaturedRoute
   '/previews_/story-error': typeof PreviewsStoryErrorRoute
   '/previews_/story-rate-limited': typeof PreviewsStoryRateLimitedRoute
   '/spot/$outcome': typeof SpotOutcomeRoute
@@ -314,6 +333,8 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews/account'
+    | '/previews/explore'
+    | '/previews/homepage-featured'
     | '/previews/story-error'
     | '/previews/story-rate-limited'
     | '/spot/$outcome'
@@ -345,6 +366,8 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews/account'
+    | '/previews/explore'
+    | '/previews/homepage-featured'
     | '/previews/story-error'
     | '/previews/story-rate-limited'
     | '/spot/$outcome'
@@ -377,6 +400,8 @@ export interface FileRouteTypes {
     | '/plate/$state'
     | '/preview/components'
     | '/previews_/account'
+    | '/previews_/explore'
+    | '/previews_/homepage-featured'
     | '/previews_/story-error'
     | '/previews_/story-rate-limited'
     | '/spot/$outcome'
@@ -406,6 +431,8 @@ export interface RootRouteChildren {
   PlateStateRoute: typeof PlateStateRoute
   PreviewComponentsRoute: typeof PreviewComponentsRoute
   PreviewsAccountRoute: typeof PreviewsAccountRoute
+  PreviewsExploreRoute: typeof PreviewsExploreRoute
+  PreviewsHomepageFeaturedRoute: typeof PreviewsHomepageFeaturedRoute
   PreviewsStoryErrorRoute: typeof PreviewsStoryErrorRoute
   PreviewsStoryRateLimitedRoute: typeof PreviewsStoryRateLimitedRoute
   SpotOutcomeRoute: typeof SpotOutcomeRoute
@@ -581,6 +608,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewsAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/previews_/explore': {
+      id: '/previews_/explore'
+      path: '/previews/explore'
+      fullPath: '/previews/explore'
+      preLoaderRoute: typeof PreviewsExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/previews_/homepage-featured': {
+      id: '/previews_/homepage-featured'
+      path: '/previews/homepage-featured'
+      fullPath: '/previews/homepage-featured'
+      preLoaderRoute: typeof PreviewsHomepageFeaturedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/previews_/story-error': {
       id: '/previews_/story-error'
       path: '/previews/story-error'
@@ -671,6 +712,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlateStateRoute: PlateStateRoute,
   PreviewComponentsRoute: PreviewComponentsRoute,
   PreviewsAccountRoute: PreviewsAccountRoute,
+  PreviewsExploreRoute: PreviewsExploreRoute,
+  PreviewsHomepageFeaturedRoute: PreviewsHomepageFeaturedRoute,
   PreviewsStoryErrorRoute: PreviewsStoryErrorRoute,
   PreviewsStoryRateLimitedRoute: PreviewsStoryRateLimitedRoute,
   SpotOutcomeRoute: SpotOutcomeRoute,

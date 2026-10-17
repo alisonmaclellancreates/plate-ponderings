@@ -11,16 +11,16 @@
 
 <!-- LOVABLE:END -->
 
-- Keep home in `src/routes/index.tsx` and styles in `src/styles.css` so routing remains additive.
+- Home: `src/routes/index.tsx`; styles: `src/styles.css`. Sample galleries use loader-free `previews_.*` routes, isolating live reads.
 - Shared handle validation classifies deterministic input failures for both profile feedback and server refusals; AI rejection remains separate so visitors receive actionable input guidance without moderation reasons.
 - Handle availability returns a three-state status (null for demo); live fields and inert previews share status rendering, and debounced results are tied to their draft so stale answers cannot leak into new input.
 - Persistent data and sign-in live in Lovable Cloud (generated clients under `src/integrations/supabase`, schema only through migrations with RLS and GRANTs on every public table), so each step adds tables and policies instead of replacing the backend.
 - CI checks and coverage run independently with frozen Bun installs; replay only `supabase/migrations/` when present, because Drizzle records are not replayable Cloud migrations.
 - Exclude generated routing and Cloud files from lint/formatting because Lovable rewrites them; retain existing rules for all non-generated source and tests.
-- Static preview pages read only from `src/lib/mock-data.ts` and share the header, footer, plate and badge components in `src/components/site/`, so later steps swap the data source without touching page layouts.
+- Static previews read only `src/lib/mock-data.ts` and reuse site components, keeping layouts independent of live data.
 - Compose state-specific preview stories without mutating shared plate records, so catching-up examples cannot change other previews.
 - Brand colours live as tokens in `src/styles.css` (exact brand hex values, not oklch), because the brand pack specifies hex and approximations drift.
-- Featured archive and homepage share `FeaturedPlateCard`; feature dates and counts at selection live on mock plate records, while current counts filter published stories, so progress cannot drift between views.
+- Featured pages share RPC DTOs and cursor queries; previews adapt mocks. Queries contain read failures: home omits empty bands, archive retries inline, preserving pages.
 - `/plate/$state` accepts existing preview aliases and mock plate slugs through the same detail layout, preserving preview URLs while giving each archive card its own working destination.
 - Only `src/lib/analytics.ts` imports the PostHog SDK; one runtime event registry derives event types and drives both capture and before_send filtering, preventing event definitions from drifting; root route effects capture query-free page paths after hydration. Registry-scoped instances support test-only events without adding production events.
 - Map public PostHog connector values to `VITE_POSTHOG_KEY` and `VITE_POSTHOG_HOST` in Vite configuration, keeping application code independent of connector-specific names.
@@ -33,6 +33,6 @@
 - Live spot outcomes retain the submitted identity separately from route prefill, so pending feedback and return-to-search links describe the actual request even after the form remounts.
 - PlateFrame owns the detail-only frame for static and real plate pages, so jurisdiction display stays identical without changing Plate artwork or other render locations.
 - Register project-owned `attachSession`, never generated `attachSupabaseAuth`: bounded `getSession()` preserves normal renewal without blocking public RPCs. Server authorization remains unchanged; never read tokens directly from storage.
-- Background AI uses `runAfterResponse` and request-scoped waitUntil; admin summaries filter via `is_summary_public`. Guesses use Astra's streamed structured low-reasoning Responses shape for stable behavior.
+- Background AI uses `runAfterResponse` and request-scoped waitUntil; summary reads batch `get_visible_summary_versions` using `is_summary_public`, keeping read counts fixed. Guesses use Astra's streamed structured low-reasoning Responses.
 - Guesses use separate server-only insert-once storage and existence-only reads until published human stories unlock text, preventing story/summary contamination.
 - Hidden guesses retain the invitation despite old summaries; revealed guesses follow summaries before human stories at every width, preserving reading order.

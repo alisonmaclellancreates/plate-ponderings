@@ -28,6 +28,10 @@ values ('d0000000-0000-0000-0000-000000000201', 'd0000000-0000-0000-0000-0000000
 
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if not public.is_summary_public('d0000000-0000-0000-0000-000000000201') then
     raise exception 'FAIL: baseline version with no hidden stories must be public';
   end if;
@@ -39,6 +43,10 @@ where id = 'd0000000-0000-0000-0000-000000000101';
 
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if public.is_summary_public('d0000000-0000-0000-0000-000000000201') then
     raise exception 'FAIL: version covering a story later hidden must be hidden';
   end if;
@@ -52,6 +60,10 @@ values ('d0000000-0000-0000-0000-000000000202', 'd0000000-0000-0000-0000-0000000
 
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if not public.is_summary_public('d0000000-0000-0000-0000-000000000202') then
     raise exception 'FAIL: version started after the story left view must stay public';
   end if;
@@ -65,6 +77,10 @@ values ('d0000000-0000-0000-0000-000000000102', 'd0000000-0000-0000-0000-0000000
 
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if not public.is_summary_public('d0000000-0000-0000-0000-000000000202') then
     raise exception 'FAIL: a never-published story deleted inside the version window must not affect visibility';
   end if;
@@ -80,6 +96,10 @@ where id = 'd0000000-0000-0000-0000-000000000101';
 
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if public.is_summary_public('d0000000-0000-0000-0000-000000000201') then
     raise exception 'FAIL: with one of two hidden stories restored, the version must stay hidden';
   end if;
@@ -91,6 +111,10 @@ where id = 'd0000000-0000-0000-0000-000000000103';
 
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if public.is_summary_public('d0000000-0000-0000-0000-000000000201') then
     raise exception 'FAIL: a deleted story must hide the versions that included it';
   end if;
@@ -106,6 +130,10 @@ values ('d0000000-0000-0000-0000-000000000203', 'd0000000-0000-0000-0000-0000000
 
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if public.is_summary_public('d0000000-0000-0000-0000-000000000203') then
     raise exception 'FAIL: version started before a hide and finished after it must be hidden';
   end if;
@@ -123,6 +151,10 @@ end $$;
 -- Verified by catalog check instead (works from any role):
 do $$
 begin
+  if (select coalesce(array_agg(version),array[]::integer[]) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) is distinct from
+     (select coalesce(array_agg(version order by version desc),array[]::integer[]) from public.summaries where subject_id='d0000000-0000-0000-0000-000000000041' and public.is_summary_public(id)) then
+    raise exception 'FAIL: batch visibility differs from original predicate';
+  end if;
   if has_table_privilege('anon', 'public.summaries', 'select') then
     raise exception 'FAIL: anon must not have select on summaries';
   end if;
@@ -131,11 +163,21 @@ begin
   end if;
 end $$;
 
+-- Restore both previously published stories; every version becomes visible again.
+update public.stories set status='published',removed_at=null where id in ('d0000000-0000-0000-0000-000000000101','d0000000-0000-0000-0000-000000000103');
+do $$ begin
+ if (select array_agg(version) from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) <> array[3,2,1] then raise exception 'FAIL: restored batch ordering'; end if;
+ if exists(select 1 from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000099')) then raise exception 'FAIL: subject isolation'; end if;
+end $$;
+update public.subjects set status='pending' where id='d0000000-0000-0000-0000-000000000041';
+do $$ begin
+ if exists(select 1 from public.get_visible_summary_versions('d0000000-0000-0000-0000-000000000041')) then raise exception 'FAIL: unpublished subject'; end if;
+end $$;
 -- Cleanup so the file is rerunnable
 delete from public.summaries where subject_id = 'd0000000-0000-0000-0000-000000000041';
 delete from public.stories  where subject_id = 'd0000000-0000-0000-0000-000000000041';
 delete from public.subjects where id = 'd0000000-0000-0000-0000-000000000041';
 
-commit;
+rollback;
 
-select 'summary-visibility: all 7 assertions plus the signed-out case passed' as result;
+select 'summary-visibility: original and batch visibility assertions passed' as result;

@@ -1,3 +1,14 @@
+# Step 46: real daily pick, featured shelf and archive
+
+- [x] Rowan sign-off changes: Recently Featured hidden entirely (heading, intro, link) with no earlier featured days, proven by a new test; Roadside Archive intro replaced with the approved sentence. 29 changed tests passed across two files; changed-file lint clean; formatting passed.
+- [x] Added sample-only unnested /previews/explore and /previews/homepage-featured, real grid/bands/shelf and live-page notes. 35 changed tests passed across five files; lint zero errors/six existing warnings; formatting passed; automatic build OK. No database, browser or AI checks.
+- [x] Contain featured read failures: omit homepage bands; Explore retries inline, including later-page failures. All 37 changed tests passed; repository lint zero errors/six existing warnings; formatting passed; automatic build OK. No database, browser or AI checks.
+- [x] Alison approved the plan and three service-only functions; singular daily copy retained and explore_filtered excluded entirely.
+- [x] Applied approved migration 0013; built atomic UTC selection, live featured pages, batch visible-summary reads and privacy-scoped analytics.
+- [x] Changed tests: 96 passed across 10 files. Lint: zero errors, six existing UI warnings. All seven database test files passed through the privileged tool; fixture readback zero. Automatic build OK; no manual full suite, coverage, typecheck, build, browser or AI checks.
+- [ ] Two-session concurrency is unexercised; requires an independent privileged multi-session harness. Daily reuse, immutable snapshot and single-row behavior passed in one transaction.
+- [x] PR #104 Codecov patch: 100% (Alison's read of the completed check). All three partials closed; CI authoritative.
+
 # Step 45b: fictional plate guesses
 
 - [x] Alison approved the plan and subject_guesses table; applied migrations 0011 and 0012 (insert-only service grants).
