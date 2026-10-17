@@ -21,18 +21,33 @@ vi.mock("@/lib/seed-photos.server", () => ({ seedPhotos: m.photos }));
 import { resetDemoSeed } from "@/lib/demo-reset.server";
 const content = new Map<string, unknown[]>();
 const files = new Set<string>();
+const users = new Map<string, { id: string; email?: string }>();
+const handles = new Map<string, string>();
 let counter = 0;
 const from = (table: string) => {
   let count = false;
+  let target = "";
+  let update: { handle: string } | undefined;
   const b = {
     select: (_: string, options?: { count?: string }) => {
       count = Boolean(options?.count);
       return b;
     },
-    eq: () => b,
+    eq: (_: string, value: string) => {
+      target = value;
+      return b;
+    },
     single: () => b,
-    update: () => b,
+    update: (value: { handle: string }) => {
+      update = value;
+      return b;
+    },
     then: (resolve: (v: unknown) => void) => {
+      if (table === "profiles" && update) {
+        if ([...handles].some(([id, handle]) => id !== target && handle === update?.handle))
+          return Promise.resolve({ error: { message: "duplicate handle" } }).then(resolve);
+        handles.set(target, update.handle);
+      }
       const result = count
         ? m.counts(table)
         : table === "app_settings"
@@ -58,6 +73,12 @@ beforeEach(() => {
   counter = 0;
   content.clear();
   files.clear();
+  users.clear();
+  handles.clear();
+  users.set("sample", { id: "sample", email: "sample@fixture.invalid" });
+  users.set("admin", { id: "admin" });
+  users.set("unrelated", { id: "unrelated" });
+  handles.set("sample", "Traveler4821");
   files.add("old/old.jpg");
   vi.stubEnv("DEMO_EMAIL", "sample@fixture.invalid");
   vi.stubEnv("DEMO_PASSWORD", "test-only");
@@ -72,21 +93,18 @@ beforeEach(() => {
   m.settings.mockReturnValue({ data: { demo_mode: true, demo_today: "2026-10-17" }, error: null });
   m.sample.mockReturnValue({ data: { handle: "Traveler4821" }, error: null });
   m.admins.mockReturnValue({ data: [{ user_id: "admin" }], error: null });
-  m.users.mockResolvedValue({
-    data: {
-      users: [
-        { id: "sample", email: "sample@fixture.invalid" },
-        { id: "admin" },
-        { id: "unrelated" },
-      ],
-    },
-    error: null,
+  m.users.mockImplementation(async () => ({ data: { users: [...users.values()] }, error: null }));
+  m.create.mockImplementation(async () => {
+    const user = { id: crypto.randomUUID() };
+    counter++;
+    users.set(user.id, user);
+    return { data: { user }, error: null };
   });
-  m.create.mockImplementation(async () => ({
-    data: { user: { id: `new-${counter++}` } },
-    error: null,
-  }));
-  m.removeUser.mockResolvedValue({ error: null });
+  m.removeUser.mockImplementation(async (id: string) => {
+    users.delete(id);
+    handles.delete(id);
+    return { error: null };
+  });
   m.rpc.mockImplementation(async (fn: string, args: { _seed?: Record<string, unknown[]> }) => {
     if (fn === "replace_demo_seed_content") {
       for (const [key, rows] of Object.entries(args._seed ?? {})) content.set(key, rows);
@@ -134,6 +152,22 @@ it("replaces unrelated content, preserves admins/sample/settings and leaves exac
   expect(m.removeUser).not.toHaveBeenCalledWith("sample");
   expect((await resetDemoSeed(client)).outcome).toBe("done");
   expect(files.size).toBe(5);
+  expect(users.size).toBe(12);
+  expect(new Set(handles.values()).size).toBe(11);
+  for (const story of content.get("stories") ?? []) {
+    const row = story as {
+      photo_path: string | null;
+      author_id: string;
+      photo_box: number[] | null;
+    };
+    if (row.photo_path) {
+      expect(row.photo_path).toMatch(new RegExp(`^${row.author_id}/[0-9a-f-]+\\.jpg$`));
+      expect(files.has(row.photo_path)).toBe(true);
+      expect(row.photo_box).toHaveLength(4);
+      expect(row.photo_box?.every((n) => n >= 0 && n <= 1)).toBe(true);
+    }
+  }
+  expect(counter).toBe(20);
   expect(m.rpc).toHaveBeenCalledWith("release_demo_reset", expect.anything());
 });
 it.each([
