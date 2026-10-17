@@ -62,8 +62,8 @@ describe("StoryPhotoZoom", () => {
   it("closes with a tap outside", async () => {
     render(<StoryPhotoZoom {...props} />);
     await open();
-    await new Promise((r) => setTimeout(r, 0));
-    fireEvent.pointerDown(document.body);
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    await user.click(document.body);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
