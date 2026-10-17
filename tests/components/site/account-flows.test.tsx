@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
+import { AuthWeakPasswordError } from "@supabase/supabase-js";
 const m = vi.hoisted(() => ({
   signedOut: false,
   account: { handle: "Traveler1234", isDemo: false, isAdmin: false },
@@ -90,7 +91,7 @@ it("signin failures are generic and do not navigate", async () => {
   expect(m.navigate).not.toHaveBeenCalled();
 });
 it("handles signup password failure, absent session and network error", async () => {
-  m.signUp.mockResolvedValue({ error: { code: "weak_password", message: "breached password" } });
+  m.signUp.mockResolvedValue({ error: new AuthWeakPasswordError("Password is too weak", 422, ["pwned"]) });
   const v = render(<SignUpPage />);
   fillEntry();
   await screen.findByRole("alert");

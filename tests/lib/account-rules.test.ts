@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { AuthWeakPasswordError } from "@supabase/supabase-js";
 import {
   handleFormatValid,
   handleValidationMessage,
@@ -77,7 +78,7 @@ describe("password failures", () => {
   });
   it("gives a breached password an actionable message without revealing account existence", () => {
     expect(
-      signupErrorMessage({ code: "weak_password", message: "Password found in breach list" }),
+      signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, ["pwned"])),
     ).toBe("This password has appeared in a data breach. Please choose a different password.");
     expect(signupErrorMessage({ code: "validation_failed", message: "Password too weak" })).toBe(
       "Please choose a stronger password with at least 8 characters.",
@@ -88,5 +89,16 @@ describe("password failures", () => {
     expect(signupErrorMessage({})).toBe(
       "Your account couldn't be created. You can try again or sign in.",
     );
+  });
+  it("classifies actual weak-password errors by reasons rather than message text", () => {
+    expect(
+      signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, ["length", "characters"])),
+    ).toBe("Please choose a stronger password with at least 8 characters.");
+    expect(
+      signupErrorMessage(new AuthWeakPasswordError("Password is too weak", 422, [])),
+    ).toBe("Please choose a stronger password with at least 8 characters.");
+    expect(
+      signupErrorMessage(new AuthWeakPasswordError("breach leak pwned", 422, ["length"])),
+    ).toBe("Please choose a stronger password with at least 8 characters.");
   });
 });
