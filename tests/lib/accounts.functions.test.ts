@@ -272,7 +272,20 @@ describe("manual recovery", () => {
       category: null,
       blockedAt: null,
     });
+    const updateSettings = vi.fn(() => chain(persist));
+    mocks.admin.from.mockImplementation((table: string) => {
+      const c = chain(table === "profiles" ? taken : settings);
+      c["update"] = table === "app_settings" ? updateSettings : vi.fn(() => chain(updated));
+      return c;
+    });
     expect(await call(resumeAiChecks)).toEqual({ resumed: true });
+    // Resume clears the whole shared block, so every AI check runs again.
+    expect(updateSettings).toHaveBeenCalledWith({
+      ai_check_block_category: null,
+      ai_check_blocked_at: null,
+      ai_check_run_id: null,
+    });
+    expect(mocks.moderate).not.toHaveBeenCalled();
     persist.error = {};
     expect(await call(resumeAiChecks)).toEqual({ resumed: false });
     settings.error = {};
