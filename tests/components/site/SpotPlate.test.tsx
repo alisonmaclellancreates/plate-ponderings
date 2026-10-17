@@ -115,11 +115,17 @@ describe("Spot outcome previews", () => {
     if (!plate || !story) throw new Error("Existing plate fixture missing");
     const find = vi.spyOn(PLATES, "find").mockReturnValue({
       ...plate,
-      stories: plate.stories.map((entry, index) => index === 0 ? { ...entry, howIKnow: "owner" } : entry),
+      stories: plate.stories.map((entry, index) =>
+        index === 0 ? { ...entry, howIKnow: "owner" } : entry,
+      ),
     });
     try {
       render(<SpotOutcomePage outcome="exists" />);
-      expect(within(screen.getByRole("list", { name: "Plate status" })).getByText(`Owner: ${story.handle}`)).toBeInTheDocument();
+      expect(
+        within(screen.getByRole("list", { name: "Plate status" })).getByText(
+          `Owner: ${story.handle}`,
+        ),
+      ).toBeInTheDocument();
     } finally {
       find.mockRestore();
     }
