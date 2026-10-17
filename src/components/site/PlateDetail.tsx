@@ -131,6 +131,32 @@ function StorySoFar({
   );
 }
 
+/** Signed in, straight to the story form; signed out, to the sign-in prompt for this plate. */
+function AddStoryLink({
+  plateId,
+  signedIn,
+  className,
+}: {
+  plateId: string;
+  signedIn: boolean;
+  className: string;
+}) {
+  return signedIn ? (
+    <Link
+      to="/story/$step"
+      params={{ step: "1" }}
+      search={{ plate: plateId }}
+      className={className}
+    >
+      Add Your Story
+    </Link>
+  ) : (
+    <Link to="/sign-in-prompt" search={{ plate: plateId }} className={className}>
+      Add Your Story
+    </Link>
+  );
+}
+
 function MysteryPrompt({
   signedIn,
   plateId,
@@ -151,15 +177,12 @@ function MysteryPrompt({
             ? "Every story starts somewhere. Be the first to share yours!"
             : "Have another interpretation? Add your story."}
         </p>
-        {signedIn && plateId ? (
-          <Link
-            to="/story/$step"
-            params={{ step: "1" }}
-            search={{ plate: plateId }}
+        {plateId ? (
+          <AddStoryLink
+            plateId={plateId}
+            signedIn={signedIn === true}
             className="brand-btn brand-btn-coral mt-4 inline-block"
-          >
-            Add Your Story
-          </Link>
+          />
         ) : (
           <button type="button" className="brand-btn brand-btn-coral mt-4">
             Add Your Story
@@ -364,16 +387,7 @@ function RealStories({ plateId, signedIn }: { plateId: string; signedIn: boolean
         <h2 id="stories-heading" className="font-display text-3xl text-navy">
           Stories
         </h2>
-        {signedIn && (
-          <Link
-            to="/story/$step"
-            params={{ step: "1" }}
-            search={{ plate: plateId }}
-            className="brand-btn brand-btn-coral"
-          >
-            Add Your Story
-          </Link>
-        )}
+        <AddStoryLink plateId={plateId} signedIn={signedIn} className="brand-btn brand-btn-coral" />
       </div>
       {data.pending.length > 0 && <PendingPanel />}
       <ul className="space-y-4">

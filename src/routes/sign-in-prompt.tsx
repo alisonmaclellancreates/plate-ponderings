@@ -6,6 +6,9 @@ const DESCRIPTION =
   "Choose how you would like to continue. After signing in, you will return here to add your story.";
 
 export const Route = createFileRoute("/sign-in-prompt")({
+  validateSearch: (search: Record<string, unknown>): { plate?: string | undefined } => ({
+    plate: typeof search["plate"] === "string" ? search["plate"].slice(0, 64) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: TITLE },
@@ -16,5 +19,10 @@ export const Route = createFileRoute("/sign-in-prompt")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <SignInPromptPage />,
+  component: SignInPromptRoute,
 });
+
+function SignInPromptRoute() {
+  const { plate } = Route.useSearch();
+  return <SignInPromptPage plateId={plate} />;
+}

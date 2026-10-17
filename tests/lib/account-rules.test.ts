@@ -4,7 +4,9 @@ import {
   handleFormatValid,
   handleValidationMessage,
   RESERVED_HANDLES,
+  plateIdOrNull,
   safeReturnPath,
+  storyReturnPath,
   signupErrorMessage,
   handleBlockCategory,
 } from "@/lib/account-rules";
@@ -102,5 +104,19 @@ describe("password failures", () => {
     expect(
       signupErrorMessage(new AuthWeakPasswordError("breach leak pwned", 422, ["length"])),
     ).toBe("Please choose a stronger password with at least 8 characters.");
+  });
+});
+
+describe("plate ids for the sign-in prompt", () => {
+  const id = "c10edcdd-6349-4041-a9b9-2bd648e86a14";
+  it("accepts a well-formed id and lowercases it", () => {
+    expect(plateIdOrNull(id.toUpperCase())).toBe(id);
+  });
+  it.each([undefined, 7, "", "p1", `${id}x`, "../sign-in", "//evil.example"])(
+    "rejects %s",
+    (value) => expect(plateIdOrNull(value)).toBeNull(),
+  );
+  it("returns to the story form for that plate, on this site", () => {
+    expect(storyReturnPath(id)).toBe(`/story/1?plate=${id}`);
   });
 });
