@@ -134,7 +134,13 @@ describe("AddStoryFlow", () => {
     await user.click(screen.getByRole("button", { name: "Submit Story" }));
     await waitFor(() => expect(screen.getByText("Story submitted!")).toBeInTheDocument());
     expect(m.submit).toHaveBeenCalledWith({
-      data: { plateId: "p1", meaning: "Pacific Northwest love.", source: "owner", more: "" },
+      data: {
+        plateId: "p1",
+        meaning: "Pacific Northwest love.",
+        source: "owner",
+        more: "",
+        photoPath: "",
+      },
     });
     expect(m.track).toHaveBeenCalledWith("story_submitted", {
       source: "owner",
