@@ -25,7 +25,10 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/lib/account-auth", () => ({
   useAccountAuth: () => ({ account: { handle: "Traveler1234", isDemo: false }, refresh: vi.fn() }),
 }));
-vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@tanstack/react-start", () => ({
+  useServerFn: (fn: unknown) => fn,
+  createMiddleware: () => ({ server: (fn: unknown) => fn }),
+}));
 vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
 vi.mock("@/lib/accounts.functions", () => ({
   checkHandle: async () => ({ status: "available" }),

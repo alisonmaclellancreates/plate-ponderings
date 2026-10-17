@@ -24,6 +24,14 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/lib/plates.functions", () => ({ getPlate: vi.fn(async () => ({ plate: null })) }));
+vi.mock("@/lib/stories.functions", () => ({
+  getPlateStories: vi.fn(),
+  STORY_PAGE_SIZE: 5,
+}));
+vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: undefined }) }));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { auth: { getUser: vi.fn(async () => ({ data: { user: null } })) } },
+}));
 
 import { Route } from "@/routes/plate.$state";
 import { getPlate } from "@/lib/plates.functions";
