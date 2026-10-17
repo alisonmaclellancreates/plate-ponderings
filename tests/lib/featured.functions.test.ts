@@ -85,7 +85,7 @@ it("returns twelve rows and a strict next cursor only when a thirteenth exists",
     _limit: 13,
   });
 });
-
+it("picks today's plate on the first page, even when the homepage was not visited", async () => {
   const rows = [row("2026-10-17"), row("2026-10-16", 1)];
   m.rpc
     .mockResolvedValueOnce({ data: [{ day: "2026-10-17" }], error: null })
