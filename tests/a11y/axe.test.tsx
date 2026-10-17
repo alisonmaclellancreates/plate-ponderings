@@ -3,19 +3,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import * as matchers from "vitest-axe/matchers";
-import type { AxeMatchers } from "vitest-axe/matchers";
 import type { ReactNode } from "react";
 
 expect.extend(matchers);
-
-// vitest-axe's own type augmentation targets the legacy global Vi namespace;
-// this project augments the vitest module instead.
-declare module "@vitest/expect" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-explicit-any
-  interface Assertion<T = any> extends AxeMatchers {}
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  interface AsymmetricMatchersContaining extends AxeMatchers {}
-}
 
 const m = vi.hoisted(() => ({
   auth: null as null | { handle: string; isDemo: boolean; isAdmin: boolean },
