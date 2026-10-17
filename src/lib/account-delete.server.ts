@@ -33,10 +33,14 @@ export async function deleteAccountData(admin: Admin, userId: string): Promise<v
       .eq("created_by", userId)
       .in("status", ["pending", "rejected"]),
   );
-  const photos = await admin.storage.from(STORY_PHOTO_BUCKET).list(userId, { limit: 1000 });
-  check("photo list", photos);
-  const paths = (photos.data ?? []).map((f) => `${userId}/${f.name}`);
-  if (paths.length > 0) check("photos", await admin.storage.from(STORY_PHOTO_BUCKET).remove(paths));
+  // Each removed page shrinks the folder, so always list from the start until it's empty.
+  for (;;) {
+    const photos = await admin.storage.from(STORY_PHOTO_BUCKET).list(userId, { limit: 1000 });
+    check("photo list", photos);
+    const paths = (photos.data ?? []).map((f) => `${userId}/${f.name}`);
+    if (paths.length === 0) break;
+    check("photos", await admin.storage.from(STORY_PHOTO_BUCKET).remove(paths));
+  }
   check("hearts", await admin.from("hearts").delete().eq("user_id", userId));
   check(
     "published plates",

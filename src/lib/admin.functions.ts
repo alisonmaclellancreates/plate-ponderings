@@ -155,11 +155,11 @@ export const recheckAllPending = createServerFn({ method: "POST" })
               },
               item.owner,
             );
-      if (outcome === "unavailable") {
+      if (outcome === "unavailable" || outcome === "blocked") {
         stopped = true;
         break;
       }
-      changed++;
+      if (outcome === "published" || outcome === "rejected") changed++;
     }
     return { outcome: "done", changed, remaining: queue.length - changed, stopped };
   });
