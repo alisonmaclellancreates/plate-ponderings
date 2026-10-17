@@ -42,7 +42,7 @@ export function PlateGuessPanel({
       aria-labelledby="plate-guess-heading"
       className="rounded-lg border border-teal bg-teal-pale p-5"
     >
-      <p className="text-xs font-semibold text-teal">Fictional · AI-written</p>
+      <p className="text-xs font-semibold text-navy">Fictional · AI-written</p>
       <h2 id="plate-guess-heading" className="mt-1 font-display text-2xl">
         What the Plate?'s guess
       </h2>
