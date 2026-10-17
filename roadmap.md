@@ -1,3 +1,10 @@
+# PR #121: tests-only patch coverage
+
+- [ ] Cover Entry demo outcomes, decoded seed photos, reset partial failures and seed-data validation/date offsets with tests only.
+- [ ] Read the exact Codecov missing lines for the other nine files and cover reachable branches.
+- [ ] Run related tests for changed files and lint only; no local coverage, build, typecheck, browser or real AI.
+- [ ] Confirm post-sync PR Codecov reaches 100%; managed Git sync owns pushing.
+
 # Step 51: demo, seed reset and removal of scaffolding
 
 - [x] Apply approved 0019 unchanged; rerun 11 existing database tests in rollbacks and verify fixture cleanup.
