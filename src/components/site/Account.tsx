@@ -38,6 +38,7 @@ function RowAction({ row, onDismiss }: { row: Submission; onDismiss?: OnDismiss 
       <Link
         to="/plate/$state"
         params={{ state: row.plateState }}
+        search={{ from: "submissions" }}
         className="brand-btn brand-btn-outline"
       >
         View Plate

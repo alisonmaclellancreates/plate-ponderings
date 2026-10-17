@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
 import type { HeaderMode } from "@/lib/header-mode";
@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getUnreadDot } from "@/lib/submissions.functions";
 import { UNREAD_DOT_KEY } from "@/lib/submissions-queries";
+import { useMenuDismiss } from "@/lib/menu-dismiss";
 
 // Explore, Spot a Plate and About are built in later steps; plain anchors until then.
 const NAV = [
@@ -16,6 +17,8 @@ const NAV = [
   { href: "/spot", label: "Spot a Plate" },
   { href: "/about", label: "About" },
 ];
+
+const headerFocus = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream";
 
 function Avatar({
   showHandle,
@@ -52,15 +55,17 @@ function Avatar({
 /** Demo profile menu, shown open in the preview so Exit Demo is visible. */
 function DemoProfile({ showHandle }: { showHandle: boolean }) {
   const [open, setOpen] = useState(true);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useMenuDismiss(open, setOpen, containerRef);
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         type="button"
         aria-expanded={open}
         aria-controls={showHandle ? "profile-menu" : "profile-menu-mobile"}
         aria-label={showHandle ? undefined : `${CURRENT_USER.handle} menu`}
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full"
+        className={`rounded-full ${headerFocus}`}
       >
         <Avatar showHandle={showHandle} />
       </button>
@@ -91,12 +96,16 @@ function DemoProfile({ showHandle }: { showHandle: boolean }) {
   );
 }
 
-const signIn = "site-nav-link rounded-md px-2 py-1";
-const tryDemo = "rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream";
+const signIn = `site-nav-link rounded-md px-2 py-1 ${headerFocus}`;
+const tryDemo = `rounded-lg border-2 border-cream px-3 py-1.5 font-semibold text-cream ${headerFocus}`;
 
 export function MemberProfile({ showHandle }: { showHandle: boolean }) {
   const auth = useAccountAuth();
   const [open, setOpen] = useState(false);
+  const location = useRouterState({ select: (state) => state.location });
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
   const [error, setError] = useState("");
   const fetchDot = useServerFn(getUnreadDot);
   const signedIn = Boolean(auth?.account);
@@ -105,12 +114,14 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
     queryFn: () => fetchDot(),
     enabled: signedIn,
   });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useMenuDismiss(open, setOpen, containerRef);
   if (!auth?.account) return null;
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <Button
         variant="ghost"
-        className="h-auto rounded-full p-0 text-cream"
+        className={`h-auto rounded-full p-0 text-cream ${headerFocus}`}
         aria-label={`${auth.account.handle} menu`}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -127,18 +138,35 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
           className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
         >
           <li>
-            <Link to="/submissions" className="block px-4 py-2 hover:bg-cream">
+            <Link
+              to="/submissions"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 px-4 py-2 hover:bg-cream"
+            >
               Your Submissions
+              {dot.data?.unread === true && (
+                <span data-testid="menu-unread-dot" className="size-2.5 rounded-full bg-coral-cta">
+                  <span className="sr-only">New updates</span>
+                </span>
+              )}
             </Link>
           </li>
           <li>
-            <Link to="/profile" className="block px-4 py-2 hover:bg-cream">
+            <Link
+              to="/profile"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 hover:bg-cream"
+            >
               Your Profile
             </Link>
           </li>
           {auth.account.isAdmin && (
             <li>
-              <Link to="/admin" className="block px-4 py-2 hover:bg-cream">
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 hover:bg-cream"
+              >
                 Admin
               </Link>
             </li>
@@ -147,9 +175,10 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
             <Button
               variant="ghost"
               className="w-full justify-start px-4 text-navy"
-              onClick={() =>
-                void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."))
-              }
+              onClick={() => {
+                setError("");
+                void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."));
+              }}
             >
               Sign out
             </Button>
@@ -169,11 +198,21 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
   const mode = previewMode ?? (auth?.account ? "member" : "signed-out");
   const demoEnabled = previewMode !== undefined || auth?.demoEnabled;
   const [open, setOpen] = useState(false);
+  const location = useRouterState({ select: (state) => state.location });
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
+  const containerRef = useRef<HTMLElement | null>(null);
+  useMenuDismiss(open, setOpen, containerRef);
   const signedOut = mode === "signed-out";
   return (
-    <header className="bg-navy text-cream" data-mode={mode}>
+    <header ref={containerRef} className="bg-navy text-cream" data-mode={mode}>
       <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 md:flex md:gap-6">
-        <Link to="/" aria-label="What the Plate? home" className="shrink-0 rounded-md">
+        <Link
+          to="/"
+          aria-label="What the Plate? home"
+          className={`shrink-0 rounded-md ${headerFocus}`}
+        >
           <img
             src="/brand/what-the-plate-logo-v1.webp"
             alt=""
@@ -184,7 +223,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
         </Link>
         <nav aria-label="Main" className="hidden flex-1 items-center gap-6 md:flex">
           {NAV.map((item) => (
-            <a key={item.href} href={item.href} className="site-nav-link">
+            <a key={item.href} href={item.href} className={`site-nav-link ${headerFocus}`}>
               {item.label}
             </a>
           ))}
@@ -228,7 +267,7 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg p-0 text-cream"
+            className={`inline-flex size-10 shrink-0 items-center justify-center rounded-lg p-0 text-cream ${headerFocus}`}
           >
             {open ? <X aria-hidden /> : <Menu aria-hidden />}
           </Button>
@@ -241,12 +280,21 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
           className="border-t border-cream/20 px-4 pb-4 md:hidden"
         >
           {NAV.map((item) => (
-            <a key={item.href} href={item.href} className="site-nav-link block py-3">
+            <Link
+              key={item.href}
+              to={item.href}
+              onClick={() => setOpen(false)}
+              className={`site-nav-link block py-3 ${headerFocus}`}
+            >
               {item.label}
-            </a>
+            </Link>
           ))}
           {signedOut && demoEnabled && (
-            <Link to="/demo" className={`${tryDemo} mt-2 inline-block`}>
+            <Link
+              to="/demo"
+              onClick={() => setOpen(false)}
+              className={`${tryDemo} mt-2 inline-block`}
+            >
               Try the Demo
             </Link>
           )}

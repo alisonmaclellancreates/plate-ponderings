@@ -5,7 +5,14 @@ import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
 import { DemoBanner } from "@/components/site/DemoBanner";
 import { PLATES, STORY_PHOTO_PLACEHOLDER, type HowIKnow } from "@/lib/mock-data";
-import { HOW_OPTIONS, MEANING_MAX, MORE_MAX, SAMPLE_STORY, type StoryStep } from "@/lib/story-form";
+import {
+  HOW_OPTIONS,
+  MEANING_MAX,
+  MEANING_START,
+  MORE_MAX,
+  SAMPLE_STORY,
+  type StoryStep,
+} from "@/lib/story-form";
 
 const outline = "brand-btn brand-btn-outline";
 const coral = "brand-btn brand-btn-coral";
@@ -94,7 +101,7 @@ function Counter({ id, value, max }: { id: string; value: string; max: number })
 }
 
 export function StoryStepOne({
-  initial = { how: "owner", meaning: "", more: "" },
+  initial = { how: "owner", meaning: MEANING_START, more: "" },
   ownerExists = false,
   rejected = false,
   demo = false,
@@ -285,11 +292,19 @@ function AdjustEditor() {
         <img
           src={STORY_PHOTO_PLACEHOLDER}
           alt="Your photo with everything blurred except the plate"
-          className="w-full"
+          className="w-full blur-[10px]"
         />
         <div
           data-testid="plate-box"
-          className="absolute left-[37%] top-[46%] h-[12%] w-[25%] border-2 border-cream shadow-[0_0_0_2px_var(--navy)]"
+          tabIndex={0}
+          role="slider"
+          aria-label="Plate area"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={25}
+          aria-valuetext="25 percent wide"
+          title="Drag to move, drag a corner to resize, or use the arrow keys."
+          className="absolute left-[37%] top-[46%] h-[12%] w-[25%] cursor-move touch-none border-2 border-cream bg-cream/10 shadow-[0_0_0_2px_var(--navy)]"
         >
           <span className={`${handle} -left-1.5 -top-1.5`} />
           <span className={`${handle} -right-1.5 -top-1.5`} />
@@ -298,6 +313,10 @@ function AdjustEditor() {
         </div>
       </div>
       <p className="mt-3">Move and resize the box so only the license plate is clear.</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Everything outside the box is blurred. Keyboard: arrow keys move the box, Shift + arrow keys
+        resize it.
+      </p>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <button type="button" className={outline}>
           Reset
@@ -305,8 +324,11 @@ function AdjustEditor() {
         <button type="button" className={outline}>
           Try again
         </button>
+        <Link to="/story/$step" params={{ step: "2" }} className={outline}>
+          Choose a different photo
+        </Link>
         <Link to="/story/$step" params={{ step: "2-review" }} className={`${coral} sm:ml-auto`}>
-          Next
+          Confirm
         </Link>
       </div>
     </Editor>

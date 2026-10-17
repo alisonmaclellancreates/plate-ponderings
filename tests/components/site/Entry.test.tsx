@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 vi.mock("@tanstack/react-router", () => ({
+  useRouterState: () => "/",
   useNavigate: () => vi.fn(),
   Link: ({
     to,

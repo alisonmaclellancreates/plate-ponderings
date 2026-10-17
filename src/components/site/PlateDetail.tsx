@@ -16,6 +16,7 @@ import { PlateFrame } from "@/components/site/PlateFrame";
 import { HeartButton, StoryMenuActions } from "@/components/site/StoryActions";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
+import { StoryPhotoThumbnail, StoryPhotoZoom } from "@/components/site/StoryPhoto";
 import { useAccountAuth } from "@/lib/account-auth";
 import {
   CATCHING_UP_STORY,
@@ -289,13 +290,14 @@ function MysteryPrompt({
 
 export function StoryCard({ story }: { story: Story }) {
   const owner = story.howIKnow === "owner";
+  const zoom = Boolean(story.photo && story.photoBox);
   return (
     <article
       data-owner={owner || undefined}
-      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
+      className={`brand-card relative grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
     >
       <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
-      <div className="min-w-0 flex-1">
+      <div className={`min-w-0 flex-1 ${zoom ? "sm:min-h-32 sm:pr-44" : ""}`}>
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm">
             <span className="font-semibold">{story.handle}</span>{" "}
@@ -319,22 +321,21 @@ export function StoryCard({ story }: { story: Story }) {
           <HowIKnowBadge how={story.howIKnow} />
         </div>
         {story.longer && <p className="mt-2">{story.longer}</p>}
+        {story.photo && story.photoBox && (
+          <StoryPhotoZoom
+            photo={story.photo}
+            box={story.photoBox}
+            handle={story.handle}
+            meaning={story.meaning}
+          />
+        )}
         <p className="mt-2 flex items-center gap-1 text-sm">
           <Heart aria-hidden className="size-4 text-coral" />
           <span>{story.hearts}</span>
           <span className="sr-only">{story.hearts === 1 ? "heart" : "hearts"}</span>
         </p>
       </div>
-      {story.photo && (
-        <img
-          src={story.photo}
-          alt={`Photo shared by ${story.handle}`}
-          width={944}
-          height={704}
-          loading="lazy"
-          className="col-start-2 h-20 w-28 shrink-0 rounded-md object-cover sm:col-start-auto"
-        />
-      )}
+      {story.photo && !zoom && <StoryPhotoThumbnail photo={story.photo} handle={story.handle} />}
     </article>
   );
 }
@@ -431,13 +432,14 @@ export function PlateDetail({ state }: { state: string }) {
 
 function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string }) {
   const owner = story.source === "owner";
+  const zoom = Boolean(story.photo && story.photoBox);
   return (
     <article
       data-owner={owner || undefined}
-      className={`brand-card grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 ${owner ? "border-coral" : ""}`}
+      className={`brand-card relative grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] ${owner ? "border-coral" : ""}`}
     >
       <UserCircle2 aria-hidden className="size-10 shrink-0 text-muted-foreground" />
-      <div className="min-w-0 flex-1">
+      <div className={`min-w-0 flex-1 ${zoom ? "sm:min-h-32 sm:pr-44" : ""}`}>
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm">
             <span className="font-semibold">{story.handle}</span>
@@ -454,8 +456,17 @@ function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string 
           <HowIKnowBadge how={story.source} />
         </div>
         {story.body && <p className="mt-2">{story.body}</p>}
+        {story.photo && story.photoBox && (
+          <StoryPhotoZoom
+            photo={story.photo}
+            box={story.photoBox}
+            handle={story.handle}
+            meaning={story.meaning}
+          />
+        )}
         <HeartButton story={story} plateId={plateId} />
       </div>
+      {story.photo && !zoom && <StoryPhotoThumbnail photo={story.photo} handle={story.handle} />}
     </article>
   );
 }
@@ -527,9 +538,11 @@ function RealStatusStrip({ plateId }: { plateId: string }) {
 export function RealPlateDetail({
   plate,
   backToSearch,
+  from,
 }: {
   plate: { id: string; jurisdiction: string; text: string };
   backToSearch?: { jurisdiction: string; text: string } | undefined;
+  from?: "submissions" | undefined;
 }) {
   const signedIn = Boolean(useAccountAuth()?.account);
   const { data: storiesData } = useQuery({
@@ -550,6 +563,14 @@ export function RealPlateDetail({
         >
           <ArrowLeft aria-hidden className="size-4" />
           Back to Search
+        </Link>
+      ) : from === "submissions" ? (
+        <Link
+          to="/submissions"
+          className="inline-flex items-center gap-1 font-semibold text-navy underline-offset-4 hover:underline"
+        >
+          <ArrowLeft aria-hidden className="size-4" />
+          Back to Your Submissions
         </Link>
       ) : (
         <a

@@ -3,6 +3,7 @@ import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
@@ -49,6 +50,22 @@ export default tseslint.config(
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  {
+    // Accessibility rules for our own components, routes and lib; generated
+    // ui/ primitives stay on the base config unless a real problem appears.
+    files: [
+      "src/components/site/**/*.{ts,tsx}",
+      "src/routes/**/*.{ts,tsx}",
+      "src/lib/**/*.{ts,tsx}",
+    ],
+    plugins: { "jsx-a11y": jsxA11y },
+    rules: {
+      ...jsxA11y.flatConfigs.recommended.rules,
+      // Alt copy like "Photo shared by {handle}" is mandated wording, and the
+      // plugin always flags "photo" (custom words merge with its defaults).
+      "jsx-a11y/img-redundant-alt": "off",
     },
   },
   eslintPluginPrettier,

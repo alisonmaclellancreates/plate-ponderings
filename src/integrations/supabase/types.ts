@@ -217,6 +217,24 @@ export type Database = {
           },
         ]
       }
+      photo_detect_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -294,6 +312,7 @@ export type Database = {
           created_at: string
           id: string
           meaning: string
+          photo_box: number[] | null
           photo_path: string | null
           published_at: string | null
           removed_at: string | null
@@ -307,6 +326,7 @@ export type Database = {
           created_at?: string
           id?: string
           meaning: string
+          photo_box?: number[] | null
           photo_path?: string | null
           published_at?: string | null
           removed_at?: string | null
@@ -320,6 +340,7 @@ export type Database = {
           created_at?: string
           id?: string
           meaning?: string
+          photo_box?: number[] | null
           photo_path?: string | null
           published_at?: string | null
           removed_at?: string | null
@@ -615,6 +636,10 @@ export type Database = {
     Functions: {
       claim_summary_run: { Args: { _subject_id: string }; Returns: boolean }
       consume_handle_save_attempt: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      consume_photo_detect_attempt: {
         Args: { _user_id: string }
         Returns: boolean
       }

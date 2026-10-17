@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Heart, MoreHorizontal } from "lucide-react";
 import { DeleteStoryDialog, ReportDialog, StoryMenuList } from "@/components/site/StoryMenu";
 import { useAccountAuth } from "@/lib/account-auth";
+import { useMenuDismiss } from "@/lib/menu-dismiss";
 import { track } from "@/lib/analytics";
 import {
   blockAuthor,
@@ -88,6 +89,9 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
   const [open, setOpen] = useState<Open>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const moreRef = useRef<HTMLButtonElement | null>(null);
+  useMenuDismiss(open === "menu", () => setOpen(null), containerRef);
   if (!auth?.account) return null;
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["plate-stories", plateId] });
@@ -112,8 +116,9 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
     setOpen(null);
   }
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
+        ref={moreRef}
         type="button"
         aria-label={`More options for ${story.handle}'s story`}
         aria-expanded={open === "menu"}
@@ -140,43 +145,43 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
           }
         />
       )}
-      {open === "report" && (
-        <div className="absolute right-0 top-8 z-10 w-80 max-w-[85vw]">
-          <ReportDialog
-            busy={busy}
-            onCancel={() => setOpen(null)}
-            onSend={(reason, note) =>
-              void run<ReportResult>(
-                () => report({ data: { storyId: story.id, reason, note } }),
-                (result) => {
-                  if (result.outcome === "already") setMessage(REPORT_ALREADY);
-                  else {
-                    setMessage(REPORT_SENT);
-                    void track("story_reported", { reason });
-                  }
-                },
-              )
-            }
-          />
-        </div>
-      )}
-      {open === "delete" && (
-        <div className="absolute right-0 top-8 z-10 w-80 max-w-[85vw]">
-          <DeleteStoryDialog
-            busy={busy}
-            onKeep={() => setOpen(null)}
-            onDelete={() =>
-              void run(
-                () => remove({ data: { storyId: story.id } }),
-                () => {
-                  void track("story_deleted", {});
-                  refresh();
-                },
-              )
-            }
-          />
-        </div>
-      )}
+      <ReportDialog
+        open={open === "report"}
+        onOpenChange={(v) => {
+          setOpen(v ? "report" : null);
+          if (!v) moreRef.current?.focus();
+        }}
+        busy={busy}
+        onSend={(reason, note) =>
+          void run<ReportResult>(
+            () => report({ data: { storyId: story.id, reason, note } }),
+            (result) => {
+              if (result.outcome === "already") setMessage(REPORT_ALREADY);
+              else {
+                setMessage(REPORT_SENT);
+                void track("story_reported", { reason });
+              }
+            },
+          )
+        }
+      />
+      <DeleteStoryDialog
+        open={open === "delete"}
+        onOpenChange={(v) => {
+          setOpen(v ? "delete" : null);
+          if (!v) moreRef.current?.focus();
+        }}
+        busy={busy}
+        onDelete={() =>
+          void run(
+            () => remove({ data: { storyId: story.id } }),
+            () => {
+              void track("story_deleted", {});
+              refresh();
+            },
+          )
+        }
+      />
       {message && (
         <p role="status" className="mt-1 max-w-64 text-right text-sm">
           {message}

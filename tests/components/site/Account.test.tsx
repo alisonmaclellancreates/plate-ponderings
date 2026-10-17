@@ -6,16 +6,21 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({
     to,
     params,
+    search,
     children,
     className,
   }: {
     to: string;
     params?: Record<string, string>;
+    search?: Record<string, string>;
     children: ReactNode;
     className?: string;
   }) => (
     <a
-      href={params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to}
+      href={
+        (params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to) +
+        (search ? `?${new URLSearchParams(search)}` : "")
+      }
       className={className}
     >
       {children}
@@ -46,6 +51,13 @@ import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Acc
 import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
 
 describe("SubmissionsPage", () => {
+  it("marks every View Plate link as coming from submissions", () => {
+    render(<SubmissionsPage />);
+    for (const link of screen.getAllByRole("link", { name: "View Plate" }))
+      expect(
+        new URL(link.getAttribute("href") ?? "", "https://example.test").searchParams.get("from"),
+      ).toBe("submissions");
+  });
   it("leaves preview Dismiss inert without a handler", () => {
     render(<SubmissionsPage />);
     fireEvent.click(screen.getAllByRole("button", { name: "Dismiss" })[0] as HTMLElement);
@@ -117,7 +129,7 @@ describe("SubmissionsPage", () => {
     expect(within(rows[2]!).getAllByRole("button", { name: "Dismiss" }).length).toBeGreaterThan(0);
     expect(within(rows[0]!).getAllByRole("link", { name: "View Plate" })[0]).toHaveAttribute(
       "href",
-      "/plate/pnw-lv",
+      "/plate/pnw-lv?from=submissions",
     );
     expect(within(rows[4]!).getAllByRole("link", { name: "View Plate" }).length).toBeGreaterThan(0);
   });

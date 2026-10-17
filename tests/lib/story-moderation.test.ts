@@ -57,6 +57,36 @@ it("sends story values only inside the marked untrusted-data block", async () =>
   expect(request.instructions).not.toContain(plate);
 });
 
+it("adds the photo to the same single call with the photo rule", async () => {
+  mocks.stream.mockReturnValue({ output: Promise.resolve({ approved: true }) });
+  const photo = "data:image/jpeg;base64,AAAA";
+  await checkStory("A meaning", "Some more", "B7K2L9", photo);
+  expect(mocks.stream).toHaveBeenCalledTimes(1);
+  const request = mocks.stream.mock.calls[0]?.[0];
+  expect(request.instructions).toContain(
+    "approve only if the photo shows the plate with no readable faces, addresses, other plates, or anything inappropriate",
+  );
+  expect(request.messages).toEqual([
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: `<untrusted-story-data>${JSON.stringify({ plate: "B7K2L9", meaning: "A meaning", story: "Some more" })}</untrusted-story-data>`,
+        },
+        { type: "image", image: photo },
+      ],
+    },
+  ]);
+});
+
+it("keeps the text-only message shape when no photo is attached", async () => {
+  mocks.stream.mockReturnValue({ output: Promise.resolve({ approved: true }) });
+  await checkStory("A meaning", "Some more", "B7K2L9");
+  const request = mocks.stream.mock.calls[0]?.[0];
+  expect(typeof request.messages[0].content).toBe("string");
+});
+
 it("returns unavailable without calling AI when its API key is missing", async () => {
   vi.stubEnv("LOVABLE_API_KEY", undefined);
   expect(await checkStory("A meaning", "", "DRAGON")).toEqual({

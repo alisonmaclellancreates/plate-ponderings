@@ -186,6 +186,58 @@ describe("RealPlateDetail", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
   });
 
+  it("renders a story photo through its signed link with the shared alt text", () => {
+    m.stories = {
+      stories: [story("1", { photo: "https://signed.example/photo.jpg" })],
+      pending: [],
+      total: 1,
+      storyCount: 1,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    const img = screen.getByRole("img", { name: "Photo shared by Traveler1" });
+    expect(img.getAttribute("src")).toBe("https://signed.example/photo.jpg");
+    expect(img.getAttribute("loading")).toBe("lazy");
+  });
+
+  it("shows the zoomed plate as a button that opens the full photo when the story has a box", async () => {
+    const user = userEvent.setup();
+    m.stories = {
+      stories: [
+        story("1", {
+          photo: "https://signed.example/photo.jpg",
+          photoBox: { x: 0.4, y: 0.45, w: 0.2, h: 0.1 },
+        }),
+      ],
+      pending: [],
+      total: 1,
+      storyCount: 1,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    const img = screen.getByRole("img", { name: "Photo shared by Traveler1" });
+    expect(img.getAttribute("src")).toBe("https://signed.example/photo.jpg");
+    expect(img.getAttribute("loading")).toBe("lazy");
+    await user.click(screen.getByRole("button", { name: "View full photo shared by Traveler1" }));
+    expect(screen.getByRole("dialog", { name: "Meaning 1" })).toBeInTheDocument();
+  });
+
+  it("renders no image and no empty space when a story has no photo", () => {
+    m.stories = {
+      stories: [story("1")],
+      pending: [],
+      total: 1,
+      storyCount: 1,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    };
+    render(<RealPlateDetail plate={plate} />);
+    expect(screen.queryByRole("img", { name: /Photo shared by/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /View full photo/ })).toBeNull();
+  });
+
   it("pages five stories at a time with Show more", async () => {
     const user = userEvent.setup();
     const stories = Array.from({ length: 7 }, (_, i) => story(String(i + 1)));
@@ -240,10 +292,20 @@ describe("RealPlateDetail", () => {
       <RealPlateDetail
         plate={plate}
         backToSearch={{ jurisdiction: "Washington", text: "B7K 2L9" }}
+        from="submissions"
       />,
     );
     const back = screen.getByRole("link", { name: "Back to Search" });
     expect(back.getAttribute("href")).toBe("/?jurisdiction=Washington&text=B7K+2L9");
+  });
+
+  it("returns to Your Submissions when its marker is present", () => {
+    render(<RealPlateDetail plate={plate} from="submissions" />);
+    expect(screen.getByRole("link", { name: "Back to Your Submissions" })).toHaveAttribute(
+      "href",
+      "/submissions",
+    );
+    expect(screen.queryByRole("link", { name: "Back to Explore" })).toBeNull();
   });
 
   it("falls back to Explore without search values", () => {

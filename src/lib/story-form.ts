@@ -18,6 +18,21 @@ export const STORY_STEPS: Record<StoryStep, string> = {
 export const MEANING_MAX = 80;
 export const MORE_MAX = 500;
 
+export const MEANING_START = "They might be ";
+const meaningPrefix = /^they might be(?:\s|$)/i;
+
+/** Keep the contributor's wording, adding speculative framing only when absent. */
+export function frameMeaning(value: string): string {
+  const trimmed = value.trim();
+  return meaningPrefix.test(trimmed) ? trimmed : `${MEANING_START}${trimmed}`;
+}
+
+export function canContinueMeaning(value: string): boolean {
+  const framed = frameMeaning(value);
+  const interpretation = framed.replace(meaningPrefix, "").trim();
+  return interpretation.length >= 3 && framed.length <= MEANING_MAX;
+}
+
 /** Shared story-submit notices, so the live flow and its previews cannot drift. */
 export const STORY_SUBMIT_ERROR_HEADING = "Hmm... something went wrong.";
 export const STORY_SUBMIT_ERROR_MESSAGE =

@@ -11,9 +11,14 @@ const str = (v: unknown) => (typeof v === "string" && v.length <= 64 ? v : undef
 export const Route = createFileRoute("/plate/$state")({
   validateSearch: (
     s: Record<string, unknown>,
-  ): { jurisdiction?: string | undefined; text?: string | undefined } => ({
+  ): {
+    jurisdiction?: string | undefined;
+    text?: string | undefined;
+    from?: "submissions" | undefined;
+  } => ({
     jurisdiction: str(s["jurisdiction"]),
     text: str(s["text"]),
+    from: s["from"] === "submissions" ? "submissions" : undefined,
   }),
   loader: async ({ params }) => {
     if (isState(params.state) || PLATES.some((p) => p.slug === params.state))
@@ -78,7 +83,7 @@ function PlateDetailRoute() {
       search.jurisdiction && search.text
         ? { jurisdiction: search.jurisdiction, text: search.text }
         : undefined;
-    return <RealPlateDetail plate={plate} backToSearch={backToSearch} />;
+    return <RealPlateDetail plate={plate} backToSearch={backToSearch} from={search.from} />;
   }
   return <PlateDetail state={state} />;
 }

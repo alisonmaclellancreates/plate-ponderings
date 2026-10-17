@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const m = vi.hoisted(() => ({
@@ -99,6 +99,20 @@ const openMenu = () =>
   userEvent.click(screen.getByRole("button", { name: "More options for maplegirl's story" }));
 
 describe("StoryMenuActions", () => {
+  it.each(["Escape", "outside"])(
+    "dismisses the story menu on %s and returns focus",
+    async (exit) => {
+      render(<StoryMenuActions story={story} plateId="p1" />);
+      const more = screen.getByRole("button", { name: "More options for maplegirl's story" });
+      await userEvent.click(more);
+      screen.getByRole("menuitem", { name: "Report story" }).focus();
+      if (exit === "Escape") fireEvent.keyDown(document, { key: "Escape" });
+      else fireEvent.pointerDown(document.body);
+      expect(screen.queryByRole("menu")).toBeNull();
+      expect(more).toHaveAttribute("aria-expanded", "false");
+      expect(more).toHaveFocus();
+    },
+  );
   it("shows no menu to signed-out visitors", () => {
     m.account = null;
     const { container } = render(<StoryMenuActions story={story} plateId="p1" />);
@@ -147,8 +161,14 @@ describe("StoryMenuActions", () => {
     render(<StoryMenuActions story={story} plateId="p1" />);
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Report story" }));
+    const returnFocus = vi.spyOn(
+      screen.getByRole("button", { name: "More options for maplegirl's story", hidden: true }),
+      "focus",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByTestId("report-dialog")).toBeNull();
+    expect(returnFocus).toHaveBeenCalled();
+    returnFocus.mockRestore();
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Report story" }));
     await userEvent.click(screen.getByLabelText("Spam"));
@@ -161,8 +181,15 @@ describe("StoryMenuActions", () => {
     render(<StoryMenuActions story={{ ...story, isOwn: true }} plateId="p1" />);
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Delete my story" }));
+    const returnFocus = vi.spyOn(
+      screen.getByRole("button", { name: "More options for maplegirl's story", hidden: true }),
+      "focus",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Keep Story" }));
     expect(m.remove).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("delete-story-dialog")).toBeNull();
+    expect(returnFocus).toHaveBeenCalled();
+    returnFocus.mockRestore();
     await openMenu();
     await userEvent.click(screen.getByRole("menuitem", { name: "Delete my story" }));
     await userEvent.click(screen.getByRole("button", { name: "Delete Story" }));

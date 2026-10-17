@@ -1,3 +1,33 @@
+# Step 48c: header menu exits and submissions returns
+
+- [x] Close member/mobile menus on every selection and router location change; tests cover each item, both profile instances, search-only changes and real memory-history back/forward.
+- [x] Carry and validate from=submissions; tests cover submissions, unknown marker, search priority and Explore fallback. Other inbound plate links unchanged.
+- [x] Related run passed 192 tests across 23 files, listing all four changed source files and nine changed/new tests. bun run lint: zero errors, six pre-existing UI warnings, none in changed files. No local coverage/build/typecheck/browser/AI, database changes or branch changes.
+- [ ] Current PR Codecov figure unavailable: GitHub returned no open pull requests. Await Alison's PR and CI; managed Git sync owns commits.
+
+# PR #113 Copilot follow-ups
+
+- [x] Stage exact 0017 SQL in docs/proposed-migrations (managed migration directory cannot be written without applying); add index-existence assertion. 0016 untouched.
+- [x] Applied approved statement as drizzle/migrations/0017_step49_photo_detect_attempts_index.sql (managed file adds trailing newline only). Database test passed, btree (user_id, attempted_at) verified, zero test attempts left.
+- [x] Stop local coverage runs going forward; only the PR Codecov figure is authoritative, per Alison's 19:27 UTC instruction.
+- [x] Release confirmed-photo preview URLs on removal/replacement, no-save submission and unmount; test each lifecycle. Review/back keeps the active URL alive.
+- [x] Requested related tests: 66 passed across 7 files. Local AddStoryFlow coverage 100% in all metrics. Lint zero errors/six existing warnings. Build OK. Replied to both Copilot comments.
+- [ ] Confirm follow-up PR Codecov after managed sync/CI. Latest PR report at 19:07:17 UTC says all modified coverable lines covered (100%), predating this follow-up.
+
+# PR #113 photo patch coverage
+
+- [x] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths; remove unreachable UI guards and duplicate URL revocation. No server/storage behaviour changes or canvas extraction.
+- [x] Requested related tests: 343 passed across 28 files. All eight named files have 100% local statements, branches and functions. Lint: zero errors/six existing warnings. Automatic build OK.
+- [x] PR Codecov report updated 19:07:17 UTC: all modified and coverable lines covered (100%). Copilot follow-up needs its own fresh CI result above. No manual push permitted.
+
+# Photo editor exits
+
+- [x] Replacement picker and adjustment skip implemented; cleanup, same-file reselection, cancellation, no-upload skip and box validation pass 45 changed tests. Preview updated. Lint zero errors/six existing warnings; automatic build OK. Desktop and 360×640 sample editor verified: exits visible, buttons/handles at least 44px, drawing enables Next and changes instruction, skip closes editor. Real file selection and cleanup are mocked tests, not live AI.
+
+# Story meaning framing
+
+- [x] Prefill “They might be”, add it when missing before review/submission without duplication, preserve the complete 80-character limit. 45 focused tests passed; changed-file lint clean; automatic build OK. No moderation or database changes.
+
 # Step 48: public facts and report labels
 
 - [x] Public facts and invitation use all published stories; visible list alone is filtered. Admin shares all report labels. Related tests: 240 passed across 26 files. Repository lint: 0 errors, 6 existing warnings. No database changes.
@@ -195,3 +225,26 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Step 47 built: live Your Submissions, Updated labels, header dot (refreshes after recheck), conditional dismiss, submissions_viewed; notifications cascade (0014). PR Codecov pending.
 
 - Step 48: plan revisions (hide/unhide refresh, reporter_id SET NULL, capped recheckAllPending, no authorKey) then build after approval
+- [ ] Step 49: story photos (choose, AI box detect, adjust, canvas blur, JPEG export, server upload).
+
+## Step 49c (story photo box, zoomed card, open view)
+- [x] Apply 0018 photo_box (tests/db/story-photo-box.sql: Alison runs in rollback)
+- [x] Server rounds box to 4 dp and clamps to photo edges before save; edge-touching test
+- [x] Save/return/clear box; zoomed card + dialog; preview
+- [x] Dialog description is "Photo shared by {handle}" via DialogPrimitive.Description (no aria-describedby override); preview sample built from a box-free base so photoBox is never undefined. 6 dialog tests and 9 preview tests pass; changed-file lint clean; build OK.
+
+## Step 52b: accessibility review and automated checks
+- [x] Add keyboard-visible drop-area focus and cream rings on navy header controls; tests cover picker keyboard reachability and all navy controls in signed-out/demo/member headers. Related: 153 tests/14 files; lint zero errors/six existing warnings; automatic build OK.
+- [ ] Focus-ring follow-up: confirm post-sync Codecov. Latest PR #117 report at 21:45:42 UTC is 100%, but remote head 96d5df6 predates this follow-up; managed sync/CI owns the next result.
+- [x] PR #117: add dismissal/listener lifecycle, controlled-dialog callbacks, route focus, Alt-resize and open-menu unread tests; remove the unreachable dismissal adapter true arm. Related run: 303 tests across 31 files; lint zero errors/six existing warnings; no local coverage.
+- [x] PR #117 preceding branch-test follow-up: Codecov updated at 21:45:42 UTC to all modified and coverable lines covered (100%). Exact private line view unavailable, but PR report confirms the gate.
+- [ ] PR #117: real Radix close tests confirm More options.focus() is called, but final focus lands on body in the test environment; isolated controlled-dialog tests retain More options focus. Behavior unchanged; actual deferred focus restoration needs separate investigation before claiming end-to-end focus return.
+- Axe tests (vitest-axe) across all listed pages and dialogs; dialogs checked against document.body (Radix portals); region rule on for full pages, per-test opt-out with comment otherwise
+- PhotoEditor: draggable box gets accessible name "Plate area", keyboard move/resize (ask first if layout change needed); PhotoEditor with suggested box added to axe tests
+- eslint-plugin-jsx-a11y recommended on our components; zero lint errors
+- Contrast table for every brand token pair; failures pushed last as their own commit after Alison approves (table may exceed 10-line report limit)
+- Skip link, focus to heading on route change, dialog focus trap/return tests
+- Menus close on Esc and outside click with focus return (profile, mobile header, story menu)
+- Report/Delete become real modal dialogs on existing dialog primitives
+- Unread dot beside Your Submissions in profile menu; rotating headline announces changes with aria-live="polite" (reduced motion unchanged)
+- Progress issue #54: fix if used, else leave open and say so
