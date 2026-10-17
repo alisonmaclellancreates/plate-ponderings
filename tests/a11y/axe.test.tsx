@@ -159,6 +159,19 @@ describe("axe: full pages", () => {
     await checkPage(<Homepage />);
   });
 
+  it("root layout skip target wraps a real page with exactly one main", async () => {
+    // The root layout's skip target is a div, not a main: pages render their
+    // own <main> and landmarks must not nest. Render the homepage inside the
+    // same skip-target structure the root layout uses.
+    const { container } = render(
+      <div id="main-content" tabIndex={-1}>
+        <Homepage />
+      </div>,
+    );
+    expect(container.querySelectorAll("main")).toHaveLength(1);
+    expect(await axe(container, AXE_OPTS)).toHaveNoViolations();
+  });
+
   it("plate page with stories, summary history and a revealed guess", async () => {
     m.queryData = {
       "plate-stories": { stories: [STORY], pending: false },
