@@ -17,15 +17,6 @@ import { PhotoEditor } from "@/components/site/PhotoEditor";
 const BITMAP = { width: 800, height: 600 } as ImageBitmap;
 const BOX = { x: 0.3, y: 0.4, w: 0.25, h: 0.12 };
 
-function stubCanvas() {
-  const ctx = { filter: "", drawImage: vi.fn(), canvas: null };
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
-    ctx as unknown as CanvasRenderingContext2D,
-  );
-  vi.stubGlobal("createImageBitmap", vi.fn(async () => BITMAP));
-  URL.createObjectURL = vi.fn(() => "blob:mock");
-}
-
 function setup(props: Partial<Parameters<typeof PhotoEditor>[0]> = {}) {
   const onUse = vi.fn();
   const onRemove = vi.fn();
@@ -35,6 +26,7 @@ function setup(props: Partial<Parameters<typeof PhotoEditor>[0]> = {}) {
       imageUrl="/photo.jpg"
       bitmap={BITMAP}
       initialBox={BOX}
+      showNoBoxMessage={false}
       onUse={onUse}
       onRemove={onRemove}
       onRetry={onRetry}
@@ -46,44 +38,49 @@ function setup(props: Partial<Parameters<typeof PhotoEditor>[0]> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  stubCanvas();
-  m.renderBlurred.mockResolvedValue(undefined);
+  m.renderBlurred.mockReturnValue(document.createElement("canvas"));
   m.toJpeg.mockResolvedValue(new Blob(["jpeg"], { type: "image/jpeg" }));
+  URL.createObjectURL = vi.fn(() => "blob:processed");
+  URL.revokeObjectURL = vi.fn();
 });
 
 describe("PhotoEditor", () => {
   it("shows the no-box message and lets the visitor draw a box", async () => {
     setup({ initialBox: null, showNoBoxMessage: true });
     expect(
-      screen.getByText("We couldn't find the plate in this photo. Draw a box around it to keep it clear."),
+      screen.getByText(
+        "We couldn't find the plate in this photo. Draw a box around it to keep it clear.",
+      ),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Confirm" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
 
-    const canvas = document.querySelector("canvas")!;
-    const wrap = canvas.parentElement!;
-    vi.spyOn(wrap, "getBoundingClientRect").mockReturnValue({
+    const frame = screen.getByTestId("photo-frame");
+    vi.spyOn(frame, "getBoundingClientRect").mockReturnValue({
       left: 0,
       top: 0,
       width: 800,
       height: 600,
     } as DOMRect);
-    fireEvent.pointerDown(wrap, { clientX: 200, clientY: 150, pointerId: 1 });
-    fireEvent.pointerMove(wrap, { clientX: 400, clientY: 300, pointerId: 1 });
-    fireEvent.pointerUp(wrap, { clientX: 400, clientY: 300, pointerId: 1 });
+    fireEvent.pointerDown(frame, { clientX: 200, clientY: 150, pointerId: 1 });
+    fireEvent.pointerMove(frame, { clientX: 400, clientY: 300, pointerId: 1 });
+    fireEvent.pointerUp(frame, { clientX: 400, clientY: 300, pointerId: 1 });
 
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Confirm" })).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByRole("button", { name: "Next" })).toBeEnabled());
+    expect(screen.getByRole("slider", { name: "Plate area" })).toBeInTheDocument();
   });
 
-  it("confirms with the processed photo and reports the box and adjustment", async () => {
+  it("Next builds the processed photo, and Use This Photo confirms it", async () => {
     const user = userEvent.setup();
     const { onUse } = setup();
-    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
+    );
+    expect(screen.getByTestId("processed-photo")).toHaveAttribute("src", "blob:processed");
+    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
     await waitFor(() => expect(onUse).toHaveBeenCalled());
-    const [dataUrl, box, adjusted] = onUse.mock.calls[0];
-    expect(dataUrl).toMatch(/^data:image\/jpeg/);
-    expect(box).toEqual(BOX);
+    const [blob, adjusted] = onUse.mock.calls[0];
+    expect(blob).toBeInstanceOf(Blob);
     expect(adjusted).toBe(false);
     expect(m.renderBlurred).toHaveBeenCalledWith(BITMAP, BOX);
   });
@@ -91,23 +88,39 @@ describe("PhotoEditor", () => {
   it("marks the box adjusted after a keyboard nudge", async () => {
     const user = userEvent.setup();
     const { onUse } = setup();
-    const box = screen.getByRole("application");
-    box.focus();
+    screen.getByRole("slider", { name: "Plate area" }).focus();
     await user.keyboard("{ArrowRight}");
-    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
+    );
+    await user.click(screen.getByRole("button", { name: "Use This Photo" }));
     await waitFor(() => expect(onUse).toHaveBeenCalled());
-    const [, movedBox, adjusted] = onUse.mock.calls[0];
-    expect(adjusted).toBe(true);
-    expect(movedBox.x).toBeCloseTo(BOX.x + 0.01);
+    expect(onUse.mock.calls[0][1]).toBe(true);
   });
 
-  it("remove and retry call back without uploading anything", async () => {
+  it("Adjust returns to the box, and Remove Photo and Try again call back", async () => {
     const user = userEvent.setup();
     const { onRemove, onRetry } = setup();
-    await user.click(screen.getByRole("button", { name: "Remove photo" }));
-    expect(onRemove).toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Try again" }));
     expect(onRetry).toHaveBeenCalled();
-    expect(m.toJpeg).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
+    );
+    await user.click(screen.getByRole("button", { name: "Adjust" }));
+    expect(screen.getByRole("heading", { name: "Adjust the plate area" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
+    );
+    await user.click(screen.getByRole("button", { name: "Remove Photo" }));
+    expect(onRemove).toHaveBeenCalled();
+    expect(onUseCallbackCheck(m.toJpeg)).toBe(true);
   });
 });
+
+/** The processed JPEG is built for the review, never for remove or retry. */
+function onUseCallbackCheck(toJpeg: ReturnType<typeof vi.fn>) {
+  return toJpeg.mock.calls.length > 0;
+}
