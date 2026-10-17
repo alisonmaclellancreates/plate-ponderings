@@ -1,5 +1,5 @@
 import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({
   user: vi.fn(),
   get: vi.fn(),
@@ -16,6 +16,7 @@ const m = vi.hoisted(() => ({
   navigate: vi.fn(),
   unsubscribe: vi.fn(),
   subscribe: vi.fn(),
+  recheck: vi.fn(),
   listener: null as null | ((event: string) => void),
 }));
 vi.mock("@/integrations/supabase/client", () => ({
@@ -33,7 +34,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 vi.mock("@/lib/accounts.functions", () => ({ getAccount: m.get, getDemoSetting: m.demo }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
-vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: vi.fn() }));
+vi.mock("@/lib/plates.functions", () => ({ recheckPendingSubjects: m.recheck }));
 vi.mock("@tanstack/react-query", () => {
   const client = {
     cancelQueries: m.cancel,
@@ -72,7 +73,9 @@ beforeEach(() => {
   m.get.mockResolvedValue({ handle: "Traveler1234", isDemo: false, isAdmin: false });
   m.demo.mockResolvedValue({ demoEnabled: true });
   m.out.mockResolvedValue({ error: null });
+  m.recheck.mockResolvedValue(undefined);
 });
+afterEach(() => vi.useRealTimers());
 it("hydrates only safe account fields and identifies with auth id", async () => {
   const v = render(
     <AccountProvider>
@@ -267,4 +270,93 @@ it("does not erase a newer account when an older signed-out read resolves", asyn
   });
   expect(screen.getByText("Traveler1234")).toBeInTheDocument();
   expect(m.identify).toHaveBeenCalledTimes(1);
+});
+it("temporarily signs out after a timeout, then restores a late verified account", async () => {
+  vi.useFakeTimers();
+  let resolve: (value: unknown) => void = () => {};
+  m.user.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1000);
+  });
+  expect(screen.getByText("signed out")).toBeInTheDocument();
+  expect(screen.queryByText("loading")).toBeNull();
+  expect(m.out).not.toHaveBeenCalled();
+  await act(async () => {
+    resolve({ data: { user: { id: "late-id" } }, error: null });
+  });
+  expect(screen.getByText("Traveler1234")).toBeInTheDocument();
+  expect(m.identify).toHaveBeenCalledWith("late-id");
+});
+it.each([401, 403])("shows signed out and clears a rejected saved session (%s)", async (status) => {
+  m.user.mockResolvedValue({ data: { user: null }, error: { status } });
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await screen.findByText("signed out");
+  expect(m.out).toHaveBeenCalledWith({ scope: "local" });
+  expect(m.get).not.toHaveBeenCalled();
+});
+it("ignores late success after the visitor has signed out", async () => {
+  vi.useFakeTimers();
+  let resolve: (value: unknown) => void = () => {};
+  m.user.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1000);
+    m.listener?.("SIGNED_OUT");
+  });
+  await act(async () => {
+    resolve({ data: { user: { id: "stale" } } });
+  });
+  expect(screen.getByText("signed out")).toBeInTheDocument();
+  expect(m.get).not.toHaveBeenCalled();
+  expect(m.identify).not.toHaveBeenCalled();
+});
+it("keeps the verified account when the background pending recheck fails", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(Date.now() + 4 * 60 * 1000);
+  m.recheck.mockRejectedValue(new Error("recheck unavailable"));
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(m.recheck).toHaveBeenCalledTimes(1);
+  expect(screen.getByText("Traveler1234")).toBeInTheDocument();
+  expect(screen.queryByText("loading")).toBeNull();
+  expect(m.out).not.toHaveBeenCalled();
+});
+it("finishes initial loading when the verified account read fails", async () => {
+  m.get.mockRejectedValue(new Error("account unavailable"));
+  render(
+    <AccountProvider>
+      <Consumer />
+    </AccountProvider>,
+  );
+  await screen.findByText("signed out");
+  expect(screen.queryByText("loading")).toBeNull();
+  expect(m.identify).not.toHaveBeenCalled();
+  expect(m.out).not.toHaveBeenCalled();
 });

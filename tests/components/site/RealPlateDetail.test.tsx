@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 const m = vi.hoisted(() => ({
   getUser: vi.fn(),
+  account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean },
   getPlateStories: vi.fn(),
   stories: null as unknown,
 }));
@@ -35,6 +36,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getUser: m.getUser } },
 }));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => ({ account: m.account }) }));
 vi.mock("@tanstack/react-query", () => ({
   useQuery: ({ queryFn }: { queryFn: () => unknown }) => {
     queryFn();
@@ -66,6 +68,7 @@ function story(id: string, over: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   m.getUser.mockResolvedValue({ data: { user: null } });
+  m.account = null;
   m.stories = {
     stories: [],
     pending: [],
@@ -167,14 +170,14 @@ describe("RealPlateDetail", () => {
   it("sends signed-out visitors from both Add Your Story buttons to the sign-in prompt for this plate", async () => {
     m.stories = { ...(m.stories as object), stories: [story("1")], total: 1, storyCount: 1 };
     render(<RealPlateDetail plate={plate} />);
-    await waitFor(() => expect(m.getUser).toHaveBeenCalled());
+    expect(m.getUser).not.toHaveBeenCalled();
     const links = screen.getAllByRole("link", { name: "Add Your Story" });
     expect(links).toHaveLength(2);
     for (const link of links) expect(link).toHaveAttribute("href", "/sign-in-prompt?plate=p1");
   });
 
   it("sends signed-in visitors from both buttons straight to the story form", async () => {
-    m.getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
     render(<RealPlateDetail plate={plate} />);
     await waitFor(() => {
       const links = screen.getAllByRole("link", { name: "Add Your Story" });
@@ -223,14 +226,16 @@ describe("RealPlateDetail", () => {
     expect(screen.getAllByRole("article")).toHaveLength(6);
   });
 
-  it("ignores a sign-in answer that arrives after leaving the page", async () => {
-    let resolve: (v: unknown) => void = () => {};
-    m.getUser.mockReturnValue(new Promise((r) => (resolve = r)));
-    const { unmount } = render(<RealPlateDetail plate={plate} />);
-    unmount();
-    resolve({ data: { user: { id: "u1" } } });
-    await Promise.resolve();
-    expect(screen.queryByRole("link", { name: "Add Your Story" })).toBeNull();
-    expect(m.getUser).toHaveBeenCalledTimes(1);
+  it("follows account changes without making its own auth request", () => {
+    const view = render(<RealPlateDetail plate={plate} />);
+    m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
+    view.rerender(<RealPlateDetail plate={plate} />);
+    for (const link of screen.getAllByRole("link", { name: "Add Your Story" }))
+      expect(link).toHaveAttribute("href", "/story/1?plate=p1");
+    m.account = null;
+    view.rerender(<RealPlateDetail plate={plate} />);
+    for (const link of screen.getAllByRole("link", { name: "Add Your Story" }))
+      expect(link).toHaveAttribute("href", "/sign-in-prompt?plate=p1");
+    expect(m.getUser).not.toHaveBeenCalled();
   });
 });

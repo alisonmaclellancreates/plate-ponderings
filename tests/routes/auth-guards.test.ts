@@ -1,11 +1,15 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const user = vi.hoisted(() => vi.fn());
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getUser: user } } }));
+const out = vi.hoisted(() => vi.fn());
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { auth: { getUser: user, signOut: out } },
+}));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
   Outlet: () => null,
   redirect: (options: unknown) => ({ options }),
 }));
+import { GUARD_TIMEOUT_MS } from "@/lib/session-check";
 import { Route as Gate } from "@/routes/_authenticated/route";
 import { Route as Adapter } from "@/routes/auth";
 import { Route as SignIn } from "@/routes/sign-in";
@@ -18,7 +22,11 @@ type Options = {
 };
 const gate = Gate as unknown as Options;
 const adapter = Adapter as unknown as Options;
-beforeEach(() => user.mockReset());
+beforeEach(() => {
+  user.mockReset();
+  out.mockReset();
+});
+afterEach(() => vi.useRealTimers());
 it("gates protected children client-side with a safe return path", async () => {
   user.mockResolvedValue({ data: { user: null }, error: null });
   expect(gate.ssr).toBe(false);
@@ -44,4 +52,26 @@ it("entry routes sanitize optional return searches", () => {
     expect(r.validateSearch({ returnTo: "/profile" })).toEqual({ returnTo: "/profile" });
     expect(r.validateSearch({})).toEqual({ returnTo: "/" });
   }
+});
+it("redirects safely rather than waiting forever on a stuck session", async () => {
+  vi.useFakeTimers();
+  user.mockReturnValue(new Promise(() => {}));
+  const result = expect(gate.beforeLoad({ location: { href: "/profile" } })).rejects.toEqual({
+    options: { to: "/auth", search: { returnTo: "/profile" } },
+  });
+  await vi.advanceTimersByTimeAsync(GUARD_TIMEOUT_MS);
+  await result;
+  expect(out).not.toHaveBeenCalled();
+});
+it("lets a slow visitor through once the check resolves", async () => {
+  vi.useFakeTimers();
+  user.mockImplementation(
+    () =>
+      new Promise((resolve) =>
+        setTimeout(() => resolve({ data: { user: {} }, error: null }), 2000),
+      ),
+  );
+  const result = gate.beforeLoad({ location: { href: "/profile" } });
+  await vi.advanceTimersByTimeAsync(2000);
+  await expect(result).resolves.toBeUndefined();
 });
