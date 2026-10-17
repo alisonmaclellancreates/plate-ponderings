@@ -63,7 +63,12 @@ beforeEach(() => {
   roles = { data: [{ role: "admin" }], error: null };
   profile = { data: { handle: "Traveler1234" }, error: null };
   settings = {
-    data: { demo_mode: false, handle_check_block_category: null, handle_check_blocked_at: null },
+    data: {
+      demo_mode: false,
+      ai_check_block_category: null,
+      ai_check_blocked_at: null,
+      ai_check_run_id: null,
+    },
     error: null,
   };
   taken = { data: [], error: null };
@@ -172,9 +177,9 @@ describe("handle saves", () => {
     mocks.moderate.mockResolvedValue({ outcome: "unavailable", block: "credit_block" });
     expect(await call(saveHandle)).toEqual({ outcome: "unavailable", message: HANDLE_UNAVAILABLE });
     expect(updateSettings).toHaveBeenCalledWith({
-      handle_check_block_category: "credit_block",
-      handle_check_blocked_at: expect.any(String),
-      handle_check_run_id: null,
+      ai_check_block_category: "credit_block",
+      ai_check_blocked_at: expect.any(String),
+      ai_check_run_id: null,
     });
   });
   it("writes only a verified caller's handle after approval", async () => {
@@ -223,7 +228,7 @@ describe("handle saves", () => {
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
   it("active blocks preserve handle and prevent new calls", async () => {
-    settings.data = { handle_check_block_category: "credit_block" };
+    settings.data = { ai_check_block_category: "credit_block" };
     expect((await call(saveHandle))["message"]).toBe(HANDLE_UNAVAILABLE);
     expect(mocks.moderate).not.toHaveBeenCalled();
   });
