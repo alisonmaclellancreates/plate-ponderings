@@ -87,7 +87,32 @@ beforeEach(() => {
   m.plate = { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } };
   m.stories = { hasOwnerStory: false };
   m.submit.mockResolvedValue({ outcome: "published" });
+  m.decode.mockResolvedValue({ width: 800, height: 600 });
+  m.detect.mockResolvedValue({ outcome: "ok", box: { x: 0.3, y: 0.4, w: 0.25, h: 0.12 } });
+  m.renderBlurred.mockResolvedValue(undefined);
+  m.toJpeg.mockResolvedValue(new Blob(["jpeg"], { type: "image/jpeg" }));
+  m.upload.mockResolvedValue({ path: "user-1/photo.jpg" });
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    filter: "",
+    drawImage: vi.fn(),
+  } as unknown as CanvasRenderingContext2D);
+  URL.createObjectURL = vi.fn(() => "blob:mock");
 });
+
+/** Choose a photo, confirm the suggested box, and land on review. */
+async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Next" }));
+  const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+  await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: "Keep the plate clear" })).toBeInTheDocument(),
+  );
+  await user.click(screen.getByRole("button", { name: "Confirm" }));
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
+  );
+  await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+}
 
 describe("AddStoryFlow", () => {
   it("tracks story_started once on mount", () => {
