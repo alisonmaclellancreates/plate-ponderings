@@ -178,14 +178,19 @@ describe("getPlateStories", () => {
   });
 
   it("orders the owner story first, then oldest first, never by hearts", async () => {
+    // Rows arrive oldest-first, as the database query orders them.
     tables["stories"] = {
       data: [
+        row("s3", "secondhand", "a3", "2026-10-01"),
         row("s2", "guess", "a2", "2026-10-02"),
         row("s1", "owner", "a1", "2026-10-05"),
-        row("s3", "secondhand", "a3", "2026-10-01"),
       ],
       error: null,
     };
+    mocks.admin.rpc.mockResolvedValue({
+      data: [{ story_id: "s3", hearts: 99 }],
+      error: null,
+    });
     tables["profiles"] = {
       data: [
         { id: "a1", handle: "OwnerOne" },
