@@ -101,6 +101,10 @@ export function AddStoryFlow({ plateId }: { plateId: string }) {
     queryKey: ["plate-stories", plateId],
     queryFn: () => getPlateStories({ data: { plateId } }),
   });
+  const { data: demo } = useQuery({
+    queryKey: ["demo-setting"],
+    queryFn: () => getDemoSetting(),
+  });
   const submitStory = useServerFn(addStory);
 
   useEffect(() => {
