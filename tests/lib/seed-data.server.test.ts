@@ -55,6 +55,29 @@ it("rejects an unknown source label in the literal seed document", async () => {
   expect(() => buildModifiedSeed("2026-10-17", accounts, paths)).toThrow("Unknown seed source.");
 });
 
+it.each([
+  ["sample history", (text: string) => text.replace("**Pending story on RAINY7Q**", "**Removed pending history**"), "Seed sample history missing."],
+  ["notification story", (text: string) => text.replace("1. **Traveler4821** · My best guess", "1. **FogLightFan** · My best guess"), "Seed notification story missing."],
+  ["report story", (text: string) => text.replace("**ParkingLotOracle**", "**MileMarker88**"), "Seed report story missing."],
+  ["story count", (text: string) => text.replace(/1\. \*\*RoadTripRaven\*\*[^\n]+/, "Removed story"), "Approved seed content counts do not match."],
+])("rejects malformed seed %s", async (_label, mutate, error) => {
+  vi.resetModules();
+  vi.doMock("../../docs/seed.md?raw", () => ({ default: mutate(seedText) }));
+  const { buildSeed: buildModifiedSeed } = await import("@/lib/seed-data.server");
+  expect(() => buildModifiedSeed("2026-10-17", accounts, paths)).toThrow(error);
+});
+
+it("uses a null box when a photo's box mapping is absent", () => {
+  const box = SEED_PHOTO_BOXES["RAINY7Q"];
+  delete SEED_PHOTO_BOXES["RAINY7Q"];
+  try {
+    const seed = buildSeed("2026-10-17", accounts, paths);
+    expect(seed.stories.find((story) => story.photo_path === paths["RAINY7Q"])?.photo_box).toBeNull();
+  } finally {
+    if (box) SEED_PHOTO_BOXES["RAINY7Q"] = box;
+  }
+});
+
 it("rejects a missing story author's account mapping", () => {
   const incomplete = { ...accounts };
   delete incomplete["FogLightFan"];
