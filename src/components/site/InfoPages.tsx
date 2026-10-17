@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { ScenicHeader } from "@/components/site/SpotPlate";
 import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
 
+export const CONTACT_EMAIL = "hello@sailawaystudios.net";
+
 export function AboutPage() {
   return (
     <main>
@@ -75,8 +77,8 @@ export function ContactPage() {
       <div className="mx-auto max-w-2xl px-4 py-8 text-lg">
         <p>
           Questions, ideas, or a plate we should feature? We'd love to hear from you at{" "}
-          <a href="mailto:hello@example.com" className="font-semibold text-navy underline">
-            hello@example.com
+          <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-navy underline">
+            {CONTACT_EMAIL}
           </a>
           .
         </p>
