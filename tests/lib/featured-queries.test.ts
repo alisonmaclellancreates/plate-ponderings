@@ -72,6 +72,7 @@ it("retains earlier archive pages when a later read fails and recovers on retry"
   const second = { today: "2026-10-17", plates: [], next: null };
   vi.mocked(getFeaturedArchive)
     .mockResolvedValueOnce(first)
+    .mockResolvedValueOnce(first)
     .mockRejectedValueOnce(new Error("Read failed"));
   const client = new QueryClient();
   await client.ensureInfiniteQueryData(featuredArchiveOptions);
