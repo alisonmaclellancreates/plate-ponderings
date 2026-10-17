@@ -3,10 +3,12 @@
 # Step 43b: retired columns and missing index only
 
 - [x] Confirm no active code or tests read the deprecated handle_check_* columns; matches outside generated types are historical migrations and documentation only.
-- [ ] Apply an isolated migration dropping the three deprecated columns.
-- [ ] Apply a separate subject_save_attempts (user_id, attempted_at) index migration and regenerate types.
-- [ ] Read the final columns and index from the database; run every tests/db file, full app coverage gate and lint.
-- [ ] Confirm automatic branch sync and PR coverage when available; manual git mutations are unavailable in this environment.
+- [x] Apply isolated drop migration 0006; no other statements included.
+- [x] Apply separate index migration 0007; types automatically regenerated and contain no retired columns.
+- [x] Database readback: app_settings has id, demo_mode, ai_check_block_category, ai_check_blocked_at, ai_check_run_id; subject_save_attempts_user_time is btree (user_id, attempted_at).
+- [x] All three DB tests pass. Initial summary test invocation had a transcription UUID error; corrected invocation passes all original assertions. App suite: 665 tests / 120 files pass; configured 95% coverage thresholds pass. Lint: zero errors, six unchanged UI warnings. Automatic build OK; no behaviour or page changes.
+- [x] Automatic local commits verified: 9b55a33 (drop), 78037bd (generated types), d3f069a (index); no manual git mutations or branch changes.
+- [ ] Confirm GitHub sync and current PR Codecov gate after CI; remote result has not been read for Step 43b and local diagnostic coverage is not a substitute.
 
 # Step 43: Copilot pending feedback and pause analytics
 
