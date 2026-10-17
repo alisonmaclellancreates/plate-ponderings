@@ -171,6 +171,16 @@ export async function resetDemoSeed(
       message: `Reset incomplete at ${step}. Retry Reset seed data to finish.`,
     };
   } finally {
-    if (claimed) await admin.rpc("release_demo_reset", { _token: token });
+    if (claimed) {
+      try {
+        checked(await admin.rpc("release_demo_reset", { _token: token }));
+      } catch {
+        return {
+          outcome: "error",
+          message:
+            "Reset lease release failed. Wait for the lease to expire, then retry Reset seed data.",
+        };
+      }
+    }
   }
 }

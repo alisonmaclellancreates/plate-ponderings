@@ -61,7 +61,11 @@ vi.mock("@/lib/demo-admin.functions", () => ({
   resetSeedData: vi.fn(),
   fillMissingGuesses: vi.fn(),
 }));
-vi.mock("@/lib/plates.functions", () => ({ searchPlate: vi.fn(), getPlate: vi.fn() }));
+vi.mock("@/lib/plates.functions", () => ({
+  searchPlate: vi.fn(),
+  getPlate: vi.fn(),
+  spotPlate: vi.fn(),
+}));
 vi.mock("@/lib/stories.functions", () => ({
   getPlateStories: vi.fn(),
   addStory: vi.fn(),
@@ -179,7 +183,7 @@ describe("axe: full pages", () => {
 
   it("plate page with stories, summary history and a revealed guess", async () => {
     m.queryData = {
-      "plate-stories": { stories: [STORY], pending: false },
+      "plate-stories": { stories: [STORY], pending: [] },
       "plate-summary": {
         current: {
           version: 2,
@@ -208,7 +212,7 @@ describe("axe: full pages", () => {
 
   it("mystery plate with the guess teaser", async () => {
     m.queryData = {
-      "plate-stories": { stories: [], pending: false },
+      "plate-stories": { stories: [], pending: [] },
       "plate-guess": { status: "hidden" },
     };
     await checkPage(

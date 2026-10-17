@@ -381,6 +381,30 @@ function SpotResultView({ result }: { result: SpotResult }) {
   }
 }
 
+function AlreadySpottedPanel({ values }: { values: { jurisdiction: string; text: string } }) {
+  return (
+    <section
+      aria-labelledby="already-spotted"
+      data-testid="roadside-sign"
+      className="rounded-lg border-4 border-teal bg-card p-5 text-center"
+    >
+      <h2 id="already-spotted" className="font-display text-2xl text-teal">
+        Someone spotted this one already!
+      </h2>
+      <p className="mt-2">
+        This plate has been submitted and is waiting for its check. Try looking again soon.
+      </p>
+      <Link
+        to="/"
+        search={{ jurisdiction: values.jurisdiction, text: values.text }}
+        className="brand-btn brand-btn-navy mt-4"
+      >
+        Back to Search
+      </Link>
+    </section>
+  );
+}
+
 type SpotStage = { kind: "form" } | { kind: "checking" } | { kind: "result"; result: SpotResult };
 
 /** The live Spot a Plate flow: form, checking, then the real outcome. */

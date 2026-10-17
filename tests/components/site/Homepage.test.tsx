@@ -195,7 +195,7 @@ describe("Homepage", () => {
       />,
     );
     const potd = screen.getByRole("region", { name: "Plate of the Day" });
-    expect(within(potd).getByRole("img", { name: /Utah plate CANYONS/ })).toBeTruthy();
+    expect(within(potd).getByRole("img", { name: /Washington plate TEST/ })).toBeTruthy();
     expect(within(potd).getByText("Mystery")).toBeTruthy();
     const recent = screen.getByRole("region", { name: "Recently Featured" });
     expect(within(recent).getAllByRole("listitem")).toHaveLength(4);

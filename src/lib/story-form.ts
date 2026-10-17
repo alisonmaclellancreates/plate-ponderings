@@ -53,4 +53,3 @@ export const HOW_OPTIONS: { value: HowIKnow; label: string; image: string }[] = 
   },
   { value: "guess", label: "My best guess", image: "/brand/how-i-know-guess-v1.webp" },
 ];
-

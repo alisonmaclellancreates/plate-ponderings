@@ -189,3 +189,22 @@ it.each(["lease", "upload", "replace", "delete", "readback"])(
     expect((await resetDemoSeed(client)).outcome).toBe("done");
   },
 );
+
+it.each(["returned", "thrown"])(
+  "reports a %s lease release failure instead of done",
+  async (kind) => {
+    const original = m.rpc.getMockImplementation();
+    m.rpc.mockImplementation(async (fn: string, args: { _seed?: Record<string, unknown[]> }) => {
+      if (fn === "release_demo_reset") {
+        if (kind === "thrown") throw new Error("release failed");
+        return { error: {} };
+      }
+      return original?.(fn, args);
+    });
+    expect(await resetDemoSeed(client)).toEqual({
+      outcome: "error",
+      message:
+        "Reset lease release failed. Wait for the lease to expire, then retry Reset seed data.",
+    });
+  },
+);

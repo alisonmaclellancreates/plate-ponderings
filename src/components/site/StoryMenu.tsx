@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Flag, Trash2, UserX } from "lucide-react";
 import {
   Dialog,
