@@ -10,7 +10,7 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-import { AboutPage, ContactPage, NotFoundPage, PrivacyPage } from "@/components/site/InfoPages";
+import { AboutPage, CONTACT_EMAIL, ContactPage, NotFoundPage, PrivacyPage } from "@/components/site/InfoPages";
 import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
 
 describe("AboutPage", () => {
@@ -52,10 +52,11 @@ describe("PrivacyPage", () => {
 });
 
 describe("ContactPage", () => {
-  it("shows the email link placeholder", () => {
+  it("shows and links the real address, with no placeholder anywhere", () => {
     render(<ContactPage />);
-    const link = screen.getByRole("link", { name: "hello@example.com" });
-    expect(link.getAttribute("href")).toBe("mailto:hello@example.com");
+    const link = screen.getByRole("link", { name: CONTACT_EMAIL });
+    expect(link.getAttribute("href")).toBe(`mailto:${CONTACT_EMAIL}`);
+    expect(screen.queryByText(/example\.com/)).toBeNull();
   });
 });
 
