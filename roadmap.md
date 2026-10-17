@@ -2,11 +2,12 @@
 
 # Step 43c: shared plate detail frame
 
-- [ ] Approve the presentation-only PlateFrame plan.
-- [ ] Extract the existing frame and show every full jurisdiction beneath the plate, aria-hidden, in both detail pages only.
-- [ ] Test shared frame and both consumers, including Newfoundland and Labrador and Utah and accessibility.
-- [ ] Browser-check Rowan's published Newfoundland and Labrador plate ROW43XYZ (alternatives ROW43XA to ROW43XD) and the existing Utah preview at 1280px and 360px. No app fixture mechanism, test-only parameters, routes or injected browser data. Cover preview-long and real-short combinations in unit tests only and report the distinction.
-- [ ] Run app suite and bun run lint; resolve changed-file errors; read current PR Codecov patch coverage and require 100% before claiming completion.
+- [x] Approve the presentation-only PlateFrame plan.
+- [x] Extract the existing frame and show every full jurisdiction beneath the plate, aria-hidden, in both detail pages only. Source check confirms one frame markup owner and two consumers; Plate and other render locations untouched.
+- [x] Test shared frame and both consumers with the real Plate, including Newfoundland and Labrador and Utah and exclusion of the added line from accessibility.
+- [x] Browser-check published ROW43XYZ through normal lookup and /plate/ut-canyons at 1280px and 360px. Screenshots inspected: complete names, no overflow; normal word wrapping enabled, names fit on one line at both tested widths. Accessibility tree omits the added line; existing heading and named Plate preserved. Preview-long and real-short combinations are unit-tested only. No browser data injection or app fixture mechanism.
+- [x] Run bun run test:coverage: 671 tests / 121 files pass and configured coverage thresholds hold. Run bun run lint: zero errors, six unchanged UI warnings, no findings in changed files. Automatic build OK. Managed commit 08f8108 recorded the implementation without switching branches.
+- [ ] Confirm 100% current PR Codecov patch coverage. Blocker: GitHub open-PR read returned no open pull requests; no Step 43c PR figure exists to report yet. Local diagnostics are not a substitute.
 
 # Step 43b: retired columns and missing index only
 

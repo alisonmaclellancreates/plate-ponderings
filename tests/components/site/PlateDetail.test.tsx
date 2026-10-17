@@ -1,12 +1,36 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlateDetail, Stories, StoryCard } from "@/components/site/PlateDetail";
 import type { Story } from "@/lib/mock-data";
 
+vi.mock("@/lib/mock-data", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/mock-data")>();
+  const base = original.PLATES.find((plate) => plate.slug === "ut-canyons");
+  if (!base) throw new Error("Missing Utah preview fixture");
+  return {
+    ...original,
+    PLATES: [
+      ...original.PLATES,
+      { ...base, slug: "test-nl", jurisdiction: "Newfoundland and Labrador", text: "ROW43XYZ" },
+    ],
+  };
+});
+
 const strip = () => screen.getByRole("list", { name: "Plate status" });
 
 describe("PlateDetail", () => {
+  it.each([
+    ["ut-canyons", "Utah", "CANYONS"],
+    ["test-nl", "Newfoundland and Labrador", "ROW43XYZ"],
+  ])("uses the shared frame for preview %s", (state, jurisdiction, text) => {
+    render(<PlateDetail state={state} />);
+    const artwork = screen.getByRole("img", { name: `${jurisdiction} plate ${text}` });
+    const name = screen.getByText(jurisdiction, { selector: "p" });
+    expect(artwork.nextElementSibling).toBe(name);
+    expect(name.getAttribute("aria-hidden")).toBe("true");
+  });
+
   it("ut-canyons by slug renders the CANYONS plate as a mystery", () => {
     render(<PlateDetail state="ut-canyons" />);
     expect(screen.getByRole("heading", { level: 1, name: "Utah plate CANYONS" })).toBeTruthy();
