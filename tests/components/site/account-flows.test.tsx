@@ -141,7 +141,7 @@ it("profile rejection and unavailable save preserve the account", async () => {
   m.save.mockRejectedValue(new Error());
   render(<ProfilePage />);
   fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
-  await screen.findByRole("status");
+  await screen.findByRole("alert");
   expect(m.account.handle).toBe("Traveler1234");
 });
 it("demo edits are disabled without availability calls", () => {
