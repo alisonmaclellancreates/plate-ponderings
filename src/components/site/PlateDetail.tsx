@@ -16,6 +16,7 @@ import { PlateFrame } from "@/components/site/PlateFrame";
 import { HeartButton, StoryMenuActions } from "@/components/site/StoryActions";
 import { ConsensusBadge, HowIKnowBadge, StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
+import { StoryPhotoThumbnail, StoryPhotoZoom } from "@/components/site/StoryPhoto";
 import { useAccountAuth } from "@/lib/account-auth";
 import {
   CATCHING_UP_STORY,
@@ -319,22 +320,21 @@ export function StoryCard({ story }: { story: Story }) {
           <HowIKnowBadge how={story.howIKnow} />
         </div>
         {story.longer && <p className="mt-2">{story.longer}</p>}
+        {story.photo && story.photoBox && (
+          <StoryPhotoZoom
+            photo={story.photo}
+            box={story.photoBox}
+            handle={story.handle}
+            meaning={story.meaning}
+          />
+        )}
         <p className="mt-2 flex items-center gap-1 text-sm">
           <Heart aria-hidden className="size-4 text-coral" />
           <span>{story.hearts}</span>
           <span className="sr-only">{story.hearts === 1 ? "heart" : "hearts"}</span>
         </p>
       </div>
-      {story.photo && (
-        <img
-          src={story.photo}
-          alt={`Photo shared by ${story.handle}`}
-          width={944}
-          height={704}
-          loading="lazy"
-          className="col-start-2 h-20 w-28 shrink-0 rounded-md object-cover sm:col-start-auto"
-        />
-      )}
+      {story.photo && !zoom && <StoryPhotoThumbnail photo={story.photo} handle={story.handle} />}
     </article>
   );
 }
@@ -454,18 +454,17 @@ function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string 
           <HowIKnowBadge how={story.source} />
         </div>
         {story.body && <p className="mt-2">{story.body}</p>}
+        {story.photo && story.photoBox && (
+          <StoryPhotoZoom
+            photo={story.photo}
+            box={story.photoBox}
+            handle={story.handle}
+            meaning={story.meaning}
+          />
+        )}
         <HeartButton story={story} plateId={plateId} />
       </div>
-      {story.photo && (
-        <img
-          src={story.photo}
-          alt={`Photo shared by ${story.handle}`}
-          width={944}
-          height={704}
-          loading="lazy"
-          className="col-start-2 h-20 w-28 shrink-0 rounded-md object-cover sm:col-start-auto"
-        />
-      )}
+      {story.photo && !zoom && <StoryPhotoThumbnail photo={story.photo} handle={story.handle} />}
     </article>
   );
 }
