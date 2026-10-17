@@ -9,7 +9,7 @@ import { PLATES } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
 import { spotPlate, type SpotResult } from "@/lib/plates.functions";
 import { useAccountAuth } from "@/lib/account-auth";
-import { DEMO_MESSAGE } from "@/lib/account-rules";
+import { DEMO_MESSAGE, RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
 import { track } from "@/lib/analytics";
 import {
   JURISDICTION_ERROR,
@@ -313,8 +313,28 @@ function ExistsStrip() {
   );
 }
 
+function RateLimitedOutcome() {
+  return (
+    <Outcome
+      sign="Spot a Plate"
+      heading="Let's pause a moment."
+      actions={
+        <Link to="/" className={outline}>
+          Go Back
+        </Link>
+      }
+    >
+      <p role="status" className="text-lg">
+        {RATE_LIMIT_MESSAGE}
+      </p>
+    </Outcome>
+  );
+}
+
 export function SpotOutcomePage({ outcome }: { outcome: SpotOutcome }) {
   switch (outcome) {
+    case "rate-limited":
+      return <RateLimitedOutcome />;
     case "validation":
       return (
         <SpotPage
@@ -479,6 +499,8 @@ function CheckingView() {
 
 function SpotResultView({ result }: { result: SpotResult }) {
   switch (result.outcome) {
+    case "rate-limited":
+      return <RateLimitedOutcome />;
     case "new":
       return (
         <Outcome
@@ -589,9 +611,7 @@ function SpotResultView({ result }: { result: SpotResult }) {
         >
           <Sasquatch />
           <p className="text-lg">
-            {result.outcome === "rate-limited"
-              ? result.message
-              : "We couldn't check this plate right now. Please try again in a few moments."}
+            We couldn't check this plate right now. Please try again in a few moments.
           </p>
         </Outcome>
       );

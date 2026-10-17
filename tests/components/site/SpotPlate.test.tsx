@@ -132,6 +132,11 @@ describe("Spot outcome previews", () => {
     expect(buttons()).toEqual(["Try Again", "Go Back"]);
   });
 
+  it("renders the rate-limited preview through the shared pause outcome", () => {
+    render(<SpotOutcomePage outcome="rate-limited" />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+  });
+
   it("every outcome renders a single heading", () => {
     for (const outcome of Object.keys(SPOT_OUTCOMES) as SpotOutcome[]) {
       const { unmount } = render(<SpotOutcomePage outcome={outcome} />);
@@ -203,6 +208,18 @@ async function fillAndSpot(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("Spot a Plate live flow", () => {
+  it("turns a rate-limited response into a pause, not a failed check", async () => {
+    live.spot.mockResolvedValue({
+      outcome: "rate-limited",
+      message: "You've done that a lot in a short time. Please wait a while and try again.",
+    });
+    render(<SpotLivePage />);
+    await fillAndSpot(userEvent.setup());
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Go Back" })).toHaveAttribute("href", "/");
+    expect(screen.queryByRole("link", { name: "Try Again" })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("sasquatch")).not.toBeInTheDocument();
+  });
   it("shows the checking state, then the new-plate outcome", async () => {
     live.spot.mockResolvedValue({
       outcome: "new",

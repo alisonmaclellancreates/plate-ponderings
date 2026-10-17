@@ -6,6 +6,7 @@ export type SpotOutcome =
   | "pending"
   | "rejected"
   | "already-spotted"
+  | "rate-limited"
   | "error";
 
 export const SPOT_OUTCOMES: Record<SpotOutcome, string> = {
@@ -16,6 +17,7 @@ export const SPOT_OUTCOMES: Record<SpotOutcome, string> = {
   pending: "Waiting for its check",
   rejected: "Couldn't add this plate",
   "already-spotted": "Spotted already",
+  "rate-limited": "Let's pause a moment.",
   error: "Something went wrong",
 };
 
