@@ -39,8 +39,8 @@ export function Explore({
         <div className="mx-auto max-w-6xl px-4 pt-6 pb-8">
           <h1 className="font-display text-4xl text-navy sm:text-5xl">The Roadside Archive</h1>
           <p className="mt-3 max-w-2xl text-lg">
-            Every day, a new mystery takes the spotlight. Here's where you can revisit the plates
-            we've featured along the way.
+            Every day, a plate takes the spotlight. Here's where you can revisit the plates we've
+            featured along the way.
           </p>
         </div>
       </section>

@@ -64,6 +64,31 @@ describe("Homepage", () => {
     expect(screen.getByRole("search")).toBeTruthy();
     expect(screen.queryByRole("region", { name: "Recently Featured" })).toBeNull();
   });
+  it("hides Recently Featured entirely when there are no earlier featured days", () => {
+    media({});
+    render(
+      <Homepage
+        live={{
+          today: "2026-10-17",
+          pick: {
+            slug: "real-id",
+            jurisdiction: "Ontario",
+            text: "REAL",
+            day: "2026-10-17",
+            count: 0,
+            atPick: 0,
+            status: "mystery",
+          },
+          recent: [],
+        }}
+      />,
+    );
+    expect(screen.getByRole("region", { name: "Plate of the Day" })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "Recently Featured" })).toBeNull();
+    expect(screen.queryByText("Recently Featured")).toBeNull();
+    expect(screen.queryByText("From past Plates of the Day.")).toBeNull();
+    expect(screen.queryByRole("link", { name: "View All Featured Plates" })).toBeNull();
+  });
   it.each([0, 1, 2])("uses real count %i and the approved daily invitation", async (count) => {
     media({});
     const pick = {

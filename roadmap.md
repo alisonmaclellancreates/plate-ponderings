@@ -1,5 +1,6 @@
 # Step 46: real daily pick, featured shelf and archive
 
+- [x] Rowan sign-off changes: Recently Featured hidden entirely (heading, intro, link) with no earlier featured days, proven by a new test; Roadside Archive intro replaced with the approved sentence. 29 changed tests passed across two files; changed-file lint clean; formatting passed.
 - [x] Added sample-only unnested /previews/explore and /previews/homepage-featured, real grid/bands/shelf and live-page notes. 35 changed tests passed across five files; lint zero errors/six existing warnings; formatting passed; automatic build OK. No database, browser or AI checks.
 - [x] Contain featured read failures: omit homepage bands; Explore retries inline, including later-page failures. All 37 changed tests passed; repository lint zero errors/six existing warnings; formatting passed; automatic build OK. No database, browser or AI checks.
 - [x] Alison approved the plan and three service-only functions; singular daily copy retained and explore_filtered excluded entirely.
