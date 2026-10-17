@@ -1,6 +1,5 @@
 /** Static preview data shared by every preview page. Replaced by Cloud data in a later step. */
 
-
 export type PlateStatus = "mystery" | "interpreted" | "owner";
 export type Consensus = "agree" | "mixed" | "differ";
 export type HowIKnow = "owner" | "knows_owner" | "secondhand" | "guess";
