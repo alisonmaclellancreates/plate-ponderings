@@ -5,6 +5,7 @@ CREATE TABLE public.photo_detect_attempts (
   user_id uuid NOT NULL,
   attempted_at timestamptz NOT NULL DEFAULT now()
 );
+REVOKE ALL ON public.photo_detect_attempts FROM PUBLIC, anon, authenticated;
 GRANT ALL ON public.photo_detect_attempts TO service_role;
 ALTER TABLE public.photo_detect_attempts ENABLE ROW LEVEL SECURITY;
 
