@@ -294,3 +294,153 @@ describe("getPlateStories", () => {
     expect(authorFilter).toEqual(["author_id", "viewer"]);
   });
 });
+
+describe("addStory failed and empty lookups", () => {
+  it("sanitizes non-string input and refuses it as validation", async () => {
+    expect(await call(addStory, { plateId: 1, meaning: null, source: 2, more: {} })).toEqual({
+      outcome: "validation",
+    });
+    expect(mocks.admin.from).not.toHaveBeenCalled();
+  });
+  it("errors when the demo role check fails, before any read", async () => {
+    context.supabase.rpc.mockResolvedValue({ data: null, error: { message: "offline" } });
+    expect(await call(addStory, INPUT)).toEqual({ outcome: "error" });
+    expect(mocks.admin.from).not.toHaveBeenCalled();
+  });
+  it("errors when the plate read fails, without consuming an attempt", async () => {
+    tables["subjects"] = { data: null, error: { message: "offline" } };
+    expect(await call(addStory, INPUT)).toEqual({ outcome: "error" });
+    expect(mocks.admin.rpc).not.toHaveBeenCalled();
+  });
+  it("errors when the attempt counter fails, before any AI call", async () => {
+    mocks.admin.rpc.mockResolvedValue({ data: null, error: { message: "offline" } });
+    expect(await call(addStory, INPUT)).toEqual({ outcome: "error" });
+    expect(mocks.check).not.toHaveBeenCalled();
+  });
+  it("errors when the AI block cannot be read, before any AI call or save", async () => {
+    mocks.admin.rpc.mockResolvedValue({ data: true, error: null });
+    mocks.readBlock.mockResolvedValue(null);
+    expect(await call(addStory, INPUT)).toEqual({ outcome: "error" });
+    expect(mocks.check).not.toHaveBeenCalled();
+  });
+  it("errors when saving a pending story fails", async () => {
+    mocks.admin.rpc.mockResolvedValue({ data: true, error: null });
+    mocks.check.mockResolvedValue({ outcome: "unavailable", block: null });
+    storyInsert = { data: null, error: { message: "offline" } };
+    expect(await call(addStory, INPUT)).toEqual({ outcome: "error" });
+  });
+  it("errors when saving a published story fails, and asks for no summary", async () => {
+    mocks.admin.rpc.mockResolvedValue({ data: true, error: null });
+    storyInsert = { data: null, error: { message: "offline" } };
+    expect(await call(addStory, INPUT)).toEqual({ outcome: "error" });
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+  it("saves the extra text trimmed, and null when blank", async () => {
+    mocks.admin.rpc.mockResolvedValue({ data: true, error: null });
+    const rows: Record<string, unknown>[] = [];
+    mocks.admin.from.mockImplementation((table: string) => {
+      const c = chain(tables[table] ?? { data: null, error: null });
+      if (table === "stories")
+        c["insert"] = vi.fn((row: Record<string, unknown>) => {
+          rows.push(row);
+          return chain(storyInsert);
+        });
+      return c;
+    });
+    await call(addStory, { ...INPUT, more: "  Seen near Seattle.  " });
+    await call(addStory, { ...INPUT, more: "   " });
+    expect(rows.map((r) => r["body"])).toEqual(["Seen near Seattle.", null]);
+  });
+});
+
+describe("getPlateStories failed and empty lookups", () => {
+  const signedIn = () => {
+    mocks.getRequest.mockReturnValue({ headers: { get: () => "Bearer a.b.c" } });
+    mocks.admin.auth.getUser.mockResolvedValue({ data: { user: { id: "viewer" } }, error: null });
+  };
+  type Out = {
+    stories: { id: string; handle: string; hearts: number }[];
+    pending: unknown[];
+    ownerHandle: string | null;
+  };
+
+  it("treats a non-string plate id as missing", async () => {
+    tables["subjects"] = { data: null, error: null };
+    expect(await call(getPlateStories, { plateId: 7 })).toBeNull();
+    const subjectChain = mocks.admin.from.mock.results[0]?.value as { eq: ReturnType<typeof vi.fn> };
+    expect(subjectChain.eq).toHaveBeenCalledWith("id", "");
+  });
+  it("returns null when the plate read fails", async () => {
+    tables["subjects"] = { data: null, error: { message: "offline" } };
+    expect(await call(getPlateStories, { plateId: "plate-1" })).toBeNull();
+  });
+  it("returns null when the stories read fails", async () => {
+    tables["stories"] = { data: null, error: { message: "offline" } };
+    expect(await call(getPlateStories, { plateId: "plate-1" })).toBeNull();
+  });
+  it("treats a non-JWT bearer token as signed out", async () => {
+    mocks.getRequest.mockReturnValue({ headers: { get: () => "Bearer sb_publishable_x" } });
+    await call(getPlateStories, { plateId: "plate-1" });
+    expect(mocks.admin.auth.getUser).not.toHaveBeenCalled();
+    expect(mocks.admin.from).not.toHaveBeenCalledWith("blocks");
+  });
+  it("treats a token the server rejects as signed out", async () => {
+    mocks.getRequest.mockReturnValue({ headers: { get: () => "Bearer a.b.c" } });
+    mocks.admin.auth.getUser.mockResolvedValue({ data: { user: null }, error: { message: "bad" } });
+    await call(getPlateStories, { plateId: "plate-1" });
+    expect(mocks.admin.from).not.toHaveBeenCalledWith("blocks");
+  });
+  it("treats empty block, pending, profile and heart reads as none", async () => {
+    signedIn();
+    tables["blocks"] = { data: null, error: null };
+    tables["profiles"] = { data: null, error: null };
+    tables["stories"] = {
+      data: [
+        { id: "s1", meaning: "M", source: "owner", body: null, author_id: "a1", published_at: null },
+      ],
+      error: null,
+    };
+    mocks.admin.rpc.mockResolvedValue({ data: null, error: null });
+    let pending = false;
+    mocks.admin.from.mockImplementation((table: string) => {
+      const c = chain(tables[table] ?? { data: null, error: null });
+      if (table === "stories") {
+        c["eq"] = vi.fn((_c: string, v: string) => {
+          if (v === "pending") pending = true;
+          return c;
+        });
+        c["then"] = (resolve: (r: Result) => void) =>
+          resolve(pending ? { data: null, error: null } : (tables["stories"] as Result));
+      }
+      return c;
+    });
+    const result = (await call(getPlateStories, { plateId: "plate-1" })) as unknown as Out;
+    expect(result.stories).toEqual([
+      {
+        id: "s1",
+        meaning: "M",
+        source: "owner",
+        body: null,
+        handle: "Traveler",
+        hearts: 0,
+        publishedAt: "",
+      },
+    ]);
+    expect(result.pending).toEqual([]);
+    expect(result.ownerHandle).toBe("Traveler");
+  });
+  it("keeps stories whose author is gone, shown as Traveler, even with blocks", async () => {
+    signedIn();
+    tables["blocks"] = { data: [{ blocked_id: "a2" }], error: null };
+    tables["stories"] = {
+      data: [
+        { id: "s1", meaning: "M", source: "owner", body: null, author_id: null, published_at: "x" },
+      ],
+      error: null,
+    };
+    const result = (await call(getPlateStories, { plateId: "plate-1" })) as unknown as Out;
+    expect(result.stories.map((s) => [s.id, s.handle])).toEqual([["s1", "Traveler"]]);
+    expect(result.ownerHandle).toBe("Traveler");
+    expect(mocks.admin.from).not.toHaveBeenCalledWith("profiles");
+  });
+});
