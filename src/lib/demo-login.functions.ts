@@ -8,7 +8,7 @@ export const startDemo = createServerFn({ method: "POST" }).handler(async () => 
   const password = process.env["DEMO_PASSWORD"];
   if (!email || !password) throw new Error("The demo is not available right now.");
   const { createClient } = await import("@supabase/supabase-js");
-  const client = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_ANON_KEY"]!, {
+  const client = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_PUBLISHABLE_KEY"]!, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
   const signedIn = await client.auth.signInWithPassword({ email, password });
