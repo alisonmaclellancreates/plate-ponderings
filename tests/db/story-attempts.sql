@@ -1,5 +1,7 @@
 -- Step 44: story_save_attempts quota (5 per 15 minutes, service-role only).
-set role service_role;
+-- Run through the privileged database tool. Rollback-only: nothing is kept.
+begin;
+set local role service_role;
 do $$
 declare
   u uuid := '44444444-4444-4444-4444-444444444444';
@@ -20,7 +22,7 @@ end $$;
 reset role;
 
 -- Browser roles have no grants on the table or the function.
-set role authenticated;
+set local role authenticated;
 do $$
 begin
   begin
@@ -45,7 +47,7 @@ end $$;
 reset role;
 
 -- RLS is enabled with no policies.
-set role service_role;
+set local role service_role;
 do $$
 begin
   if not (select relrowsecurity from pg_class where oid = 'public.story_save_attempts'::regclass) then
@@ -56,3 +58,5 @@ begin
   end if;
 end $$;
 reset role;
+rollback;
+select 'story-attempts: 5/15-minute quota, denial without recording, browser refusal and RLS checks passed; fixtures rolled back' as result;
