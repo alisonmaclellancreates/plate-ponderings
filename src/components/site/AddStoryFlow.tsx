@@ -2,11 +2,15 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Info } from "lucide-react";
+import { Camera, Info } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { Outcome } from "@/components/site/SpotPlate";
+import { PhotoEditor } from "@/components/site/PhotoEditor";
 import { getPlate } from "@/lib/plates.functions";
 import { addStory, getPlateStories, type HowKey } from "@/lib/stories.functions";
+import { detectPlateBox, uploadStoryPhoto } from "@/lib/photos.functions";
+import { blobToDataUrl, decodePhoto, toDetectDataUrl } from "@/lib/photo-canvas";
+import type { Box } from "@/lib/photo-blur";
 import {
   HOW_OPTIONS,
   MEANING_MAX,
@@ -19,9 +23,24 @@ import { useAccountAuth } from "@/lib/account-auth";
 import { track } from "@/lib/analytics";
 
 const DEMO_FORM_MESSAGE = "Adding stories is turned off in the demo.";
+const UNREADABLE_PHOTO_MESSAGE =
+  "We couldn't read this photo. You can choose another, or continue without one.";
+const PHOTO_UPLOAD_NOTE =
+  "We'll suggest the license plate area and blur everything else. You'll review and adjust it before sharing. The original photo is sent for detection and is never stored by our application.";
 
 const outline = "brand-btn brand-btn-outline";
 const coral = "brand-btn brand-btn-coral";
+
+/** A chosen photo being worked on: the decoded image and its display URL. */
+type PhotoDraft = {
+  bitmap: ImageBitmap;
+  imageUrl: string;
+  suggestion: Box | null;
+  noBoxMessage: boolean;
+};
+
+/** The confirmed photo: uploaded path plus the processed preview for review. */
+type PhotoReady = { path: string; previewUrl: string };
 
 type FlowStep = "1" | "2" | "3" | "done" | "checking";
 
