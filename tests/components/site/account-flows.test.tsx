@@ -78,6 +78,26 @@ import { ProfilePage } from "@/components/site/Account";
 import { MemberProfile, SiteHeader } from "@/components/site/SiteHeader";
 import { AiCheckStatus } from "@/components/site/AiCheckStatus";
 
+it("displays a server demo refusal on handle save without refreshing the profile", async () => {
+  m.save.mockResolvedValue({ outcome: "demo", message: "Demo handle changes refused" });
+  render(<ProfilePage />);
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "NewTraveler" } });
+  await screen.findByText("Available");
+  fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+  await screen.findByText("Demo handle changes refused");
+  expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "save_handle" });
+  expect(m.refresh).not.toHaveBeenCalled();
+});
+
+it("labels the sample account's sign-out action Exit Demo and invokes sign-out", async () => {
+  m.account.isDemo = true;
+  render(<MemberProfile showHandle />);
+  fireEvent.click(screen.getByRole("button", { name: "Traveler1234 menu" }));
+  fireEvent.click(screen.getByRole("button", { name: "Exit Demo" }));
+  await waitFor(() => expect(m.out).toHaveBeenCalledOnce());
+  expect(screen.queryByRole("link", { name: "Admin" })).toBeNull();
+});
+
 it.each(["signed-out", "demo", undefined] as const)(
   "uses cream keyboard rings for every navy-header control in %s mode",
   (mode) => {

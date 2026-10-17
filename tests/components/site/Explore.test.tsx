@@ -12,6 +12,13 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 import { Explore } from "@/components/site/Explore";
 
+it("renders an empty archive before live data is supplied", () => {
+  render(<Explore />);
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("The Roadside Archive");
+  expect(screen.queryByRole("link")).toBeNull();
+  expect(screen.queryByRole("button")).toBeNull();
+});
+
 it("loads real pages and focuses the first new date, even for a repeated plate", async () => {
   const row = (day: string): FeaturedDisplay => ({
     slug: "real-id",

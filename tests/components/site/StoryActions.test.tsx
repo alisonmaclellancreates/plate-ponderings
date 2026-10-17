@@ -48,6 +48,15 @@ beforeEach(() => {
 });
 
 describe("HeartButton", () => {
+  it("retains an existing heart when the server refuses demo unheart", async () => {
+    m.heart.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE });
+    render(<HeartButton story={{ ...story, hearted: true }} plateId="p1" />);
+    await userEvent.click(screen.getByRole("button", { pressed: true }));
+    expect(await screen.findByRole("status")).toHaveTextContent(DEMO_MESSAGE);
+    expect(screen.getByRole("button", { pressed: true })).toHaveTextContent("2hearts");
+    expect(m.track).toHaveBeenCalledWith("demo_write_refused", { action: "unheart" });
+    expect(m.invalidate).not.toHaveBeenCalled();
+  });
   it("sends signed-out visitors to sign in with a return to this plate", async () => {
     m.account = null;
     render(<HeartButton story={story} plateId="p1" />);
