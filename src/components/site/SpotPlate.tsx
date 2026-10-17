@@ -308,7 +308,9 @@ function ExistsStrip() {
           <ConsensusBadge consensus={plate.summaries[0].consensus} />
         </li>
       )}
-      <li className="px-3 font-semibold">{owner ? `Owner: ${owner.handle}` : "No owner yet"}</li>
+      <li className="px-3 font-semibold">
+        {owner ? `Says it's their plate: ${owner.handle}` : "No owner claim yet"}
+      </li>
     </ul>
   );
 }
