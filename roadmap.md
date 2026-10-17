@@ -234,6 +234,7 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - [x] Dialog description is "Photo shared by {handle}" via DialogPrimitive.Description (no aria-describedby override); preview sample built from a box-free base so photoBox is never undefined. 6 dialog tests and 9 preview tests pass; changed-file lint clean; build OK.
 
 ## Step 52b: accessibility review and automated checks
+- [ ] Add keyboard-visible drop-area focus and cream rings on navy header controls; test both, run related tests/lint, read post-sync Codecov.
 - [x] PR #117: add dismissal/listener lifecycle, controlled-dialog callbacks, route focus, Alt-resize and open-menu unread tests; remove the unreachable dismissal adapter true arm. Related run: 303 tests across 31 files; lint zero errors/six existing warnings; no local coverage.
 - [ ] PR #117: post-sync Codecov verification awaits managed Git sync and CI. Latest GitHub report remains 73.84615% with 17 missing lines at 21:31:30 UTC; private Codecov API returns Not found and check exposes no line annotations, so exact line-level verification is unavailable.
 - [ ] PR #117: real Radix close tests confirm More options.focus() is called, but final focus lands on body in the test environment; isolated controlled-dialog tests retain More options focus. Behavior unchanged; actual deferred focus restoration needs separate investigation before claiming end-to-end focus return.
