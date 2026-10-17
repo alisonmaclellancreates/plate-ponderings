@@ -15,6 +15,7 @@ export const RESERVED_HANDLES = [
 export const HANDLE_UNAVAILABLE =
   "We couldn't check that handle right now. Your current handle is unchanged. Try again soon.";
 export const HANDLE_REJECTED = "That handle couldn't be used. Your current handle is unchanged.";
+export const HANDLE_TAKEN = "That handle is taken. Choose another.";
 export const RATE_LIMIT_MESSAGE =
   "You've done that a lot in a short time. Please wait a while and try again.";
 export const DEMO_MESSAGE =
@@ -57,12 +58,13 @@ export function safeReturnPath(value: unknown): string {
 export function signupErrorMessage(error: {
   code?: string | undefined;
   message?: string | undefined;
+  reasons?: readonly string[] | undefined;
 }) {
   if (
     error.code === "weak_password" ||
     (error.code === "validation_failed" && /password/i.test(error.message ?? ""))
   ) {
-    return /breach|leak|pwned/i.test(error.message ?? "")
+    return error.reasons?.includes("pwned")
       ? "This password has appeared in a data breach. Please choose a different password."
       : "Please choose a stronger password with at least 8 characters.";
   }

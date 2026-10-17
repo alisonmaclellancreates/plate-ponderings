@@ -74,6 +74,11 @@
 
 # Step 42: accounts, handles and session-aware header
 
+- [x] Return available/taken/unknown (null for demo); shared preview status rendering and stale/own-handle tests. Live Rowan session shows Traveler7444 taken beneath input without Save and own handle Available. 548 tests pass; all three changed source files 100% local coverage; focused lint clean.
+
+- [x] Classify weak-password errors by reasons; actual AuthWeakPasswordError tests pass. Live signup returns 422 with pwned and displays the unchanged breached-password message. 541 tests pass; account-rules coverage 100%, touched-file lint clean, build OK.
+- [x] Set and read back credit_block at 2026-10-17 06:12:55 UTC with test run marker; leave Resume to Alison. Preview and published share this setting.
+
 - [x] Rowan review: 278px handle input at 360px with feedback below; actionable validation, truncated mobile header with full accessible name. 536 tests pass; maintained lint 0 errors/0 warnings, six existing UI warnings; build OK.
 - [x] Grant Traveler3374 admin access and verify Handle check status: real account menu opens Admin, status reads Ready; handle remains Traveler3374 after save and reload.
 - [x] Capture saved/rejected handle and password/account error review states, distinguishing live results from simulated provider responses; review PDF supplied with reproducible steps in docs/rowan-review.md.

@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { Output, streamText } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayRunIdFetch } from "./ai/run-id.server.ts";
+import { createLovableAiGatewayRunIdFetch } from "./ai/run-id.server";
 import { handleBlockCategory, type HandleBlockCategory } from "./account-rules";
 
 export type ModerationResult = {

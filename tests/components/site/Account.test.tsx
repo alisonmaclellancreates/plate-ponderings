@@ -27,7 +27,7 @@ vi.mock("@/lib/account-auth", () => ({
 }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/lib/accounts.functions", () => ({
-  checkHandle: async () => ({ available: true }),
+  checkHandle: async () => ({ status: "available" }),
   saveHandle: vi.fn(),
 }));
 

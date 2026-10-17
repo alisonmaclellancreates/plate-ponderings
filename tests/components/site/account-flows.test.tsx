@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
+import { AuthWeakPasswordError } from "@supabase/supabase-js";
 const m = vi.hoisted(() => ({
   signedOut: false,
   account: { handle: "Traveler1234", isDemo: false, isAdmin: false },
@@ -51,7 +52,7 @@ beforeEach(() => {
   m.account = { handle: "Traveler1234", isDemo: false, isAdmin: false };
   m.signIn.mockResolvedValue({ data: { session: {} }, error: null });
   m.signUp.mockResolvedValue({ data: { session: {} }, error: null });
-  m.check.mockResolvedValue({ available: true });
+  m.check.mockResolvedValue({ status: "available" });
   m.save.mockResolvedValue({ outcome: "changed", message: "Changes saved." });
   m.status.mockResolvedValue({
     allowed: true,
@@ -90,7 +91,9 @@ it("signin failures are generic and do not navigate", async () => {
   expect(m.navigate).not.toHaveBeenCalled();
 });
 it("handles signup password failure, absent session and network error", async () => {
-  m.signUp.mockResolvedValue({ error: { code: "weak_password", message: "breached password" } });
+  m.signUp.mockResolvedValue({
+    error: new AuthWeakPasswordError("Password is too weak", 422, ["pwned"]),
+  });
   const v = render(<SignUpPage />);
   fillEntry();
   await screen.findByRole("alert");
@@ -141,7 +144,7 @@ it("profile rejection and unavailable save preserve the account", async () => {
   m.save.mockRejectedValue(new Error());
   render(<ProfilePage />);
   fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
-  await screen.findByRole("status");
+  await screen.findByRole("alert");
   expect(m.account.handle).toBe("Traveler1234");
 });
 it("demo edits are disabled without availability calls", () => {
@@ -157,6 +160,50 @@ it("availability failures do not mark the handle available", async () => {
   await waitFor(() => expect(m.check).toHaveBeenCalled());
   expect(screen.queryByText("Available")).toBeNull();
 });
+it.each(["available", "taken", "unknown", null] as const)(
+  "renders the current typing check status %s without saving",
+  async (status) => {
+    m.check.mockResolvedValue({ status });
+    render(<ProfilePage />);
+    fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Traveler7444" } });
+    await waitFor(() => expect(m.check).toHaveBeenCalledWith({ data: { handle: "Traveler7444" } }));
+    if (status === "taken") {
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "That handle is taken. Choose another.",
+      );
+    } else {
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(Boolean(screen.queryByText("Available"))).toBe(status === "available");
+    }
+    expect(m.save).not.toHaveBeenCalled();
+  },
+);
+it("never shows the current own handle as taken, ignoring case", async () => {
+  m.check.mockResolvedValue({ status: "taken" });
+  render(<ProfilePage />);
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "traveler1234" } });
+  await screen.findByText("Available");
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+it("ignores a stale taken response for earlier valid input and hides resolved results on edits", async () => {
+  let resolve: ((value: { status: "taken" }) => void) | undefined;
+  m.check.mockReturnValueOnce(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  render(<ProfilePage />);
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Traveler7444" } });
+  await waitFor(() => expect(m.check).toHaveBeenCalledTimes(1));
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Fresh_Handle" } });
+  await act(async () => {
+    resolve?.({ status: "taken" });
+  });
+  expect(screen.queryByRole("alert")).toBeNull();
+  await screen.findByText("Available");
+  fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "Another_Handle" } });
+  expect(screen.queryByText("Available")).toBeNull();
+});
 it("member menus show only authorized admin actions and handle signout errors", async () => {
   const v = render(<SiteHeader />);
   fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
@@ -170,28 +217,47 @@ it("member menus show only authorized admin actions and handle signout errors", 
   fireEvent.click(screen.getAllByRole("button", { name: "Traveler1234 menu" })[0] as HTMLElement);
   expect(screen.getByRole("link", { name: "Admin" })).toBeInTheDocument();
 });
-it("admin sees block status and explicitly resets it", async () => {
+it("admin sees the blocked design and success only after a confirmed resume", async () => {
   m.account.isAdmin = true;
   render(<HandleCheckStatus />);
-  await screen.findByText("Blocked: credit_block");
+  await screen.findByTestId("blocked-icon");
+  expect(screen.getByText("Blocked")).toBeInTheDocument();
+  expect(
+    screen.getByText("Handle checks are paused. People can keep their current handles."),
+  ).toBeInTheDocument();
+  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
   m.status.mockResolvedValue({ allowed: true, category: null });
   fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
-  await screen.findByText("Ready");
+  await screen.findByText("Handle checks resumed.");
+  expect(screen.getByText("Ready")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Resume handle checks" })).toBeNull();
   expect(m.resume).toHaveBeenCalledTimes(1);
 });
-it("admin reset failures and status errors remain visible", async () => {
+it("a confirmed resume that still reads blocked shows no success", async () => {
+  m.account.isAdmin = true;
+  render(<HandleCheckStatus />);
+  await screen.findByTestId("blocked-icon");
+  fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
+  await screen.findByTestId("blocked-icon");
+  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
+  expect(m.resume).toHaveBeenCalledTimes(1);
+});
+it("admin reset failures and status errors keep the blocked state", async () => {
   m.account.isAdmin = true;
   m.resume.mockResolvedValue({ resumed: false });
   const v = render(<HandleCheckStatus />);
-  await screen.findByText("Blocked: credit_block");
+  await screen.findByTestId("blocked-icon");
   fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
   await screen.findByRole("alert");
+  expect(screen.getByTestId("blocked-icon")).toBeInTheDocument();
+  expect(screen.queryByText("Handle checks resumed.")).toBeNull();
   v.unmount();
   m.resume.mockRejectedValue(new Error());
   const v2 = render(<HandleCheckStatus />);
-  await screen.findByText("Blocked: credit_block");
+  await screen.findByTestId("blocked-icon");
   fireEvent.click(screen.getByRole("button", { name: "Resume handle checks" }));
   await screen.findByRole("alert");
+  expect(screen.getByTestId("blocked-icon")).toBeInTheDocument();
   v2.unmount();
   m.status.mockRejectedValue(new Error());
   render(<HandleCheckStatus />);
@@ -234,7 +300,7 @@ it("ignores duplicate profile saves while the first is pending", async () => {
   expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
 });
 it("ignores a stale availability response after the draft becomes invalid", async () => {
-  let resolve: ((value: { available: boolean }) => void) | undefined;
+  let resolve: ((value: { status: "available" | "taken" | "unknown" }) => void) | undefined;
   m.check.mockReturnValueOnce(
     new Promise((r) => {
       resolve = r;
@@ -244,7 +310,7 @@ it("ignores a stale availability response after the draft becomes invalid", asyn
   await waitFor(() => expect(m.check).toHaveBeenCalledTimes(1));
   fireEvent.change(screen.getByLabelText("Handle"), { target: { value: "a-" } });
   await act(async () => {
-    resolve?.({ available: true });
+    resolve?.({ status: "available" });
   });
   expect(screen.queryByText("Available")).toBeNull();
   expect(m.check).toHaveBeenCalledTimes(1);

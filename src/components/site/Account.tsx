@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, ChevronRight, UserCircle2 } from "lucide-react";
+import { CheckCircle2, TriangleAlert, ChevronRight, UserCircle2 } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { ModerationBadge } from "@/components/site/Badges";
 import { ScenicHeader } from "@/components/site/SpotPlate";
 import { StoryCard } from "@/components/site/PlateDetail";
 import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
 import { formatDay } from "@/lib/format-day";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAccountAuth } from "@/lib/account-auth";
 import { checkHandle, saveHandle } from "@/lib/accounts.functions";
@@ -14,6 +14,7 @@ import {
   handleFormatValid,
   handleValidationMessage,
   HANDLE_UNAVAILABLE,
+  HANDLE_TAKEN,
   DEMO_MESSAGE,
 } from "@/lib/account-rules";
 import { Button } from "@/components/ui/button";
@@ -117,11 +118,98 @@ export function SubmissionsPage({ rows = SUBMISSIONS }: { rows?: Submission[] })
 export const HANDLE_HELP =
   "3-20 characters: letters, numbers, and underscores. Handles are unique (not case sensitive). Some names are reserved. We'll run a quick safety check when you save.";
 
+/** Presentational handle field; previews render it inertly with a fixed state. */
+export function HandleField({
+  draft,
+  status = "unknown",
+  message = "",
+  busy = false,
+  isDemo = false,
+  onDraftChange,
+  onSubmit,
+}: {
+  draft: string;
+  status?: "available" | "taken" | "unknown" | null;
+  message?: string;
+  busy?: boolean;
+  isDemo?: boolean;
+  onDraftChange?: (value: string) => void;
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+}) {
+  const uid = useId();
+  const inputId = `handle-${uid}`;
+  const statusId = `handle-status-${uid}`;
+  const helpId = `handle-help-${uid}`;
+  const messageId = `handle-message-${uid}`;
+  const available = !isDemo && status === "available";
+  const success = message === "Changes saved." ? message : "";
+  const serverError = message && !success ? message : "";
+  const validationError =
+    !isDemo && !available && !handleFormatValid(draft) ? handleValidationMessage(draft) : "";
+  const error =
+    serverError || validationError || (!isDemo && status === "taken" ? HANDLE_TAKEN : "");
+  const describedBy = [available || isDemo ? statusId : "", error ? messageId : "", helpId]
+    .filter(Boolean)
+    .join(" ");
+  return (
+    <form
+      className="min-w-0 flex-1 space-y-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit?.(e);
+      }}
+    >
+      <label htmlFor={inputId} className="block font-semibold text-navy">
+        Handle
+      </label>
+      <input
+        id={inputId}
+        name="handle"
+        value={draft}
+        onChange={(e) => onDraftChange?.(e.target.value)}
+        disabled={busy || isDemo}
+        aria-describedby={describedBy}
+        className="w-full min-w-0 rounded-md border border-border bg-card px-3 py-2"
+      />
+      {available && (
+        <span id={statusId} className="brand-badge w-fit" data-tone="green">
+          <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+          Available
+        </span>
+      )}
+      {isDemo && (
+        <p id={statusId} className="text-sm text-muted-foreground">
+          {DEMO_MESSAGE}
+        </p>
+      )}
+      {error && (
+        <p id={messageId} role="alert" className="flex items-start gap-1.5 text-coral-cta">
+          <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {error}
+        </p>
+      )}
+      <p id={helpId} className="text-sm text-muted-foreground">
+        {HANDLE_HELP}
+      </p>
+      <div className="pt-2">
+        <Button type="submit" disabled={busy || isDemo} className="brand-btn brand-btn-navy">
+          Save Changes
+        </Button>
+      </div>
+      {success && <p role="status">{success}</p>}
+    </form>
+  );
+}
+
 export function ProfilePage() {
   const auth = useAccountAuth();
   const handle = auth?.account?.handle ?? CURRENT_USER.handle;
   const [draft, setDraft] = useState(handle);
-  const [available, setAvailable] = useState(false);
+  const [availability, setAvailability] = useState<{
+    draft: string;
+    status: "available" | "taken" | "unknown" | null;
+  } | null>(null);
+  const status = availability?.draft === draft ? availability.status : "unknown";
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const check = useServerFn(checkHandle);
@@ -130,13 +218,20 @@ export function ProfilePage() {
     setDraft(handle);
   }, [handle]);
   useEffect(() => {
-    setAvailable(false);
+    setAvailability(null);
     if (!auth?.account || auth.account.isDemo || !handleFormatValid(draft)) return;
     let active = true;
     const timer = setTimeout(() => {
       void check({ data: { handle: draft } })
         .then((r) => {
-          if (active) setAvailable(r.available);
+          if (active)
+            setAvailability({
+              draft,
+              status:
+                r.status === "taken" && draft.toLowerCase() === handle.toLowerCase()
+                  ? "available"
+                  : r.status,
+            });
         })
         .catch(() => {});
     }, 250);
@@ -144,7 +239,7 @@ export function ProfilePage() {
       active = false;
       clearTimeout(timer);
     };
-  }, [draft, auth?.account, check]);
+  }, [draft, handle, auth?.account, check]);
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy || !auth?.account) return;
@@ -182,59 +277,18 @@ export function ProfilePage() {
                 data-testid="profile-icon"
                 className="size-24 shrink-0 text-muted-foreground"
               />
-              <form className="min-w-0 flex-1 space-y-2" onSubmit={submit}>
-                <label htmlFor="handle" className="block font-semibold text-navy">
-                  Handle
-                </label>
-                <div className="grid min-w-0 grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-                  <input
-                    id="handle"
-                    name="handle"
-                    value={draft}
-                    onChange={(e) => {
-                      setDraft(e.target.value);
-                      setMessage("");
-                    }}
-                    disabled={busy || auth?.account?.isDemo}
-                    aria-describedby={
-                      available || auth?.account?.isDemo || !handleFormatValid(draft)
-                        ? "handle-status handle-help"
-                        : "handle-help"
-                    }
-                    className="w-full min-w-0 rounded-md border border-border bg-card px-3 py-2"
-                  />
-                  {available ? (
-                    <span id="handle-status" className="brand-badge w-fit" data-tone="green">
-                      <CheckCircle2 aria-hidden className="size-4 shrink-0" />
-                      Available
-                    </span>
-                  ) : (
-                    <span
-                      id="handle-status"
-                      className="min-w-0 text-sm text-muted-foreground sm:max-w-48"
-                    >
-                      {auth?.account?.isDemo
-                        ? DEMO_MESSAGE
-                        : handleFormatValid(draft)
-                          ? ""
-                          : handleValidationMessage(draft)}
-                    </span>
-                  )}
-                </div>
-                <p id="handle-help" className="text-sm text-muted-foreground">
-                  {HANDLE_HELP}
-                </p>
-                <div className="pt-2">
-                  <Button
-                    type="submit"
-                    disabled={busy || auth?.account?.isDemo}
-                    className="brand-btn brand-btn-navy"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-                {message && <p role="status">{message}</p>}
-              </form>
+              <HandleField
+                draft={draft}
+                status={status}
+                message={message}
+                busy={busy}
+                isDemo={Boolean(auth?.account?.isDemo)}
+                onDraftChange={(value) => {
+                  setDraft(value);
+                  setMessage("");
+                }}
+                onSubmit={submit}
+              />
             </div>
           </section>
           <aside className="brand-card -rotate-1 bg-cream-warm p-5 shadow-md">
