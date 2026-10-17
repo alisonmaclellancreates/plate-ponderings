@@ -4,6 +4,7 @@ import { z } from "zod";
 const m = vi.hoisted(() => ({
   streamText: vi.fn(),
   responses: vi.fn(() => "model"),
+  provider: vi.fn(),
 }));
 
 vi.mock("ai", () => ({
@@ -11,7 +12,10 @@ vi.mock("ai", () => ({
   Output: { object: (opts: unknown) => opts },
 }));
 vi.mock("@ai-sdk/openai", () => ({
-  createOpenAI: () => ({ responses: m.responses }),
+  createOpenAI: (options: unknown) => {
+    m.provider(options);
+    return { responses: m.responses };
+  },
 }));
 vi.mock("@/lib/ai/run-id.server", () => ({
   createLovableAiGatewayRunIdFetch: () => ({
@@ -36,9 +40,66 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe("detectPlateBoxInImage", () => {
+  it.each([
+    { found: true, x: null, y: 0.2, w: 0.3, h: 0.1 },
+    { found: true, x: 0.1, y: null, w: 0.3, h: 0.1 },
+    { found: true, x: 0.1, y: 0.2, w: null, h: 0.1 },
+    { found: true, x: 0.1, y: 0.2, w: 0.3, h: null },
+    { found: true, x: 0.1, y: 0.2, w: 0.3, h: 0.01 },
+  ])("returns no box for incomplete or undersized coordinates %o", async (output) => {
+    aiReturns(output);
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({ outcome: "ok", box: null });
+  });
+
+  it.each([
+    [402, { type: "insufficient_credits" }, "credit_block"],
+    [403, { error: { type: "provider_access_denied" } }, "provider_denied"],
+    [403, { error: { code: "provider_access_denied" } }, "provider_denied"],
+    [403, {}, "provider_denied"],
+    [403, "not JSON", "provider_denied"],
+    [429, {}, null],
+    [500, {}, null],
+  ])("contains gateway status %s with body %o", async (status, body, block) => {
+    const response = new Response(typeof body === "string" ? body : JSON.stringify(body), {
+      status: Number(status),
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    m.streamText.mockImplementation(() => ({
+      output: (async () => {
+        const options = m.provider.mock.calls[0]?.[0] as {
+          fetch: typeof fetch;
+        };
+        expect(await options.fetch("https://example.test", {})).toBe(response);
+        throw new Error("gateway failed");
+      })(),
+    }));
+    await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({
+      outcome: "unavailable",
+      block,
+      runId: "run-1",
+    });
+    expect(warn).toHaveBeenCalledTimes(Number(status) === 402 || Number(status) === 403 ? 1 : 0);
+  });
+
+  it.each([{ found: true }, { found: true, x: -0.1, y: 0, w: 0.2, h: 0.2 }])(
+    "contains schema-invalid model output %o",
+    async (output) => {
+      m.streamText.mockImplementation((options: { output: { schema: z.ZodType } }) => ({
+        output: Promise.resolve().then(() => options.output.schema.parse(output)),
+      }));
+      await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({
+        outcome: "unavailable",
+        block: null,
+        runId: "run-1",
+      });
+    },
+  );
   it("returns unavailable without a gateway key, never calling the AI", async () => {
     vi.stubEnv("LOVABLE_API_KEY", "");
     await expect(detectPlateBoxInImage(DATA_URL)).resolves.toEqual({

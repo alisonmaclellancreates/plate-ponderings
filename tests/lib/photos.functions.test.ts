@@ -92,6 +92,26 @@ beforeEach(() => {
 });
 
 describe("detectPlateBox", () => {
+  it.each([42, "data:text/plain;base64,YWJj", `data:image/jpeg;base64,${"A".repeat(3_000_000)}`])(
+    "refuses unsupported detection input",
+    async (image) => {
+      expect(await call(detectPlateBox, { image })).toEqual({ outcome: "unavailable" });
+      expect(mocks.detect).not.toHaveBeenCalled();
+    },
+  );
+  it("contains role and AI-state read failures", async () => {
+    mocks.userRpc.mockResolvedValueOnce({ data: false, error: new Error("offline") });
+    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({ outcome: "unavailable" });
+    mocks.readBlock.mockResolvedValueOnce(null);
+    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({ outcome: "unavailable" });
+    expect(mocks.adminRpc).not.toHaveBeenCalled();
+  });
+  it.each([null, "credit_block"])("persists only terminal detector blocks: %s", async (block) => {
+    mocks.detect.mockResolvedValue({ outcome: "unavailable", block, runId: "r1" });
+    expect(await call(detectPlateBox, { image: jpegDataUrl() })).toEqual({ outcome: "unavailable" });
+    if (block) expect(mocks.persistBlock).toHaveBeenCalledWith(expect.anything(), block, "r1");
+    else expect(mocks.persistBlock).not.toHaveBeenCalled();
+  });
   it("passes the photo to detection and returns its box", async () => {
     const box = { x: 0.1, y: 0.2, w: 0.3, h: 0.1 };
     mocks.detect.mockResolvedValue({ outcome: "ok", box });
@@ -144,6 +164,18 @@ describe("detectPlateBox", () => {
 });
 
 describe("uploadStoryPhoto", () => {
+  it("contains role lookup errors without uploading", async () => {
+    mocks.userRpc.mockResolvedValue({ data: false, error: new Error("offline") });
+    expect(await call(uploadStoryPhoto, { jpeg: jpegDataUrl() })).toEqual({ outcome: "error" });
+    expect(mocks.upload).not.toHaveBeenCalled();
+  });
+  it.each([42, "not a data URL", "data:image/jpeg;base64,AAAA", "data:image/jpeg;base64,/9j/4AAA"])(
+    "refuses malformed JPEG input %s",
+    async (jpeg) => {
+      expect(await call(uploadStoryPhoto, { jpeg })).toEqual({ outcome: "invalid" });
+      expect(mocks.upload).not.toHaveBeenCalled();
+    },
+  );
   it("stores the photo in the caller's own folder", async () => {
     const result = await call(uploadStoryPhoto, { jpeg: jpegDataUrl() });
     expect(result).toEqual({
