@@ -141,16 +141,22 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   const photoInput = useRef<HTMLInputElement>(null);
   const photoSelection = useRef(0);
 
-  useEffect(() => () => {
-    photoSelection.current += 1;
-  }, []);
+  useEffect(
+    () => () => {
+      photoSelection.current += 1;
+    },
+    [],
+  );
 
-  useEffect(() => () => {
-    if (photoDraft) {
-      photoDraft.bitmap.close();
-      URL.revokeObjectURL(photoDraft.imageUrl);
-    }
-  }, [photoDraft]);
+  useEffect(
+    () => () => {
+      if (photoDraft) {
+        photoDraft.bitmap.close();
+        URL.revokeObjectURL(photoDraft.imageUrl);
+      }
+    },
+    [photoDraft],
+  );
 
   const { data: plateData } = useQuery({
     queryKey: ["plate", plateId],

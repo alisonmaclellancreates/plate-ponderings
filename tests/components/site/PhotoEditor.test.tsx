@@ -99,16 +99,19 @@ describe("PhotoEditor", () => {
     expect(onUse.mock.calls[0]![1]).toBe(true);
   });
 
-  it.each([BOX, null])("adjustment can skip or choose another photo with box %o without processing", async (initialBox) => {
-    const user = userEvent.setup();
-    const { onRemove, onChooseAnother } = setup({ initialBox });
-    await user.click(screen.getByRole("button", { name: "Choose another photo" }));
-    expect(onChooseAnother).toHaveBeenCalledTimes(1);
-    await user.click(screen.getByRole("button", { name: "Skip photo" }));
-    expect(onRemove).toHaveBeenCalledTimes(1);
-    expect(m.renderBlurred).not.toHaveBeenCalled();
-    expect(m.toJpeg).not.toHaveBeenCalled();
-  });
+  it.each([BOX, null])(
+    "adjustment can skip or choose another photo with box %o without processing",
+    async (initialBox) => {
+      const user = userEvent.setup();
+      const { onRemove, onChooseAnother } = setup({ initialBox });
+      await user.click(screen.getByRole("button", { name: "Choose another photo" }));
+      expect(onChooseAnother).toHaveBeenCalledTimes(1);
+      await user.click(screen.getByRole("button", { name: "Skip photo" }));
+      expect(onRemove).toHaveBeenCalledTimes(1);
+      expect(m.renderBlurred).not.toHaveBeenCalled();
+      expect(m.toJpeg).not.toHaveBeenCalled();
+    },
+  );
 
   it("Next cannot process a photo without a box", async () => {
     const user = userEvent.setup();

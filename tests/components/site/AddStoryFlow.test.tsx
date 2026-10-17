@@ -394,7 +394,10 @@ describe("AddStoryFlow", () => {
       m.detect.mockResolvedValue({ outcome: "ok", box });
       const user = userEvent.setup();
       render(<AddStoryFlow plateId="p1" />);
-      await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+      await user.type(
+        screen.getByLabelText(/What do you think it means/),
+        "Pacific Northwest love.",
+      );
       await user.click(screen.getByRole("button", { name: "Next" }));
       const input = document.getElementById("story-photo") as HTMLInputElement;
       await user.upload(input, new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
@@ -404,12 +407,16 @@ describe("AddStoryFlow", () => {
       expect(input.value).toBe("");
       expect(m.close).toHaveBeenCalledTimes(1);
       expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
-      expect(m.track.mock.calls.filter(([event]) => event === "photo_skipped")).toEqual([["photo_skipped", {}]]);
+      expect(m.track.mock.calls.filter(([event]) => event === "photo_skipped")).toEqual([
+        ["photo_skipped", {}],
+      ]);
       expect(m.upload).not.toHaveBeenCalled();
       expect(m.toJpeg).not.toHaveBeenCalled();
       await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
       await user.click(screen.getByRole("button", { name: "Submit Story" }));
-      await waitFor(() => expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }));
+      await waitFor(() =>
+        expect(m.submit).toHaveBeenCalledWith({ data: expect.objectContaining({ photoPath: "" }) }),
+      );
     },
   );
 

@@ -169,7 +169,8 @@ export function PhotoEditor({
     }
   };
 
-  const handle = "absolute size-11 touch-none flex items-center justify-center after:size-4 after:rounded-sm after:border-2 after:border-navy after:bg-cream";
+  const handle =
+    "absolute size-11 touch-none flex items-center justify-center after:size-4 after:rounded-sm after:border-2 after:border-navy after:bg-cream";
   const corners: { corner: Corner; className: string }[] = [
     { corner: "nw", className: "-left-5.5 -top-5.5 cursor-nwse-resize" },
     { corner: "ne", className: "-right-5.5 -top-5.5 cursor-nesw-resize" },
@@ -192,7 +193,12 @@ export function PhotoEditor({
           {mode === "adjust" ? (
             <>
               <div className="mb-4 grid grid-cols-2 gap-3">
-                <Button type="button" variant="outline" className={outline} onClick={onChooseAnother}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={outline}
+                  onClick={onChooseAnother}
+                >
                   Choose another photo
                 </Button>
                 <Button type="button" variant="outline" className={outline} onClick={onRemove}>
@@ -243,9 +249,7 @@ export function PhotoEditor({
                   </div>
                 )}
               </div>
-              <p className="mt-3">
-                {showNoBoxMessage && !box ? NO_BOX_MESSAGE : ADJUST_NOTE}
-              </p>
+              <p className="mt-3">{showNoBoxMessage && !box ? NO_BOX_MESSAGE : ADJUST_NOTE}</p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <Button
                   type="button"
