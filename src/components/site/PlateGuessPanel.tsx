@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { track } from "@/lib/analytics";
 
 export function GuessTeaser() {
@@ -22,20 +22,20 @@ export function PlateGuessPanel({
   meaning: string;
   story: string;
 }) {
-  const panel = useRef<HTMLElement>(null);
   const seen = useRef<string | null>(null);
-  useEffect(() => {
-    const element = panel.current;
-    if (!element) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting) && seen.current !== plateId) {
-        seen.current = plateId;
-        void track("ai_guess_revealed", {});
-      }
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [plateId]);
+  const panel = useCallback(
+    (element: HTMLElement) => {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && seen.current !== plateId) {
+          seen.current = plateId;
+          void track("ai_guess_revealed", {});
+        }
+      });
+      observer.observe(element);
+      return () => observer.disconnect();
+    },
+    [plateId],
+  );
   return (
     <section
       ref={panel}
