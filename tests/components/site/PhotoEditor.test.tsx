@@ -96,7 +96,7 @@ describe("PhotoEditor", () => {
     );
     await user.click(screen.getByRole("button", { name: "Use This Photo" }));
     await waitFor(() => expect(onUse).toHaveBeenCalled());
-    expect(onUse.mock.calls[0][1]).toBe(true);
+    expect(onUse.mock.calls[0]![1]).toBe(true);
   });
 
   it("Adjust returns to the box, and Remove Photo and Try again call back", async () => {
