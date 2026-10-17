@@ -372,7 +372,7 @@ describe("getPlateStories failed and empty lookups", () => {
     mocks.admin.auth.getUser.mockResolvedValue({ data: { user: { id: "viewer" } }, error: null });
   };
   type Out = {
-    stories: { id: string; handle: string; hearts: number }[];
+    stories: { id: string; handle: string; hearts: number; isOwn?: boolean; hearted?: boolean }[];
     pending: unknown[];
     ownerHandle: string | null;
   };
