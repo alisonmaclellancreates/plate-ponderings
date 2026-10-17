@@ -367,7 +367,9 @@ describe("getPlateStories failed and empty lookups", () => {
   it("treats a non-string plate id as missing", async () => {
     tables["subjects"] = { data: null, error: null };
     expect(await call(getPlateStories, { plateId: 7 })).toBeNull();
-    const subjectChain = mocks.admin.from.mock.results[0]?.value as { eq: ReturnType<typeof vi.fn> };
+    const subjectChain = mocks.admin.from.mock.results[0]?.value as {
+      eq: ReturnType<typeof vi.fn>;
+    };
     expect(subjectChain.eq).toHaveBeenCalledWith("id", "");
   });
   it("returns null when the plate read fails", async () => {
@@ -396,7 +398,14 @@ describe("getPlateStories failed and empty lookups", () => {
     tables["profiles"] = { data: null, error: null };
     tables["stories"] = {
       data: [
-        { id: "s1", meaning: "M", source: "owner", body: null, author_id: "a1", published_at: null },
+        {
+          id: "s1",
+          meaning: "M",
+          source: "owner",
+          body: null,
+          author_id: "a1",
+          published_at: null,
+        },
       ],
       error: null,
     };

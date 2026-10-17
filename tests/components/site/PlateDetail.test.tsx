@@ -209,6 +209,8 @@ it("reads a story with 1 heart as 1 heart", () => {
   it("a plate with stories but no summary yet shows no Story So Far", () => {
     render(<PlateDetail state="test-no-summary" />);
     expect(screen.queryByRole("heading", { name: "The Story So Far" })).toBeNull();
-    expect(screen.queryByRole("heading", { name: "What do you think this plate means?" })).toBeNull();
+    expect(
+      screen.queryByRole("heading", { name: "What do you think this plate means?" }),
+    ).toBeNull();
   });
 });

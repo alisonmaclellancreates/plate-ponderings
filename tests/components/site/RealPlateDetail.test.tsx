@@ -41,7 +41,10 @@ vi.mock("@tanstack/react-query", () => ({
     return { data: m.stories };
   },
 }));
-vi.mock("@/lib/stories.functions", () => ({ getPlateStories: m.getPlateStories, STORY_PAGE_SIZE: 5 }));
+vi.mock("@/lib/stories.functions", () => ({
+  getPlateStories: m.getPlateStories,
+  STORY_PAGE_SIZE: 5,
+}));
 
 import { RealPlateDetail } from "@/components/site/PlateDetail";
 

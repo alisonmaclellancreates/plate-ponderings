@@ -579,7 +579,11 @@ describe("recheckPendingSubjects", () => {
       withStories([{ ...storyRow, body: "Seen near Seattle.", subjects: null }]);
       tables["subjects"] = { data: [], error: null };
       await call(recheckPendingSubjects, {});
-      expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "Seen near Seattle.", "");
+      expect(mocks.checkStory).toHaveBeenCalledWith(
+        "Pacific Northwest love.",
+        "Seen near Seattle.",
+        "",
+      );
     });
   });
 });

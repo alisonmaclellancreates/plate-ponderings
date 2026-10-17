@@ -290,7 +290,10 @@ describe("AddStoryFlow branches", () => {
   });
 
   it("a demo refusal shows its message without a heading, tracked as error", async () => {
-    await submitWith({ outcome: "demo", message: "Adding plates and stories is turned off in the demo." });
+    await submitWith({
+      outcome: "demo",
+      message: "Adding plates and stories is turned off in the demo.",
+    });
     const status = await screen.findByRole("status");
     expect(status.children).toHaveLength(1);
     expect(status.firstElementChild).toHaveClass("font-semibold");
