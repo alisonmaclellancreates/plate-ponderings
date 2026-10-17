@@ -2,10 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ admin: { from: vi.fn(), rpc: vi.fn() }, moderate: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({
   createServerFn: () => {
+    let validate = (data: unknown) => data;
     const builder = {
       middleware: () => builder,
-      inputValidator: () => builder,
-      handler: (fn: unknown) => fn,
+      inputValidator: (fn: (data: unknown) => unknown) => {
+        validate = fn;
+        return builder;
+      },
+      handler:
+        (fn: (args: { data: unknown; context: unknown }) => unknown) =>
+        (args: { data: unknown; context: unknown }) =>
+          fn({ ...args, data: validate(args.data) }),
     };
     return builder;
   },
@@ -43,7 +50,7 @@ let updated: Result;
 let persist: Result;
 let attempt: Result;
 const context = { userId: "caller", supabase: { rpc: vi.fn(), from: vi.fn() } };
-async function call(fn: unknown, handle = "Alison_42") {
+async function call(fn: unknown, handle: unknown = "Alison_42") {
   return await (fn as (a: unknown) => Promise<Record<string, unknown>>)({
     data: { handle },
     context,
@@ -104,6 +111,14 @@ describe("account reads", () => {
   });
 });
 describe("availability", () => {
+  it.each([42, null, {}, ["Alison_42"]])(
+    "refuses non-string handle input %j before privileged reads",
+    async (handle) => {
+      expect(await call(checkHandle, handle)).toEqual({ available: false });
+      expect(mocks.admin.from).not.toHaveBeenCalled();
+      expect(mocks.moderate).not.toHaveBeenCalled();
+    },
+  );
   it("returns only availability and never calls AI or records attempts", async () => {
     expect(await call(checkHandle)).toEqual({ available: true });
     taken.data = [{ id: "other" }];
@@ -123,6 +138,35 @@ describe("availability", () => {
   });
 });
 describe("handle saves", () => {
+  it.each([42, null, {}, ["Alison_42"]])(
+    "rejects non-string handle input %j without moderation or writes",
+    async (handle) => {
+      expect(await call(saveHandle, handle)).toEqual({
+        outcome: "rejected",
+        message: HANDLE_REJECTED,
+      });
+      expect(mocks.admin.rpc).toHaveBeenCalledWith("consume_handle_save_attempt", {
+        _user_id: "caller",
+      });
+      expect(mocks.admin.from).not.toHaveBeenCalled();
+      expect(mocks.moderate).not.toHaveBeenCalled();
+    },
+  );
+  it("persists a terminal block with a null run id when the gateway supplies none", async () => {
+    const updateSettings = vi.fn(() => chain(persist));
+    mocks.admin.from.mockImplementation((table: string) => {
+      const c = chain(table === "profiles" ? taken : settings);
+      c["update"] = table === "app_settings" ? updateSettings : vi.fn(() => chain(updated));
+      return c;
+    });
+    mocks.moderate.mockResolvedValue({ outcome: "unavailable", block: "credit_block" });
+    expect(await call(saveHandle)).toEqual({ outcome: "unavailable", message: HANDLE_UNAVAILABLE });
+    expect(updateSettings).toHaveBeenCalledWith({
+      handle_check_block_category: "credit_block",
+      handle_check_blocked_at: expect.any(String),
+      handle_check_run_id: null,
+    });
+  });
   it("writes only a verified caller's handle after approval", async () => {
     expect(await call(saveHandle)).toEqual({
       outcome: "changed",
