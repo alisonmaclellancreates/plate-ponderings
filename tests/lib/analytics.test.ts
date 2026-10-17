@@ -30,12 +30,14 @@ describe("analytics", () => {
       "handle_changed",
       "handle_rejected",
     ] as const) {
-      await analytics.track(event, {
+      const privateProperties = {
         email: "private",
         handle: "private",
         password: "private",
         moderation: "private",
-      });
+      };
+      // @ts-expect-error Verify runtime filtering when a caller bypasses the event schema.
+      await analytics.track(event, privateProperties);
       expect(sdk.capture).toHaveBeenLastCalledWith(event, {});
       const beforeSend = sdk.init.mock.calls[0]?.[1].before_send;
       expect(
