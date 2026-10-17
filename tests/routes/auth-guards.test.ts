@@ -1,6 +1,7 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const user = vi.hoisted(() => vi.fn());
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getUser: user } } }));
+const out = vi.hoisted(() => vi.fn());
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getUser: user, signOut: out } } }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
   Outlet: () => null,
@@ -19,6 +20,7 @@ type Options = {
 const gate = Gate as unknown as Options;
 const adapter = Adapter as unknown as Options;
 beforeEach(() => user.mockReset());
+afterEach(() => vi.useRealTimers());
 it("gates protected children client-side with a safe return path", async () => {
   user.mockResolvedValue({ data: { user: null }, error: null });
   expect(gate.ssr).toBe(false);
@@ -44,4 +46,14 @@ it("entry routes sanitize optional return searches", () => {
     expect(r.validateSearch({ returnTo: "/profile" })).toEqual({ returnTo: "/profile" });
     expect(r.validateSearch({})).toEqual({ returnTo: "/" });
   }
+});
+it("redirects safely rather than waiting forever on a stuck session", async () => {
+  vi.useFakeTimers();
+  user.mockReturnValue(new Promise(() => {}));
+  const result = expect(gate.beforeLoad({ location: { href: "/profile" } })).rejects.toEqual({
+    options: { to: "/auth", search: { returnTo: "/profile" } },
+  });
+  await vi.advanceTimersByTimeAsync(1000);
+  await result;
+  expect(out).not.toHaveBeenCalled();
 });
