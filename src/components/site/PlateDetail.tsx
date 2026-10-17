@@ -142,7 +142,12 @@ function AddStoryLink({
   className: string;
 }) {
   return signedIn ? (
-    <Link to="/story/$step" params={{ step: "1" }} search={{ plate: plateId }} className={className}>
+    <Link
+      to="/story/$step"
+      params={{ step: "1" }}
+      search={{ plate: plateId }}
+      className={className}
+    >
       Add Your Story
     </Link>
   ) : (

@@ -18,9 +18,11 @@ const href = (to: string, params?: Record<string, string>, search?: Record<strin
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => vi.fn(),
-  Navigate: (p: { to: string; params?: Record<string, string>; search?: Record<string, string> }) => (
-    <p data-testid="redirect">{href(p.to, p.params, p.search)}</p>
-  ),
+  Navigate: (p: {
+    to: string;
+    params?: Record<string, string>;
+    search?: Record<string, string>;
+  }) => <p data-testid="redirect">{href(p.to, p.params, p.search)}</p>,
   Link: ({
     to,
     params,
