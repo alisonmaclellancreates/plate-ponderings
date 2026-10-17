@@ -249,59 +249,18 @@ export function ProfilePage() {
                 data-testid="profile-icon"
                 className="size-24 shrink-0 text-muted-foreground"
               />
-              <form className="min-w-0 flex-1 space-y-2" onSubmit={submit}>
-                <label htmlFor="handle" className="block font-semibold text-navy">
-                  Handle
-                </label>
-                <div className="grid min-w-0 grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-                  <input
-                    id="handle"
-                    name="handle"
-                    value={draft}
-                    onChange={(e) => {
-                      setDraft(e.target.value);
-                      setMessage("");
-                    }}
-                    disabled={busy || auth?.account?.isDemo}
-                    aria-describedby={
-                      available || auth?.account?.isDemo || !handleFormatValid(draft)
-                        ? "handle-status handle-help"
-                        : "handle-help"
-                    }
-                    className="w-full min-w-0 rounded-md border border-border bg-card px-3 py-2"
-                  />
-                  {available ? (
-                    <span id="handle-status" className="brand-badge w-fit" data-tone="green">
-                      <CheckCircle2 aria-hidden className="size-4 shrink-0" />
-                      Available
-                    </span>
-                  ) : (
-                    <span
-                      id="handle-status"
-                      className="min-w-0 text-sm text-muted-foreground sm:max-w-48"
-                    >
-                      {auth?.account?.isDemo
-                        ? DEMO_MESSAGE
-                        : handleFormatValid(draft)
-                          ? ""
-                          : handleValidationMessage(draft)}
-                    </span>
-                  )}
-                </div>
-                <p id="handle-help" className="text-sm text-muted-foreground">
-                  {HANDLE_HELP}
-                </p>
-                <div className="pt-2">
-                  <Button
-                    type="submit"
-                    disabled={busy || auth?.account?.isDemo}
-                    className="brand-btn brand-btn-navy"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-                {message && <p role="status">{message}</p>}
-              </form>
+              <HandleField
+                draft={draft}
+                available={available}
+                message={message}
+                busy={busy}
+                isDemo={Boolean(auth?.account?.isDemo)}
+                onDraftChange={(value) => {
+                  setDraft(value);
+                  setMessage("");
+                }}
+                onSubmit={submit}
+              />
             </div>
           </section>
           <aside className="brand-card -rotate-1 bg-cream-warm p-5 shadow-md">

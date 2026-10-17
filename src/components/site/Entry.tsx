@@ -139,18 +139,59 @@ function useEntry(kind: "signed_in" | "signed_up", returnTo: string) {
   }
   return { busy, error, submit };
 }
-export function SignInPage({ returnTo = "/" }: { returnTo?: string }) {
+type EntryFormProps = {
+  busy: boolean;
+  error: string;
+  submit: (e: React.FormEvent<HTMLFormElement>) => void;
+};
+
+/** Inert submit for previews: never calls the server. */
+const inertSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+};
+
+export function SignInForm({ busy, error, submit }: EntryFormProps) {
+  return (
+    <form className="space-y-4" onSubmit={submit}>
+      <EmailField />
+      <PasswordField />
+      {error && <p role="alert">{error}</p>}
+      <Button type="submit" disabled={busy} className="brand-btn brand-btn-navy w-full">
+        Sign In
+      </Button>
+    </form>
+  );
+}
+
+export function SignUpForm({ busy, error, submit }: EntryFormProps) {
+  return (
+    <form className="space-y-4" onSubmit={submit}>
+      <EmailField />
+      <PasswordField hint="Use at least 8 characters" />
+      {error && <p role="alert">{error}</p>}
+      <Button type="submit" disabled={busy} className="brand-btn brand-btn-coral w-full">
+        Create Account
+      </Button>
+    </form>
+  );
+}
+
+export function SignInPage({
+  returnTo = "/",
+  previewError,
+}: {
+  returnTo?: string;
+  previewError?: string;
+}) {
   const { busy, error, submit } = useEntry("signed_in", returnTo);
+  const preview = previewError !== undefined;
   return (
     <EntryShell title="Sign In" subtitle="Welcome back!">
-      <form className="space-y-4" onSubmit={submit}>
-        <EmailField />
-        <PasswordField />
-        {error && <p role="alert">{error}</p>}
-        <Button type="submit" disabled={busy} className="brand-btn brand-btn-navy w-full">
-          Sign In
-        </Button>
-      </form>
+      <SignInForm
+        busy={preview ? false : busy}
+        error={preview ? previewError : error}
+        submit={preview ? inertSubmit : submit}
+      />
       <p className="mt-5 text-center">
         <Link to="/sign-up" search={{ returnTo: safeReturnPath(returnTo) }} className={link}>
           Create an account
@@ -160,18 +201,22 @@ export function SignInPage({ returnTo = "/" }: { returnTo?: string }) {
   );
 }
 
-export function SignUpPage({ returnTo = "/" }: { returnTo?: string }) {
+export function SignUpPage({
+  returnTo = "/",
+  previewError,
+}: {
+  returnTo?: string;
+  previewError?: string;
+}) {
   const { busy, error, submit } = useEntry("signed_up", returnTo);
+  const preview = previewError !== undefined;
   return (
     <EntryShell title="Create an Account" subtitle="Join the community and add your story.">
-      <form className="space-y-4" onSubmit={submit}>
-        <EmailField />
-        <PasswordField hint="Use at least 8 characters" />
-        {error && <p role="alert">{error}</p>}
-        <Button type="submit" disabled={busy} className="brand-btn brand-btn-coral w-full">
-          Create Account
-        </Button>
-      </form>
+      <SignUpForm
+        busy={preview ? false : busy}
+        error={preview ? previewError : error}
+        submit={preview ? inertSubmit : submit}
+      />
       <p className="mt-4 text-sm text-muted-foreground">
         We'll give you a handle to start. You can change it anytime in your profile.
       </p>
