@@ -12,7 +12,7 @@ vi.mock("@tanstack/react-router", () => ({
   notFound: () => new Error("not found"),
 }));
 
-vi.mock("@/lib/plates.functions", () => ({ getPlate: vi.fn(async () => null) }));
+vi.mock("@/lib/plates.functions", () => ({ getPlate: vi.fn(async () => ({ plate: null })) }));
 
 import { Route } from "@/routes/plate.$state";
 
