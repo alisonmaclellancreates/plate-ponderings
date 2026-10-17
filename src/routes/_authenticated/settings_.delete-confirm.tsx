@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DeleteConfirmPage } from "@/components/site/Settings";
+import { LiveDeleteConfirm } from "@/components/site/LiveSettings";
 
 const TITLE = "Delete your account? | What the Plate?";
 const DESCRIPTION = "Confirm deleting your account.";
@@ -15,5 +15,5 @@ export const Route = createFileRoute("/_authenticated/settings_/delete-confirm")
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <DeleteConfirmPage />,
+  component: () => <LiveDeleteConfirm />,
 });

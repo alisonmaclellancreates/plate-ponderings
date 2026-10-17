@@ -446,6 +446,8 @@ describe("getPlateStories failed and empty lookups", () => {
         handle: "Traveler",
         hearts: 0,
         publishedAt: "",
+        isOwn: false,
+        hearted: false,
       },
     ]);
     expect(result.pending).toEqual([]);

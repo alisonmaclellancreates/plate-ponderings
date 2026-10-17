@@ -8,6 +8,11 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getUser: async () => ({ data: { user: { id: "test" } }, error: null }) } },
 }));
 
+vi.mock("@/components/site/LiveSettings", async () => {
+  const { DeleteConfirmPage } = await import("@/components/site/Settings");
+  return { LiveDeleteConfirm: () => <DeleteConfirmPage />, LiveSettings: () => null };
+});
+
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-router")>();
   return {

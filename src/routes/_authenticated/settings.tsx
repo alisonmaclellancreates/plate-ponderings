@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SettingsPage } from "@/components/site/Settings";
+import { LiveSettings } from "@/components/site/LiveSettings";
 
 const TITLE = "Settings | What the Plate?";
 const DESCRIPTION = "Blocked people and account settings.";
@@ -15,5 +15,5 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <SettingsPage />,
+  component: () => <LiveSettings />,
 });

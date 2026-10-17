@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (o: Record<string, unknown>) => o,
 }));
-vi.mock("@/components/site/Settings", () => ({ SettingsPage: () => <p>page</p> }));
+vi.mock("@/components/site/LiveSettings", () => ({ LiveSettings: () => <p>page</p> }));
 
 import { Route } from "@/routes/_authenticated/settings";
 
