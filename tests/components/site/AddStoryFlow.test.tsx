@@ -239,6 +239,71 @@ describe("AddStoryFlow", () => {
     const { container } = render(<AddStoryFlow plateId="p1" />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("tracks photo_skipped when continuing without a photo", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    expect(m.track).toHaveBeenCalledWith("photo_skipped", {});
+  });
+
+  it("a confirmed photo is uploaded, shown at review, and submitted with the story", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+    await addPhoto(user);
+    expect(m.upload).toHaveBeenCalledWith({
+      data: { dataUrl: expect.stringMatching(/^data:image\/jpeg/) },
+    });
+    expect(m.track).toHaveBeenCalledWith("photo_added", { box_found: true, box_adjusted: false });
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByAltText("Your blurred photo")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() => expect(screen.getByText("Story submitted!")).toBeInTheDocument());
+    expect(m.submit).toHaveBeenCalledWith({
+      data: {
+        plateId: "p1",
+        meaning: "Pacific Northwest love.",
+        source: "owner",
+        more: "",
+        photoPath: "user-1/photo.jpg",
+      },
+    });
+  });
+
+  it("detection unavailable goes straight to draw-a-box with the no-box message", async () => {
+    m.detect.mockResolvedValue({ outcome: "unavailable" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "We couldn't find the plate in this photo. Draw a box around it to keep it clear.",
+        ),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it("an unreadable photo shows the message and lets the visitor continue", async () => {
+    m.decode.mockRejectedValue(new Error("bad file"));
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const file = new File(["nope"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "We couldn't read this photo. You can choose another, or continue without one.",
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(m.detect).not.toHaveBeenCalled();
+    expect(m.upload).not.toHaveBeenCalled();
+  });
 });
 
 describe("AddStoryFlow preview mode", () => {
