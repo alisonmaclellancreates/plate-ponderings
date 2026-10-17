@@ -42,6 +42,14 @@ reset role;
 set local role service_role;
 do $$
 begin
+  if not exists (
+    select 1 from pg_indexes
+    where schemaname = 'public'
+      and tablename = 'photo_detect_attempts'
+      and indexname = 'photo_detect_attempts_user_time'
+  ) then
+    raise exception 'photo_detect_attempts_user_time index must exist';
+  end if;
   if not (select relrowsecurity from pg_class where oid = 'public.photo_detect_attempts'::regclass) then
     raise exception 'photo_detect_attempts must have RLS enabled';
   end if;

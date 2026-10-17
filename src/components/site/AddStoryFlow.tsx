@@ -140,6 +140,12 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   const started = useRef(false);
   const photoInput = useRef<HTMLInputElement>(null);
   const photoSelection = useRef(0);
+  const photoPreviewUrl = photoReady?.previewUrl;
+
+  useEffect(() => {
+    if (!photoPreviewUrl) return;
+    return () => URL.revokeObjectURL(photoPreviewUrl);
+  }, [photoPreviewUrl]);
 
   useEffect(
     () => () => {

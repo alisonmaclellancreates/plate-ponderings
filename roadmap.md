@@ -1,8 +1,16 @@
+# PR #113 Copilot follow-ups
+
+- [x] Stage exact 0017 SQL in docs/proposed-migrations (managed migration directory cannot be written without applying); add index-existence assertion. 0016 untouched.
+- [ ] Create/apply managed migration 0017 and run database assertion. Blocker: Alison's approval.
+- [x] Release confirmed-photo preview URLs on removal/replacement, no-save submission and unmount; test each lifecycle. Review/back keeps the active URL alive.
+- [x] Requested related tests: 66 passed across 7 files. Local AddStoryFlow coverage 100% in all metrics. Lint zero errors/six existing warnings. Build OK. Replied to both Copilot comments.
+- [ ] Confirm follow-up PR Codecov after managed sync/CI. Latest PR report at 19:07:17 UTC says all modified coverable lines covered (100%), predating this follow-up.
+
 # PR #113 photo patch coverage
 
 - [x] Cover canvas rendering/export and remaining photo detection, upload, editor, flow, preview and story paths; remove unreachable UI guards and duplicate URL revocation. No server/storage behaviour changes or canvas extraction.
 - [x] Requested related tests: 343 passed across 28 files. All eight named files have 100% local statements, branches and functions. Lint: zero errors/six existing warnings. Automatic build OK.
-- [ ] Confirm PR Codecov after managed GitHub sync and CI. Latest actual report remains 78.77462%/97 missing, updated 18:56:20 UTC; GitHub could not find managed local commit eab6021 at 19:03 UTC. No manual push permitted.
+- [x] PR Codecov report updated 19:07:17 UTC: all modified and coverable lines covered (100%). Copilot follow-up needs its own fresh CI result above. No manual push permitted.
 
 # Photo editor exits
 
