@@ -460,6 +460,17 @@ describe("recheckPendingSubjects", () => {
       subjects: { identity_b: "PNW LV" },
     };
     function withStories(stories: unknown[], storyError: unknown = null) {
+      tables["subjects"] = {
+        data: [
+          {
+            id: "subj-9",
+            identity_a: "US-WA",
+            identity_b: "PNW LV",
+            jurisdictions: { name: "Washington" },
+          },
+        ],
+        error: null,
+      };
       const notifications: unknown[] = [];
       const updates = vi.fn(() => chain({ data: null, error: null }));
       mocks.admin.from.mockImplementation((table: string) => {
