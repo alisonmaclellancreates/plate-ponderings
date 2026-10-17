@@ -450,4 +450,77 @@ describe("recheckPendingSubjects", () => {
     expect(mocks.check).toHaveBeenCalledTimes(1);
     expect(mocks.persistBlock).toHaveBeenCalledWith(mocks.admin, "credit_block", "r");
   });
+
+  describe("pending stories", () => {
+    const storyRow = {
+      id: "story-1",
+      subject_id: "subj-9",
+      meaning: "Pacific Northwest love.",
+      body: null,
+      subjects: { identity_b: "PNW LV" },
+    };
+    function withStories(stories: unknown[], storyError: unknown = null) {
+      const notifications: unknown[] = [];
+      const updates = vi.fn(() => chain({ data: null, error: null }));
+      mocks.admin.from.mockImplementation((table: string) => {
+        const c = chain(
+          table === "stories"
+            ? { data: stories, error: storyError }
+            : (tables[table] ?? { data: null, error: null }),
+        );
+        if (table === "stories" || table === "profiles") c["update"] = updates;
+        if (table === "notifications")
+          c["insert"] = vi.fn((row: unknown) => {
+            notifications.push(row);
+            return chain({ data: null, error: null });
+          });
+        return c;
+      });
+      return { notifications, updates };
+    }
+
+    it("publishes an approved story, notifies, and asks for a fresh summary", async () => {
+      const { notifications } = withStories([storyRow]);
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(mocks.checkStory).toHaveBeenCalledWith("Pacific Northwest love.", "", "PNW LV");
+      expect(notifications).toEqual([
+        {
+          user_id: "caller",
+          kind: "story_published",
+          subject_id: "subj-9",
+          story_id: "story-1",
+        },
+      ]);
+      expect(mocks.refresh).toHaveBeenCalledWith("subj-9");
+    });
+
+    it("rejects a failed story and notifies without a summary request", async () => {
+      const { notifications } = withStories([storyRow]);
+      mocks.checkStory.mockResolvedValue({ outcome: "rejected", block: null });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 1 });
+      expect(notifications).toEqual([
+        {
+          user_id: "caller",
+          kind: "story_rejected",
+          subject_id: "subj-9",
+          story_id: "story-1",
+        },
+      ]);
+      expect(mocks.refresh).not.toHaveBeenCalled();
+    });
+
+    it("stops on unavailable and on a block", async () => {
+      withStories([storyRow, { ...storyRow, id: "story-2" }]);
+      mocks.checkStory.mockResolvedValue({ outcome: "unavailable", block: "credit_block", runId: "r" });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+      expect(mocks.checkStory).toHaveBeenCalledTimes(1);
+      expect(mocks.persistBlock).toHaveBeenCalledWith(mocks.admin, "credit_block", "r");
+    });
+
+    it("skips a failed pending-story read", async () => {
+      withStories(null as unknown as unknown[], { message: "offline" });
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 0 });
+      expect(mocks.checkStory).not.toHaveBeenCalled();
+    });
+  });
 });
