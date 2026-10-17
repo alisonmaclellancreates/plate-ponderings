@@ -52,15 +52,15 @@ export function HandleCheckStatusPanel({
           >
             Resume handle checks
           </Button>
-          {error && (
-            <p role="alert" className="mt-2">
-              {error}
-            </p>
-          )}
         </div>
       ) : (
         <p role="status" className="mt-2">
           Ready
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="mt-2">
+          {error}
         </p>
       )}
       {success && (
