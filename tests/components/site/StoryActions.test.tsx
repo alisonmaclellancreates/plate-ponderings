@@ -21,6 +21,7 @@ vi.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: m.invalidate }),
 }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/components/site/PlateDetail", () => ({ StoryCard: () => null }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
 vi.mock("@/lib/story-actions.functions", () => ({
   toggleHeart: m.heart,
@@ -77,7 +78,11 @@ describe("HeartButton", () => {
     expect(screen.getByRole("button", { pressed: true })).toHaveTextContent("1heart");
   });
   it.each([
-    ["demo", () => m.heart.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE }), DEMO_MESSAGE],
+    [
+      "demo",
+      () => m.heart.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE }),
+      DEMO_MESSAGE,
+    ],
     ["error", () => m.heart.mockResolvedValue({ outcome: "error" }), ACTION_ERROR],
     ["throw", () => m.heart.mockRejectedValue(new Error("x")), ACTION_ERROR],
   ])("shows a message and keeps the count on %s", async (_l, arrange, text) => {
@@ -111,9 +116,7 @@ describe("StoryMenuActions", () => {
   it("offers only Delete on your own story", async () => {
     render(<StoryMenuActions story={{ ...story, isOwn: true }} plateId="p1" />);
     await openMenu();
-    expect(screen.getAllByRole("menuitem").map((i) => i.textContent)).toEqual([
-      "Delete my story",
-    ]);
+    expect(screen.getAllByRole("menuitem").map((i) => i.textContent)).toEqual(["Delete my story"]);
   });
   it("blocks the author and refreshes stories and summary", async () => {
     m.block.mockResolvedValue({ outcome: "done" });

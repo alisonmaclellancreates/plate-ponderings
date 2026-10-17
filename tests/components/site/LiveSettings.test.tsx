@@ -19,6 +19,7 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => m.navigate,
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
 }));
+vi.mock("@/components/site/SpotPlate", () => ({ ScenicHeader: () => null }));
 vi.mock("@/lib/analytics", () => ({ track: m.track, reset: m.reset }));
 vi.mock("@/lib/story-actions.functions", () => ({
   getBlockedPeople: m.blocked,
@@ -69,7 +70,11 @@ describe("LiveSettings", () => {
     await waitFor(() => expect(m.blocked).toHaveBeenCalled());
   });
   it.each([
-    ["demo", () => m.unblock.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE }), DEMO_MESSAGE],
+    [
+      "demo",
+      () => m.unblock.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE }),
+      DEMO_MESSAGE,
+    ],
     ["error", () => m.unblock.mockResolvedValue({ outcome: "error" }), SETTINGS_ERROR],
     ["throw", () => m.unblock.mockRejectedValue(new Error("x")), SETTINGS_ERROR],
   ])("explains a refused unblock: %s", async (_l, arrange, text) => {
@@ -93,16 +98,23 @@ describe("LiveDeleteConfirm", () => {
     expect(client.getQueryData(BLOCKED_KEY)).toBeUndefined();
   });
   it.each([
-    ["demo", () => m.remove.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE }), DEMO_MESSAGE],
+    [
+      "demo",
+      () => m.remove.mockResolvedValue({ outcome: "demo", message: DEMO_MESSAGE }),
+      DEMO_MESSAGE,
+    ],
     ["error", () => m.remove.mockResolvedValue({ outcome: "error" }), SETTINGS_ERROR],
     ["throw", () => m.remove.mockRejectedValue(new Error("x")), SETTINGS_ERROR],
-  ])("never sends account_deleted when deletion does not succeed: %s", async (_l, arrange, text) => {
-    arrange();
-    renderWith(<LiveDeleteConfirm />);
-    await userEvent.click(screen.getByRole("button", { name: "Delete Account" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent(text);
-    expect(m.track).not.toHaveBeenCalled();
-    expect(m.signOut).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Delete Account" })).toBeEnabled();
-  });
+  ])(
+    "never sends account_deleted when deletion does not succeed: %s",
+    async (_l, arrange, text) => {
+      arrange();
+      renderWith(<LiveDeleteConfirm />);
+      await userEvent.click(screen.getByRole("button", { name: "Delete Account" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(text);
+      expect(m.track).not.toHaveBeenCalled();
+      expect(m.signOut).not.toHaveBeenCalled();
+      expect(screen.getByRole("button", { name: "Delete Account" })).toBeEnabled();
+    },
+  );
 });

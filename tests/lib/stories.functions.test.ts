@@ -372,7 +372,7 @@ describe("getPlateStories failed and empty lookups", () => {
     mocks.admin.auth.getUser.mockResolvedValue({ data: { user: { id: "viewer" } }, error: null });
   };
   type Out = {
-    stories: { id: string; handle: string; hearts: number }[];
+    stories: { id: string; handle: string; hearts: number; isOwn?: boolean; hearted?: boolean }[];
     pending: unknown[];
     ownerHandle: string | null;
   };
@@ -466,6 +466,29 @@ describe("getPlateStories failed and empty lookups", () => {
     expect(result.stories.map((s) => [s.id, s.handle])).toEqual([["s1", "Traveler"]]);
     expect(result.ownerHandle).toBe("Traveler");
     expect(mocks.admin.from).not.toHaveBeenCalledWith("profiles");
+  });
+  it("marks the viewer's own stories and the ones they hearted", async () => {
+    signedIn();
+    tables["stories"] = {
+      data: [
+        {
+          id: "s1",
+          meaning: "M",
+          source: "guess",
+          body: null,
+          author_id: "viewer",
+          published_at: "x",
+        },
+        { id: "s2", meaning: "N", source: "guess", body: null, author_id: "a2", published_at: "y" },
+      ],
+      error: null,
+    };
+    tables["hearts"] = { data: [{ story_id: "s2" }], error: null };
+    const result = (await call(getPlateStories, { plateId: "plate-1" })) as unknown as Out;
+    expect(result.stories.map((s) => [s.id, s.isOwn, s.hearted])).toEqual([
+      ["s1", true, false],
+      ["s2", false, true],
+    ]);
   });
   it("treats an empty stories read as a plate with no stories", async () => {
     tables["stories"] = { data: null, error: null };
