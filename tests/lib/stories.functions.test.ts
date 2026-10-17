@@ -476,7 +476,7 @@ describe("getPlateStories failed and empty lookups", () => {
           meaning: "M",
           source: "guess",
           body: null,
-          author_id: "caller",
+          author_id: "viewer",
           published_at: "x",
         },
         { id: "s2", meaning: "N", source: "guess", body: null, author_id: "a2", published_at: "y" },
