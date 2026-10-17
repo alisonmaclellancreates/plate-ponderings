@@ -12,7 +12,7 @@ import {
   Shuffle,
   type LucideIcon,
 } from "lucide-react";
-import type { Consensus, HowIKnow, Moderation, PlateStatus } from "@/lib/mock-data";
+import type { Consensus, HowIKnow, Moderation, PlateStatus } from "@/lib/domain";
 
 interface BadgeSpec {
   label: string;

@@ -3,7 +3,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AdminPage } from "@/components/site/Admin";
 import { getReportedStories, recheckAllPending, setStoryHidden } from "@/lib/admin.functions";
-import type { ReportedStory } from "@/lib/mock-data";
+import type { ReportedStory } from "@/lib/domain";
 import { track } from "@/lib/analytics";
 import { ADMIN_ERROR, ADMIN_REPORTS_KEY, RECHECK_PAUSED, recheckNote } from "@/lib/admin-copy";
 import { DemoAdminControls } from "./DemoAdminControls";

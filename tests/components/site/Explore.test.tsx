@@ -11,7 +11,7 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 import { Explore } from "@/components/site/Explore";
-import { featuredPlates } from "@/lib/mock-data";
+import { featuredPlates } from "../../fixtures/plates";
 
 it("shows 12 newest plates with CANYONS today, then loads the remaining two", async () => {
   const user = userEvent.setup();

@@ -1,4 +1,4 @@
-import type { HowIKnow } from "@/lib/mock-data";
+import type { HowIKnow } from "@/lib/domain";
 
 export type StoryStep =
   "1" | "1-owner-exists" | "2" | "2-adjust" | "2-review" | "3" | "done" | "checking" | "rejected";
@@ -54,9 +54,4 @@ export const HOW_OPTIONS: { value: HowIKnow; label: string; image: string }[] = 
   { value: "guess", label: "My best guess", image: "/brand/how-i-know-guess-v1.webp" },
 ];
 
-/** Sample answers shown on review and on the rejected step; preview only. */
-export const SAMPLE_STORY = {
-  how: "owner" as HowIKnow,
-  meaning: "Pacific Northwest love.",
-  more: "I grew up near Portland and wanted a plate that says where my heart is.",
-};
+/**

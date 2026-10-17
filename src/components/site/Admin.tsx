@@ -1,5 +1,5 @@
 import { Plate } from "@/components/site/Plate";
-import { REPORTED_STORIES, type ReportedStory } from "@/lib/mock-data";
+import type { ReportedStory } from "@/lib/domain";
 import { REPORT_REASON_OPTIONS } from "@/lib/report-reasons";
 import { AiCheckStatus } from "./AiCheckStatus";
 import type { ReactNode } from "react";
@@ -46,14 +46,12 @@ function ReportRow({
   );
 }
 
-export const SAMPLE_RECHECK_NOTE = "2 items waiting for a safety check.";
-
 export function AdminPage({
-  rows = REPORTED_STORIES,
+  rows = [],
   onToggle,
   onRecheck,
   busy = false,
-  note = SAMPLE_RECHECK_NOTE,
+  note = "",
   message = "",
   demoControls,
 }: {

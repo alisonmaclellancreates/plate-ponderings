@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-import type { Submission } from "@/lib/mock-data";
+import type { Submission } from "../../fixtures/plates";
 
 const m = vi.hoisted(() => ({
   data: { rows: [] as unknown[], unreadCount: 0 },

@@ -12,7 +12,7 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
-import { featuredPlates, featuredProgress, publishedStories } from "@/lib/mock-data";
+import { featuredPlates, featuredProgress, publishedStories } from "../../fixtures/plates";
 
 it.each(featuredPlates())("renders published counts, status and progress for $text", (plate) => {
   render(<FeaturedPlateCard plate={plate} />);

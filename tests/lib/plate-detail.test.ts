@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { orderStories } from "@/lib/plate-detail";
-import type { Story } from "@/lib/mock-data";
+import type { Story } from "@/../tests/fixtures/plates";
 
 describe("orderStories", () => {
   it("never sorts by hearts; ties broken by id", () => {

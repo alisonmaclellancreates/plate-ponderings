@@ -8,7 +8,7 @@ import {
   markSubmissionsRead,
 } from "@/lib/submissions.functions";
 import { SUBMISSIONS_KEY, UNREAD_DOT_KEY } from "@/lib/submissions-queries";
-import type { Submission } from "@/lib/mock-data";
+import type { Submission } from "@/lib/domain";
 import { track } from "@/lib/analytics";
 
 const DISMISS_ERROR = "We couldn't dismiss that right now. Please try again.";

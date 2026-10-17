@@ -3,8 +3,7 @@ import { CheckCircle2, TriangleAlert, ChevronRight, UserCircle2 } from "lucide-r
 import { Plate } from "@/components/site/Plate";
 import { ModerationBadge } from "@/components/site/Badges";
 import { ScenicHeader } from "@/components/site/SpotPlate";
-import { StoryCard } from "@/components/site/PlateDetail";
-import { CURRENT_USER, PROFILE_SAMPLE_STORY, SUBMISSIONS, type Submission } from "@/lib/mock-data";
+import type { Submission } from "@/lib/domain";
 import { formatDay } from "@/lib/format-day";
 import { useEffect, useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -105,7 +104,7 @@ function SubmissionRow({ row, onDismiss }: { row: Submission; onDismiss?: OnDism
 }
 
 export function SubmissionsPage({
-  rows = SUBMISSIONS,
+  rows = [],
   onDismiss,
   message = "",
 }: {
@@ -223,7 +222,7 @@ export function HandleField({
 
 export function ProfilePage() {
   const auth = useAccountAuth();
-  const handle = auth?.account?.handle ?? CURRENT_USER.handle;
+  const handle = auth?.account?.handle ?? "";
   const [draft, setDraft] = useState(handle);
   const [availability, setAvailability] = useState<{
     draft: string;
@@ -272,7 +271,8 @@ export function ProfilePage() {
         await auth.refresh();
         await track("handle_changed", {});
       } else if (result.outcome === "rejected") await track("handle_rejected", {});
-      else if (result.outcome === "demo") await track("demo_write_refused", { action: "save_handle" });
+      else if (result.outcome === "demo")
+        await track("demo_write_refused", { action: "save_handle" });
     } catch {
       setMessage(HANDLE_UNAVAILABLE);
     } finally {
@@ -316,14 +316,6 @@ export function ProfilePage() {
             <p>Your handle appears with your stories and the plates you've spotted.</p>
           </aside>
         </div>
-        <section aria-labelledby="how-appear">
-          <h2 id="how-appear" className="font-display text-2xl text-navy">
-            How you'll appear
-          </h2>
-          <article data-testid="sample-story" className="mt-3">
-            <StoryCard story={{ ...PROFILE_SAMPLE_STORY, handle }} />
-          </article>
-        </section>
       </div>
     </main>
   );

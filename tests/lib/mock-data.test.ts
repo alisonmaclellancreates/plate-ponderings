@@ -6,7 +6,7 @@ import {
   featuredPlates,
   featuredProgress,
   publishedStories,
-} from "@/lib/mock-data";
+} from "@/../tests/fixtures/plates";
 import { plateFontSize, plateTone } from "@/lib/jurisdictions";
 
 const find = (text: string) => {

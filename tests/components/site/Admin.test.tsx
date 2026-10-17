@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 
 import { AdminPage } from "@/components/site/Admin";
-import { REPORTED_STORIES } from "@/lib/mock-data";
+import { REPORTED_STORIES } from "../../fixtures/plates";
 
 describe("AdminPage", () => {
   it("shows the heading and the recheck row", () => {

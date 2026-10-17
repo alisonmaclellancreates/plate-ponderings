@@ -109,7 +109,7 @@ describe("Spot outcome previews", () => {
   });
 
   it("attributes the owner story in the existing-plate preview", async () => {
-    const { PLATES } = await import("@/lib/mock-data");
+    const { PLATES } = await import("../../fixtures/plates");
     const plate = PLATES.find((record) => record.slug === "bc-lv2code");
     const story = plate?.stories[0];
     if (!plate || !story) throw new Error("Existing plate fixture missing");

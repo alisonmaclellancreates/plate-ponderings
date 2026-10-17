@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { Consensus } from "./mock-data";
+import type { Consensus } from "./domain";
 import { consensusFor, isCatchingUp } from "./summary";
 
 export type PlateSummaryVersion = {

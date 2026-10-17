@@ -48,7 +48,7 @@ vi.mock("@/lib/accounts.functions", () => ({
 }));
 
 import { HANDLE_HELP, ProfilePage, SubmissionsPage } from "@/components/site/Account";
-import { PLATES, SUBMISSIONS } from "@/lib/mock-data";
+import { PLATES, SUBMISSIONS } from "../../fixtures/plates";
 
 describe("SubmissionsPage", () => {
   it("marks every View Plate link as coming from submissions", () => {

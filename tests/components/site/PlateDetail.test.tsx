@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlateDetail, Stories, StoryCard } from "@/components/site/PlateDetail";
-import type { Story } from "@/lib/mock-data";
+import type { Story } from "../../fixtures/plates";
 
 vi.mock("@/lib/summaries.functions", () => ({ getPlateSummary: () => Promise.resolve(null) }));
-vi.mock("@/lib/mock-data", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/lib/mock-data")>();
+vi.mock("../../fixtures/plates", async (importOriginal) => {
+  const original = await importOriginal<typeof import("../../fixtures/plates")>();
   const base = original.PLATES.find((plate) => plate.slug === "ut-canyons");
   if (!base) throw new Error("Missing Utah preview fixture");
   return {

@@ -8,7 +8,7 @@ import {
   openFeatured,
   previewFeatured,
 } from "@/lib/featured";
-import { PLATES } from "@/lib/mock-data";
+import { PLATES } from "@/../tests/fixtures/plates";
 
 it.each([
   [5, 0, "Still a mystery"],

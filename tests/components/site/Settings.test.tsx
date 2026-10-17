@@ -11,7 +11,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 import { DeleteConfirmPage, SettingsPage } from "@/components/site/Settings";
-import { BLOCKED_HANDLES, BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/mock-data";
+import { BLOCKED_HANDLES, BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "../../fixtures/plates";
 
 describe("SettingsPage", () => {
   it("lists each blocked handle with an Unblock button and the blocking explanation", () => {

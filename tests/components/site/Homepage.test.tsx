@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Homepage, PlateOfTheDay } from "@/components/site/Homepage";
 import { HEADLINES, ROTATE_MS } from "@/lib/headlines";
-import type { PlateRecord } from "@/lib/mock-data";
+import type { PlateRecord } from "../../fixtures/plates";
 import type { ReactNode } from "react";
 import { track } from "@/lib/analytics";
 import { QueryClient } from "@tanstack/react-query";
@@ -349,7 +349,7 @@ describe("Homepage", () => {
     },
   );
   it("omits only the daily band when the preview collection is empty", async () => {
-    const { PLATES } = await import("@/lib/mock-data");
+    const { PLATES } = await import("../../fixtures/plates");
     const saved = PLATES.splice(0);
     try {
       render(<Homepage />);

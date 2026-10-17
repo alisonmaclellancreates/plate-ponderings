@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, UserRound, X } from "lucide-react";
-import { CURRENT_USER } from "@/lib/mock-data";
-import type { HeaderMode } from "@/lib/header-mode";
 import { useAccountAuth } from "@/lib/account-auth";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +20,7 @@ const headerFocus = "focus-visible:outline-none focus-visible:ring-2 focus-visib
 
 function Avatar({
   showHandle,
-  handle = CURRENT_USER.handle,
+  handle = "",
   dot = false,
 }: {
   showHandle: boolean;
@@ -49,50 +47,6 @@ function Avatar({
         {handle}
       </span>
     </span>
-  );
-}
-
-/** Demo profile menu, shown open in the preview so Exit Demo is visible. */
-function DemoProfile({ showHandle }: { showHandle: boolean }) {
-  const [open, setOpen] = useState(true);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  useMenuDismiss(open, setOpen, containerRef);
-  return (
-    <div className="relative" ref={containerRef}>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={showHandle ? "profile-menu" : "profile-menu-mobile"}
-        aria-label={showHandle ? undefined : `${CURRENT_USER.handle} menu`}
-        onClick={() => setOpen((v) => !v)}
-        className={`rounded-full ${headerFocus}`}
-      >
-        <Avatar showHandle={showHandle} />
-      </button>
-      {open && (
-        <ul
-          id={showHandle ? "profile-menu" : "profile-menu-mobile"}
-          aria-label="Profile"
-          className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
-        >
-          <li>
-            <Link to="/submissions" className="block px-4 py-2 hover:bg-cream">
-              Your Submissions
-            </Link>
-          </li>
-          <li>
-            <Link to="/profile" className="block px-4 py-2 hover:bg-cream">
-              Your Profile
-            </Link>
-          </li>
-          <li className="border-t border-border">
-            <Link to="/" className="block px-4 py-2 font-semibold hover:bg-cream">
-              Exit Demo
-            </Link>
-          </li>
-        </ul>
-      )}
-    </div>
   );
 }
 
@@ -160,7 +114,7 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
               Your Profile
             </Link>
           </li>
-          {auth.account.isAdmin && (
+          {auth.account.isAdmin && !auth.account.isDemo && (
             <li>
               <Link
                 to="/admin"
@@ -193,10 +147,10 @@ export function MemberProfile({ showHandle }: { showHandle: boolean }) {
     </div>
   );
 }
-export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
+export function SiteHeader() {
   const auth = useAccountAuth();
-  const mode = previewMode ?? (auth?.account ? "member" : "signed-out");
-  const demoEnabled = previewMode !== undefined || auth?.demoEnabled;
+  const mode = auth?.account ? (auth.account.isDemo ? "demo" : "member") : "signed-out";
+  const demoEnabled = auth?.demoEnabled;
   const [open, setOpen] = useState(false);
   const location = useRouterState({ select: (state) => state.location });
   useEffect(() => {
@@ -240,10 +194,6 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
                 </Link>
               )}
             </>
-          ) : mode === "demo" ? (
-            <DemoProfile showHandle />
-          ) : previewMode ? (
-            <Avatar showHandle />
           ) : (
             <MemberProfile showHandle />
           )}
@@ -253,10 +203,6 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
             <Link to="/sign-in" search={{ returnTo: "/" }} className={signIn}>
               Sign in
             </Link>
-          ) : mode === "demo" ? (
-            <DemoProfile showHandle={false} />
-          ) : previewMode ? (
-            <Avatar showHandle={false} />
           ) : (
             <MemberProfile showHandle={false} />
           )}

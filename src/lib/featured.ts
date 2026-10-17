@@ -1,5 +1,4 @@
-import type { FeaturedPlate, PlateRecord, PlateStatus } from "./mock-data";
-import { plateStatus, publishedStories } from "./mock-data";
+import type { PlateStatus } from "./domain";
 import { storyCount } from "./story-count";
 import { track } from "./analytics";
 
@@ -12,22 +11,6 @@ export type FeaturedDisplay = {
   atPick: number;
   status: PlateStatus;
 };
-
-export function previewFeatured(plate: PlateRecord): FeaturedDisplay {
-  return {
-    slug: plate.slug,
-    jurisdiction: plate.jurisdiction,
-    text: plate.text,
-    day: plate.plateOfTheDay ?? "",
-    count: publishedStories(plate).length,
-    atPick: plate.featuredStoryCount ?? 0,
-    status: plateStatus(plate),
-  };
-}
-
-export function featuredDisplay(plate: FeaturedPlate | FeaturedDisplay): FeaturedDisplay {
-  return "day" in plate ? plate : previewFeatured(plate);
-}
 
 export function featuredProgress(atPick: number, now: number): string {
   if (now === 0) return "Still a mystery";
