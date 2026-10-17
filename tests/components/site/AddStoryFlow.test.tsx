@@ -282,6 +282,26 @@ describe("AddStoryFlow", () => {
     });
   });
 
+  it.each(["rejected", "error", "validation"] as const)(
+    "a %s outcome forgets the deleted photo, so a retry never sends its path",
+    async (first) => {
+      m.submit.mockResolvedValueOnce({ outcome: first });
+      const user = userEvent.setup();
+      render(<AddStoryFlow plateId="p1" />);
+      await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+      await addPhoto(user);
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(1));
+      expect(m.submit.mock.calls[0][0].data.photoPath).toBe("user-1/photo.jpg");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+      await user.click(screen.getByRole("button", { name: "Submit Story" }));
+      await waitFor(() => expect(m.submit).toHaveBeenCalledTimes(2));
+      expect(m.submit.mock.calls[1][0].data.photoPath).toBe("");
+    },
+  );
+
   it("detection unavailable goes straight to draw-a-box with the no-box message", async () => {
     m.detect.mockResolvedValue({ outcome: "unavailable" });
     const user = userEvent.setup();
