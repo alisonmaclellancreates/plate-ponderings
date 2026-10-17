@@ -288,7 +288,10 @@ describe("AddStoryFlow", () => {
       m.submit.mockResolvedValueOnce({ outcome: first });
       const user = userEvent.setup();
       render(<AddStoryFlow plateId="p1" />);
-      await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+      await user.type(
+        screen.getByLabelText(/What do you think it means/),
+        "Pacific Northwest love.",
+      );
       await addPhoto(user);
       await user.click(screen.getByRole("button", { name: "Next" }));
       await user.click(screen.getByRole("button", { name: "Submit Story" }));
