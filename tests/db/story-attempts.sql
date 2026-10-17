@@ -33,6 +33,14 @@ begin
     raise exception 'authenticated should not execute consume_story_save_attempt';
   exception when insufficient_privilege then null;
   end;
+  -- Stories are written only by the addStory server function; a browser
+  -- insert would skip the check, validation and rate limit.
+  begin
+    insert into public.stories (subject_id, author_id, meaning, source, status)
+    values (gen_random_uuid(), auth.uid(), 'Sneaky published story', 'guess', 'published');
+    raise exception 'authenticated should not insert into stories';
+  exception when insufficient_privilege then null;
+  end;
 end $$;
 reset role;
 
