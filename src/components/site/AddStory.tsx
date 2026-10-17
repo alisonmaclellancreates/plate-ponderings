@@ -280,7 +280,7 @@ function Editor({ title, children }: { title: string; children: ReactNode }) {
 function AdjustEditor() {
   const handle = "absolute size-3 rounded-sm border-2 border-navy bg-cream";
   return (
-    <Editor title="Keep the plate clear">
+    <Editor title="Adjust the plate area">
       <div className="relative overflow-hidden rounded-lg">
         <img
           src={STORY_PHOTO_PLACEHOLDER}
