@@ -42,6 +42,17 @@ function routerAt(path: string) {
   });
 }
 
+it.each(["explore", "homepage-featured"])(
+  "resolves /previews/%s as an unnested sample page",
+  async (page) => {
+    const router = routerAt(`/previews/${page}`);
+    await router.load();
+    expect(router.state.matches.at(-1)?.routeId).toBe(`/previews_/${page}`);
+    expect(router.state.matches.map((match) => match.routeId)).not.toContain("/previews");
+    expect(router.state.matches.at(-1)?.status).toBe("success");
+  },
+);
+
 it("resolves /previews/account to its own route, not the /previews list", async () => {
   const router = routerAt("/previews/account");
   await router.load();
