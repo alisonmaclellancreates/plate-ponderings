@@ -59,9 +59,9 @@ Search hint: "Spaces and dashes are ignored". Symbol plates are a known limitati
 |---|---|
 | No published stories | Mystery |
 | Published stories, no owner story | Interpreted |
-| An owner story exists | Owner weighed in |
+| An owner story exists | Owner claim |
 
-Status-strip owner line: "No owner yet", or "Owner: {handle}".
+Status-strip owner line: "No owner claim yet", or "Says it's their plate: {handle}".
 
 ## How do you know
 

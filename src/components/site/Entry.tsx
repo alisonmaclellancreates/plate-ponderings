@@ -7,12 +7,17 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccountAuth } from "@/lib/account-auth";
 import {
+  plateIdOrNull,
   safeReturnPath,
+  storyReturnPath,
   signupErrorMessage,
   SIGN_IN_ERROR,
   SIGN_UP_ERROR,
 } from "@/lib/account-rules";
-import { useNavigate } from "@tanstack/react-router";
+import { Navigate, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getPlate } from "@/lib/plates.functions";
 
 const field = "h-11 w-full rounded-lg border border-input bg-card px-3";
 
@@ -286,10 +291,53 @@ const CHOICES = [
   },
 ] as const;
 
-export function SignInPromptPage() {
+/**
+ * The sign-in prompt for one real plate. It looks the plate up by id (published only) and
+ * never falls back to another plate: a missing, malformed or unpublished id shows a way on instead.
+ */
+export function SignInPromptPage({ plateId }: { plateId?: string | undefined } = {}) {
+  const id = plateIdOrNull(plateId);
+  const lookup = useServerFn(getPlate);
+  const auth = useAccountAuth();
+  const { data, isPending } = useQuery({
+    queryKey: ["sign-in-prompt-plate", id],
+    queryFn: () => lookup({ data: { id: id as string } }),
+    enabled: id !== null,
+  });
+  const plate = id ? (data?.plate ?? null) : null;
+  if (plate && auth?.account)
+    return (
+      <Navigate to="/story/$step" params={{ step: "1" }} search={{ plate: plate.id }} replace />
+    );
+  if (id && isPending) return <main className="mx-auto max-w-4xl px-4 py-6 sm:py-10" />;
+  if (!plate)
+    return (
+      <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:py-10">
+        <h1 className="font-display text-3xl text-navy sm:text-4xl">Add Your Story</h1>
+        <section className="brand-card mx-auto max-w-lg p-6 sm:p-8">
+          <h2 className="font-display text-2xl text-navy">We couldn't find that plate.</h2>
+          <p className="mt-2">Look it up again, or spot it if it's new to the collection.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link to="/" hash="plate-search" className="brand-btn brand-btn-coral">
+              Look Up a Plate
+            </Link>
+            <Link to="/spot" className="brand-btn brand-btn-outline">
+              Spot a Plate
+            </Link>
+          </div>
+          <p className="mt-6 text-center">
+            <Link to="/explore" className={link}>
+              Explore
+            </Link>
+          </p>
+        </section>
+      </main>
+    );
+
+  const returnTo = storyReturnPath(plate.id);
   return (
     <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:py-10">
-      <PlateHeader />
+      <PlateHeader plate={plate} />
       <h1 className="font-display text-3xl text-navy sm:text-4xl">Add Your Story</h1>
       <section aria-labelledby="prompt-title" className="brand-card mx-auto max-w-lg p-6 sm:p-8">
         <h2 id="prompt-title" className="font-display text-2xl text-navy">
@@ -303,7 +351,7 @@ export function SignInPromptPage() {
             <li key={c.to}>
               <Link
                 to={c.to}
-                search={c.to === "/demo" ? {} : { returnTo: "/story/1" }}
+                search={c.to === "/demo" ? {} : { returnTo }}
                 aria-describedby={`cap-${c.to.slice(1)}`}
                 className={`brand-btn ${c.cls} w-full`}
               >
@@ -319,7 +367,7 @@ export function SignInPromptPage() {
           ))}
         </ul>
         <p className="mt-6 text-center">
-          <Link to="/plate/$state" params={{ state: "pnw-lv" }} className={link}>
+          <Link to="/plate/$state" params={{ state: plate.id }} className={link}>
             Back to this plate
           </Link>
         </p>

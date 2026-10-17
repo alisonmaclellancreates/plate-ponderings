@@ -164,19 +164,22 @@ describe("RealPlateDetail", () => {
     expect(screen.getByText(/Only you can see this for now/)).toBeInTheDocument();
   });
 
-  it("offers Add Your Story as a link only to signed-in visitors", async () => {
-    const { unmount } = render(<RealPlateDetail plate={plate} />);
+  it("sends signed-out visitors from both Add Your Story buttons to the sign-in prompt for this plate", async () => {
+    m.stories = { ...(m.stories as object), stories: [story("1")], total: 1, storyCount: 1 };
+    render(<RealPlateDetail plate={plate} />);
     await waitFor(() => expect(m.getUser).toHaveBeenCalled());
-    expect(screen.queryByRole("link", { name: "Add Your Story" })).toBeNull();
-    unmount();
+    const links = screen.getAllByRole("link", { name: "Add Your Story" });
+    expect(links).toHaveLength(2);
+    for (const link of links) expect(link).toHaveAttribute("href", "/sign-in-prompt?plate=p1");
+  });
+
+  it("sends signed-in visitors from both buttons straight to the story form", async () => {
     m.getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
     render(<RealPlateDetail plate={plate} />);
     await waitFor(() => {
       const links = screen.getAllByRole("link", { name: "Add Your Story" });
-      expect(links.length).toBeGreaterThan(0);
-      for (const link of links) {
-        expect(link).toHaveAttribute("href", "/story/1?plate=p1");
-      }
+      expect(links).toHaveLength(2);
+      for (const link of links) expect(link).toHaveAttribute("href", "/story/1?plate=p1");
     });
   });
 
@@ -228,5 +231,6 @@ describe("RealPlateDetail", () => {
     resolve({ data: { user: { id: "u1" } } });
     await Promise.resolve();
     expect(screen.queryByRole("link", { name: "Add Your Story" })).toBeNull();
+    expect(m.getUser).toHaveBeenCalledTimes(1);
   });
 });

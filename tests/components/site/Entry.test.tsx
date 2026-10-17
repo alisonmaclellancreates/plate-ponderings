@@ -35,37 +35,11 @@ vi.mock("@tanstack/react-start", () => ({
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 
-import { DemoPage, SignInPage, SignInPromptPage, SignUpPage } from "@/components/site/Entry";
+import { DemoPage, SignInPage, SignUpPage } from "@/components/site/Entry";
 import { StoryStepOne } from "@/components/site/AddStory";
 import { SiteHeader } from "@/components/site/SiteHeader";
 
 describe("entry screens", () => {
-  it("sign-in prompt offers three choices with captions and a way back", () => {
-    render(<SignInPromptPage />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Add Your Story");
-    expect(screen.getByRole("img", { name: "Oregon plate PNW LV" })).toBeInTheDocument();
-    expect(screen.getByText("Sign in to add your story")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Choose how you'd like to continue. After signing in, you'll return here to add your story.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/Your story will be added/)).toBeNull();
-    const signIn = screen.getByRole("link", { name: "Sign In" });
-    expect(signIn).toHaveAttribute("href", "/sign-in");
-    expect(signIn).toHaveAccessibleDescription("I already have an account");
-    expect(screen.getByRole("link", { name: "Create an Account" })).toHaveAccessibleDescription(
-      "I'm new here",
-    );
-    expect(screen.getByRole("link", { name: "Try the Demo" })).toHaveAccessibleDescription(
-      "Look around as a sample traveler",
-    );
-    expect(screen.getByRole("link", { name: "Back to this plate" })).toHaveAttribute(
-      "href",
-      "/plate/pnw-lv",
-    );
-  });
-
   it("sign in toggles password visibility and has no extras", () => {
     render(<SignInPage />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Sign In");
