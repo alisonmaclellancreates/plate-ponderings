@@ -1,5 +1,13 @@
 # Step 11: GitHub CI and Codecov
 
+# Step 43c: shared plate detail frame
+
+- [ ] Approve the presentation-only PlateFrame plan.
+- [ ] Extract the existing frame and show every full jurisdiction beneath the plate, aria-hidden, in both detail pages only.
+- [ ] Test shared frame and both consumers, including Newfoundland and Labrador and Utah and accessibility.
+- [ ] Verify preview and real detail pages at 1280px and 360px without changing persistent data or other plate drawings.
+- [ ] Run app suite and bun run lint; resolve changed-file errors; read current PR Codecov patch coverage and require 100% before claiming completion.
+
 # Step 43b: retired columns and missing index only
 
 - [x] Confirm no active code or tests read the deprecated handle_check_* columns; matches outside generated types are historical migrations and documentation only.
