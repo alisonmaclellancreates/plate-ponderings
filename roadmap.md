@@ -74,6 +74,9 @@
 
 # Step 42: accounts, handles and session-aware header
 
+- [ ] Rowan review: full-width mobile handle input with feedback below, actionable validation, truncated mobile header handle.
+- [ ] Grant Traveler3374 admin access and verify Handle check status.
+- [ ] Capture saved/rejected handle and password/account error review states, distinguishing live results from simulated provider responses.
 - [x] Patch coverage: 533 tests pass; all eight reported files have 100% statement/branch/line coverage locally; no production branches removed. Maintained lint 0 errors/0 warnings; build OK.
 - [ ] Patch coverage: re-read PR #86 Codecov after follow-up sync and CI. Blocker: latest completed CI predates these tests; current PR report remains 94.60154%, not a result for this follow-up. GitHub read access is verified.
 - [x] Pre-merge: separate the account hook, resolve the provider effect dependency without suppression; maintained files have 0 errors/0 warnings, repository-wide 0 errors/6 existing UI warnings. All 509 tests pass; build OK; protected profile redirect verified.

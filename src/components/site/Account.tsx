@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAccountAuth } from "@/lib/account-auth";
 import { checkHandle, saveHandle } from "@/lib/accounts.functions";
-import { handleFormatValid, HANDLE_UNAVAILABLE, DEMO_MESSAGE } from "@/lib/account-rules";
+import { handleFormatValid, handleValidationMessage, HANDLE_UNAVAILABLE, DEMO_MESSAGE } from "@/lib/account-rules";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
 
@@ -181,7 +181,7 @@ export function ProfilePage() {
                 <label htmlFor="handle" className="block font-semibold text-navy">
                   Handle
                 </label>
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="grid min-w-0 grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
                   <input
                     id="handle"
                     name="handle"
@@ -196,20 +196,20 @@ export function ProfilePage() {
                         ? "handle-status handle-help"
                         : "handle-help"
                     }
-                    className="min-w-0 flex-1 rounded-md border border-border bg-card px-3 py-2"
+                    className="w-full min-w-0 rounded-md border border-border bg-card px-3 py-2"
                   />
                   {available ? (
-                    <span id="handle-status" className="brand-badge" data-tone="green">
+                    <span id="handle-status" className="brand-badge w-fit" data-tone="green">
                       <CheckCircle2 aria-hidden className="size-4 shrink-0" />
                       Available
                     </span>
                   ) : (
-                    <span id="handle-status" className="text-sm text-muted-foreground">
+                    <span id="handle-status" className="min-w-0 text-sm text-muted-foreground sm:max-w-48">
                       {auth?.account?.isDemo
                         ? DEMO_MESSAGE
                         : handleFormatValid(draft)
                           ? ""
-                          : "That handle couldn't be used."}
+                          : handleValidationMessage(draft)}
                     </span>
                   )}
                 </div>

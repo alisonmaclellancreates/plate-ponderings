@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   handleFormatValid,
+  handleValidationMessage,
   HANDLE_REJECTED,
   HANDLE_UNAVAILABLE,
   RATE_LIMIT_MESSAGE,
@@ -73,7 +74,7 @@ export const saveHandle = createServerFn({ method: "POST" })
     if (attempt.error) return { outcome: "unavailable" as const, message: HANDLE_UNAVAILABLE };
     if (!attempt.data) return { outcome: "rate_limited" as const, message: RATE_LIMIT_MESSAGE };
     if (!handleFormatValid(data.handle))
-      return { outcome: "rejected" as const, message: HANDLE_REJECTED };
+      return { outcome: "rejected" as const, message: handleValidationMessage(data.handle) };
     const taken = await supabaseAdmin
       .from("profiles")
       .select("id")
