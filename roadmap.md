@@ -1,15 +1,14 @@
 # Step 51: demo, seed reset and removal of scaffolding
 
-- [x] Read step brief; move original seed photos to docs/seed-photos and delete measuring copies.
-- [x] Plan and full proposed 0019 approved by Alison at 22:37 UTC.
-- [ ] Apply approved 0019 verbatim through migration tool, then run database tests in rollback before application implementation.
-- [ ] Incorporate corrected literal counts (15 published stories, 9 summaries, 1 pending and 1 rejected); refuse reset before deletion when demo_today is empty.
-- [ ] Propose full 0019 SQL; process seed JPEGs at ≤1200 px/0.85, report individual/total bytes and stop before bundling if total exceeds 1 MB.
-- [ ] Build demo/refusals, frozen date and reset/seed before removing previews last.
-- [ ] Build demo login/exits/banner, audit write refusals and exclude demo rechecks/read updates.
-- [ ] Implement shared effective today, admin-only reset and sequential missing-guess fill.
-- [ ] Process seed JPEGs, seed exact docs/seed.md content and remove mock/preview scaffolding.
-- [ ] Run related tests and lint; approved database tests in rollback with cleanup readback. No destructive reset or real AI run without explicit request.
+- [x] Apply approved 0019 unchanged; rerun 11 existing database tests in rollbacks and verify fixture cleanup.
+- [x] Add and run demo-reset rollback checks for frozen date, leases, refusals and grants.
+- [x] Build demo login/banner/exits, server/database refusals and recheck/read exclusions.
+- [x] Implement shared effective date, non-demo admin reset and sequential missing-guess fill.
+- [x] Process five seed JPEGs at 1200px/0.85, total 333,591 bytes; preserve literal docs/seed.md content.
+- [x] Remove mock data/media and preview-only routes last; retain shared live states.
+- [x] Write docs/step51-demo-write-audit.md and mocked repeated-reset/account/media tests.
+- [x] Final related run: 791 tests across 75 files passed; lint zero errors, six existing UI warnings.
+- [ ] Live demo/reset/AI verification: awaits Alison's setup and separate explicit permission; no destructive reset or real AI authorized.
 
 # Step 48c: header menu exits and submissions returns
 

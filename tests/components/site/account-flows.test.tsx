@@ -302,6 +302,7 @@ it("a successful sign-out leaves the menu open until the route change closes it"
 it.each(["Explore", "Spot a Plate", "About", "Try the Demo"])(
   "closes the mobile menu immediately when %s is chosen",
   (label) => {
+    m.demoEnabled = true;
     m.signedOut = true;
     render(<SiteHeader />);
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));

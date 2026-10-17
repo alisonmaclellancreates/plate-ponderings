@@ -222,6 +222,18 @@ function MysteryPrompt({
   );
 }
 
+function PendingPanel() {
+  return (
+    <div role="status" className="flex gap-3 rounded-xl bg-slate p-4">
+      <Hourglass aria-hidden className="size-5 shrink-0 text-navy" />
+      <p>
+        <span className="font-semibold">Your story is waiting for its check.</span> Only you can see
+        this for now.
+      </p>
+    </div>
+  );
+}
+
 function RealStoryCard({ story, plateId }: { story: PlateStory; plateId: string }) {
   const owner = story.source === "owner";
   const zoom = Boolean(story.photo && story.photoBox);

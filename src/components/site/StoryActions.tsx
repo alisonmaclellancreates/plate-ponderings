@@ -45,8 +45,7 @@ export function HeartButton({ story, plateId }: { story: Story; plateId: string 
       if (result.outcome === "demo") {
         setMessage(result.message);
         void track("demo_write_refused", { action: next ? "heart" : "unheart" });
-      }
-      else if (result.outcome === "error") setMessage(ACTION_ERROR);
+      } else if (result.outcome === "error") setMessage(ACTION_ERROR);
       else {
         setHearted(next);
         setCount((c) => c + (next ? 1 : -1));
@@ -112,8 +111,7 @@ export function StoryMenuActions({ story, plateId }: { story: Story; plateId: st
       if (result.outcome === "demo") {
         setMessage(result.message ?? "");
         void track("demo_write_refused", { action: actionName });
-      }
-      else if (result.outcome === "error" || result.outcome === "validation")
+      } else if (result.outcome === "error" || result.outcome === "validation")
         setMessage(ACTION_ERROR);
       else done(result);
     } catch {
