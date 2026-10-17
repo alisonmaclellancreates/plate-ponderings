@@ -86,11 +86,10 @@ beforeEach(() => {
   mocks.admin.from.mockImplementation((table: string) => {
     const c = chain(tables[table] ?? { data: null, error: null });
     if (table === "subjects" || table === "profiles") {
-      const insertOrUpdate = vi.fn(() =>
+      c["insert"] = vi.fn(() =>
         chain(table === "subjects" ? insertResult : { data: null, error: null }),
       );
-      c["insert"] = insertOrUpdate;
-      c["update"] = insertOrUpdate;
+      c["update"] = vi.fn(() => chain({ data: [{ id: "row-1" }], error: null }));
     }
     return c;
   });
@@ -472,7 +471,7 @@ describe("recheckPendingSubjects", () => {
         error: null,
       };
       const notifications: unknown[] = [];
-      const updates = vi.fn(() => chain({ data: null, error: null }));
+      const updates = vi.fn(() => chain({ data: [{ id: "row-1" }], error: null }));
       mocks.admin.from.mockImplementation((table: string) => {
         const c = chain(
           table === "stories"
