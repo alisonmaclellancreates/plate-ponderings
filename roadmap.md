@@ -1,5 +1,6 @@
 # Step 46: real daily pick, featured shelf and archive
 
+- [ ] Contain featured read failures: omit homepage bands; keep Explore with an inline retry; run changed tests and lint.
 - [x] Alison approved the plan and three service-only functions; singular daily copy retained and explore_filtered excluded entirely.
 - [x] Applied approved migration 0013; built atomic UTC selection, live featured pages, batch visible-summary reads and privacy-scoped analytics.
 - [x] Changed tests: 96 passed across 10 files. Lint: zero errors, six existing UI warnings. All seven database test files passed through the privileged tool; fixture readback zero. Automatic build OK; no manual full suite, coverage, typecheck, build, browser or AI checks.
