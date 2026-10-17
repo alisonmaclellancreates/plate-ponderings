@@ -595,6 +595,7 @@ describe("getPlateStories failed and empty lookups", () => {
         isOwn: false,
         hearted: false,
         photo: null,
+        photoBox: null,
       },
     ]);
     expect(result.pending).toEqual([]);
@@ -637,6 +638,32 @@ describe("getPlateStories failed and empty lookups", () => {
     ]);
     expect(mocks.admin.storage.from).toHaveBeenCalledWith("story-photos");
     expect(createSignedUrls).toHaveBeenCalledWith(["a1/uuid.jpg"], 900);
+  });
+  it("returns a signed photo without a box for a story saved before boxes", async () => {
+    tables["stories"] = {
+      data: [
+        {
+          id: "s1",
+          meaning: "M",
+          source: "guess",
+          body: null,
+          author_id: "a1",
+          published_at: "x",
+          photo_path: "a1/uuid.jpg",
+          photo_box: null,
+        },
+      ],
+      error: null,
+    };
+    const createSignedUrls = vi.fn().mockResolvedValue({
+      data: [{ signedUrl: "https://signed.example/old.jpg" }],
+      error: null,
+    });
+    mocks.admin.storage.from.mockReturnValue({ createSignedUrls });
+    const result = await call(getPlateStories, { plateId: "plate-1" });
+    expect(result["stories"]).toEqual([
+      expect.objectContaining({ photo: "https://signed.example/old.jpg", photoBox: null }),
+    ]);
   });
   it.each([null, [], [{ signedUrl: "" }]])(
     "omits a photo when signing yields no URL: %o",

@@ -177,3 +177,43 @@ describe("decodePhoto with a rotated image", () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe("normalizeSubmittedBox", () => {
+  it("rounds to four places and keeps a box touching the right and bottom edges", () => {
+    expect(normalizeSubmittedBox({ x: 0.700004, y: 0.83333, w: 0.300004, h: 0.166674 })).toEqual({
+      x: 0.7,
+      y: 0.8333,
+      w: 0.3,
+      h: 0.1667,
+    });
+  });
+  it("clamps negative origins and overflowing sizes into the photo", () => {
+    expect(normalizeSubmittedBox({ x: -0.01, y: -0.2, w: 1.5, h: 0.5 })).toEqual({
+      x: 0,
+      y: 0,
+      w: 1,
+      h: 0.5,
+    });
+  });
+  it.each([
+    null,
+    "box",
+    { x: 0.1, y: 0.1, w: 0.1 },
+    { x: 0.1, y: 0.1, w: Number.NaN, h: 0.1 },
+    { x: 0.1, y: 0.1, w: "0.1", h: 0.1 },
+    { x: 0.1, y: 0.1, w: 0, h: 0.1 },
+    { x: 0.1, y: 0.1, w: 0.1, h: -0.1 },
+    { x: 1, y: 0, w: 0.1, h: 0.1 },
+  ])("refuses %o", (input) => {
+    expect(normalizeSubmittedBox(input)).toBeNull();
+  });
+});
+
+describe("boxFromColumn", () => {
+  it("reads a stored box and refuses missing or malformed columns", () => {
+    expect(boxFromColumn([0.1, 0.2, 0.3, 0.4])).toEqual({ x: 0.1, y: 0.2, w: 0.3, h: 0.4 });
+    expect(boxFromColumn(null)).toBeNull();
+    expect(boxFromColumn(undefined)).toBeNull();
+    expect(boxFromColumn([0.1, 0.2])).toBeNull();
+  });
+});
