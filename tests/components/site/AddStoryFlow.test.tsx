@@ -70,6 +70,8 @@ vi.mock("@/lib/photo-canvas", () => ({
   decodePhoto: m.decode,
   renderBlurredPhoto: m.renderBlurred,
   canvasToJpegBlob: m.toJpeg,
+  toDetectDataUrl: vi.fn(() => "data:image/jpeg;base64,detect"),
+  blobToDataUrl: vi.fn(async () => "data:image/jpeg;base64,processed"),
 }));
 
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
