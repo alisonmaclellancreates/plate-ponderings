@@ -74,9 +74,9 @@ it("two handle fields on one page keep their own names and descriptions", () => 
   );
   const inputs = screen.getAllByLabelText("Handle");
   expect(inputs).toHaveLength(2);
-  expect(inputs[0].id).not.toBe(inputs[1].id);
-  const first = inputs[0].getAttribute("aria-describedby")!.split(" ");
-  const second = inputs[1].getAttribute("aria-describedby")!.split(" ");
+  expect(inputs[0]!.id).not.toBe(inputs[1]!.id);
+  const first = inputs[0]!.getAttribute("aria-describedby")!.split(" ");
+  const second = inputs[1]!.getAttribute("aria-describedby")!.split(" ");
   for (const id of first) expect(second).not.toContain(id);
   const described = (el: HTMLElement) =>
     el
@@ -84,9 +84,9 @@ it("two handle fields on one page keep their own names and descriptions", () => 
       .split(" ")
       .map((id) => document.getElementById(id)?.textContent ?? "")
       .join(" ");
-  expect(described(inputs[0])).toContain("reserved");
-  expect(described(inputs[0])).not.toContain("letters, numbers, and underscores only");
-  expect(described(inputs[1])).toContain("Use letters, numbers, and underscores only.");
+  expect(described(inputs[0]!)).toContain("reserved");
+  expect(described(inputs[0]!)).not.toContain("letters, numbers, and underscores only");
+  expect(described(inputs[1]!)).toContain("Use letters, numbers, and underscores only.");
 });
 
 it("account errors use coral text with a decorative icon; success stays calm", () => {

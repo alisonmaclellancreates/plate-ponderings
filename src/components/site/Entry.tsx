@@ -40,7 +40,7 @@ function EntryShell({
   );
 }
 
-function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: string }) {
+function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: string | undefined }) {
   const [shown, setShown] = useState(false);
   const uid = useId();
   const id = `password-${uid}`;
@@ -86,7 +86,7 @@ function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: str
   );
 }
 
-function EmailField({ describedBy }: { describedBy?: string }) {
+function EmailField({ describedBy }: { describedBy?: string | undefined }) {
   const uid = useId();
   const id = `email-${uid}`;
   return (
