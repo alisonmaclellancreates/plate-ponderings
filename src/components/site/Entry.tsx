@@ -40,22 +40,25 @@ function EntryShell({
   );
 }
 
-function PasswordField({ hint }: { hint?: string }) {
+function PasswordField({ hint, describedBy }: { hint?: string; describedBy?: string }) {
   const [shown, setShown] = useState(false);
+  const uid = useId();
+  const id = `password-${uid}`;
+  const hintId = `password-hint-${uid}`;
   return (
     <div>
-      <label htmlFor="password" className="mb-1 block font-semibold">
+      <label htmlFor={id} className="mb-1 block font-semibold">
         Password
       </label>
       <div className="relative">
         <input
-          id="password"
+          id={id}
           name="password"
           required
           minLength={hint ? 8 : undefined}
           type={shown ? "text" : "password"}
           autoComplete={hint ? "new-password" : "current-password"}
-          aria-describedby={hint ? "password-hint" : undefined}
+          aria-describedby={[hint ? hintId : "", describedBy ?? ""].filter(Boolean).join(" ") || undefined}
           className={`${field} pr-12`}
         />
         <button
@@ -81,14 +84,34 @@ function PasswordField({ hint }: { hint?: string }) {
   );
 }
 
-function EmailField() {
+function EmailField({ describedBy }: { describedBy?: string }) {
+  const uid = useId();
+  const id = `email-${uid}`;
   return (
     <div>
-      <label htmlFor="email" className="mb-1 block font-semibold">
+      <label htmlFor={id} className="mb-1 block font-semibold">
         Email
       </label>
-      <input id="email" name="email" required type="email" autoComplete="email" className={field} />
+      <input
+        id={id}
+        name="email"
+        required
+        type="email"
+        autoComplete="email"
+        aria-describedby={describedBy}
+        className={field}
+      />
     </div>
+  );
+}
+
+/** Account error: coral text with a decorative warning icon, announced on appear. */
+function FormError({ id, children }: { id: string; children: ReactNode }) {
+  return (
+    <p id={id} role="alert" className="flex items-start gap-1.5 text-coral-cta">
+      <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+      {children}
+    </p>
   );
 }
 
