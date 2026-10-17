@@ -27,7 +27,7 @@ import {
 } from "@/lib/mock-data";
 import { storyCount } from "@/lib/story-count";
 import { track } from "@/lib/analytics";
-import { HISTORY_PAGE_SIZE } from "@/lib/summary";
+import { CATCHING_UP_MESSAGE, HISTORY_PAGE_SIZE } from "@/lib/summary";
 import { getPlateSummary, type PlateSummaryVersion } from "@/lib/summaries.functions";
 import { getPlateStories, STORY_PAGE_SIZE, type PlateStory } from "@/lib/stories.functions";
 import {
@@ -192,7 +192,7 @@ function RealStorySoFar({ plateId, fallback }: { plateId: string; fallback: Reac
   });
   const toPanel = (v: PlateSummaryVersion): PanelSummary => ({
     id: String(v.version),
-    date: v.generatedAt,
+    date: v.generatedAt.slice(0, 10),
     consensus: v.consensus,
     storyCount: v.storyCount,
     text: v.text,

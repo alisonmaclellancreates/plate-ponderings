@@ -35,3 +35,5 @@ export function isCatchingUp(input: {
 }
 
 export const HISTORY_PAGE_SIZE = 3;
+
+export const CATCHING_UP_MESSAGE = "New stories have arrived. The Story So Far is catching up.";
