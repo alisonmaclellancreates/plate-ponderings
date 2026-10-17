@@ -13,7 +13,17 @@ vi.mock("@tanstack/react-query", () => ({
   useSuspenseQuery: () => ({ data: m.data }),
   useQueryClient: () => ({ invalidateQueries: m.invalidate }),
 }));
-vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@tanstack/react-start", () => ({
+  useServerFn: (fn: unknown) => fn,
+  createMiddleware: () => ({ server: (fn: unknown) => fn }),
+  createServerFn: () => {
+    const builder: Record<string, unknown> = {};
+    builder["middleware"] = () => builder;
+    builder["inputValidator"] = () => builder;
+    builder["handler"] = (fn: unknown) => fn;
+    return builder;
+  },
+}));
 vi.mock("@/lib/submissions.functions", () => ({
   getSubmissions: vi.fn(),
   markSubmissionsRead: m.markRead,
@@ -25,8 +35,6 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => null }));
 vi.mock("@/lib/accounts.functions", () => ({ checkHandle: vi.fn(), saveHandle: vi.fn() }));
-vi.mock("@/integrations/supabase/auth-middleware", () => ({ requireSupabaseAuth: {} }));
-vi.mock("@/lib/plates.functions", () => ({}));
 
 import { LiveSubmissions } from "@/components/site/LiveSubmissions";
 
