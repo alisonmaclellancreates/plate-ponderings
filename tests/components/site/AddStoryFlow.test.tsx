@@ -1,0 +1,181 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
+
+const m = vi.hoisted(() => ({
+  submit: vi.fn(),
+  track: vi.fn(),
+  navigate: vi.fn(),
+  auth: { account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean } },
+  plate: { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } } as unknown,
+  stories: { hasOwnerStory: false } as unknown,
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({
+    to,
+    params,
+    children,
+    className,
+  }: {
+    to: string;
+    params?: Record<string, string>;
+    children: ReactNode;
+    className?: string;
+  }) => (
+    <a
+      className={className}
+      href={params ? to.replace(/\$(\w+)/, (_, k: string) => params[k] ?? "") : to}
+    >
+      {children}
+    </a>
+  ),
+  useNavigate: () => m.navigate,
+}));
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: ({ queryKey }: { queryKey: string[] }) => ({
+    data: queryKey[0] === "plate" ? m.plate : m.stories,
+  }),
+}));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/lib/plates.functions", () => ({ getPlate: vi.fn() }));
+vi.mock("@/lib/stories.functions", () => ({
+  addStory: m.submit,
+  getPlateStories: vi.fn(),
+}));
+vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => m.auth }));
+vi.mock("@/lib/analytics", () => ({ track: m.track }));
+
+import { AddStoryFlow } from "@/components/site/AddStoryFlow";
+
+async function fillAndReview(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+  await user.click(screen.getByRole("button", { name: "Next" }));
+  await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  m.auth.account = { handle: "Traveler4821", isDemo: false, isAdmin: false };
+  m.plate = { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } };
+  m.stories = { hasOwnerStory: false };
+  m.submit.mockResolvedValue({ outcome: "published" });
+});
+
+describe("AddStoryFlow", () => {
+  it("tracks story_started once on mount", () => {
+    render(<AddStoryFlow plateId="p1" />);
+    expect(m.track).toHaveBeenCalledWith("story_started", {});
+    expect(m.track).toHaveBeenCalledTimes(1);
+  });
+
+  it("walks the three steps and submits, landing on the published outcome", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    expect(screen.getByText("How I know")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(screen.getByText("Story submitted!")).toBeInTheDocument(),
+    );
+    expect(m.submit).toHaveBeenCalledWith({
+      data: { plateId: "p1", meaning: "Pacific Northwest love.", source: "owner", more: "" },
+    });
+    expect(m.track).toHaveBeenCalledWith("story_submitted", {
+      source: "owner",
+      has_more_text: false,
+      outcome: "published",
+    });
+    expect(screen.getByRole("link", { name: "View This Plate" })).toHaveAttribute(
+      "href",
+      "/plate/p1",
+    );
+  });
+
+  it("shows the owner note when the plate already has an owner story", () => {
+    m.stories = { hasOwnerStory: true };
+    render(<AddStoryFlow plateId="p1" />);
+    expect(screen.getByText(/Yours will appear alongside theirs/)).toBeInTheDocument();
+  });
+
+  it("a rejected story keeps the writer's words and explains", async () => {
+    m.submit.mockResolvedValue({ outcome: "rejected" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(screen.getByText("We couldn't add this story.")).toBeInTheDocument(),
+    );
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+      "Pacific Northwest love.",
+    );
+    expect(m.track).toHaveBeenCalledWith(
+      "story_submitted",
+      expect.objectContaining({ outcome: "rejected" }),
+    );
+  });
+
+  it("a pending story lands on the checking outcome", async () => {
+    m.submit.mockResolvedValue({ outcome: "pending" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(screen.getByText("Your story is being checked.")).toBeInTheDocument(),
+    );
+    expect(screen.getByRole("link", { name: "Go to Your Submissions" })).toHaveAttribute(
+      "href",
+      "/submissions",
+    );
+  });
+
+  it("a rate limit is recorded as rate_limited and shows the wait message", async () => {
+    m.submit.mockResolvedValue({ outcome: "rate-limited", message: "You've done that a lot in a short time. Please wait a while and try again." });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(screen.getByText(/Please wait a while and try again/)).toBeInTheDocument(),
+    );
+    expect(m.track).toHaveBeenCalledWith(
+      "story_submitted",
+      expect.objectContaining({ outcome: "rate_limited" }),
+    );
+  });
+
+  it("a thrown failure is recorded as error with the generic message", async () => {
+    m.submit.mockRejectedValue(new Error("offline"));
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(screen.getByText("Hmm... something went wrong.")).toBeInTheDocument(),
+    );
+    expect(m.track).toHaveBeenCalledWith(
+      "story_submitted",
+      expect.objectContaining({ outcome: "error" }),
+    );
+  });
+
+  it("the demo account sees the form with every control disabled", () => {
+    m.auth.account = { handle: "Traveler4821", isDemo: true, isAdmin: false };
+    render(<AddStoryFlow plateId="p1" />);
+    expect(screen.getByText("Adding stories is turned off in the demo.")).toBeInTheDocument();
+    for (const radio of screen.getAllByRole("radio")) expect(radio).toBeDisabled();
+    expect(screen.getByLabelText(/What do you think it means/)).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: /Tell us more/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    expect(m.submit).not.toHaveBeenCalled();
+  });
+
+  it("renders nothing while the plate is loading", () => {
+    m.plate = undefined;
+    const { container } = render(<AddStoryFlow plateId="p1" />);
+    expect(container).toBeEmptyDOMElement();
+  });
+});
