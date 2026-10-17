@@ -21,7 +21,10 @@ type Options = {
 };
 const gate = Gate as unknown as Options;
 const adapter = Adapter as unknown as Options;
-beforeEach(() => user.mockReset());
+beforeEach(() => {
+  user.mockReset();
+  out.mockReset();
+});
 afterEach(() => vi.useRealTimers());
 it("gates protected children client-side with a safe return path", async () => {
   user.mockResolvedValue({ data: { user: null }, error: null });
