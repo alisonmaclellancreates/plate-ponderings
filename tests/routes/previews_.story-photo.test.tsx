@@ -32,6 +32,20 @@ beforeEach(() => {
 });
 
 describe("/previews/story-photo", () => {
+  it("shows a zoomed sample card that opens, and an older card without a box", async () => {
+    const user = userEvent.setup();
+    render(<Component />);
+    const buttons = screen.getAllByRole("button", {
+      name: "View full photo shared by Traveler4821",
+    });
+    expect(buttons).toHaveLength(1);
+    expect(screen.getAllByRole("img", { name: "Photo shared by Traveler4821" })).toHaveLength(2);
+    await user.click(buttons[0]!);
+    expect(
+      screen.getByRole("dialog", { name: "They might be a fan of the open road" }),
+    ).toBeInTheDocument();
+  });
+
   it("has app-specific metadata", () => {
     const head = Route.options.head;
     if (!head) throw new Error("Missing preview head");

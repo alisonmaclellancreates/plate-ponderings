@@ -139,7 +139,7 @@ describe("PhotoEditor", () => {
     await user.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByRole("heading", { name: "Review your photo" });
     await user.click(screen.getByRole("button", { name: "Use This Photo" }));
-    await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), false, expect.objectContaining({ w: expect.any(Number) })));
+    await waitFor(() => expect(onUse).toHaveBeenCalledWith(expect.any(Blob), false, BOX));
   });
   it("shows the no-box message and lets the visitor draw a box", async () => {
     setup({ initialBox: null, showNoBoxMessage: true });
