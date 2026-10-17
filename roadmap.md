@@ -1,3 +1,10 @@
+# Step 45b: fictional plate guesses
+
+- [ ] Propose isolated server-only guess schema and implementation plan; wait for Alison's database approval.
+- [ ] Build nonblocking publication generation, own-plate recheck gap fill, server-derived reveal, teaser/panel and no-property analytics; mocked behavioral tests.
+- [ ] Run lint, relevant/full tests and every tests/db file; verify new generation and reveal/hide at 1280px and 360px, workerd or published check; report only checks actually run.
+- [ ] Read PR Codecov patch figure after Alison opens the PR. Blocker: PR not open.
+
 # Rowan: summary prompt review
 
 - [x] Preserve the brief’s score table, match Rowan’s score/text instruction verbatim, and add the attributed-ownership rule with instruction tests. No schema or existing-summary edits.
