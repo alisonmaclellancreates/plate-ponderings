@@ -1,3 +1,7 @@
+# Story meaning framing
+
+- [ ] Prefill “They might be”, add it when missing before review/submission, preserve length validation, and run focused tests/lint. No moderation or database changes.
+
 # Step 48: public facts and report labels
 
 - [x] Public facts and invitation use all published stories; visible list alone is filtered. Admin shares all report labels. Related tests: 240 passed across 26 files. Repository lint: 0 errors, 6 existing warnings. No database changes.
