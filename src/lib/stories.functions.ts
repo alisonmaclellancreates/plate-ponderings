@@ -51,14 +51,25 @@ export const addStory = createServerFn({ method: "POST" })
       _user_id: context.userId,
       _role: "demo",
     });
-    if (roleError) return { outcome: "error" };
+    // Every no-save outcome logs one stage tag (never story text or photo) so
+    // failed submissions can be traced in server logs.
+    const trace = (stage: string, error?: { message?: string } | null): void => {
+      console.warn(JSON.stringify({ event: "add_story", stage, error: error?.message ?? null }));
+    };
+    if (roleError) {
+      trace("role", roleError);
+      return { outcome: "error" };
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // A photo path is exactly the caller's folder plus one uuid.jpg; anything
     // else (dot segments, other folders, other names) is refused.
     const photoPathPattern = new RegExp(
       `^${context.userId}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.jpg$`,
     );
-    if (data.photoPath && !photoPathPattern.test(data.photoPath)) return { outcome: "error" };
+    if (data.photoPath && !photoPathPattern.test(data.photoPath)) {
+      trace("photo-path");
+      return { outcome: "error" };
+    }
     // Every outcome that saves no story removes the uploaded photo.
     const deletePhoto = async (): Promise<void> => {
       if (!data.photoPath) return;
@@ -66,10 +77,12 @@ export const addStory = createServerFn({ method: "POST" })
       await supabaseAdmin.storage.from(STORY_PHOTO_BUCKET).remove([data.photoPath]);
     };
     if (demo) {
+      trace("demo");
       await deletePhoto();
       return { outcome: "demo", message: DEMO_MESSAGE };
     }
     if (!validateStory(data)) {
+      trace("validation");
       await deletePhoto();
       return { outcome: "validation" };
     }
@@ -80,6 +93,7 @@ export const addStory = createServerFn({ method: "POST" })
       .eq("status", "published")
       .maybeSingle();
     if (plateError || !plate) {
+      trace("plate", plateError);
       await deletePhoto();
       return { outcome: "error" };
     }
@@ -87,10 +101,12 @@ export const addStory = createServerFn({ method: "POST" })
       _user_id: context.userId,
     });
     if (attempt.error) {
+      trace("attempt", attempt.error);
       await deletePhoto();
       return { outcome: "error" };
     }
     if (!attempt.data) {
+      trace("rate-limited");
       await deletePhoto();
       return { outcome: "rate-limited", message: RATE_LIMIT_MESSAGE };
     }
@@ -105,14 +121,17 @@ export const addStory = createServerFn({ method: "POST" })
         status: "pending",
       });
       if (inserted.error) {
+        trace("insert-pending", inserted.error);
         await deletePhoto();
         return { outcome: "error" };
       }
+      trace("pending");
       return { outcome: "pending" };
     };
     const { readAiBlock, persistAiBlock } = await import("./ai-block.server");
     const block = await readAiBlock(supabaseAdmin);
     if (!block) {
+      trace("ai-block-read");
       await deletePhoto();
       return { outcome: "error" };
     }
@@ -126,6 +145,7 @@ export const addStory = createServerFn({ method: "POST" })
         .from(STORY_PHOTO_BUCKET)
         .download(data.photoPath);
       if (downloaded.error || !downloaded.data) {
+        trace("photo-download", downloaded.error);
         await deletePhoto();
         return { outcome: "error" };
       }
@@ -144,6 +164,7 @@ export const addStory = createServerFn({ method: "POST" })
     if (result.block) await persistAiBlock(supabaseAdmin, result.block, result.runId);
     if (result.outcome === "unavailable") return insertPending();
     if (result.outcome === "rejected") {
+      trace(photoDataUrl ? "rejected-with-photo" : "rejected");
       await deletePhoto();
       return { outcome: "rejected" };
     }
@@ -158,6 +179,7 @@ export const addStory = createServerFn({ method: "POST" })
       published_at: new Date().toISOString(),
     });
     if (inserted.error) {
+      trace("insert-published", inserted.error);
       await deletePhoto();
       return { outcome: "error" };
     }
