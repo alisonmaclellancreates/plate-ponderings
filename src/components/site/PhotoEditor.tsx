@@ -9,9 +9,10 @@ import {
   type Point,
 } from "@/lib/photo-blur";
 import { canvasToJpegBlob, renderBlurredPhoto } from "@/lib/photo-canvas";
+import { Button } from "@/components/ui/button";
 
-const outline = "brand-btn brand-btn-outline";
-const coral = "brand-btn brand-btn-coral";
+const outline = "brand-btn brand-btn-outline min-h-11 h-auto whitespace-normal";
+const coral = "brand-btn brand-btn-coral min-h-11 h-auto whitespace-normal";
 
 export const NO_BOX_MESSAGE =
   "We couldn't find the plate in this photo. Draw a box around it to keep it clear.";
@@ -31,8 +32,8 @@ export type PhotoEditorProps = {
   /** Confirmed processed photo; `adjusted` is true when the box was changed. */
   onUse: (blob: Blob, adjusted: boolean) => void;
   onRemove: () => void;
-  /** Try again: the flow re-runs detection and passes a new initialBox. */
-  onRetry: () => void;
+  /** Open the replacement file picker without changing the current editor. */
+  onChooseAnother: () => void;
 };
 
 type Drag =
@@ -61,7 +62,7 @@ export function PhotoEditor({
   showNoBoxMessage,
   onUse,
   onRemove,
-  onRetry,
+  onChooseAnother,
 }: PhotoEditorProps) {
   const [box, setBox] = useState<Box | null>(initialBox);
   const [mode, setMode] = useState<"adjust" | "review">("adjust");
@@ -84,7 +85,8 @@ export function PhotoEditor({
   );
 
   const pointAt = (e: React.PointerEvent): Point => {
-    const rect = frame.current!.getBoundingClientRect();
+    const rect = frame.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
     return {
       x: Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)),
       y: Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height)),
@@ -167,12 +169,12 @@ export function PhotoEditor({
     }
   };
 
-  const handle = "absolute size-4 rounded-sm border-2 border-navy bg-cream touch-none";
+  const handle = "absolute size-11 touch-none flex items-center justify-center after:size-4 after:rounded-sm after:border-2 after:border-navy after:bg-cream";
   const corners: { corner: Corner; className: string }[] = [
-    { corner: "nw", className: "-left-2 -top-2 cursor-nwse-resize" },
-    { corner: "ne", className: "-right-2 -top-2 cursor-nesw-resize" },
-    { corner: "sw", className: "-bottom-2 -left-2 cursor-nesw-resize" },
-    { corner: "se", className: "-bottom-2 -right-2 cursor-nwse-resize" },
+    { corner: "nw", className: "-left-5.5 -top-5.5 cursor-nwse-resize" },
+    { corner: "ne", className: "-right-5.5 -top-5.5 cursor-nesw-resize" },
+    { corner: "sw", className: "-bottom-5.5 -left-5.5 cursor-nesw-resize" },
+    { corner: "se", className: "-bottom-5.5 -right-5.5 cursor-nwse-resize" },
   ];
 
   return (
@@ -189,10 +191,19 @@ export function PhotoEditor({
         <div className="mt-4">
           {mode === "adjust" ? (
             <>
+              <div className="mb-4 grid grid-cols-2 gap-3">
+                <Button type="button" variant="outline" className={outline} onClick={onChooseAnother}>
+                  Choose another photo
+                </Button>
+                <Button type="button" variant="outline" className={outline} onClick={onRemove}>
+                  Skip photo
+                </Button>
+              </div>
               <div
                 ref={frame}
                 data-testid="photo-frame"
-                className="relative touch-none overflow-hidden rounded-lg select-none"
+                className="relative mx-auto touch-none overflow-hidden rounded-lg select-none"
+                style={{ width: `min(100%, ${(bitmap.width / bitmap.height) * 45}dvh)` }}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
@@ -233,28 +244,26 @@ export function PhotoEditor({
                 )}
               </div>
               <p className="mt-3">
-                {showNoBoxMessage && !initialBox ? NO_BOX_MESSAGE : ADJUST_NOTE}
+                {showNoBoxMessage && !box ? NO_BOX_MESSAGE : ADJUST_NOTE}
               </p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   className={outline}
                   onClick={() => setBox(initialBox)}
                   disabled={!initialBox}
                 >
                   Reset
-                </button>
-                <button type="button" className={outline} onClick={onRetry}>
-                  Try again
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   className={`${coral} sm:ml-auto`}
                   disabled={!box || processing}
                   onClick={() => void confirm()}
                 >
                   Next
-                </button>
+                </Button>
               </div>
             </>
           ) : (
@@ -269,16 +278,17 @@ export function PhotoEditor({
                 <h3 className="font-display text-2xl text-navy">Does this look right?</h3>
                 <p className="mt-2">{REVIEW_NOTE}</p>
                 <div className="mt-4 flex flex-col gap-3">
-                  <button
+                  <Button
                     type="button"
                     className={coral}
                     disabled={processing}
                     onClick={() => void use()}
                   >
                     Use This Photo
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="outline"
                     className={outline}
                     onClick={() => {
                       setProcessedUrl((old) => {
@@ -289,10 +299,10 @@ export function PhotoEditor({
                     }}
                   >
                     Adjust
-                  </button>
-                  <button type="button" className={outline} onClick={onRemove}>
+                  </Button>
+                  <Button type="button" variant="outline" className={outline} onClick={onRemove}>
                     Remove Photo
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

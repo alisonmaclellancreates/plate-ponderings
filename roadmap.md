@@ -1,3 +1,7 @@
+# Photo editor exits
+
+- [ ] Replace retry detection with replacement picker, add adjustment skip cleanup, preserve box validation and 44px targets, update sample preview, and run focused tests and lint.
+
 # Story meaning framing
 
 - [x] Prefill “They might be”, add it when missing before review/submission without duplication, preserve the complete 80-character limit. 45 focused tests passed; changed-file lint clean; automatic build OK. No moderation or database changes.
