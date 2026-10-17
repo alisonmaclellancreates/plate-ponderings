@@ -144,6 +144,8 @@ export type PlateStory = {
   handle: string;
   hearts: number;
   publishedAt: string;
+  /** Short-lived signed link to the blurred photo, when the story has one. */
+  photo: string | null;
   /** The verified viewer wrote this story. */
   isOwn: boolean;
   /** The verified viewer has hearted this story. */
@@ -168,6 +170,7 @@ type StoryRow = {
   body: string | null;
   author_id: string | null;
   published_at: string | null;
+  photo_path: string | null;
 };
 
 /**
