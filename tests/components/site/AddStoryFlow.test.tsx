@@ -189,3 +189,62 @@ describe("AddStoryFlow", () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+
+describe("AddStoryFlow preview mode", () => {
+  const preview = {
+    plate: { id: "preview-story-states", jurisdiction: "Oregon", text: "PNW LV" },
+    draft: {
+      how: "owner" as const,
+      meaning: "Pacific Northwest love.",
+      more: "I grew up near Portland and wanted a plate that says where my heart is.",
+    },
+    notice: {
+      heading: "Hmm... something went wrong." as string | null,
+      message:
+        "We couldn't submit your story right now. Your words are still here. Please try again.",
+    },
+  };
+
+  it("shows the error notice and the kept draft, and submitting calls nothing", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="preview-story-states" preview={preview} />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Hmm... something went wrong.");
+    expect(status).toHaveTextContent(
+      "We couldn't submit your story right now. Your words are still here. Please try again.",
+    );
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+      "Pacific Northwest love.",
+    );
+    expect(screen.getByRole("textbox", { name: /Tell us more/ })).toHaveValue(
+      "I grew up near Portland and wanted a plate that says where my heart is.",
+    );
+    expect(screen.getByRole("radio", { name: /It's my plate/ })).toBeChecked();
+    expect(m.track).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    expect(m.submit).not.toHaveBeenCalled();
+    expect(m.track).not.toHaveBeenCalled();
+  });
+
+  it("shows the pause heading and wait message with the kept draft", () => {
+    render(
+      <AddStoryFlow
+        plateId="preview-story-states"
+        preview={{
+          ...preview,
+          notice: { heading: "Let's pause a moment.", message: RATE_LIMIT_MESSAGE },
+        }}
+      />,
+    );
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Let's pause a moment.");
+    expect(status).toHaveTextContent(RATE_LIMIT_MESSAGE);
+    expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
+      "Pacific Northwest love.",
+    );
+    expect(m.track).not.toHaveBeenCalled();
+  });
+});
