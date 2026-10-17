@@ -1,3 +1,12 @@
+# Step 51: demo, seed reset and removal of scaffolding
+
+- [x] Read step brief; move original seed photos to docs/seed-photos and delete measuring copies.
+- [ ] Present one plan and proposed additive database changes; await Alison's approval before applying.
+- [ ] Build demo login/exits/banner, audit write refusals and exclude demo rechecks/read updates.
+- [ ] Implement shared effective today, admin-only reset and sequential missing-guess fill.
+- [ ] Process seed JPEGs, seed exact docs/seed.md content and remove mock/preview scaffolding.
+- [ ] Run related tests and lint; approved database tests in rollback with cleanup readback. No destructive reset or real AI run without explicit request.
+
 # Step 48c: header menu exits and submissions returns
 
 - [x] Close member/mobile menus on every selection and router location change; tests cover each item, both profile instances, search-only changes and real memory-history back/forward.
