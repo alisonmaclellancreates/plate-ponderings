@@ -28,12 +28,13 @@
 - AI checks persist only terminal provider-denial or credit blocks (never transient errors) in service-only `ai_check_*` settings, per Lovable AI Gateway rules. One block pauses every AI check (handles, plates, rechecks, summaries); paused handle saves keep the old handle, new plates save pending, rechecks do nothing. Only an admin clears it via `/admin` **Resume AI checks**; the next user-initiated check retries.
 - Own-account operations live in authenticated server functions with server-only moderation; a root account provider owns auth lifecycle and cache teardown, keeping private identifiers out of page DTOs.
 - Keep account context types and the consumer hook in `src/lib/account-auth.ts`, separate from the component-only provider; stabilize refresh and declare effect dependencies so auth lifecycle remains lint-safe without rule suppression.
-- The member-profile menu is an independently testable component, including its signed-out refusal, so account boundaries can be verified without artificial context changes during a parent render.
+- Test the member-profile menu independently, including signed-out refusal, to verify account boundaries.
 - Protected routes use the client-only `_authenticated` gate and `/auth` adapter. Shared bounded `checkSignedIn` clears only definite rejections and restores late success; plate actions read account context, avoiding duplicate checks.
 - Live and preview rate-limit outcomes share one renderer and the existing wait-message constant, so preview review cannot drift from the submitted flow.
 - Live spot outcomes retain the submitted identity separately from route prefill, so pending feedback and return-to-search links describe the actual request even after the form remounts.
-- PlateFrame owns the detail-only frame for static and real plate pages, so jurisdiction display stays identical without changing Plate artwork or other render locations.
+- PlateFrame shares detail-only jurisdiction display across static/live pages without changing Plate artwork.
 - Register project-owned `attachSession`, never generated `attachSupabaseAuth`: bounded `getSession()` preserves normal renewal without blocking public RPCs. Server authorization remains unchanged; never read tokens directly from storage.
 - Background AI uses `runAfterResponse` and request-scoped waitUntil; summary reads batch `get_visible_summary_versions` using `is_summary_public`, keeping read counts fixed. Guesses use Astra's streamed structured low-reasoning Responses.
 - Guesses use separate server-only insert-once storage and existence-only reads until published human stories unlock text, preventing story/summary contamination.
 - Hidden guesses retain the invitation despite old summaries; revealed guesses follow summaries before human stories at every width, preserving reading order.
+- Story-entry framing and validation share story-form helpers; review and submission use the same value to avoid hidden edits and length overflow.

@@ -14,6 +14,9 @@ import type { Box } from "@/lib/photo-blur";
 import {
   HOW_OPTIONS,
   MEANING_MAX,
+  MEANING_START,
+  frameMeaning,
+  canContinueMeaning,
   MORE_MAX,
   STORY_RATE_LIMIT_HEADING,
   STORY_SUBMIT_ERROR_HEADING,
@@ -123,7 +126,7 @@ export type AddStoryPreview = {
 export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: AddStoryPreview }) {
   const [step, setStep] = useState<FlowStep>("1");
   const [how, setHow] = useState<HowKey>(preview?.draft.how ?? "owner");
-  const [meaning, setMeaning] = useState(preview?.draft.meaning ?? "");
+  const [meaning, setMeaning] = useState(preview?.draft.meaning ?? MEANING_START);
   const [more, setMore] = useState(preview?.draft.more ?? "");
   const [rejected, setRejected] = useState(false);
   const [pause, setPause] = useState<{ heading: string | null; message: string } | null>(
@@ -239,7 +242,13 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     setPause(null);
     try {
       const result = await submitStory({
-        data: { plateId, meaning, source: how, more, photoPath: photoReady?.path ?? "" },
+        data: {
+          plateId,
+          meaning: frameMeaning(meaning),
+          source: how,
+          more,
+          photoPath: photoReady?.path ?? "",
+        },
       });
       const outcome =
         result.outcome === "rate-limited"
@@ -477,8 +486,11 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
           </Link>
           <button
             type="button"
-            onClick={() => setStep("2")}
-            disabled={demo || meaning.trim().length < 3}
+            onClick={() => {
+              setMeaning(frameMeaning(meaning));
+              setStep("2");
+            }}
+            disabled={demo || !canContinueMeaning(meaning)}
             className={coral}
           >
             Next

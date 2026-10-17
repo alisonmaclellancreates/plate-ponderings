@@ -120,6 +120,46 @@ async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("AddStoryFlow", () => {
+  it("requires more than the prefilled starter before continuing", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    const input = screen.getByLabelText(/What do you think it means/);
+    expect(input).toHaveValue("They might be ");
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    await user.type(input, "single.");
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+  });
+
+  it.each([
+    ["a funeral director", "They might be a funeral director"],
+    ["They might be a funeral director", "They might be a funeral director"],
+    ["they might be single.", "they might be single."],
+  ])("frames %s consistently for review and submission", async (entered, expected) => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.clear(screen.getByLabelText(/What do you think it means/));
+    await user.type(screen.getByLabelText(/What do you think it means/), entered);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Continue without a photo" }));
+    expect(screen.getByText(expected)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() =>
+      expect(m.submit).toHaveBeenCalledWith({
+        data: { plateId: "p1", meaning: expected, source: "owner", more: "", photoPath: "" },
+      }),
+    );
+  });
+
+  it("does not allow adding a missing prefix to overflow the meaning limit", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    const input = screen.getByLabelText(/What do you think it means/);
+    await user.clear(input);
+    await user.type(input, "a".repeat(67));
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    expect(m.submit).not.toHaveBeenCalled();
+  });
+
   it("tracks story_started once on mount", () => {
     render(<AddStoryFlow plateId="p1" />);
     expect(m.track).toHaveBeenCalledWith("story_started", {});
@@ -136,7 +176,7 @@ describe("AddStoryFlow", () => {
     expect(m.submit).toHaveBeenCalledWith({
       data: {
         plateId: "p1",
-        meaning: "Pacific Northwest love.",
+        meaning: "They might be Pacific Northwest love.",
         source: "owner",
         more: "",
         photoPath: "",
@@ -169,7 +209,7 @@ describe("AddStoryFlow", () => {
       expect(screen.getByText("We couldn't add this story.")).toBeInTheDocument(),
     );
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
+      "They might be Pacific Northwest love.",
     );
     expect(m.track).toHaveBeenCalledWith(
       "story_submitted",
@@ -226,7 +266,7 @@ describe("AddStoryFlow", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
+      "They might be Pacific Northwest love.",
     );
     expect(m.track).toHaveBeenCalledWith(
       "story_submitted",
@@ -274,7 +314,7 @@ describe("AddStoryFlow", () => {
     expect(m.submit).toHaveBeenCalledWith({
       data: {
         plateId: "p1",
-        meaning: "Pacific Northwest love.",
+        meaning: "They might be Pacific Northwest love.",
         source: "owner",
         more: "",
         photoPath: "user-1/photo.jpg",
@@ -290,7 +330,7 @@ describe("AddStoryFlow", () => {
       render(<AddStoryFlow plateId="p1" />);
       await user.type(
         screen.getByLabelText(/What do you think it means/),
-        "Pacific Northwest love.",
+        "They might be Pacific Northwest love.",
       );
       await addPhoto(user);
       await user.click(screen.getByRole("button", { name: "Next" }));
@@ -462,7 +502,7 @@ describe("AddStoryFlow branches", () => {
         "We couldn't submit your story right now. Your words are still here. Please try again.",
       );
       expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-        "Pacific Northwest love.",
+        "They might be Pacific Northwest love.",
       );
       expect(m.track).toHaveBeenCalledWith(
         "story_submitted",
@@ -479,7 +519,7 @@ describe("AddStoryFlow branches", () => {
     expect(screen.getByRole("heading", { name: "Add a photo (optional)" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByLabelText(/What do you think it means/)).toHaveValue(
-      "Pacific Northwest love.",
+      "They might be Pacific Northwest love.",
     );
   });
 
@@ -496,7 +536,7 @@ describe("AddStoryFlow branches", () => {
       expect(m.submit).toHaveBeenCalledWith({
         data: {
           plateId: "p1",
-          meaning: "Pacific Northwest love.",
+          meaning: "They might be Pacific Northwest love.",
           source: "guess",
           more: "Seen near Seattle.",
           photoPath: "",
@@ -517,7 +557,11 @@ describe("AddStoryFlow branches", () => {
         plateId="x"
         preview={{
           plate: { id: "x", jurisdiction: "Oregon", text: "PNW LV" },
-          draft: { how: "mystery" as never, meaning: "Pacific Northwest love.", more: "" },
+          draft: {
+            how: "mystery" as never,
+            meaning: "They might be Pacific Northwest love.",
+            more: "",
+          },
           notice: { heading: null, message: "note" },
         }}
       />,
