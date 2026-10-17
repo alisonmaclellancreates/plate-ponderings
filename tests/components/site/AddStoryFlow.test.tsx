@@ -9,6 +9,11 @@ const m = vi.hoisted(() => ({
   getPlateStories: vi.fn(),
   track: vi.fn(),
   navigate: vi.fn(),
+  detect: vi.fn(),
+  upload: vi.fn(),
+  decode: vi.fn(),
+  renderBlurred: vi.fn(),
+  toJpeg: vi.fn(),
   auth: { account: null as null | { handle: string; isDemo: boolean; isAdmin: boolean } },
   plate: { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } } as unknown,
   stories: { hasOwnerStory: false } as unknown,
@@ -57,6 +62,15 @@ vi.mock("@/lib/stories.functions", () => ({
 }));
 vi.mock("@/lib/account-auth", () => ({ useAccountAuth: () => m.auth }));
 vi.mock("@/lib/analytics", () => ({ track: m.track }));
+vi.mock("@/lib/photos.functions", () => ({
+  detectPlateBox: m.detect,
+  uploadStoryPhoto: m.upload,
+}));
+vi.mock("@/lib/photo-canvas", () => ({
+  decodePhoto: m.decode,
+  renderBlurredPhoto: m.renderBlurred,
+  canvasToJpegBlob: m.toJpeg,
+}));
 
 import { AddStoryFlow } from "@/components/site/AddStoryFlow";
 import { RATE_LIMIT_MESSAGE } from "@/lib/account-rules";
@@ -73,7 +87,32 @@ beforeEach(() => {
   m.plate = { plate: { id: "p1", jurisdiction: "Washington", text: "B7K 2L9" } };
   m.stories = { hasOwnerStory: false };
   m.submit.mockResolvedValue({ outcome: "published" });
+  m.decode.mockResolvedValue({ width: 800, height: 600 });
+  m.detect.mockResolvedValue({ outcome: "ok", box: { x: 0.3, y: 0.4, w: 0.25, h: 0.12 } });
+  m.renderBlurred.mockResolvedValue(undefined);
+  m.toJpeg.mockResolvedValue(new Blob(["jpeg"], { type: "image/jpeg" }));
+  m.upload.mockResolvedValue({ path: "user-1/photo.jpg" });
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    filter: "",
+    drawImage: vi.fn(),
+  } as unknown as CanvasRenderingContext2D);
+  URL.createObjectURL = vi.fn(() => "blob:mock");
 });
+
+/** Choose a photo, confirm the suggested box, and land on review. */
+async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Next" }));
+  const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+  await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: "Keep the plate clear" })).toBeInTheDocument(),
+  );
+  await user.click(screen.getByRole("button", { name: "Confirm" }));
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
+  );
+  await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+}
 
 describe("AddStoryFlow", () => {
   it("tracks story_started once on mount", () => {
@@ -199,6 +238,71 @@ describe("AddStoryFlow", () => {
     m.plate = undefined;
     const { container } = render(<AddStoryFlow plateId="p1" />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("tracks photo_skipped when continuing without a photo", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await fillAndReview(user);
+    expect(m.track).toHaveBeenCalledWith("photo_skipped", {});
+  });
+
+  it("a confirmed photo is uploaded, shown at review, and submitted with the story", async () => {
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
+    await addPhoto(user);
+    expect(m.upload).toHaveBeenCalledWith({
+      data: { dataUrl: expect.stringMatching(/^data:image\/jpeg/) },
+    });
+    expect(m.track).toHaveBeenCalledWith("photo_added", { box_found: true, box_adjusted: false });
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByAltText("Your blurred photo")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit Story" }));
+    await waitFor(() => expect(screen.getByText("Story submitted!")).toBeInTheDocument());
+    expect(m.submit).toHaveBeenCalledWith({
+      data: {
+        plateId: "p1",
+        meaning: "Pacific Northwest love.",
+        source: "owner",
+        more: "",
+        photoPath: "user-1/photo.jpg",
+      },
+    });
+  });
+
+  it("detection unavailable goes straight to draw-a-box with the no-box message", async () => {
+    m.detect.mockResolvedValue({ outcome: "unavailable" });
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "We couldn't find the plate in this photo. Draw a box around it to keep it clear.",
+        ),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it("an unreadable photo shows the message and lets the visitor continue", async () => {
+    m.decode.mockRejectedValue(new Error("bad file"));
+    const user = userEvent.setup();
+    render(<AddStoryFlow plateId="p1" />);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const file = new File(["nope"], "photo.jpg", { type: "image/jpeg" });
+    await user.upload(screen.getByLabelText(/Choose a photo/i), file);
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "We couldn't read this photo. You can choose another, or continue without one.",
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(m.detect).not.toHaveBeenCalled();
+    expect(m.upload).not.toHaveBeenCalled();
   });
 });
 

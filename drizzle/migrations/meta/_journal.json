@@ -113,6 +113,13 @@
       "when": 1792249524817,
       "tag": "0015_step48_story_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792257377535,
+      "tag": "0016_step49_photo_detect_attempts",
+      "breakpoints": true
     }
   ]
 }

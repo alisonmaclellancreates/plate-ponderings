@@ -280,16 +280,19 @@ function Editor({ title, children }: { title: string; children: ReactNode }) {
 function AdjustEditor() {
   const handle = "absolute size-3 rounded-sm border-2 border-navy bg-cream";
   return (
-    <Editor title="Adjust the plate area">
+    <Editor title="Keep the plate clear">
       <div className="relative overflow-hidden rounded-lg">
         <img
           src={STORY_PHOTO_PLACEHOLDER}
           alt="Your photo with everything blurred except the plate"
-          className="w-full"
+          className="w-full blur-[10px]"
         />
         <div
           data-testid="plate-box"
-          className="absolute left-[37%] top-[46%] h-[12%] w-[25%] border-2 border-cream shadow-[0_0_0_2px_var(--navy)]"
+          tabIndex={0}
+          role="application"
+          aria-label="Plate area. Drag to move, drag a corner to resize, or use the arrow keys."
+          className="absolute left-[37%] top-[46%] h-[12%] w-[25%] cursor-move touch-none border-2 border-cream bg-cream/10 shadow-[0_0_0_2px_var(--navy)]"
         >
           <span className={`${handle} -left-1.5 -top-1.5`} />
           <span className={`${handle} -right-1.5 -top-1.5`} />
@@ -298,6 +301,10 @@ function AdjustEditor() {
         </div>
       </div>
       <p className="mt-3">Move and resize the box so only the license plate is clear.</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Everything outside the box is blurred. Keyboard: arrow keys move the box, Shift + arrow
+        keys resize it.
+      </p>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <button type="button" className={outline}>
           Reset
@@ -305,8 +312,11 @@ function AdjustEditor() {
         <button type="button" className={outline}>
           Try again
         </button>
+        <Link to="/story/$step" params={{ step: "2" }} className={outline}>
+          Choose a different photo
+        </Link>
         <Link to="/story/$step" params={{ step: "2-review" }} className={`${coral} sm:ml-auto`}>
-          Next
+          Confirm
         </Link>
       </div>
     </Editor>
