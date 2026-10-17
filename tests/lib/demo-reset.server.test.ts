@@ -69,7 +69,7 @@ const client = {
   },
 } as unknown as SupabaseClient<Database>;
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
   counter = 0;
   content.clear();
   files.clear();
@@ -242,3 +242,58 @@ it.each(["returned", "thrown"])(
     });
   },
 );
+
+it.each(["refused", "returned error", "thrown error"])("stops when the reset lock is %s", async (failure) => {
+  const original = m.rpc.getMockImplementation();
+  m.rpc.mockImplementation(async (fn: string, args: { _seed?: Record<string, unknown[]> }) => {
+    if (fn === "claim_demo_reset") {
+      if (failure === "thrown error") throw new Error("Lock unavailable");
+      return failure === "refused" ? { data: false, error: null } : { data: null, error: {} };
+    }
+    return original?.(fn, args);
+  });
+  expect(await resetDemoSeed(client)).toEqual({ outcome: "error", message: failure === "refused" ? "Another reset is running. Please retry later." : "Reset incomplete at preflight. Retry Reset seed data to finish." });
+  expect(m.create).not.toHaveBeenCalled();
+  expect(m.remove).not.toHaveBeenCalled();
+  expect(m.rpc.mock.calls.some(([name]) => name === "release_demo_reset")).toBe(false);
+});
+
+it.each(["lost", "returned error", "thrown error"])("stops at the next account when renewal is %s mid-reset", async (failure) => {
+  const original = m.rpc.getMockImplementation();
+  let renewals = 0;
+  m.rpc.mockImplementation(async (fn: string, args: { _seed?: Record<string, unknown[]> }) => {
+    if (fn === "renew_demo_reset" && ++renewals === 3) {
+      if (failure === "thrown error") throw new Error("Renewal unavailable");
+      return failure === "lost" ? { data: false, error: null } : { error: {} };
+    }
+    return original?.(fn, args);
+  });
+  expect(await resetDemoSeed(client)).toEqual({ outcome: "error", message: "Reset incomplete at seed accounts. Retry Reset seed data to finish." });
+  expect(m.create).toHaveBeenCalledTimes(2);
+  expect(m.list).not.toHaveBeenCalled();
+  expect(m.replace).not.toHaveBeenCalled();
+  expect(m.removeUser).not.toHaveBeenCalled();
+  expect(m.rpc).toHaveBeenLastCalledWith("release_demo_reset", expect.anything());
+});
+
+it.each(["create", "missing user", "list", "remove", "upload", "delete", "count", "download"])("stops at the first %s failure without running later stages", async (failure) => {
+  const stages: Record<string, string> = { create: "seed accounts", "missing user": "seed accounts", list: "photo clearing", remove: "photo clearing", upload: "photo upload", delete: "old account removal", count: "readback", download: "readback" };
+  if (failure === "create") m.create.mockResolvedValueOnce({ error: {} });
+  if (failure === "missing user") m.create.mockResolvedValueOnce({ data: { user: null }, error: null });
+  if (failure === "list") m.list.mockResolvedValueOnce({ error: {} });
+  if (failure === "remove") m.remove.mockResolvedValueOnce({ error: {} });
+  if (failure === "upload") m.upload.mockResolvedValueOnce({ error: {} });
+  if (failure === "delete") m.removeUser.mockResolvedValueOnce({ error: {} });
+  if (failure === "count") m.counts.mockReturnValueOnce({ count: 15, error: null });
+  if (failure === "download") m.download.mockResolvedValueOnce({ error: {} });
+  expect(await resetDemoSeed(client)).toEqual({ outcome: "error", message: `Reset incomplete at ${stages[failure]}. Retry Reset seed data to finish.` });
+  if (["create", "missing user"].includes(failure)) { expect(m.create).toHaveBeenCalledOnce(); expect(m.list).not.toHaveBeenCalled(); }
+  if (["list", "remove"].includes(failure)) expect(m.upload).not.toHaveBeenCalled();
+  if (failure === "remove") expect(m.remove).toHaveBeenCalledOnce();
+  if (failure === "upload") expect(m.upload).toHaveBeenCalledOnce();
+  if (["create", "missing user", "list", "remove", "upload"].includes(failure)) { expect(m.replace).not.toHaveBeenCalled(); expect(m.removeUser).not.toHaveBeenCalled(); }
+  if (failure === "delete") { expect(m.removeUser).toHaveBeenCalledOnce(); expect(m.counts).not.toHaveBeenCalled(); }
+  if (failure === "count") { expect(m.counts).toHaveBeenCalledOnce(); expect(m.counts).toHaveBeenCalledWith("subjects"); expect(m.download).not.toHaveBeenCalled(); }
+  if (failure === "download") expect(m.download).toHaveBeenCalledOnce();
+  expect(m.rpc).toHaveBeenLastCalledWith("release_demo_reset", expect.anything());
+});
