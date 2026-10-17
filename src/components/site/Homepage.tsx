@@ -67,8 +67,14 @@ function SearchCard({
     setErrors(next);
     if (next.jurisdiction || next.text) return;
     setBusy(true);
+    onSearchError(null);
     try {
       const result = await search({ data: { jurisdiction, text } });
+      if (result.status === "error") {
+        await track("subject_searched", { found: false, jurisdiction });
+        onSearchError("We couldn't search right now. Please try again in a few moments.");
+        return;
+      }
       await track("subject_searched", {
         found: result.status === "found",
         jurisdiction,
@@ -83,7 +89,7 @@ function SearchCard({
         onNoMatch({ jurisdiction, text });
       }
     } catch {
-      onNoMatch({ jurisdiction, text });
+      onSearchError("We couldn't search right now. Please try again in a few moments.");
     } finally {
       setBusy(false);
     }
