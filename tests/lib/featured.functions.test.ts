@@ -68,7 +68,24 @@ it.each([0, 1])("distinguishes homepage read failure %i from no pick", async (fa
     .mockResolvedValueOnce({ data: null, error: {} });
   await expect(getFeaturedHome()).rejects.toThrow("couldn't load");
 });
-it("picks today's plate on the first page, even when the homepage was not visited", async () => {
+it("returns twelve rows and a strict next cursor only when a thirteenth exists", async () => {
+  const rows = Array.from({ length: 13 }, (_, i) =>
+    row(`2026-10-${String(17 - i).padStart(2, "0")}`),
+  );
+  m.rpc
+    .mockResolvedValueOnce({ data: [{ day: "2026-10-17" }], error: null })
+    .mockResolvedValueOnce({ data: rows, error: null });
+  const first = await getFeaturedArchive({ data: {} });
+  expect(first.plates).toHaveLength(12);
+  expect(first.next).toBe("2026-10-06");
+  m.rpc.mockResolvedValueOnce({ data: [rows[12]], error: null });
+  expect((await getFeaturedArchive({ data: { before: "2026-10-06" } })).next).toBeNull();
+  expect(m.rpc).toHaveBeenLastCalledWith("get_featured_subject_days", {
+    _before: "2026-10-06",
+    _limit: 13,
+  });
+});
+
   const rows = [row("2026-10-17"), row("2026-10-16", 1)];
   m.rpc
     .mockResolvedValueOnce({ data: [{ day: "2026-10-17" }], error: null })
