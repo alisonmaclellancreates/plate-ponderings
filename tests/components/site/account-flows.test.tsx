@@ -80,7 +80,7 @@ import { AiCheckStatus } from "@/components/site/AiCheckStatus";
 it.each(["signed-out", "demo", undefined] as const)(
   "uses cream keyboard rings for every navy-header control in %s mode",
   (mode) => {
-    render(<SiteHeader mode={mode} />);
+    render(mode === undefined ? <SiteHeader /> : <SiteHeader mode={mode} />);
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
     const header = screen.getByRole("banner");
     const controls = Array.from(header.querySelectorAll("a, button")).filter(
