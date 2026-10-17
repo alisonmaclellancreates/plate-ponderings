@@ -130,6 +130,10 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
     preview?.notice ?? null,
   );
   const [submitting, setSubmitting] = useState(false);
+  const [photoDraft, setPhotoDraft] = useState<PhotoDraft | null>(null);
+  const [photoReady, setPhotoReady] = useState<PhotoReady | null>(null);
+  const [photoUnreadable, setPhotoUnreadable] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const started = useRef(false);
 
   const { data: plateData } = useQuery({
@@ -145,6 +149,8 @@ export function AddStoryFlow({ plateId, preview }: { plateId: string; preview?: 
   const auth = useAccountAuth();
   const demo = Boolean(auth?.account?.isDemo);
   const submitStory = useServerFn(addStory);
+  const detectBox = useServerFn(detectPlateBox);
+  const uploadPhoto = useServerFn(uploadStoryPhoto);
 
   useEffect(() => {
     if (!started.current) {
