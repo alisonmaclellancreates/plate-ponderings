@@ -13,7 +13,13 @@ const NAV = [
   { href: "/about", label: "About" },
 ];
 
-function Avatar({ showHandle, handle = CURRENT_USER.handle }: { showHandle: boolean; handle?: string }) {
+function Avatar({
+  showHandle,
+  handle = CURRENT_USER.handle,
+}: {
+  showHandle: boolean;
+  handle?: string;
+}) {
   return (
     <span className="flex items-center gap-2">
       <span className="relative inline-flex size-9 items-center justify-center rounded-full bg-cream text-navy">
@@ -74,16 +80,59 @@ function MemberProfile({ showHandle }: { showHandle: boolean }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   if (!auth?.account) return null;
-  return <div className="relative">
-    <Button variant="ghost" className="h-auto rounded-full p-0 text-cream" aria-label={`${auth.account.handle} menu`} aria-expanded={open} onClick={() => setOpen(v => !v)}><Avatar showHandle={showHandle} handle={auth.account.handle} /></Button>
-    {open && <ul aria-label="Profile" className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg">
-      <li><Link to="/submissions" className="block px-4 py-2 hover:bg-cream">Your Submissions</Link></li>
-      <li><Link to="/profile" className="block px-4 py-2 hover:bg-cream">Your Profile</Link></li>
-      {auth.account.isAdmin && <li><Link to="/admin" className="block px-4 py-2 hover:bg-cream">Admin</Link></li>}
-      <li className="border-t border-border"><Button variant="ghost" className="w-full justify-start px-4 text-navy" onClick={() => void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."))}>Sign out</Button></li>
-      {error && <li role="alert" className="px-4 py-2">{error}</li>}
-    </ul>}
-  </div>;
+  return (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        className="h-auto rounded-full p-0 text-cream"
+        aria-label={`${auth.account.handle} menu`}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Avatar showHandle={showHandle} handle={auth.account.handle} />
+      </Button>
+      {open && (
+        <ul
+          aria-label="Profile"
+          className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 text-navy shadow-lg"
+        >
+          <li>
+            <Link to="/submissions" className="block px-4 py-2 hover:bg-cream">
+              Your Submissions
+            </Link>
+          </li>
+          <li>
+            <Link to="/profile" className="block px-4 py-2 hover:bg-cream">
+              Your Profile
+            </Link>
+          </li>
+          {auth.account.isAdmin && (
+            <li>
+              <Link to="/admin" className="block px-4 py-2 hover:bg-cream">
+                Admin
+              </Link>
+            </li>
+          )}
+          <li className="border-t border-border">
+            <Button
+              variant="ghost"
+              className="w-full justify-start px-4 text-navy"
+              onClick={() =>
+                void auth.signOut().catch(() => setError("We couldn't sign you out. Try again."))
+              }
+            >
+              Sign out
+            </Button>
+          </li>
+          {error && (
+            <li role="alert" className="px-4 py-2">
+              {error}
+            </li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
 }
 export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
   const auth = useAccountAuth();
@@ -116,14 +165,18 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
               <Link to="/sign-in" className={signIn}>
                 Sign in
               </Link>
-              {demoEnabled && <Link to="/demo" className={tryDemo}>
-                Try the Demo
-              </Link>}
+              {demoEnabled && (
+                <Link to="/demo" className={tryDemo}>
+                  Try the Demo
+                </Link>
+              )}
             </>
           ) : mode === "demo" ? (
             <DemoProfile showHandle />
+          ) : previewMode ? (
+            <Avatar showHandle />
           ) : (
-            previewMode ? <Avatar showHandle /> : <MemberProfile showHandle />
+            <MemberProfile showHandle />
           )}
         </div>
         <div className="ml-auto flex items-center gap-3 md:hidden">
@@ -133,8 +186,10 @@ export function SiteHeader({ mode: previewMode }: { mode?: HeaderMode }) {
             </Link>
           ) : mode === "demo" ? (
             <DemoProfile showHandle={false} />
+          ) : previewMode ? (
+            <Avatar showHandle={false} />
           ) : (
-            previewMode ? <Avatar showHandle={false} /> : <MemberProfile showHandle={false} />
+            <MemberProfile showHandle={false} />
           )}
           <button
             type="button"

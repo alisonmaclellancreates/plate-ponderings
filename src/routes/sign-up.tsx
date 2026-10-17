@@ -6,7 +6,9 @@ const TITLE = "Create an Account | What the Plate?";
 const DESCRIPTION = "Join the community and add your story.";
 
 export const Route = createFileRoute("/sign-up")({
-  validateSearch: (search: Record<string, unknown>) => ({ returnTo: safeReturnPath(search['returnTo']) }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    returnTo: safeReturnPath(search["returnTo"]),
+  }),
   head: () => ({
     meta: [
       { title: TITLE },
@@ -19,4 +21,7 @@ export const Route = createFileRoute("/sign-up")({
   }),
   component: SignUpRoute,
 });
-function SignUpRoute() { const { returnTo } = Route.useSearch(); return <SignUpPage returnTo={returnTo} />; }
+function SignUpRoute() {
+  const { returnTo } = Route.useSearch();
+  return <SignUpPage returnTo={returnTo} />;
+}

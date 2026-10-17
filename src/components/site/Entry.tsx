@@ -100,19 +100,42 @@ function useEntry(kind: "signed_in" | "signed_up", returnTo: string) {
   const auth = useAccountAuth();
   const navigate = useNavigate();
   async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault(); if (busy) return;
+    e.preventDefault();
+    if (busy) return;
     const data = new FormData(e.currentTarget);
-    const email = String(data.get("email") ?? ""); const password = String(data.get("password") ?? "");
+    const email = String(data.get("email") ?? "");
+    const password = String(data.get("password") ?? "");
     if (!email || !password) return;
-    setBusy(true); setError("");
+    setBusy(true);
+    setError("");
     try {
-      const result = kind === "signed_up" ? await supabase.auth.signUp({ email, password }) : await supabase.auth.signInWithPassword({ email, password });
-      if (result.error) { setError(kind === "signed_up" ? signupErrorMessage(result.error) : "We couldn't sign you in. Check your email and password and try again."); return; }
-      if (!result.data.session) { setError("Your account couldn't be signed in. Please try signing in."); return; }
+      const result =
+        kind === "signed_up"
+          ? await supabase.auth.signUp({ email, password })
+          : await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) {
+        setError(
+          kind === "signed_up"
+            ? signupErrorMessage(result.error)
+            : "We couldn't sign you in. Check your email and password and try again.",
+        );
+        return;
+      }
+      if (!result.data.session) {
+        setError("Your account couldn't be signed in. Please try signing in.");
+        return;
+      }
       await auth?.completeSignIn(kind);
       await navigate({ to: safeReturnPath(returnTo) });
-    } catch { setError(kind === "signed_up" ? "Your account couldn't be created. You can try again or sign in." : "We couldn't sign you in. Check your email and password and try again."); }
-    finally { setBusy(false); }
+    } catch {
+      setError(
+        kind === "signed_up"
+          ? "Your account couldn't be created. You can try again or sign in."
+          : "We couldn't sign you in. Check your email and password and try again.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
   return { busy, error, submit };
 }

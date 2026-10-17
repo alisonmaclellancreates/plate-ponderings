@@ -6,7 +6,9 @@ const TITLE = "Sign In | What the Plate?";
 const DESCRIPTION = "Welcome back. Sign in to What the Plate?.";
 
 export const Route = createFileRoute("/sign-in")({
-  validateSearch: (search: Record<string, unknown>) => ({ returnTo: safeReturnPath(search['returnTo']) }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    returnTo: safeReturnPath(search["returnTo"]),
+  }),
   head: () => ({
     meta: [
       { title: TITLE },
@@ -19,4 +21,7 @@ export const Route = createFileRoute("/sign-in")({
   }),
   component: SignInRoute,
 });
-function SignInRoute() { const { returnTo } = Route.useSearch(); return <SignInPage returnTo={returnTo} />; }
+function SignInRoute() {
+  const { returnTo } = Route.useSearch();
+  return <SignInPage returnTo={returnTo} />;
+}

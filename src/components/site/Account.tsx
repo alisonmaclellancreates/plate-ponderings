@@ -121,24 +121,42 @@ export function ProfilePage() {
   const [message, setMessage] = useState("");
   const check = useServerFn(checkHandle);
   const save = useServerFn(saveHandle);
-  useEffect(() => { setDraft(handle); }, [handle]);
+  useEffect(() => {
+    setDraft(handle);
+  }, [handle]);
   useEffect(() => {
     setAvailable(false);
     if (!auth?.account || auth.account.isDemo || !handleFormatValid(draft)) return;
     let active = true;
-    const timer = setTimeout(() => { void check({ data: { handle: draft } }).then(r => { if (active) setAvailable(r.available); }).catch(() => {}); }, 250);
-    return () => { active = false; clearTimeout(timer); };
+    const timer = setTimeout(() => {
+      void check({ data: { handle: draft } })
+        .then((r) => {
+          if (active) setAvailable(r.available);
+        })
+        .catch(() => {});
+    }, 250);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [draft, auth?.account, check]);
   async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault(); if (busy || !auth?.account) return;
-    setBusy(true); setMessage("");
+    e.preventDefault();
+    if (busy || !auth?.account) return;
+    setBusy(true);
+    setMessage("");
     try {
       const result = await save({ data: { handle: draft } });
       setMessage(result.message);
-      if (result.outcome === "changed") { await auth.refresh(); await track("handle_changed", {}); }
-      else if (result.outcome === "rejected") await track("handle_rejected", {});
-    } catch { setMessage(HANDLE_UNAVAILABLE); }
-    finally { setBusy(false); }
+      if (result.outcome === "changed") {
+        await auth.refresh();
+        await track("handle_changed", {});
+      } else if (result.outcome === "rejected") await track("handle_rejected", {});
+    } catch {
+      setMessage(HANDLE_UNAVAILABLE);
+    } finally {
+      setBusy(false);
+    }
   }
   return (
     <main>
@@ -168,21 +186,38 @@ export function ProfilePage() {
                     id="handle"
                     name="handle"
                     value={draft}
-                    onChange={e => { setDraft(e.target.value); setMessage(""); }}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      setMessage("");
+                    }}
                     disabled={busy || auth?.account?.isDemo}
                     aria-describedby="handle-status handle-help"
                     className="min-w-0 flex-1 rounded-md border border-border bg-card px-3 py-2"
                   />
-                  {available ? <span id="handle-status" className="brand-badge" data-tone="green">
-                    <CheckCircle2 aria-hidden className="size-4 shrink-0" />
-                    Available
-                  </span> : <span id="handle-status" className="text-sm text-muted-foreground">{auth?.account?.isDemo ? DEMO_MESSAGE : handleFormatValid(draft) ? "" : "That handle couldn't be used."}</span>}
+                  {available ? (
+                    <span id="handle-status" className="brand-badge" data-tone="green">
+                      <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+                      Available
+                    </span>
+                  ) : (
+                    <span id="handle-status" className="text-sm text-muted-foreground">
+                      {auth?.account?.isDemo
+                        ? DEMO_MESSAGE
+                        : handleFormatValid(draft)
+                          ? ""
+                          : "That handle couldn't be used."}
+                    </span>
+                  )}
                 </div>
                 <p id="handle-help" className="text-sm text-muted-foreground">
                   {HANDLE_HELP}
                 </p>
                 <div className="pt-2">
-                  <Button type="submit" disabled={busy || auth?.account?.isDemo} className="brand-btn brand-btn-navy">
+                  <Button
+                    type="submit"
+                    disabled={busy || auth?.account?.isDemo}
+                    className="brand-btn brand-btn-navy"
+                  >
                     Save Changes
                   </Button>
                 </div>
