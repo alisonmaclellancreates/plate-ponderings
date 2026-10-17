@@ -11,8 +11,8 @@ expect.extend(matchers);
 // vitest-axe's own type augmentation targets the legacy global Vi namespace;
 // this project augments the vitest module instead.
 declare module "@vitest/expect" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
-  interface Assertion<T = unknown> extends AxeMatchers {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-explicit-any
+  interface Assertion<T = any> extends AxeMatchers {}
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface AsymmetricMatchersContaining extends AxeMatchers {}
 }
