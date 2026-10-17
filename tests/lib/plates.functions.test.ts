@@ -556,5 +556,13 @@ describe("recheckPendingSubjects", () => {
       expect(mocks.checkStory).not.toHaveBeenCalled();
       expect(mocks.admin.from).not.toHaveBeenCalledWith("stories");
     });
+
+    it("notifies and refreshes only when the guarded update matched a row", async () => {
+      const { notifications, updates } = withStories([storyRow]);
+      updates.mockImplementation(() => chain({ data: [], error: null }));
+      expect(await call(recheckPendingSubjects, {})).toEqual({ rechecked: 2 });
+      expect(notifications).toEqual([]);
+      expect(mocks.refresh).not.toHaveBeenCalled();
+    });
   });
 });
