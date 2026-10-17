@@ -101,19 +101,22 @@ beforeEach(() => {
   URL.createObjectURL = vi.fn(() => "blob:mock");
 });
 
-/** Choose a photo, confirm the suggested box, and land on review. */
+/** Choose a photo, confirm the suggested box, and land back on step 2. */
 async function addPhoto(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Next" }));
   const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
   await user.upload(screen.getByLabelText(/Choose a photo/i), file);
   await waitFor(() =>
-    expect(screen.getByRole("heading", { name: "Keep the plate clear" })).toBeInTheDocument(),
+    expect(screen.getByRole("heading", { name: "Adjust the plate area" })).toBeInTheDocument(),
   );
-  await user.click(screen.getByRole("button", { name: "Confirm" }));
+  await user.click(screen.getByRole("button", { name: "Next" }));
   await waitFor(() =>
     expect(screen.getByRole("heading", { name: "Review your photo" })).toBeInTheDocument(),
   );
   await user.click(screen.getByRole("button", { name: "Use This Photo" }));
+  await waitFor(() =>
+    expect(screen.getByAltText("Your processed photo, blurred except the plate")).toBeInTheDocument(),
+  );
 }
 
 describe("AddStoryFlow", () => {
