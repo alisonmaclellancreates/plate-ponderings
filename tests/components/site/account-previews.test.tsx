@@ -32,7 +32,7 @@ import { HandleField } from "@/components/site/Account";
 import { SignInPage, SignUpPage } from "@/components/site/Entry";
 import { HandleCheckStatusPanel } from "@/components/site/HandleCheckStatus";
 import { HANDLE_REJECTED, HANDLE_TAKEN } from "@/lib/account-rules";
-import { Route as AccountPreviewsRoute } from "@/routes/previews.account";
+import { Route as AccountPreviewsRoute } from "@/routes/previews_.account";
 
 beforeEach(() => vi.clearAllMocks());
 
