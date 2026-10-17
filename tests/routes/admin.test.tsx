@@ -41,5 +41,10 @@ it("sends non-admins home from beforeLoad", async () => {
 
 it("treats a failed access check as not admin", async () => {
   m.access.mockImplementation(() => Promise.reject(new Error("down")));
-  await expect(R.beforeLoad()).rejects.toEqual({ redirect: { to: "/", replace: true } });
+  const thrown = await R.beforeLoad().then(
+    () => "passed",
+    (e: unknown) => e,
+  );
+  console.log("THROWN", JSON.stringify(thrown), String(thrown));
+  expect(thrown).toEqual({ redirect: { to: "/", replace: true } });
 });
