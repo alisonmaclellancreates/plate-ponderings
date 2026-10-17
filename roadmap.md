@@ -7,7 +7,7 @@
 - [x] Applied approved migration 0013; built atomic UTC selection, live featured pages, batch visible-summary reads and privacy-scoped analytics.
 - [x] Changed tests: 96 passed across 10 files. Lint: zero errors, six existing UI warnings. All seven database test files passed through the privileged tool; fixture readback zero. Automatic build OK; no manual full suite, coverage, typecheck, build, browser or AI checks.
 - [ ] Two-session concurrency is unexercised; requires an independent privileged multi-session harness. Daily reuse, immutable snapshot and single-row behavior passed in one transaction.
-- [ ] Report PR Codecov patch after Alison opens the Step 46 PR. CI is authoritative; no local coverage estimate.
+- [x] PR #104 Codecov patch: 100% (Alison's read of the completed check). All three partials closed; CI authoritative.
 
 # Step 45b: fictional plate guesses
 
