@@ -103,7 +103,9 @@ describe("requestSummaryRefresh", () => {
   it("passes an unknown source key through as its own label", async () => {
     rowsResult = { data: [{ meaning: "Odd", source: "legacy", body: null }], error: null };
     await requestSummaryRefresh("plate-1");
-    expect(m.generate).toHaveBeenCalledWith([{ meaning: "Odd", sourceLabel: "legacy", text: null }]);
+    expect(m.generate).toHaveBeenCalledWith([
+      { meaning: "Odd", sourceLabel: "legacy", text: null },
+    ]);
   });
 
   it("numbers the first version 1", async () => {
