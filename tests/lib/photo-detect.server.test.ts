@@ -76,9 +76,9 @@ describe("detectPlateBoxInImage", () => {
     const call = m.streamText.mock.calls[0]?.[0] as { output: { schema: z.ZodType } };
     const schema = call.output.schema;
     expect(schema.safeParse({ found: false }).success).toBe(false);
-    expect(
-      schema.safeParse({ found: false, x: null, y: null, w: null, h: null }).success,
-    ).toBe(true);
+    expect(schema.safeParse({ found: false, x: null, y: null, w: null, h: null }).success).toBe(
+      true,
+    );
   });
 
   it("returns no box when the box is smaller than the minimum", async () => {
