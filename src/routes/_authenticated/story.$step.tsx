@@ -40,5 +40,7 @@ export const Route = createFileRoute("/_authenticated/story/$step")({
 
 function StoryStepRoute() {
   const { step } = Route.useLoaderData();
+  const { plate } = Route.useSearch();
+  if (plate) return <AddStoryFlow plateId={plate} />;
   return <StoryStepPage step={step} />;
 }
