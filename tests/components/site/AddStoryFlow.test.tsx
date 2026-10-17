@@ -93,11 +93,9 @@ beforeEach(() => {
   m.detect.mockResolvedValue({ outcome: "ok", box: { x: 0.3, y: 0.4, w: 0.25, h: 0.12 } });
   m.renderBlurred.mockResolvedValue(undefined);
   m.toJpeg.mockResolvedValue(new Blob(["jpeg"], { type: "image/jpeg" }));
-  m.upload.mockResolvedValue({ path: "user-1/photo.jpg" });
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    filter: "",
-    drawImage: vi.fn(),
-  } as unknown as CanvasRenderingContext2D);
+  m.upload.mockResolvedValue({ outcome: "ok", path: "user-1/photo.jpg" });
+  m.renderBlurred.mockReturnValue(document.createElement("canvas"));
+  URL.revokeObjectURL = vi.fn();
   URL.createObjectURL = vi.fn(() => "blob:mock");
 });
 
@@ -264,7 +262,7 @@ describe("AddStoryFlow", () => {
     await user.type(screen.getByLabelText(/What do you think it means/), "Pacific Northwest love.");
     await addPhoto(user);
     expect(m.upload).toHaveBeenCalledWith({
-      data: { dataUrl: expect.stringMatching(/^data:image\/jpeg/) },
+      data: { jpeg: "data:image/jpeg;base64,processed" },
     });
     expect(m.track).toHaveBeenCalledWith("photo_added", { box_found: true, box_adjusted: false });
     await user.click(screen.getByRole("button", { name: "Next" }));
