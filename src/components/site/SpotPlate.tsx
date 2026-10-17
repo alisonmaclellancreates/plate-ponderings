@@ -639,11 +639,11 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
           : result.outcome === "rate-limited"
             ? "rate_limited"
             : result.outcome === "new" ||
-              result.outcome === "exists" ||
-              result.outcome === "pending" ||
-              result.outcome === "rejected"
-            ? result.outcome
-            : "error";
+                result.outcome === "exists" ||
+                result.outcome === "pending" ||
+                result.outcome === "rejected"
+              ? result.outcome
+              : "error";
       await track("subject_spotted", { outcome });
     } catch {
       setStage({ kind: "result", result: { outcome: "error" } });
@@ -665,11 +665,7 @@ export function SpotLivePage({ values }: { values?: SpotValues | undefined }) {
           <SpotForm values={submittedValues ?? values} isDemo={isDemo} onSpot={onSpot} />
           {stage.kind === "result" &&
             stage.result.outcome === "already-spotted" &&
-            submittedValues && (
-              <AlreadySpottedPanel
-                values={submittedValues}
-              />
-            )}
+            submittedValues && <AlreadySpottedPanel values={submittedValues} />}
         </div>
         <WhatHappensNext />
       </div>
