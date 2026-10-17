@@ -263,7 +263,7 @@ export const recheckPendingSubjects = createServerFn({ method: "POST" })
       .select("id,subject_id,meaning,body,subjects!stories_subject_id_fkey(identity_b)")
       .eq("author_id", context.userId)
       .eq("status", "pending");
-    if (!pendingStories.error && pendingStories.data.length > 0) {
+    if (!pendingStories.error && pendingStories.data && pendingStories.data.length > 0) {
       const { checkStory } = await import("./story-moderation.server");
       const { requestSummaryRefresh } = await import("./summary-refresh.server");
       for (const story of pendingStories.data) {

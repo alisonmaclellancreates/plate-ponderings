@@ -27,6 +27,8 @@ vi.mock("@tanstack/react-start", () => ({
 vi.mock("@/integrations/supabase/auth-middleware", () => ({ requireSupabaseAuth: {} }));
 vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: mocks.admin }));
 vi.mock("@/lib/plate-moderation.server", () => ({ checkSubject: mocks.check }));
+vi.mock("@/lib/story-moderation.server", () => ({ checkStory: mocks.checkStory }));
+vi.mock("@/lib/summary-refresh.server", () => ({ requestSummaryRefresh: mocks.refresh }));
 vi.mock("@/lib/ai-block.server", () => ({
   readAiBlock: mocks.readBlock,
   persistAiBlock: mocks.persistBlock,
