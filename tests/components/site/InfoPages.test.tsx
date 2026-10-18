@@ -26,6 +26,23 @@ describe("AboutPage", () => {
     expect(screen.getByText(/family member/)).toBeTruthy();
     expect(screen.getByText(/#SheBuilds/)).toBeTruthy();
   });
+
+  it("embeds the walkthrough video with controls and a download fallback", () => {
+    render(<AboutPage />);
+    const section = screen.getByLabelText("App walkthrough video");
+    expect(screen.getByRole("heading", { level: 2, name: "See the app in action" })).toBeTruthy();
+    const video = section.querySelector("video");
+    expect(video).toBeTruthy();
+    expect(video?.getAttribute("src")).toMatch(/^\/__l5e\/assets-v1\//);
+    expect(video?.hasAttribute("controls")).toBe(true);
+    expect(video?.getAttribute("preload")).toBe("metadata");
+    expect(video?.hasAttribute("playsinline")).toBe(true);
+    expect(video?.querySelector('track[kind="captions"]')).toBeTruthy();
+    const download = screen.getByRole("link", { name: "Download the walkthrough" });
+    expect(download.getAttribute("href")).toBe(video?.getAttribute("src"));
+    expect(download.hasAttribute("download")).toBe(true);
+    expect(screen.getByText(/A quick tour of spotting plates/)).toBeTruthy();
+  });
 });
 
 describe("PrivacyPage", () => {
