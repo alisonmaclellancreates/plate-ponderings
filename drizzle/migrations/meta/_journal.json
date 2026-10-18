@@ -141,6 +141,13 @@
       "when": 1792276901938,
       "tag": "0019_step51_demo_seed",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792281598261,
+      "tag": "0020_repair_demo_reset_delete_scopes",
+      "breakpoints": true
     }
   ]
 }
