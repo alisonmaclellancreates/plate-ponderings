@@ -22,6 +22,24 @@ export function AboutPage() {
           plate's meaning grows as more people weigh in.
         </p>
         <p>It was built for #SheBuilds, with love for everyone who reads the road.</p>
+        <section className="brand-card p-6" aria-label="App walkthrough video">
+          <h2 className="font-display text-2xl text-navy">See the app in action</h2>
+          <video
+            src={walkthroughAsset.url}
+            controls
+            preload="metadata"
+            playsInline
+            className="mt-3 w-full rounded-lg"
+          >
+            <track kind="captions" label="Walkthrough captions" />
+            Your browser can't play this video here.{" "}
+            <a href={walkthroughAsset.url} download className="font-semibold text-navy underline">
+              Download the walkthrough
+            </a>{" "}
+            instead.
+          </video>
+          <p className="mt-3 text-base">A quick tour of spotting plates and sharing stories.</p>
+        </section>
       </div>
     </main>
   );
