@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ScenicHeader } from "@/components/site/SpotPlate";
 import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/domain";
+import walkthroughAsset from "@/assets/walkthrough.mp4.asset.json";
 
 export const CONTACT_EMAIL = "hello@sailawaystudios.net";
 
