@@ -1,7 +1,7 @@
 # Reset rejected-delete repair
 
-- [ ] Apply approved function-only repair: explicit non-null key predicates on all ten reset-owned deletes, unchanged guards and grants.
-- [ ] Run delete-scope/access regression in a rollback without invoking reset; run lint.
+- [x] Applied 0020 function-only repair: explicit non-null key predicates on all ten reset-owned deletes, unchanged guards and grants.
+- [x] Database delete-scope/access regression passed in a rollback without invoking reset. Lint: zero errors, six existing warnings.
 - [ ] Full reset verification remains blocked on separate permission to run the destructive reset.
 
 # PR #121: tests-only patch coverage
