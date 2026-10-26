@@ -1,7 +1,16 @@
-import type { Box } from "@/lib/photo-blur";
 /** Sample data for the /previews gallery and tests. Never read by live pages. */
+import type { Box } from "@/lib/photo-blur";
+import type {
+  HowIKnow,
+  Moderation,
+  PlateRecord,
+  PlateStatus,
+  ReportedStory,
+  Story,
+  Submission,
+  Summary,
+} from "@/lib/domain";
 
-import type { HowIKnow, Moderation, PlateRecord, Story, Summary } from "@/lib/domain";
 export type {
   Consensus,
   HowIKnow,
@@ -14,7 +23,6 @@ export type {
   Summary,
 } from "@/lib/domain";
 export { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/domain";
-import type { PlateStatus, ReportedStory, Submission } from "@/lib/domain";
 
 export const CURRENT_USER = { handle: "Traveler4821", hasNotification: true };
 
