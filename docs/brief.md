@@ -59,9 +59,9 @@ Search hint: "Spaces and dashes are ignored". Symbol plates are a known limitati
 |---|---|
 | No published stories | Mystery |
 | Published stories, no owner story | Interpreted |
-| An owner story exists | Owner claim |
+| An owner story exists | Owner weighed in |
 
-Status-strip owner line: "No owner claim yet", or "Says it's their plate: {handle}".
+Status-strip owner line: "No owner yet", or "Owner: {handle}".
 
 ## How do you know
 
@@ -165,4 +165,3 @@ One optional photo per story. The AI is asked for one thing: the box around the 
 - Generated handles for new accounts: `Traveler` followed by four digits, for example `Traveler4821`.
 - Reserved handles (case ignored): admin, administrator, owner, demo, moderator, mod, staff, support, whattheplate, system, null, undefined.
 - The demo sample account's handle is `Traveler4821`.
-
