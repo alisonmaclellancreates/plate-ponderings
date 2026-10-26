@@ -27,7 +27,7 @@ import {
   asFeatured,
   featuredPlates,
 } from "@/lib/mock-data";
-import { samplePlate, sampleStories, sampleSummary, toPlateStory } from "@/lib/preview-samples";
+import { samplePlate, sampleStories, sampleSummary } from "@/lib/preview-samples";
 import { decodePhoto } from "@/lib/photo-canvas";
 import type { Box } from "@/lib/photo-blur";
 import type { PlateGuess } from "@/lib/plate-guesses.functions";
@@ -288,12 +288,12 @@ const exploreLive = (error = false) => ({
 /** One renderer per registry slug. */
 export const PREVIEW_SCREENS: Record<string, () => ReactNode> = {
   "home-featured": () => {
-    const [pick, ...recent] = featured();
+    const pick = asFeatured(samplePlate("ut-canyons"));
     return (
       <main>
-        <PlateOfTheDay plate={pick!} PlateLink={SamplePlateLink} />
+        <PlateOfTheDay plate={pick} PlateLink={SamplePlateLink} />
         <RecentlyFeatured
-          live={{ today: TODAY, pick: pick!, recent: recent.slice(0, 4) }}
+          live={{ today: TODAY, pick, recent: featured().slice(1, 5) }}
           PlateLink={SamplePlateLink}
         />
       </main>
@@ -501,6 +501,3 @@ export function PreviewScreen({ slug }: { slug: string }) {
     </>
   );
 }
-
-// Re-exported for tests that check the sample story mapping end to end.
-export { toPlateStory };
