@@ -6,8 +6,6 @@ import { track } from "@/lib/analytics";
 import type { SpotValues } from "@/lib/spot";
 import { CheckingView, SpotOutcomeView, SpotPageView } from "@/components/site/SpotViews";
 
-export { Outcome, ScenicHeader, SpotForm } from "@/components/site/SpotViews";
-
 type SpotStage = { kind: "form" } | { kind: "checking" } | { kind: "result"; result: SpotResult };
 
 /** The live Spot a Plate flow: form, checking, then the real outcome. */
