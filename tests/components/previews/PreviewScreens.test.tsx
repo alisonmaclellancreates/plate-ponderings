@@ -198,8 +198,8 @@ describe("sample photo editor", () => {
 describe("gallery index", () => {
   it("lists every sample screen and the live pages", () => {
     render(<PreviewIndex />);
-    for (const p of PREVIEWS)
-      expect(screen.getByRole("link", { name: new RegExp(p.label) })).toBeInTheDocument();
+    const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
+    for (const p of PREVIEWS) expect(hrefs).toContain(`/previews/${p.slug}`);
     expect(screen.getAllByRole("link", { name: /Live$/ })).toHaveLength(LIVE_PAGES.length);
     expect(screen.getByRole("heading", { name: "Plate page" })).toBeInTheDocument();
   });
