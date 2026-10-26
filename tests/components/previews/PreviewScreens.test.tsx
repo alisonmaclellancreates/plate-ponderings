@@ -70,9 +70,10 @@ describe("preview gallery", () => {
     "renders %s as a labelled sample, and pressing its buttons reaches no server",
     async (slug) => {
       render(<PreviewScreen slug={slug} />);
-      const note = screen.getByRole("note");
+      // A sample dialog opens modally, hiding the strip from assistive tech behind it.
+      const note = screen.getByRole("note", { hidden: true });
       expect(note).toHaveTextContent("Nothing here is saved.");
-      expect(screen.getByRole("link", { name: "All previews" })).toHaveAttribute(
+      expect(screen.getByRole("link", { name: "All previews", hidden: true })).toHaveAttribute(
         "href",
         "/previews",
       );
