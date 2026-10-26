@@ -14,6 +14,7 @@ import type { FeaturedHome } from "@/lib/featured.functions";
 
 import { storyCount } from "@/lib/story-count";
 import { HEADLINES, useHeadlineIndex } from "@/lib/headlines";
+import { LivePlateLink, type PlateLinkComponent } from "@/components/site/plate-link";
 
 function Headline() {
   const active = useHeadlineIndex();
