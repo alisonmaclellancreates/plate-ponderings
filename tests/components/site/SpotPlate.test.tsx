@@ -27,7 +27,7 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
-import { SpotForm } from "@/components/site/SpotPlate";
+import { SpotForm } from "@/components/site/SpotViews";
 import { JURISDICTION_ERROR, TEXT_EMPTY_ERROR } from "@/lib/spot";
 
 describe("Spot a Plate form", () => {

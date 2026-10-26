@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ScenicHeader } from "@/components/site/SpotPlate";
+import { ScenicHeader } from "@/components/site/SpotViews";
 import { BLOCKING_EXPLANATION, DELETE_ACCOUNT_WARNING } from "@/lib/domain";
 import walkthroughAsset from "@/assets/walkthrough.mp4.asset.json";
 

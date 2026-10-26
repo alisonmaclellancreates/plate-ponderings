@@ -1,14 +1,19 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /previews
 
 User-agent: Bingbot
 Allow: /
+Disallow: /previews
 
 User-agent: Twitterbot
 Allow: /
+Disallow: /previews
 
 User-agent: facebookexternalhit
 Allow: /
+Disallow: /previews
 
 User-agent: *
 Allow: /
+Disallow: /previews

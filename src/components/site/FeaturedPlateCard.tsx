@@ -1,26 +1,27 @@
-import { Link } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
 import { StatusBadge } from "@/components/site/Badges";
 import { formatDay } from "@/lib/format-day";
 import { storyCount } from "@/lib/story-count";
 import { featuredProgress, openFeatured, type FeaturedDisplay } from "@/lib/featured";
+import { LivePlateLink, type PlateLinkComponent } from "@/components/site/plate-link";
 
 export function FeaturedPlateCard({
   plate,
   today = false,
   utcToday,
+  PlateLink = LivePlateLink,
 }: {
   plate: FeaturedDisplay;
   today?: boolean;
   utcToday?: string | undefined;
+  PlateLink?: PlateLinkComponent;
 }) {
   const display = plate;
   const count = display.count;
   return (
-    <Link
-      to="/plate/$state"
-      params={{ state: plate.slug }}
+    <PlateLink
+      plateId={plate.slug}
       onClick={utcToday ? () => openFeatured(display, utcToday) : undefined}
       className="brand-card flex h-full flex-col items-center gap-3 p-4 text-center transition-shadow hover:shadow-md"
     >
@@ -39,6 +40,6 @@ export function FeaturedPlateCard({
       </p>
       <StatusBadge status={display.status} />
       <p className="text-sm">{featuredProgress(display.atPick, count)}</p>
-    </Link>
+    </PlateLink>
   );
 }

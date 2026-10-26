@@ -275,3 +275,10 @@ Status: implemented and verified locally. 735 tests pass, typecheck clean, lint 
 - Report/Delete become real modal dialogs on existing dialog primitives
 - Unread dot beside Your Submissions in profile menu; rotating headline announces changes with aria-live="polite" (reduced motion unchanged)
 - Progress issue #54: fix if used, else leave open and say so
+
+## Preview gallery restored (anyone with the link)
+- [x] `/previews` index plus `/previews/$screen` for 49 sample screens from one registry; noindex heads and robots.txt Disallow; not linked from the site.
+- [x] Plate page, story form and Spot a Plate split into data-free views (`PlateDetailView`, `AddStoryView`, `SpotViews`) rendered by the live wrappers and the gallery; plate links are a swappable component; Admin takes an AI status slot.
+- [x] Sample data back in `src/lib/mock-data.ts` (tests re-export it); sample photo restored under `/mock`.
+- [x] Tests: every screen renders labelled and makes no server request when its buttons are pressed; registry, head, sample adapters and routes covered. Related: 374 tests/37 files; lint zero errors, six existing warnings; build OK.
+- [ ] Confirm the PR's Codecov patch figure after managed sync and CI.
