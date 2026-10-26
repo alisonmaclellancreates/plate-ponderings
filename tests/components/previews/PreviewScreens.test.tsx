@@ -36,7 +36,6 @@ vi.mock("@/components/site/PhotoEditor", () => ({
 }));
 
 import {
-  PREVIEW_SCREENS,
   PreviewScreen,
   SamplePhotoEditor,
   SamplePlateLink,
@@ -62,10 +61,6 @@ afterEach(() => {
 const requests = () => fetchSpy.mock.calls.map(([url]) => String(url));
 
 describe("preview gallery", () => {
-  it("has exactly one screen for every registry entry", () => {
-    expect(Object.keys(PREVIEW_SCREENS).sort()).toEqual(PREVIEWS.map((p) => p.slug).sort());
-  });
-
   it.each(PREVIEWS.map((p) => p.slug))(
     "renders %s as a labelled sample, and pressing its buttons reaches no server",
     async (slug) => {

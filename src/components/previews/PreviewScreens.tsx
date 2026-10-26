@@ -48,7 +48,7 @@ import { findPreview } from "@/lib/preview-registry";
 const noop = () => {};
 
 /** Sample plates that have their own sample plate page. */
-export const SAMPLE_PLATE_SCREENS: Record<string, string> = {
+const SAMPLE_PLATE_SCREENS: Record<string, string> = {
   "or-pnwlv": "plate-pnw-lv",
   "wa-b7k2l9": "plate-mystery",
   "bc-lv2code": "plate-interpreted",
@@ -286,7 +286,7 @@ const exploreLive = (error = false) => ({
 });
 
 /** One renderer per registry slug. */
-export const PREVIEW_SCREENS: Record<string, () => ReactNode> = {
+const PREVIEW_SCREENS: Record<string, () => ReactNode> = {
   "home-featured": () => {
     const pick = asFeatured(samplePlate("ut-canyons"));
     return (
