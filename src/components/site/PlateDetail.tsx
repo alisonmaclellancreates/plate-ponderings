@@ -36,7 +36,7 @@ export function RealPlateDetail({
       from={from}
       signedIn={signedIn}
       stories={stories ?? undefined}
-      summary={summary}
+      summary={summary ?? undefined}
       guess={guess}
       actions={(story) => ({
         menu: <StoryMenuActions story={story} plateId={plate.id} />,
