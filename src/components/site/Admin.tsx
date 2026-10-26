@@ -54,6 +54,7 @@ export function AdminPage({
   note = "",
   message = "",
   demoControls,
+  aiStatus = <AiCheckStatus />,
 }: {
   rows?: ReportedStory[];
   onToggle?: Toggle;
@@ -62,11 +63,13 @@ export function AdminPage({
   note?: string;
   message?: string;
   demoControls?: ReactNode;
+  /** The AI check status panel; the live page loads it, the sample gallery passes a fixed one. */
+  aiStatus?: ReactNode;
 }) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="font-display text-4xl text-navy">Admin</h1>
-      <AiCheckStatus />
+      {aiStatus}
       {demoControls}
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
