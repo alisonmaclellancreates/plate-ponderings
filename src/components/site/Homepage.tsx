@@ -359,10 +359,12 @@ export function PlateOfTheDay({
   plate,
   utcToday,
   headingId = "potd-heading",
+  PlateLink = LivePlateLink,
 }: {
   plate: FeaturedDisplay;
   utcToday?: string | undefined;
   headingId?: string;
+  PlateLink?: PlateLinkComponent;
 }) {
   const display = plate;
   const status = display.status;
@@ -396,14 +398,13 @@ export function PlateOfTheDay({
             <div className="min-w-0">
               <StatusBadge status={status} />
               <p className="mt-3 text-lg">{copy}</p>
-              <Link
-                to="/plate/$state"
-                params={{ state: plate.slug }}
+              <PlateLink
+                plateId={plate.slug}
                 onClick={utcToday ? () => openFeatured(display, utcToday) : undefined}
                 className="brand-btn brand-btn-navy mt-4"
               >
                 View This Plate
-              </Link>
+              </PlateLink>
             </div>
           </div>
         </div>
@@ -412,7 +413,13 @@ export function PlateOfTheDay({
   );
 }
 
-export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) {
+export function RecentlyFeatured({
+  live,
+  PlateLink,
+}: {
+  live?: FeaturedHome | undefined;
+  PlateLink?: PlateLinkComponent | undefined;
+}) {
   const recent = live?.recent ?? [];
   if (recent.length === 0) return null;
   return (
@@ -431,7 +438,11 @@ export function RecentlyFeatured({ live }: { live?: FeaturedHome | undefined }) 
       <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {recent.map((p) => (
           <li key={p.day} className="min-w-0">
-            <FeaturedPlateCard plate={p} utcToday={live?.today} />
+            <FeaturedPlateCard
+              plate={p}
+              utcToday={live?.today}
+              {...(PlateLink ? { PlateLink } : {})}
+            />
           </li>
         ))}
       </ul>

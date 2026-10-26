@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FeaturedPlateCard } from "@/components/site/FeaturedPlateCard";
 import type { FeaturedDisplay } from "@/lib/featured";
+import type { PlateLinkComponent } from "@/components/site/plate-link";
 
 export function Explore({
   live,
+  PlateLink,
 }: {
+  PlateLink?: PlateLinkComponent | undefined;
   live?:
     | {
         plates: FeaturedDisplay[];
@@ -54,6 +57,7 @@ export function Explore({
                 plate={plate}
                 today={plate.day === live?.today}
                 utcToday={live?.today}
+                {...(PlateLink ? { PlateLink } : {})}
               />
             </li>
           ))}
