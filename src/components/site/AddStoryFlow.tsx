@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Camera, Info } from "lucide-react";
 import { Plate } from "@/components/site/Plate";
-import { Outcome } from "@/components/site/SpotPlate";
+import { Outcome } from "@/components/site/SpotViews";
 import { PhotoEditor } from "@/components/site/PhotoEditor";
 import { getPlate } from "@/lib/plates.functions";
 import { addStory, getPlateStories, type HowKey } from "@/lib/stories.functions";
