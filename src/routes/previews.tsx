@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PreviewIndex } from "@/components/previews/PreviewIndex";
 
 const TITLE = "Previews | What the Plate?";
-const DESCRIPTION = "Sample screens of What the Plate?, built from the real pages and sample plates.";
+const DESCRIPTION =
+  "Sample screens of What the Plate?, built from the real pages and sample plates.";
 
 export const Route = createFileRoute("/previews")({
   head: () => ({

@@ -12,11 +12,7 @@ import { track } from "@/lib/analytics";
 import { CATCHING_UP_MESSAGE, HISTORY_PAGE_SIZE } from "@/lib/summary";
 import type { PlateGuess } from "@/lib/plate-guesses.functions";
 import type { PlateSummaryResult, PlateSummaryVersion } from "@/lib/summaries.functions";
-import {
-  STORY_PAGE_SIZE,
-  type PlateStoriesResult,
-  type PlateStory,
-} from "@/lib/stories.functions";
+import { STORY_PAGE_SIZE, type PlateStoriesResult, type PlateStory } from "@/lib/stories.functions";
 
 type PanelSummary = Summary & { id?: string };
 
@@ -394,7 +390,11 @@ export function PlateDetailView({
       </div>
       <StatusStrip data={stories} />
       {stories && (
-        <Stories data={stories} addStory={addStory("brand-btn brand-btn-coral")} actions={actions} />
+        <Stories
+          data={stories}
+          addStory={addStory("brand-btn brand-btn-coral")}
+          actions={actions}
+        />
       )}
     </main>
   );

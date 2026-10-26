@@ -28,7 +28,12 @@ describe("preview samples", () => {
     expect(owner.hasOwnerStory).toBe(true);
     expect(owner.ownerHandle).toBe("teadragon");
     const none = sampleStories(samplePlate("nm-chile"));
-    expect(none).toMatchObject({ storyCount: 0, total: 0, hasOwnerStory: false, ownerHandle: null });
+    expect(none).toMatchObject({
+      storyCount: 0,
+      total: 0,
+      hasOwnerStory: false,
+      ownerHandle: null,
+    });
   });
 
   it("adds extra and pending stories without changing the shared record", () => {

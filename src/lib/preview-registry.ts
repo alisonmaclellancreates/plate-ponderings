@@ -37,20 +37,55 @@ const e = (group: PreviewGroup, slug: string, label: string, note: string): Prev
 });
 
 export const PREVIEWS: readonly PreviewEntry[] = [
-  e("Home and archive", "home-featured", "Homepage featured", "Plate of the Day, mystery pick, recently featured"),
-  e("Home and archive", "home-fallback", "Plate of the Day, fallback", "A pick that already has stories"),
-  e("Home and archive", "explore", "The Roadside Archive", "Featured plates, newest first, with Load More"),
+  e(
+    "Home and archive",
+    "home-featured",
+    "Homepage featured",
+    "Plate of the Day, mystery pick, recently featured",
+  ),
+  e(
+    "Home and archive",
+    "home-fallback",
+    "Plate of the Day, fallback",
+    "A pick that already has stories",
+  ),
+  e(
+    "Home and archive",
+    "explore",
+    "The Roadside Archive",
+    "Featured plates, newest first, with Load More",
+  ),
   e("Home and archive", "explore-error", "Archive, couldn't load", "Inline retry"),
 
   e("Plate page", "plate-pnw-lv", "Oregon PNW LV", "Two stories, largely agree"),
   e("Plate page", "plate-mystery", "Mystery", "Washington B7K2L9, no stories"),
-  e("Plate page", "plate-interpreted", "Interpreted", "British Columbia LV2CODE, five stories, no owner"),
+  e(
+    "Plate page",
+    "plate-interpreted",
+    "Interpreted",
+    "British Columbia LV2CODE, five stories, no owner",
+  ),
   e("Plate page", "plate-owner", "Owner weighed in", "California TEATIME with an owner claim"),
   e("Plate page", "plate-history", "Earlier summaries", "LV2CODE with earlier summaries open"),
-  e("Plate page", "plate-pending", "Your story is pending", "LV2CODE with your story waiting for its check"),
-  e("Plate page", "plate-catching-up", "Catching up", "A new story the summary hasn't caught up with"),
+  e(
+    "Plate page",
+    "plate-pending",
+    "Your story is pending",
+    "LV2CODE with your story waiting for its check",
+  ),
+  e(
+    "Plate page",
+    "plate-catching-up",
+    "Catching up",
+    "A new story the summary hasn't caught up with",
+  ),
   e("Plate page", "plate-guess-hidden", "Guess waiting", "A mystery with a hidden guess"),
-  e("Plate page", "plate-guess-revealed", "Guess revealed", "The guess after the first human story"),
+  e(
+    "Plate page",
+    "plate-guess-revealed",
+    "Guess revealed",
+    "The guess after the first human story",
+  ),
 
   e("Spot a Plate", "spot-validation", "Missing details", "Inline errors"),
   e("Spot a Plate", "spot-demo", "Demo", "Form turned off for the sample account"),

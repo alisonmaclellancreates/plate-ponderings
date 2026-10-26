@@ -200,11 +200,7 @@ export function AddStoryView({
               alt="Your processed photo, blurred except the plate"
               className="w-full rounded-lg"
             />
-            <button
-              type="button"
-              className={outline}
-              onClick={onRemovePhoto}
-            >
+            <button type="button" className={outline} onClick={onRemovePhoto}>
               Remove Photo
             </button>
             <button type="button" className={coral} onClick={() => onStep("3")}>
@@ -257,12 +253,7 @@ export function AddStoryView({
             <button type="button" onClick={() => onStep("2")} className={outline}>
               Back
             </button>
-            <button
-              type="button"
-              onClick={onSubmit}
-              disabled={submitting}
-              className={coral}
-            >
+            <button type="button" onClick={onSubmit} disabled={submitting} className={coral}>
               Submit Story
             </button>
           </>
@@ -275,11 +266,7 @@ export function AddStoryView({
           }
         >
           {photoUrl && (
-            <img
-              src={photoUrl}
-              alt="Your blurred photo"
-              className="w-full rounded-lg"
-            />
+            <img src={photoUrl} alt="Your blurred photo" className="w-full rounded-lg" />
           )}
           <dl className="brand-card space-y-4 bg-card p-5">
             <div>
