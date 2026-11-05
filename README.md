@@ -2,6 +2,8 @@
 
 [![codecov](https://codecov.io/gh/alisonmaclellancreates/plate-ponderings/graph/badge.svg)](https://codecov.io/gh/alisonmaclellancreates/plate-ponderings)
 
+Regenerating CodeCov 
+
 **Every plate has a story.** What the Plate? is a home for the stories behind personalized license plates. Spot a plate from the US or Canada, share what you think it means and how you know, and see how everyone's stories compare.
 
 - **Try it:** [whattheplate.lovable.app](https://whattheplate.lovable.app). "Try the demo" signs you in as a read-only sample traveler.
